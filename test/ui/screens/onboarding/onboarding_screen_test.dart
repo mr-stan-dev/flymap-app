@@ -106,9 +106,7 @@ void main() {
 
     await _pumpUntilVisible(tester, find.text('Get more from every flight'));
 
-    await tester.tap(
-      find.widgetWithText(PrimaryButton, 'Start my first flight'),
-    );
+    await tester.tap(find.widgetWithText(TertiaryButton, 'Continue Free'));
     await _pumpUntilVisible(tester, find.text('Flight search screen'));
 
     expect(find.text('Flight search screen'), findsOneWidget);

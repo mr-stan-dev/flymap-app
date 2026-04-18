@@ -69,7 +69,7 @@ void main() {
       );
     });
 
-    testWidgets('shows "Upgrade" for free users above 3 selections', (
+    testWidgets('shows "Upgrade to Pro" for free users above 3 selections', (
       tester,
     ) async {
       final state = FlightPreviewState.initial().copyWith(
@@ -97,7 +97,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Upgrade'), findsOneWidget);
+      expect(find.text('Upgrade to Pro'), findsOneWidget);
       expect(
         find.textContaining('Free plan includes up to 3 offline articles'),
         findsOneWidget,

@@ -50,6 +50,9 @@ void main() {
     await GetIt.I.reset();
     GetIt.I.registerSingleton<FlightRepository>(_FakeFlightRepository());
     GetIt.I.registerSingleton<DeleteFlightUseCase>(_FakeDeleteFlightUseCase());
+    GetIt.I.registerSingleton<OnboardingRepository>(
+      OnboardingRepository(prefsStorage: UserFlightPrefsStorage()),
+    );
     final learnRepository = _FakeLearnRepository();
     GetIt.I.registerSingleton<GetLearnCategoriesUseCase>(
       GetLearnCategoriesUseCase(repository: learnRepository),
