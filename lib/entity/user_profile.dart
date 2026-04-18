@@ -12,6 +12,8 @@ enum UsersInterests {
 }
 
 class UserProfile extends Equatable {
+  static const int maxDisplayNameLength = 14;
+
   const UserProfile({
     required this.displayName,
     required this.flyingFrequency,

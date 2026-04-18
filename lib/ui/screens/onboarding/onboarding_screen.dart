@@ -133,12 +133,9 @@ class _OnboardingFlowViewState extends State<_OnboardingFlowView> {
                 ? context.t.onboarding.proActiveTitle
                 : context.t.onboarding.proTitle,
             isPro: subscriptionState.isPro,
-            onTryPro: () => _tryPro(context),
           ),
-          primaryActionLabel: (context, _, subscriptionState) =>
-              subscriptionState.isPro
-              ? context.t.onboarding.planFirstFlightPro
-              : context.t.onboarding.planFirstFlight,
+          primaryActionLabel: (context, _, __) =>
+              context.t.onboarding.planFirstFlight,
           canContinue: (_) => true,
         ),
       ];
@@ -242,22 +239,14 @@ class _OnboardingFlowViewState extends State<_OnboardingFlowView> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                  child: PrimaryButton(
-                    label: currentStep.primaryActionLabel(
-                      context,
-                      state,
-                      subscriptionState,
-                    ),
-                    isLoading: _isFinishing,
-                    onPressed: canContinue
-                        ? () => _handlePrimary(
-                            context.read(),
-                            currentStepId: currentStep.id,
-                            isLastStep: isLastStep,
-                            state: state,
-                            stepsTotal: steps.length,
-                          )
-                        : null,
+                  child: _buildBottomActions(
+                    context,
+                    currentStep: currentStep,
+                    state: state,
+                    subscriptionState: subscriptionState,
+                    canContinue: canContinue,
+                    isLastStep: isLastStep,
+                    stepsTotal: steps.length,
                   ),
                 ),
               ],
@@ -265,6 +254,59 @@ class _OnboardingFlowViewState extends State<_OnboardingFlowView> {
           ),
         );
       },
+    );
+  }
+
+  bool _isSoftProStep(
+    OnboardingStepDefinition currentStep,
+    SubscriptionState subscriptionState,
+  ) {
+    return currentStep.id == OnboardingStepId.pro && !subscriptionState.isPro;
+  }
+
+  Widget _buildBottomActions(
+    BuildContext context, {
+    required OnboardingStepDefinition currentStep,
+    required OnboardingProfileFormState state,
+    required SubscriptionState subscriptionState,
+    required bool canContinue,
+    required bool isLastStep,
+    required int stepsTotal,
+  }) {
+    final cubit = context.read<OnboardingProfileFormCubit>();
+    final onContinuePressed = canContinue
+        ? () => _handlePrimary(
+            cubit,
+            currentStepId: currentStep.id,
+            isLastStep: isLastStep,
+            state: state,
+            stepsTotal: stepsTotal,
+          )
+        : null;
+
+    if (_isSoftProStep(currentStep, subscriptionState)) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          PremiumButton(
+            label: context.t.onboarding.unlockPro,
+            trailingIcon: Icons.arrow_forward_rounded,
+            onPressed: _isFinishing ? null : () => _tryPro(context),
+          ),
+          SizedBox(height: 12),
+          TertiaryButton(
+            label: context.t.onboarding.continueFree,
+            isLoading: _isFinishing,
+            onPressed: onContinuePressed,
+          ),
+        ],
+      );
+    }
+
+    return PrimaryButton(
+      label: currentStep.primaryActionLabel(context, state, subscriptionState),
+      isLoading: _isFinishing,
+      onPressed: onContinuePressed,
     );
   }
 

@@ -467,7 +467,9 @@
     "proTitle": "Get more from every flight",
     "proStepSubtitle": "Detailed offline maps, more places to discover, and full article packs — even offline",
     "unlockPro": "Unlock Pro",
-    "proActiveTitle": "Flymap Pro is active",
+    "continueFree": "Continue Free",
+    "proActiveTitle": "Congratulations!",
+    "proActiveSubtitle": "You now have full access to detailed maps, all places, and article packs.",
     "planFirstFlight": "Start my first flight",
     "planFirstFlightPro": "Plan my first detailed flight",
     "failedLoadProfile": "Failed to load your profile."

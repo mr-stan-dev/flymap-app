@@ -865,8 +865,14 @@ class TranslationsOnboardingEn {
 	/// en: 'Unlock Pro'
 	String get unlockPro => 'Unlock Pro';
 
-	/// en: 'Flymap Pro is active'
-	String get proActiveTitle => 'Flymap Pro is active';
+	/// en: 'Continue Free'
+	String get continueFree => 'Continue Free';
+
+	/// en: 'Congratulations!'
+	String get proActiveTitle => 'Congratulations!';
+
+	/// en: 'You now have full access to detailed maps, all places, and article packs.'
+	String get proActiveSubtitle => 'You now have full access to detailed maps, all places, and article packs.';
 
 	/// en: 'Start my first flight'
 	String get planFirstFlight => 'Start my first flight';
@@ -1987,7 +1993,9 @@ extension on Translations {
 			'onboarding.proTitle' => 'Get more from every flight',
 			'onboarding.proStepSubtitle' => 'Detailed offline maps, more places to discover, and full article packs — even offline',
 			'onboarding.unlockPro' => 'Unlock Pro',
-			'onboarding.proActiveTitle' => 'Flymap Pro is active',
+			'onboarding.continueFree' => 'Continue Free',
+			'onboarding.proActiveTitle' => 'Congratulations!',
+			'onboarding.proActiveSubtitle' => 'You now have full access to detailed maps, all places, and article packs.',
 			'onboarding.planFirstFlight' => 'Start my first flight',
 			'onboarding.planFirstFlightPro' => 'Plan my first detailed flight',
 			'onboarding.failedLoadProfile' => 'Failed to load your profile.',

@@ -70,7 +70,11 @@ class OnboardingProfileFormCubit extends Cubit<OnboardingProfileFormState> {
   }
 
   Future<void> setDisplayName(String value) async {
-    await _persistProfile(state.profile.copyWith(displayName: value));
+    final normalized = value.trim();
+    final capped = normalized.length <= UserProfile.maxDisplayNameLength
+        ? normalized
+        : normalized.substring(0, UserProfile.maxDisplayNameLength);
+    await _persistProfile(state.profile.copyWith(displayName: capped));
   }
 
   Future<void> setFlyingFrequency(FlyingFrequency frequency) async {

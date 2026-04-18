@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/data/local/airports_database.dart';
 import 'package:flymap/entity/user_profile.dart';
@@ -131,7 +132,12 @@ class _SettingsProfileContent extends StatelessWidget {
     OnboardingProfileFormCubit cubit,
     OnboardingProfileFormState state,
   ) async {
-    final controller = TextEditingController(text: state.profile.displayName);
+    final initialName = state.profile.displayName;
+    final cappedInitialName =
+        initialName.length <= UserProfile.maxDisplayNameLength
+        ? initialName
+        : initialName.substring(0, UserProfile.maxDisplayNameLength);
+    final controller = TextEditingController(text: cappedInitialName);
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -149,6 +155,11 @@ class _SettingsProfileContent extends StatelessWidget {
           child: TextField(
             controller: controller,
             textCapitalization: TextCapitalization.words,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(
+                UserProfile.maxDisplayNameLength,
+              ),
+            ],
             decoration: InputDecoration(
               hintText: 'Alex',
               prefixIcon: const Icon(Icons.person_outline_rounded),

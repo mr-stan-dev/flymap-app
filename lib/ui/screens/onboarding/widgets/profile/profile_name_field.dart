@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flymap/entity/user_profile.dart';
 
 class ProfileNameField extends StatefulWidget {
   const ProfileNameField({
@@ -16,17 +18,18 @@ class ProfileNameField extends StatefulWidget {
 
 class _ProfileNameFieldState extends State<ProfileNameField> {
   late final TextEditingController _controller = TextEditingController(
-    text: widget.initialValue,
+    text: _capDisplayName(widget.initialValue),
   );
 
   @override
   void didUpdateWidget(covariant ProfileNameField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialValue == widget.initialValue) return;
-    if (_controller.text == widget.initialValue) return;
+    final cappedValue = _capDisplayName(widget.initialValue);
+    if (_controller.text == cappedValue) return;
     _controller.value = TextEditingValue(
-      text: widget.initialValue,
-      selection: TextSelection.collapsed(offset: widget.initialValue.length),
+      text: cappedValue,
+      selection: TextSelection.collapsed(offset: cappedValue.length),
     );
   }
 
@@ -41,6 +44,9 @@ class _ProfileNameFieldState extends State<ProfileNameField> {
     return TextField(
       controller: _controller,
       textCapitalization: TextCapitalization.words,
+      inputFormatters: [
+        LengthLimitingTextInputFormatter(UserProfile.maxDisplayNameLength),
+      ],
       onChanged: widget.onChanged,
       decoration: InputDecoration(
         hintText: 'Your name',
@@ -48,5 +54,12 @@ class _ProfileNameFieldState extends State<ProfileNameField> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
+  }
+
+  String _capDisplayName(String value) {
+    if (value.length <= UserProfile.maxDisplayNameLength) {
+      return value;
+    }
+    return value.substring(0, UserProfile.maxDisplayNameLength);
   }
 }
