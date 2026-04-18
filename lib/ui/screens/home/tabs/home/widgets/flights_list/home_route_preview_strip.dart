@@ -121,7 +121,7 @@ class _PoiRouteMarker extends StatelessWidget {
     return Container(
       width: 24,
       height: 24,
-      padding: const EdgeInsets.all(3),
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         shape: BoxShape.circle,

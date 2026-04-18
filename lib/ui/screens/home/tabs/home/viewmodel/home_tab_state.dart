@@ -22,12 +22,14 @@ final class HomeTabSuccess extends HomeTabState {
   final FlightStatistics statistics;
   final List<Flight> flights;
   final HomeFlightsSort sort;
+  final String displayName;
   final bool isRefreshing;
 
   const HomeTabSuccess({
     required this.statistics,
     required this.flights,
     required this.sort,
+    this.displayName = '',
     this.isRefreshing = false,
   });
 
@@ -35,18 +37,26 @@ final class HomeTabSuccess extends HomeTabState {
     FlightStatistics? statistics,
     List<Flight>? flights,
     HomeFlightsSort? sort,
+    String? displayName,
     bool? isRefreshing,
   }) {
     return HomeTabSuccess(
       statistics: statistics ?? this.statistics,
       flights: flights ?? this.flights,
       sort: sort ?? this.sort,
+      displayName: displayName ?? this.displayName,
       isRefreshing: isRefreshing ?? this.isRefreshing,
     );
   }
 
   @override
-  List<Object?> get props => [statistics, flights, sort, isRefreshing];
+  List<Object?> get props => [
+    statistics,
+    flights,
+    sort,
+    displayName,
+    isRefreshing,
+  ];
 }
 
 /// Error state

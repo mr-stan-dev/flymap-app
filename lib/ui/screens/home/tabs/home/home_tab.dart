@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
+import 'package:flymap/repository/flight_repository.dart';
+import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_cubit.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_state.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/home_tab_loaded.dart';
+import 'package:flymap/usecase/delete_flight_use_case.dart';
+import 'package:get_it/get_it.dart';
 
 // Global refresh notifier that can be accessed from anywhere
 final ValueNotifier<bool> homeRefreshNotifier = ValueNotifier(false);
@@ -16,7 +20,11 @@ class HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HomeTabCubit(),
+      create: (context) => HomeTabCubit(
+        repository: GetIt.I<FlightRepository>(),
+        onboardingRepository: GetIt.I<OnboardingRepository>(),
+        deleteFlightUseCase: GetIt.I<DeleteFlightUseCase>(),
+      ),
       child: _HomeTabContent(),
     );
   }

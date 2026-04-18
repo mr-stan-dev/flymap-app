@@ -3,24 +3,30 @@ import 'package:flymap/entity/flight.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/repository/flight_repository.dart';
+import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_state.dart';
 import 'package:flymap/usecase/delete_flight_use_case.dart';
-import 'package:get_it/get_it.dart';
 
 /// Cubit for managing home tab state
 class HomeTabCubit extends Cubit<HomeTabState> {
   final _logger = Logger('HomeTabCubit');
+  final FlightRepository _repository;
+  final OnboardingRepository _onboardingRepository;
+  final DeleteFlightUseCase _deleteFlightUseCase;
+
   HomeFlightsSort _sort = HomeFlightsSort.mostRecent;
   List<Flight> _allFlights = const [];
 
-  HomeTabCubit() : super(const HomeTabLoading()) {
-    _repository = GetIt.I<FlightRepository>();
-    _deleteFlightUseCase = GetIt.I<DeleteFlightUseCase>();
+  HomeTabCubit({
+    required FlightRepository repository,
+    required OnboardingRepository onboardingRepository,
+    required DeleteFlightUseCase deleteFlightUseCase,
+  }) : _repository = repository,
+       _onboardingRepository = onboardingRepository,
+       _deleteFlightUseCase = deleteFlightUseCase,
+       super(const HomeTabLoading()) {
     _loadData();
   }
-
-  late final FlightRepository _repository;
-  late final DeleteFlightUseCase _deleteFlightUseCase;
 
   /// Load all data for home tab
   Future<void> _loadData() async {
@@ -28,10 +34,15 @@ class HomeTabCubit extends Cubit<HomeTabState> {
       emit(const HomeTabLoading());
 
       // Load data in parallel
-      final results = await Future.wait([_loadStatistics(), _loadFlights()]);
+      final results = await Future.wait([
+        _loadStatistics(),
+        _loadFlights(),
+        _loadDisplayName(),
+      ]);
 
       final statistics = results[0] as FlightStatistics;
       final flights = results[1] as List<Flight>;
+      final displayName = results[2] as String;
       _allFlights = flights;
 
       emit(
@@ -39,6 +50,7 @@ class HomeTabCubit extends Cubit<HomeTabState> {
           statistics: statistics,
           flights: _sortedFlights(),
           sort: _sort,
+          displayName: displayName,
         ),
       );
     } catch (e) {
@@ -89,10 +101,15 @@ class HomeTabCubit extends Cubit<HomeTabState> {
 
     try {
       // Load data in parallel
-      final results = await Future.wait([_loadStatistics(), _loadFlights()]);
+      final results = await Future.wait([
+        _loadStatistics(),
+        _loadFlights(),
+        _loadDisplayName(),
+      ]);
 
       final statistics = results[0] as FlightStatistics;
       final flights = results[1] as List<Flight>;
+      final displayName = results[2] as String;
       _allFlights = flights;
 
       _logger.log('Refresh completed: ${flights.length} flights loaded');
@@ -101,6 +118,7 @@ class HomeTabCubit extends Cubit<HomeTabState> {
           statistics: statistics,
           flights: _sortedFlights(),
           sort: _sort,
+          displayName: displayName,
           isRefreshing: false,
         ),
       );
@@ -183,6 +201,16 @@ class HomeTabCubit extends Cubit<HomeTabState> {
     } catch (e) {
       _logger.error('Failed to delete flight $flightId: $e');
       return false;
+    }
+  }
+
+  Future<String> _loadDisplayName() async {
+    try {
+      final profile = await _onboardingRepository.getProfile();
+      return profile.displayName.trim();
+    } catch (e) {
+      _logger.error('Error loading profile display name: $e');
+      return '';
     }
   }
 

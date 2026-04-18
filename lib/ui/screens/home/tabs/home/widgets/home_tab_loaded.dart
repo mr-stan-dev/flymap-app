@@ -32,7 +32,10 @@ class HomeTabLoaded extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  HomeSummaryHeader(statistics: state.statistics),
+                  HomeSummaryHeader(
+                    statistics: state.statistics,
+                    displayName: state.displayName,
+                  ),
                   const SizedBox(height: 24),
                   HomeFlightsList(
                     flights: state.flights,

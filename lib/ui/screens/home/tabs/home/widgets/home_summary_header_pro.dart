@@ -6,9 +6,14 @@ import 'package:flymap/ui/design_system/tokens/ds_spacing.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_state.dart';
 
 class HomeSummaryHeaderPro extends StatelessWidget {
-  const HomeSummaryHeaderPro({required this.statistics, super.key});
+  const HomeSummaryHeaderPro({
+    required this.statistics,
+    required this.displayName,
+    super.key,
+  });
 
   final FlightStatistics statistics;
+  final String displayName;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +63,7 @@ class HomeSummaryHeaderPro extends StatelessWidget {
                 const SizedBox(width: DsSpacing.sm),
                 Expanded(
                   child: Text(
-                    context.t.home.welcomeTitlePro,
+                    _resolveWelcomeTitle(context),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -94,6 +99,14 @@ class HomeSummaryHeaderPro extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _resolveWelcomeTitle(BuildContext context) {
+    final trimmedName = displayName.trim();
+    if (trimmedName.isNotEmpty) {
+      return 'Welcome to Flymap Pro, $trimmedName';
+    }
+    return context.t.home.welcomeTitlePro;
   }
 }
 

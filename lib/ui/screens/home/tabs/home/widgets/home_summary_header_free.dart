@@ -3,9 +3,14 @@ import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_state.dart';
 
 class HomeSummaryHeaderFree extends StatelessWidget {
-  const HomeSummaryHeaderFree({required this.statistics, super.key});
+  const HomeSummaryHeaderFree({
+    required this.statistics,
+    required this.displayName,
+    super.key,
+  });
 
   final FlightStatistics statistics;
+  final String displayName;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +38,7 @@ class HomeSummaryHeaderFree extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              context.t.home.welcomeTitle,
+              _resolveWelcomeTitle(context),
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -66,6 +71,14 @@ class HomeSummaryHeaderFree extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _resolveWelcomeTitle(BuildContext context) {
+    final trimmedName = displayName.trim();
+    if (trimmedName.isNotEmpty) {
+      return 'Welcome to Flymap, $trimmedName';
+    }
+    return context.t.home.welcomeTitle;
   }
 }
 

@@ -7,9 +7,14 @@ import 'home_summary_header_free.dart';
 import 'home_summary_header_pro.dart';
 
 class HomeSummaryHeader extends StatelessWidget {
-  const HomeSummaryHeader({required this.statistics, super.key});
+  const HomeSummaryHeader({
+    required this.statistics,
+    required this.displayName,
+    super.key,
+  });
 
   final FlightStatistics statistics;
+  final String displayName;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +22,10 @@ class HomeSummaryHeader extends StatelessWidget {
       (SubscriptionCubit cubit) => cubit.state.isPro,
     );
     return isProUser
-        ? HomeSummaryHeaderPro(statistics: statistics)
-        : HomeSummaryHeaderFree(statistics: statistics);
+        ? HomeSummaryHeaderPro(statistics: statistics, displayName: displayName)
+        : HomeSummaryHeaderFree(
+            statistics: statistics,
+            displayName: displayName,
+          );
   }
 }
