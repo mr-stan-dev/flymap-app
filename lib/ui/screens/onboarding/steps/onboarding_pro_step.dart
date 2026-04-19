@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/onboarding/widgets/onboarding_step_scaffold.dart';
-import 'package:flymap/ui/screens/onboarding/widgets/onboarding_window_image.dart';
 
 class OnboardingProStep extends StatelessWidget {
   const OnboardingProStep({
@@ -28,8 +27,9 @@ class OnboardingProStep extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const OnboardingWindowImage(
-                assetPath: 'assets/images/onboarding2.webp',
+              SizedBox.square(
+                dimension: 240,
+                child: Image.asset('assets/images/logo_pro.webp'),
               ),
             ],
           ),

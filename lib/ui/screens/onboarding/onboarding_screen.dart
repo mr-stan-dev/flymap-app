@@ -67,8 +67,6 @@ class _OnboardingFlowViewState extends State<_OnboardingFlowView> {
         OnboardingStepDefinition(
           id: OnboardingStepId.welcome,
           stepBuilder: (context, __, ___) => OnboardingWelcomeStep(
-            title: context.t.onboarding.welcomeTitle,
-            tagline: context.t.onboarding.welcomeSubtitle,
           ),
           primaryActionLabel: (context, _, __) =>
               context.t.onboarding.letsStart,

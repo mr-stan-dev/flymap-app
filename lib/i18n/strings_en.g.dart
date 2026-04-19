@@ -781,8 +781,8 @@ class TranslationsOnboardingEn {
 	/// en: 'Discover what’s below'
 	String get welcomeTitle => 'Discover what’s below';
 
-	/// en: 'Offline maps and interesting places along your flight'
-	String get welcomeSubtitle => 'Offline maps and interesting places along your flight';
+	/// en: 'shows you offline maps and interesting places along your flight'
+	String get welcomeSubtitle => 'shows you offline maps and interesting places along your flight';
 
 	/// en: 'Pick a username'
 	String get nameTitle => 'Pick a username';
@@ -859,8 +859,8 @@ class TranslationsOnboardingEn {
 	/// en: 'Get more from every flight'
 	String get proTitle => 'Get more from every flight';
 
-	/// en: 'Detailed offline maps, more places to discover, and full article packs — even offline'
-	String get proStepSubtitle => 'Detailed offline maps, more places to discover, and full article packs — even offline';
+	/// en: 'Unlock detailed maps, places and articles — even offline.'
+	String get proStepSubtitle => 'Unlock detailed maps, places and articles — even offline.';
 
 	/// en: 'Unlock Pro'
 	String get unlockPro => 'Unlock Pro';
@@ -1965,7 +1965,7 @@ extension on Translations {
 			'onboarding.skip' => 'Skip',
 			'onboarding.letsStart' => 'Let\'s start',
 			'onboarding.welcomeTitle' => 'Discover what’s below',
-			'onboarding.welcomeSubtitle' => 'Offline maps and interesting places along your flight',
+			'onboarding.welcomeSubtitle' => 'shows you offline maps and interesting places along your flight',
 			'onboarding.nameTitle' => 'Pick a username',
 			'onboarding.nameSubtitle' => 'Make discovery personal. You can change it anytime.',
 			'onboarding.frequencyTitle' => 'How often do you fly?',
@@ -1991,7 +1991,7 @@ extension on Translations {
 			'onboarding.interestNationalParks' => 'National parks & reserves',
 			'onboarding.interestRivers' => 'Rivers & lakes',
 			'onboarding.proTitle' => 'Get more from every flight',
-			'onboarding.proStepSubtitle' => 'Detailed offline maps, more places to discover, and full article packs — even offline',
+			'onboarding.proStepSubtitle' => 'Unlock detailed maps, places and articles — even offline.',
 			'onboarding.unlockPro' => 'Unlock Pro',
 			'onboarding.continueFree' => 'Continue Free',
 			'onboarding.proActiveTitle' => 'Congratulations!',
