@@ -1,5 +1,6 @@
 import 'package:flymap/entity/user_profile.dart';
 import 'package:flymap/entity/user_flight_prefs.dart';
+import 'package:flymap/entity/user_interests_payload.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserFlightPrefsStorage {
@@ -54,10 +55,7 @@ class UserFlightPrefsStorage {
   }
 
   UsersInterests? _parseInterest(String value) {
-    for (final interest in UsersInterests.values) {
-      if (interest.name == value) return interest;
-    }
-    return null;
+    return UsersInterestsPayload.fromStorageValue(value);
   }
 
   String? _normalizedCode(String? code) {

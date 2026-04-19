@@ -12,12 +12,12 @@ void main() {
         airportArrival: 'SFO',
         waypoints: const [LatLng(0, 0), LatLng(1, 1)],
         promptVersion: 2,
-        interests: const [UsersInterests.cities, UsersInterests.engineering],
+        interests: const [UsersInterests.regions, UsersInterests.volcanoes],
       );
 
       expect(request['user_preferences'], isA<Map<String, dynamic>>());
       final prefs = request['user_preferences']! as Map<String, dynamic>;
-      expect(prefs['interests'], ['cities', 'engineering']);
+      expect(prefs['interests'], ['Cities & regions', 'Volcanoes & geology']);
     },
   );
 

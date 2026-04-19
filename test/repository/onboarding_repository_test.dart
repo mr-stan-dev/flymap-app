@@ -23,7 +23,7 @@ void main() {
       displayName: 'Alex',
       flyingFrequency: FlyingFrequency.monthly,
       homeAirportCode: 'egll',
-      interests: [UsersInterests.cities, UsersInterests.engineering],
+      interests: [UsersInterests.regions, UsersInterests.volcanoes],
     );
 
     await repository.saveProfile(profile);
@@ -33,8 +33,8 @@ void main() {
     expect(stored.flyingFrequency, FlyingFrequency.monthly);
     expect(stored.homeAirportCode, 'EGLL');
     expect(stored.interests, const [
-      UsersInterests.cities,
-      UsersInterests.engineering,
+      UsersInterests.regions,
+      UsersInterests.volcanoes,
     ]);
     expect(await repository.hasSeenOnboarding(), isNot(true));
   });
@@ -56,7 +56,7 @@ void main() {
           displayName: 'Nina',
           flyingFrequency: FlyingFrequency.fewPerYear,
           homeAirportCode: 'lhr',
-          interests: [UsersInterests.cities],
+          interests: [UsersInterests.regions],
         ),
       );
 
@@ -67,7 +67,7 @@ void main() {
       expect(profile.displayName, 'Nina');
       expect(profile.flyingFrequency, FlyingFrequency.fewPerYear);
       expect(profile.homeAirportCode, 'LHR');
-      expect(profile.interests, const [UsersInterests.cities]);
+      expect(profile.interests, const [UsersInterests.regions]);
     },
   );
 }

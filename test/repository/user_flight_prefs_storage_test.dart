@@ -22,7 +22,7 @@ void main() {
     const prefs = UserFlightPrefs(
       flyingFrequency: FlyingFrequency.monthly,
       homeAirportCode: ' egll ',
-      interests: [UsersInterests.cities, UsersInterests.engineering],
+      interests: [UsersInterests.regions, UsersInterests.volcanoes],
     );
 
     await storage.savePrefs(prefs);
@@ -31,8 +31,26 @@ void main() {
     expect(loaded.flyingFrequency, FlyingFrequency.monthly);
     expect(loaded.homeAirportCode, 'EGLL');
     expect(loaded.interests, const [
-      UsersInterests.cities,
-      UsersInterests.engineering,
+      UsersInterests.regions,
+      UsersInterests.volcanoes,
+    ]);
+  });
+
+  test('maps legacy interest names to new enum values', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'onboarding.profile.interests': <String>[
+        'landmarks',
+        'aviationHistory',
+        'engineering',
+      ],
+    });
+    storage = UserFlightPrefsStorage();
+
+    final loaded = await storage.loadPrefs();
+    expect(loaded.interests, const [
+      UsersInterests.nationalParks,
+      UsersInterests.rivers,
+      UsersInterests.volcanoes,
     ]);
   });
 }

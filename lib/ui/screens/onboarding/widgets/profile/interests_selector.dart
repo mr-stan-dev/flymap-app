@@ -39,12 +39,11 @@ class InterestsSelector extends StatelessWidget {
                 ),
               ),
               selected: isSelected,
-              avatar: Icon(
-                interest.icon,
-                size: 18,
-                color: isSelected
-                    ? colorScheme.onPrimary
-                    : colorScheme.onSurfaceVariant,
+              avatar: Image.asset(
+                interest.markerAssetPath,
+                width: 18,
+                height: 18,
+                fit: BoxFit.contain,
               ),
               materialTapTargetSize: MaterialTapTargetSize.padded,
               labelPadding: const EdgeInsets.symmetric(horizontal: 8),

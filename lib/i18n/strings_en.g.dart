@@ -826,8 +826,8 @@ class TranslationsOnboardingEn {
 	/// en: 'No airports found for that search.'
 	String get noHomeAirportFound => 'No airports found for that search.';
 
-	/// en: 'What are you interested in?'
-	String get interestsTitle => 'What are you interested in?';
+	/// en: 'What places you want to see more?'
+	String get interestsTitle => 'What places you want to see more?';
 
 	/// en: 'Choose up to 3 topics to see more relevant places and stories along your flight.'
 	String get interestsSubtitle => 'Choose up to 3 topics to see more relevant places and stories along your flight.';
@@ -838,23 +838,23 @@ class TranslationsOnboardingEn {
 	/// en: '$count of $max selected'
 	String interestsSelected({required Object count, required Object max}) => '${count} of ${max} selected';
 
-	/// en: 'Mountains & landscapes'
-	String get interestMountains => 'Mountains & landscapes';
+	/// en: 'Mountains & ridges'
+	String get interestMountains => 'Mountains & ridges';
 
-	/// en: 'Cities & skylines'
-	String get interestCities => 'Cities & skylines';
+	/// en: 'Volcanoes & geology'
+	String get interestVolcanoes => 'Volcanoes & geology';
 
-	/// en: 'Coastlines & islands'
-	String get interestCoastlines => 'Coastlines & islands';
+	/// en: 'Cities & regions'
+	String get interestRegions => 'Cities & regions';
 
-	/// en: 'Landmarks & culture'
-	String get interestLandmarks => 'Landmarks & culture';
+	/// en: 'Islands & coastlines'
+	String get interestIslands => 'Islands & coastlines';
 
-	/// en: 'Aviation history'
-	String get interestAviationHistory => 'Aviation history';
+	/// en: 'National parks & reserves'
+	String get interestNationalParks => 'National parks & reserves';
 
-	/// en: 'Aircraft & engineering'
-	String get interestEngineering => 'Aircraft & engineering';
+	/// en: 'Rivers & lakes'
+	String get interestRivers => 'Rivers & lakes';
 
 	/// en: 'Get more from every flight'
 	String get proTitle => 'Get more from every flight';
@@ -1980,16 +1980,16 @@ extension on Translations {
 			'onboarding.popularAirports' => 'Popular airports',
 			'onboarding.removeHomeAirport' => 'Remove home airport',
 			'onboarding.noHomeAirportFound' => 'No airports found for that search.',
-			'onboarding.interestsTitle' => 'What are you interested in?',
+			'onboarding.interestsTitle' => 'What places you want to see more?',
 			'onboarding.interestsSubtitle' => 'Choose up to 3 topics to see more relevant places and stories along your flight.',
 			'onboarding.interestsHelper' => 'Pick up to 3 topics.',
 			'onboarding.interestsSelected' => ({required Object count, required Object max}) => '${count} of ${max} selected',
-			'onboarding.interestMountains' => 'Mountains & landscapes',
-			'onboarding.interestCities' => 'Cities & skylines',
-			'onboarding.interestCoastlines' => 'Coastlines & islands',
-			'onboarding.interestLandmarks' => 'Landmarks & culture',
-			'onboarding.interestAviationHistory' => 'Aviation history',
-			'onboarding.interestEngineering' => 'Aircraft & engineering',
+			'onboarding.interestMountains' => 'Mountains & ridges',
+			'onboarding.interestVolcanoes' => 'Volcanoes & geology',
+			'onboarding.interestRegions' => 'Cities & regions',
+			'onboarding.interestIslands' => 'Islands & coastlines',
+			'onboarding.interestNationalParks' => 'National parks & reserves',
+			'onboarding.interestRivers' => 'Rivers & lakes',
 			'onboarding.proTitle' => 'Get more from every flight',
 			'onboarding.proStepSubtitle' => 'Detailed offline maps, more places to discover, and full article packs — even offline',
 			'onboarding.unlockPro' => 'Unlock Pro',

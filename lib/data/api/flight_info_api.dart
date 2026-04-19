@@ -4,6 +4,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flymap/data/api/flight_info_api_mapper.dart';
 import 'package:flymap/entity/flight_info.dart';
 import 'package:flymap/entity/user_profile.dart';
+import 'package:flymap/entity/user_interests_payload.dart';
 import 'package:flymap/entity/wiki_article_candidate.dart';
 import 'package:flymap/logger.dart';
 import 'package:latlong2/latlong.dart';
@@ -37,7 +38,7 @@ Map<String, dynamic> buildFlightInfoFunctionRequest({
     'prompt_version': promptVersion.toString(),
   };
   final preferenceInterests = interests
-      ?.map((interest) => interest.name)
+      ?.map((interest) => interest.payloadValue)
       .toList(growable: false);
   if (preferenceInterests != null && preferenceInterests.isNotEmpty) {
     request['user_preferences'] = <String, dynamic>{

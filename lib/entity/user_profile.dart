@@ -4,11 +4,11 @@ enum FlyingFrequency { firstFlight, fewPerYear, monthly, frequent }
 
 enum UsersInterests {
   mountains,
-  cities,
-  coastlines,
-  landmarks,
-  aviationHistory,
-  engineering,
+  volcanoes,
+  regions,
+  islands,
+  nationalParks,
+  rivers,
 }
 
 class UserProfile extends Equatable {

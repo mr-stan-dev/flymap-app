@@ -5,6 +5,7 @@ import 'package:flymap/entity/route_poi_summary.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/map/layers/poi_style_config.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_preview_bottom_sheet.dart';
+import 'package:flymap/ui/screens/shared/poi_type_marker_asset.dart';
 
 class PoiHighlightsSection extends StatefulWidget {
   const PoiHighlightsSection({required this.poi, super.key});
@@ -91,7 +92,11 @@ class _PoiChip extends StatelessWidget {
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(_iconAssetPathForType(item.type), width: 16, height: 16),
+          Image.asset(
+            PoiTypeMarkerAsset.iconPathFor(item.type),
+            width: 16,
+            height: 16,
+          ),
           ConstrainedBox(
             constraints: BoxConstraints(maxWidth: maxWidth),
             child: Padding(
@@ -119,22 +124,4 @@ class _PoiChip extends StatelessWidget {
       labelPadding: EdgeInsets.zero,
     );
   }
-
-  String _iconAssetPathForType(FlightPoiType type) => switch (type) {
-    FlightPoiType.city => 'assets/images/poi/city.png',
-    FlightPoiType.river => 'assets/images/poi/river.png',
-    FlightPoiType.island => 'assets/images/poi/island.png',
-    FlightPoiType.airport => 'assets/images/poi/airport.png',
-    FlightPoiType.mountain => 'assets/images/poi/mountain.png',
-    FlightPoiType.lake => 'assets/images/poi/lake.png',
-    FlightPoiType.volcano => 'assets/images/poi/volcano.png',
-    FlightPoiType.pass => 'assets/images/poi/mountain.png',
-    FlightPoiType.bay => 'assets/images/poi/bay.png',
-    FlightPoiType.waterfall => 'assets/images/poi/waterfall.png',
-    FlightPoiType.glacier => 'assets/images/poi/glacier.png',
-    FlightPoiType.desert => 'assets/images/poi/desert.png',
-    FlightPoiType.sea => 'assets/images/poi/sea.png',
-    FlightPoiType.region => 'assets/images/poi/region.png',
-    FlightPoiType.unknown => 'assets/images/poi/unknown.png',
-  };
 }

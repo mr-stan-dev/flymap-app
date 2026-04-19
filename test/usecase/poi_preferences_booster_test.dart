@@ -13,16 +13,16 @@ void main() {
 
   test('uses maximum matching interest boost instead of summing', () {
     final boost = booster.interestBoostFor(FlightPoiType.city, const [
-      UsersInterests.cities,
-      UsersInterests.landmarks,
+      UsersInterests.regions,
+      UsersInterests.nationalParks,
     ]);
     expect(boost, 120);
   });
 
   test('applies hard cap to keep boosts bounded', () {
-    final boost = booster.interestBoostFor(FlightPoiType.airport, const [
-      UsersInterests.engineering,
-      UsersInterests.aviationHistory,
+    final boost = booster.interestBoostFor(FlightPoiType.volcano, const [
+      UsersInterests.mountains,
+      UsersInterests.volcanoes,
     ]);
     expect(boost, PoiPreferencesBooster.maxBoost);
     expect(boost, 140);
