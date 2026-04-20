@@ -103,6 +103,8 @@ class VectorTilesDownloader {
         await targetDirectory.create(recursive: true);
       }
 
+      await _resetMbtilesSidecars(mbtilesPath);
+
       // Create database using sqflite
       final dbHelper = VectorTilesDb();
       db = await openDatabase(
@@ -359,14 +361,18 @@ class VectorTilesDownloader {
       _logger.log('Verifying MBTiles file...');
       controller.add(const DownloadMapVerifying());
 
-      final fileSize = await MbtilesVerifier.verifyMbtilesFile(mbtilesPath);
+      final verification = await MbtilesVerifier.verifyMbtilesFile(mbtilesPath);
 
-      if (fileSize > 0) {
+      if (verification.isValid) {
         _logger.log('File verification successful, yielding success event');
-        controller.add(DownloadMapDone(mbtilesPath, fileSize));
+        controller.add(DownloadMapDone(mbtilesPath, verification.fileSize));
       } else {
+        final verifierError =
+            verification.errorMessage ?? 'unknown verification error';
         _logger.log('File verification failed, yielding error event');
-        controller.add(const DownloadMapError('Failed to verify MBTiles file'));
+        controller.add(
+          DownloadMapError('Failed to verify MBTiles file: $verifierError'),
+        );
       }
 
       await _safeClose(controller);
@@ -423,6 +429,20 @@ class VectorTilesDownloader {
     try {
       await controller.close();
     } catch (_) {}
+  }
+
+  Future<void> _resetMbtilesSidecars(String mbtilesPath) async {
+    final artifactPaths = <String>[
+      '$mbtilesPath-wal',
+      '$mbtilesPath-shm',
+      '$mbtilesPath-journal',
+    ];
+    for (final path in artifactPaths) {
+      final file = File(path);
+      if (!await file.exists()) continue;
+      _logger.log('Deleting stale MBTiles artifact: $path');
+      await file.delete();
+    }
   }
 
   Map<int, int> _buildSkippedByZoom({

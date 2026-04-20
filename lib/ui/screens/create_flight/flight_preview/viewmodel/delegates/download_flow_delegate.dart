@@ -219,10 +219,9 @@ class DownloadFlowDelegate {
           flightId: flightId,
           info: enrichedInfo,
         );
-        final poiFailedCount =
-            (result.failedCount + (!persisted ? 1 : 0))
-                .clamp(0, poiToDownloadCount)
-                .toInt();
+        final poiFailedCount = (result.failedCount + (!persisted ? 1 : 0))
+            .clamp(0, poiToDownloadCount)
+            .toInt();
         final poiSucceededCount = poiToDownloadCount - poiFailedCount;
         unawaited(
           _cubit._analytics.log(
@@ -590,24 +589,33 @@ class DownloadFlowDelegate {
                   }
                   break;
                 case DownloadMapError():
+                  final failureReason = _mapDownloadFailureReason(
+                    event.errorMsg,
+                  );
+                  final failureStage = _mapDownloadFailureStage(event.errorMsg);
                   unawaited(
                     _cubit._analytics.log(
                       DownloadFailedEvent(
                         stage: 'map_download',
-                        errorType: 'map_download_error',
+                        errorType: failureReason,
                         errorMessage: event.errorMsg,
                         routeLengthKm: routeLengthKm,
                       ),
                     ),
                   );
                   unawaited(
-                    _cubit._crashlytics.setContext(downloadStage: 'failed'),
+                    _cubit._crashlytics.setContext(
+                      downloadStage:
+                          '$failureStage:${_contextErrorSnippet(event.errorMsg)}',
+                    ),
                   );
                   unawaited(
                     _cubit._crashlytics.recordError(
-                      Exception(event.errorMsg),
+                      Exception(
+                        '[map-download:$failureReason] ${event.errorMsg}',
+                      ),
                       StackTrace.current,
-                      reason: 'map_download_failed',
+                      reason: failureReason,
                     ),
                   );
                   _cubit._emitState(
@@ -825,6 +833,48 @@ class DownloadFlowDelegate {
   String _formatDownloadedMb(int bytes) {
     final mb = bytes / (1024 * 1024);
     return '${mb.toStringAsFixed(1)} MB';
+  }
+
+  String _mapDownloadFailureReason(String errorMessage) {
+    final normalized = errorMessage.toLowerCase();
+    if (normalized.contains('failed to verify mbtiles file') ||
+        normalized.contains('mbtiles verification failed')) {
+      return 'map_download_failed_mbtiles_verification';
+    }
+    if (normalized.contains('no internet')) {
+      return 'map_download_failed_no_internet';
+    }
+    if (normalized.contains('tiles downloaded')) {
+      return 'map_download_failed_low_tile_coverage';
+    }
+    if (normalized.contains('canceled')) {
+      return 'map_download_failed_canceled';
+    }
+    return 'map_download_failed';
+  }
+
+  String _mapDownloadFailureStage(String errorMessage) {
+    final normalized = errorMessage.toLowerCase();
+    if (normalized.contains('failed to verify mbtiles file') ||
+        normalized.contains('mbtiles verification failed')) {
+      return 'failed_verifying_mbtiles';
+    }
+    if (normalized.contains('tiles downloaded')) {
+      return 'failed_tile_coverage';
+    }
+    if (normalized.contains('no internet')) {
+      return 'failed_no_internet';
+    }
+    if (normalized.contains('canceled')) {
+      return 'failed_canceled';
+    }
+    return 'failed';
+  }
+
+  String _contextErrorSnippet(String errorMessage) {
+    final compact = errorMessage.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (compact.length <= 160) return compact;
+    return '${compact.substring(0, 160)}...';
   }
 }
 
