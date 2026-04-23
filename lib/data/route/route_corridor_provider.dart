@@ -20,6 +20,22 @@ class RouteCorridorProvider {
   }) {
     if (route.length < 2) return route;
 
+    // Reject invalid input coordinates up-front: downstream MapLibre calls
+    // serialize the corridor to JSON and `jsonEncode` throws on NaN/Infinity.
+    for (int i = 0; i < route.length; i++) {
+      final point = route[i];
+      if (point.latitude.isNaN ||
+          point.longitude.isNaN ||
+          point.latitude.isInfinite ||
+          point.longitude.isInfinite) {
+        _logger.error(
+          'Route contains invalid coordinate at index $i: '
+          '${point.latitude}, ${point.longitude}. Skipping corridor.',
+        );
+        return [];
+      }
+    }
+
     _logger.log('=== CORRIDOR GENERATION DEBUG ===');
     _logger.log('Route length: ${route.length}');
     _logger.log('Width: ${widthKm}km');

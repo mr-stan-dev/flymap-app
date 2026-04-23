@@ -36,7 +36,13 @@ class GreatCircleRouteProvider implements FlightRouteProvider {
 
     final distanceKm = MapUtils.distanceKm(departure: start, arrival: end);
 
-    final segments = (distanceKm / MapDownloadConfig.wayPointDensityKm).round();
+    // Ensure at least one segment so we always emit start and end points.
+    // Without this guard, very short routes (≤ ~50 km) round to 0 segments,
+    // which would compute `fraction = 0 / 0 = NaN` and produce invalid LatLngs
+    // that later break MapLibre GeoJSON encoding (jsonEncode NaN failure).
+    final rawSegments = (distanceKm / MapDownloadConfig.wayPointDensityKm)
+        .round();
+    final segments = rawSegments < 1 ? 1 : rawSegments;
 
     for (int i = 0; i <= segments; i++) {
       final fraction = i / segments;
@@ -188,8 +194,11 @@ class GreatCircleRouteProvider implements FlightRouteProvider {
   List<LatLng> _calculateSimpleRoute(LatLng start, LatLng end, int segments) {
     List<LatLng> route = [];
 
-    for (int i = 0; i <= segments; i++) {
-      final fraction = i / segments;
+    // Guard against 0-segment input to avoid `0 / 0` producing NaN fractions.
+    final safeSegments = segments < 1 ? 1 : segments;
+
+    for (int i = 0; i <= safeSegments; i++) {
+      final fraction = i / safeSegments;
       final point = _interpolatePoint(start, end, fraction);
       route.add(point);
     }

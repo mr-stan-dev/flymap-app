@@ -18,10 +18,13 @@ class FlightRouteMapLayers {
     String dashedPathSourceId = 'flight-route-path-source',
     String dashedPathLayerId = 'flight-route-path-layer',
   }) async {
-    if (includeDimming) {
+    // A missing/invalid corridor (e.g. degenerate or NaN-producing routes)
+    // must not reach MapLibre layers; GeoJSON encoding cannot serialize it.
+    final hasCorridor = route.corridor.length >= 3;
+    if (includeDimming && hasCorridor) {
       await DimmingLayer(route.corridor).add(controller);
     }
-    if (includeCorridor) {
+    if (includeCorridor && hasCorridor) {
       await CorridorLayer(route.corridor).add(controller);
     }
 
