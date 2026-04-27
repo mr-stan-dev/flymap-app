@@ -9,6 +9,7 @@ import 'package:flymap/entity/flight.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/map_download_config.dart';
+import 'package:flymap/utils/url_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -28,8 +29,9 @@ class ShareFlightCubit extends Cubit<ShareFlightState> {
     _loadStyle();
   }
 
-  static const String _fallbackStyleUrl =
-      'https://tiles.openfreemap.org/styles/liberty';
+  static const String flymapStyleLiberty =
+      '${UrlUtils.flymapTilesUrl}/styles/liberty';
+
   final Logger _logger = const Logger('ShareFlightCubit');
   final FlightMapStyleMapper _styleMapper = FlightMapStyleMapper();
   final MapAssetCacheService _mapAssetCacheService;
@@ -45,7 +47,7 @@ class ShareFlightCubit extends Cubit<ShareFlightState> {
         emit(
           state.copyWith(
             status: ShareFlightStatus.ready,
-            styleString: _fallbackStyleUrl,
+            styleString: flymapStyleLiberty,
             clearError: true,
           ),
         );
@@ -66,7 +68,7 @@ class ShareFlightCubit extends Cubit<ShareFlightState> {
         emit(
           state.copyWith(
             status: ShareFlightStatus.ready,
-            styleString: _fallbackStyleUrl,
+            styleString: flymapStyleLiberty,
             errorMessage: t.shareFlight.offlineMapMissing,
           ),
         );
@@ -98,7 +100,7 @@ class ShareFlightCubit extends Cubit<ShareFlightState> {
       emit(
         state.copyWith(
           status: ShareFlightStatus.ready,
-          styleString: _fallbackStyleUrl,
+          styleString: flymapStyleLiberty,
           errorMessage: t.shareFlight.offlineStyleFailed,
         ),
       );

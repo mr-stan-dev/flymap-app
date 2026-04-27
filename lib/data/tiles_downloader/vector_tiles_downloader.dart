@@ -296,8 +296,9 @@ class VectorTilesDownloader {
             downloadWorker,
             WorkerInit(
               chunk,
-              MapDownloadConfig.tileUrlTemplate,
-              receivePort.sendPort,
+              primaryTemplate: MapDownloadConfig.flymapTiles,
+              fallbackTemplate: MapDownloadConfig.ofmTiles,
+              sendPort: receivePort.sendPort,
             ),
           );
           _isolates.add(iso);

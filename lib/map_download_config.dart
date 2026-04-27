@@ -25,8 +25,12 @@ class MapDownloadConfig {
 
   static const String mapLayerId = 'ofm_vector';
   static const String mbtilesDirectoryName = 'mbtiles';
-  static const String tileUrlTemplate =
-      'https://tiles.openfreemap.org/planet/20260304_001001_pt/{z}/{x}/{y}.pbf';
+  static const String planetPath = 'planet/20260304_001001_pt';
+  static const String tilesPattern = '{z}/{x}/{y}.pbf';
+  static const String flymapTiles =
+      'https://tiles.flymap.app/$planetPath/$tilesPattern';
+  static const String ofmTiles =
+      'https://tiles.openfreemap.org/$planetPath/$tilesPattern';
 
   static const double fallbackDistanceKm = 1000.0;
   static const double estimatedMinMbPer1000Km = 30.0;

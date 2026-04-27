@@ -14,6 +14,7 @@ import 'package:flymap/ui/map/map_style_safety.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_preview_bottom_sheet.dart';
 import 'package:flymap/usecase/get_poi_wiki_preview_use_case.dart';
+import 'package:flymap/utils/url_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
@@ -36,9 +37,17 @@ class FlightMapPreviewWidget extends StatefulWidget {
 }
 
 class _FlightMapPreviewWidgetState extends State<FlightMapPreviewWidget> {
+  static const String _primaryStyleUrl =
+      '${UrlUtils.flymapTilesUrl}/styles/liberty';
+  static const String _fallbackStyleUrl = '${UrlUtils.ofmTilesUrl}/styles/liberty';
+  static const Duration _styleLoadTimeout = Duration(seconds: 8);
+
   final Logger _logger = const Logger('FlightMapPreviewWidget');
   MapLibreMapController? _mapController;
+  Timer? _styleFallbackTimer;
   bool _mapReady = false;
+  bool _didFallbackToOpenFreeMap = false;
+  String _styleUrl = _primaryStyleUrl;
   late final FlightRoute route = widget.flightRoute;
   bool _routeLayersAdded = false;
   int _styleGeneration = 0;
@@ -64,10 +73,13 @@ class _FlightMapPreviewWidgetState extends State<FlightMapPreviewWidget> {
     setState(() {
       _mapReady = true;
     });
+    _scheduleStyleFallbackIfNeeded();
     unawaited(_clampCameraZoomToBounds());
   }
 
   void _onStyleLoaded() {
+    _styleFallbackTimer?.cancel();
+    _styleFallbackTimer = null;
     if (!_mapReady) return;
     final styleGeneration = ++_styleGeneration;
     _routeLayersAdded = false;
@@ -91,6 +103,23 @@ class _FlightMapPreviewWidgetState extends State<FlightMapPreviewWidget> {
         _logger.error('Failed to update map preview style layers: $error');
         return;
       }
+    });
+  }
+
+  void _scheduleStyleFallbackIfNeeded() {
+    if (_didFallbackToOpenFreeMap || _styleUrl != _primaryStyleUrl) {
+      return;
+    }
+    _styleFallbackTimer?.cancel();
+    _styleFallbackTimer = Timer(_styleLoadTimeout, () {
+      if (!mounted || _didFallbackToOpenFreeMap) return;
+      _logger.error(
+        'Primary style did not load within $_styleLoadTimeout, switching to OpenFreeMap fallback',
+      );
+      setState(() {
+        _didFallbackToOpenFreeMap = true;
+        _styleUrl = _fallbackStyleUrl;
+      });
     });
   }
 
@@ -282,6 +311,7 @@ class _FlightMapPreviewWidgetState extends State<FlightMapPreviewWidget> {
         .clamp(widget.minZoom, widget.maxZoom)
         .toDouble();
     return MapLibreMap(
+      key: ValueKey<String>(_styleUrl),
       onMapCreated: _onMapCreated,
       initialCameraPosition: CameraPosition(target: _center, zoom: initialZoom),
       minMaxZoomPreference: MinMaxZoomPreference(
@@ -289,7 +319,7 @@ class _FlightMapPreviewWidgetState extends State<FlightMapPreviewWidget> {
         widget.maxZoom,
       ),
       trackCameraPosition: true,
-      styleString: "https://tiles.openfreemap.org/styles/liberty",
+      styleString: _styleUrl,
       compassViewPosition: CompassViewPosition.bottomRight,
       compassViewMargins: const Point(16, 16),
       onStyleLoadedCallback: _onStyleLoaded,
@@ -298,6 +328,8 @@ class _FlightMapPreviewWidgetState extends State<FlightMapPreviewWidget> {
 
   @override
   void dispose() {
+    _styleFallbackTimer?.cancel();
+    _styleFallbackTimer = null;
     if (_featureTapListenerAttached) {
       _mapController?.onFeatureTapped.remove(_onFeatureTapped);
       _featureTapListenerAttached = false;
