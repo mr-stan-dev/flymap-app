@@ -84,6 +84,20 @@ class SettingsContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 SettingsGroupCard(
+                  title: context.t.settings.storage,
+                  children: [
+                    SettingItem(
+                      title: context.t.settings.storageTitle,
+                      subtitle: context.t.settings.storageSubtitle,
+                      leading: const Icon(Icons.storage_rounded),
+                      onTap: () async {
+                        await AppRouter.goToSettingsStorage(context);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SettingsGroupCard(
                   title: context.t.settings.support,
                   children: [
                     const LeaveFeedbackSettingItem(),

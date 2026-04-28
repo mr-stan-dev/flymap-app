@@ -292,6 +292,42 @@ class TranslationsSettingsEn {
 	/// en: 'Units'
 	String get units => 'Units';
 
+	/// en: 'Storage'
+	String get storage => 'Storage';
+
+	/// en: 'Storage'
+	String get storageTitle => 'Storage';
+
+	/// en: 'Downloaded maps and disk usage'
+	String get storageSubtitle => 'Downloaded maps and disk usage';
+
+	/// en: 'Loading storage...'
+	String get storageLoading => 'Loading storage...';
+
+	/// en: 'Failed to load storage data.'
+	String get storageLoadError => 'Failed to load storage data.';
+
+	/// en: 'Downloaded maps'
+	String get storageMapsLabel => 'Downloaded maps';
+
+	/// en: 'Total size'
+	String get storageTotalSizeLabel => 'Total size';
+
+	/// en: 'Downloaded maps'
+	String get storageDownloadedMaps => 'Downloaded maps';
+
+	/// en: 'Name'
+	String get storageSortName => 'Name';
+
+	/// en: 'Size'
+	String get storageSortSize => 'Size';
+
+	/// en: 'Size: $size'
+	String storageMapSize({required Object size}) => 'Size: ${size}';
+
+	/// en: 'No downloaded maps yet.'
+	String get storageEmpty => 'No downloaded maps yet.';
+
 	/// en: 'Altitude'
 	String get altitude => 'Altitude';
 
@@ -1649,6 +1685,18 @@ extension on Translations {
 			'settings.dark' => 'Dark',
 			'settings.light' => 'Light',
 			'settings.units' => 'Units',
+			'settings.storage' => 'Storage',
+			'settings.storageTitle' => 'Storage',
+			'settings.storageSubtitle' => 'Downloaded maps and disk usage',
+			'settings.storageLoading' => 'Loading storage...',
+			'settings.storageLoadError' => 'Failed to load storage data.',
+			'settings.storageMapsLabel' => 'Downloaded maps',
+			'settings.storageTotalSizeLabel' => 'Total size',
+			'settings.storageDownloadedMaps' => 'Downloaded maps',
+			'settings.storageSortName' => 'Name',
+			'settings.storageSortSize' => 'Size',
+			'settings.storageMapSize' => ({required Object size}) => 'Size: ${size}',
+			'settings.storageEmpty' => 'No downloaded maps yet.',
 			'settings.altitude' => 'Altitude',
 			'settings.altitudeUnit' => 'Altitude unit',
 			'settings.speed' => 'Speed',
