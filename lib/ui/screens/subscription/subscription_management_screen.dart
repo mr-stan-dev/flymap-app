@@ -19,7 +19,7 @@ class SubscriptionManagementScreen extends StatefulWidget {
 
 class _SubscriptionManagementScreenState
     extends State<SubscriptionManagementScreen> {
-  static const String _supportEmail = 'support@apptractor.dev';
+  static const String _supportEmail = 'team@apptractor.dev';
   static final Uri _iosSubscriptionsUri = Uri.parse(
     'https://apps.apple.com/account/subscriptions',
   );
