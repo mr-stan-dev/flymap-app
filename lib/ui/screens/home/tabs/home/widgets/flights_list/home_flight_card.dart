@@ -11,6 +11,8 @@ import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dialog.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_cubit.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_route_preview_strip.dart';
+import 'package:flymap/utils/country_name_utils.dart';
+import 'package:flymap/utils/route_utils.dart';
 
 class HomeFlightCard extends StatelessWidget {
   const HomeFlightCard({required this.flight, super.key});
@@ -53,39 +55,21 @@ class HomeFlightCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            departure.displayCode,
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.6,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 18,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          Text(
-                            arrival.displayCode,
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.6,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        RouteUtils.routeCities(route),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${departure.cityWithCountryCode} • ${arrival.cityWithCountryCode}',
+                        RouteUtils.routeCountries(route),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
-                        maxLines: 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -121,8 +105,8 @@ class HomeFlightCard extends StatelessWidget {
               createdLabel: _createdLabel(flight.createdAt),
               poiCount: poiCount,
               articleCount: articleCount,
-              departureCode: departure.displayCode,
-              arrivalCode: arrival.displayCode,
+              departureCode: departure.city,
+              arrivalCode: arrival.city,
               routePreviewPoi: routePreviewPoi,
             ),
           ],
@@ -171,7 +155,12 @@ class HomeFlightCard extends StatelessWidget {
 
   String _createdLabel(DateTime createdAt) {
     final delta = DateTime.now().difference(createdAt);
-    if (delta.inDays >= 1) return t.home.daysAgo(days: delta.inDays);
+    if (delta.inDays >= 1) {
+      final mm = createdAt.month.toString().padLeft(2, '0');
+      final dd = createdAt.day.toString().padLeft(2, '0');
+      final yyyy = createdAt.year.toString();
+      return '$mm/$dd/$yyyy';
+    }
     if (delta.inHours >= 1) return t.home.hoursAgo(hours: delta.inHours);
     if (delta.inMinutes >= 1) {
       return t.home.minutesAgo(minutes: delta.inMinutes);

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_state.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 
 import 'home_summary_header_free.dart';
@@ -8,13 +7,13 @@ import 'home_summary_header_pro.dart';
 
 class HomeSummaryHeader extends StatelessWidget {
   const HomeSummaryHeader({
-    required this.statistics,
     required this.displayName,
+    required this.hasInternet,
     super.key,
   });
 
-  final FlightStatistics statistics;
   final String displayName;
+  final bool hasInternet;
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +21,13 @@ class HomeSummaryHeader extends StatelessWidget {
       (SubscriptionCubit cubit) => cubit.state.isPro,
     );
     return isProUser
-        ? HomeSummaryHeaderPro(statistics: statistics, displayName: displayName)
-        : HomeSummaryHeaderFree(
-            statistics: statistics,
+        ? HomeSummaryHeaderPro(
             displayName: displayName,
+            hasInternet: hasInternet,
+          )
+        : HomeSummaryHeaderFree(
+            displayName: displayName,
+            hasInternet: hasInternet,
           );
   }
 }

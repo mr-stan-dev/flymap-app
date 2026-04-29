@@ -1,3 +1,4 @@
+import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/entity/flight.dart';
 import 'package:flymap/i18n/strings.g.dart';
@@ -13,6 +14,7 @@ class HomeTabCubit extends Cubit<HomeTabState> {
   final FlightRepository _repository;
   final OnboardingRepository _onboardingRepository;
   final DeleteFlightUseCase _deleteFlightUseCase;
+  final ConnectivityChecker _connectivityChecker;
 
   HomeFlightsSort _sort = HomeFlightsSort.mostRecent;
   List<Flight> _allFlights = const [];
@@ -21,9 +23,11 @@ class HomeTabCubit extends Cubit<HomeTabState> {
     required FlightRepository repository,
     required OnboardingRepository onboardingRepository,
     required DeleteFlightUseCase deleteFlightUseCase,
+    ConnectivityChecker? connectivityChecker,
   }) : _repository = repository,
        _onboardingRepository = onboardingRepository,
        _deleteFlightUseCase = deleteFlightUseCase,
+       _connectivityChecker = connectivityChecker ?? const ConnectivityChecker(),
        super(const HomeTabLoading()) {
     _loadData();
   }
@@ -38,11 +42,13 @@ class HomeTabCubit extends Cubit<HomeTabState> {
         _loadStatistics(),
         _loadFlights(),
         _loadDisplayName(),
+        _loadConnectivity(),
       ]);
 
       final statistics = results[0] as FlightStatistics;
       final flights = results[1] as List<Flight>;
       final displayName = results[2] as String;
+      final hasInternet = results[3] as bool;
       _allFlights = flights;
 
       emit(
@@ -51,6 +57,7 @@ class HomeTabCubit extends Cubit<HomeTabState> {
           flights: _sortedFlights(),
           sort: _sort,
           displayName: displayName,
+          hasInternet: hasInternet,
         ),
       );
     } catch (e) {
@@ -105,11 +112,13 @@ class HomeTabCubit extends Cubit<HomeTabState> {
         _loadStatistics(),
         _loadFlights(),
         _loadDisplayName(),
+        _loadConnectivity(),
       ]);
 
       final statistics = results[0] as FlightStatistics;
       final flights = results[1] as List<Flight>;
       final displayName = results[2] as String;
+      final hasInternet = results[3] as bool;
       _allFlights = flights;
 
       _logger.log('Refresh completed: ${flights.length} flights loaded');
@@ -119,6 +128,7 @@ class HomeTabCubit extends Cubit<HomeTabState> {
           flights: _sortedFlights(),
           sort: _sort,
           displayName: displayName,
+          hasInternet: hasInternet,
           isRefreshing: false,
         ),
       );
@@ -211,6 +221,15 @@ class HomeTabCubit extends Cubit<HomeTabState> {
     } catch (e) {
       _logger.error('Error loading profile display name: $e');
       return '';
+    }
+  }
+
+  Future<bool> _loadConnectivity() async {
+    try {
+      return await _connectivityChecker.hasInternetConnectivity();
+    } catch (e) {
+      _logger.error('Error checking internet connectivity: $e');
+      return true;
     }
   }
 

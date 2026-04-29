@@ -140,6 +140,18 @@ class TranslationsHomeEn {
 	/// en: 'Offline maps for flights'
 	String get welcomeSubtitle => 'Offline maps for flights';
 
+	/// en: 'Ready for the next flight?'
+	String get greetingOnline => 'Ready for the next flight?';
+
+	/// en: 'Hi $name, ready for the next flight?'
+	String greetingOnlineWithName({required Object name}) => 'Hi ${name}, ready for the next flight?';
+
+	/// en: 'Ready to explore your flight?'
+	String get greetingOffline => 'Ready to explore your flight?';
+
+	/// en: 'Hi $name, ready to explore your flight?'
+	String greetingOfflineWithName({required Object name}) => 'Hi ${name}, ready to explore your flight?';
+
 	/// en: 'Flights saved'
 	String get flightsSaved => 'Flights saved';
 
@@ -1638,6 +1650,10 @@ extension on Translations {
 			'home.welcomeTitle' => 'Welcome to Flymap',
 			'home.welcomeTitlePro' => 'Welcome to Flymap Pro',
 			'home.welcomeSubtitle' => 'Offline maps for flights',
+			'home.greetingOnline' => 'Ready for the next flight?',
+			'home.greetingOnlineWithName' => ({required Object name}) => 'Hi ${name}, ready for the next flight?',
+			'home.greetingOffline' => 'Ready to explore your flight?',
+			'home.greetingOfflineWithName' => ({required Object name}) => 'Hi ${name}, ready to explore your flight?',
 			'home.flightsSaved' => 'Flights saved',
 			'home.storageUsed' => 'Storage used',
 			'home.flightsCount' => ({required Object count}) => 'Flights (${count})',

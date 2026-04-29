@@ -23,6 +23,7 @@ final class HomeTabSuccess extends HomeTabState {
   final List<Flight> flights;
   final HomeFlightsSort sort;
   final String displayName;
+  final bool hasInternet;
   final bool isRefreshing;
 
   const HomeTabSuccess({
@@ -30,6 +31,7 @@ final class HomeTabSuccess extends HomeTabState {
     required this.flights,
     required this.sort,
     this.displayName = '',
+    this.hasInternet = true,
     this.isRefreshing = false,
   });
 
@@ -38,6 +40,7 @@ final class HomeTabSuccess extends HomeTabState {
     List<Flight>? flights,
     HomeFlightsSort? sort,
     String? displayName,
+    bool? hasInternet,
     bool? isRefreshing,
   }) {
     return HomeTabSuccess(
@@ -45,6 +48,7 @@ final class HomeTabSuccess extends HomeTabState {
       flights: flights ?? this.flights,
       sort: sort ?? this.sort,
       displayName: displayName ?? this.displayName,
+      hasInternet: hasInternet ?? this.hasInternet,
       isRefreshing: isRefreshing ?? this.isRefreshing,
     );
   }
@@ -55,6 +59,7 @@ final class HomeTabSuccess extends HomeTabState {
     flights,
     sort,
     displayName,
+    hasInternet,
     isRefreshing,
   ];
 }
