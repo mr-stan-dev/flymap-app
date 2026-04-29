@@ -289,6 +289,45 @@ class TranslationsSettingsEn {
 	/// en: '$count selected'
 	String profileInterestsSelected({required Object count}) => '${count} selected';
 
+	/// en: 'History'
+	String get historyTitle => 'History';
+
+	/// en: 'All flights and stats'
+	String get historySubtitle => 'All flights and stats';
+
+	/// en: 'Loading history...'
+	String get historyLoading => 'Loading history...';
+
+	/// en: 'Failed to load flight history.'
+	String get historyLoadError => 'Failed to load flight history.';
+
+	/// en: 'Total flights'
+	String get historyFlightsLabel => 'Total flights';
+
+	/// en: 'Total distance'
+	String get historyDistanceLabel => 'Total distance';
+
+	/// en: 'All flights'
+	String get historyAllFlights => 'All flights';
+
+	/// en: 'Name'
+	String get historySortName => 'Name';
+
+	/// en: 'Distance'
+	String get historySortDistance => 'Distance';
+
+	/// en: 'Date'
+	String get historySortDate => 'Date';
+
+	/// en: 'No flights yet.'
+	String get historyEmpty => 'No flights yet.';
+
+	/// en: 'Search by airport or city'
+	String get historySearchHint => 'Search by airport or city';
+
+	/// en: 'No matching flights found.'
+	String get historyNoResults => 'No matching flights found.';
+
 	/// en: 'Appearance'
 	String get appearance => 'Appearance';
 
@@ -1699,6 +1738,19 @@ extension on Translations {
 			'settings.profileEditHint' => 'Tap any item to edit your profile details.',
 			'settings.profileNotSet' => 'Not set',
 			'settings.profileInterestsSelected' => ({required Object count}) => '${count} selected',
+			'settings.historyTitle' => 'History',
+			'settings.historySubtitle' => 'All flights and stats',
+			'settings.historyLoading' => 'Loading history...',
+			'settings.historyLoadError' => 'Failed to load flight history.',
+			'settings.historyFlightsLabel' => 'Total flights',
+			'settings.historyDistanceLabel' => 'Total distance',
+			'settings.historyAllFlights' => 'All flights',
+			'settings.historySortName' => 'Name',
+			'settings.historySortDistance' => 'Distance',
+			'settings.historySortDate' => 'Date',
+			'settings.historyEmpty' => 'No flights yet.',
+			'settings.historySearchHint' => 'Search by airport or city',
+			'settings.historyNoResults' => 'No matching flights found.',
 			'settings.appearance' => 'Appearance',
 			'settings.theme' => 'Theme',
 			'settings.system' => 'System',

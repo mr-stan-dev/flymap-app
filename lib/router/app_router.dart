@@ -13,6 +13,7 @@ import 'package:flymap/ui/screens/home/home_screen.dart';
 import 'package:flymap/ui/screens/onboarding/onboarding_screen.dart';
 import 'package:flymap/ui/screens/share_flight/share_flight_screen.dart';
 import 'package:flymap/ui/screens/settings/profile/settings_profile_screen.dart';
+import 'package:flymap/ui/screens/settings/history/history_screen.dart';
 import 'package:flymap/ui/screens/settings/storage/storage_screen.dart';
 import 'package:flymap/ui/screens/subscription/subscription_management_screen.dart';
 import 'package:flymap/usecase/submit_feedback_use_case.dart';
@@ -33,6 +34,7 @@ class AppRouter {
   static const String onboardingRoute = '/onboarding';
   static const String settingsProfileRoute = '/settings/profile';
   static const String settingsStorageRoute = '/settings/storage';
+  static const String settingsHistoryRoute = '/settings/history';
 
   /// Create the router configuration
   static GoRouter createRouter({required bool showOnboarding}) {
@@ -121,6 +123,11 @@ class AppRouter {
           name: 'settings-storage',
           builder: (context, state) => const StorageScreen(),
         ),
+        GoRoute(
+          path: settingsHistoryRoute,
+          name: 'settings-history',
+          builder: (context, state) => const HistoryScreen(),
+        ),
 
         GoRoute(
           path: feedbackRoute,
@@ -195,6 +202,10 @@ class AppRouter {
 
   static Future<void> goToSettingsStorage(BuildContext context) {
     return context.push(settingsStorageRoute);
+  }
+
+  static Future<void> goToSettingsHistory(BuildContext context) {
+    return context.push(settingsHistoryRoute);
   }
 
   /// Navigate to feedback and return true when submitted.

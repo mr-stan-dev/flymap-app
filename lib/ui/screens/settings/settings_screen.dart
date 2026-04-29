@@ -70,6 +70,14 @@ class SettingsContent extends StatelessWidget {
                         await context.read<SettingsCubit>().load();
                       },
                     ),
+                    SettingItem(
+                      title: context.t.settings.historyTitle,
+                      subtitle: context.t.settings.historySubtitle,
+                      leading: const Icon(Icons.history_rounded),
+                      onTap: () async {
+                        await AppRouter.goToSettingsHistory(context);
+                      },
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
