@@ -233,15 +233,15 @@
       "legendTitle": "POI legend",
       "estimatedMapSize": "Estimated map size: $size",
       "upgradeToPro": "Upgrade to Pro",
-      "basicHint": "Basic map detail with $count places",
-      "proGateHint": "Upgrade for a detailed map with $count places",
+      "basicHint": "Basic map detail with limited places",
+      "proGateHint": "Upgrade for a detailed map with all places",
       "proHint": "Detailed offline map with $count places",
       "optionsTitle": "Approximate route",
       "optionsBody": "Route is approximate — actual path may vary, especially on long-haul flights."
     },
     "overview": {
       "routeNotReady": "Route is not ready yet.",
-      "proPoiUpsell": "Free plan includes basic map and $current places"
+      "proPoiUpsell": "Free plan includes basic map and limited places"
     },
     "wikipedia": {
       "title": "Select articles to download with map",
@@ -501,7 +501,7 @@
     "popularAirports": "Popular airports",
     "removeHomeAirport": "Remove home airport",
     "noHomeAirportFound": "No airports found for that search.",
-    "interestsTitle": "What places you want to see more?",
+    "interestsTitle": "What places you want to see more on a map?",
     "interestsSubtitle": "Choose up to 3 topics to see more relevant places and stories along your flight.",
     "interestsHelper": "Pick up to 3 topics.",
     "interestsSelected": "$count of $max selected",

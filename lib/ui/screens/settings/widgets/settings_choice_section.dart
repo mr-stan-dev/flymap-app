@@ -29,7 +29,6 @@ class SettingsChoiceSection extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 8),
         ],
         Wrap(
           spacing: 8,

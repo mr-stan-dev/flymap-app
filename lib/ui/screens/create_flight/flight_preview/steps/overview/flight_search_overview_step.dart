@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/map_preview/map_detail_hint.dart';
-import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/flight_info_widget.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/flight_info_widget.dart';
 import 'package:flymap/usecase/poi_selection_config.dart';
 
 class FlightSearchOverviewStep extends StatelessWidget {
@@ -50,11 +50,9 @@ class FlightSearchOverviewStep extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         MapDetailHint(
-                          message: context.t.createFlight.mapPreview
-                              .proGateHint(count: proPoiCount),
-                          details: context.t.createFlight.overview.proPoiUpsell(
-                            current: currentPoiCount,
-                          ),
+                          message:
+                              context.t.createFlight.mapPreview.proGateHint,
+                          details: context.t.createFlight.overview.proPoiUpsell,
                           highlighted: true,
                         ),
                         const SizedBox(height: 12),

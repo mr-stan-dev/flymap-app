@@ -26,7 +26,7 @@ class SettingsBottomSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: theme.textTheme.titleLarge),
+            Text(title, style: theme.textTheme.headlineMedium),
             const SizedBox(height: 16),
             child,
             const SizedBox(height: 20),

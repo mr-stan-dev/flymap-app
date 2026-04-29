@@ -105,12 +105,8 @@ class FlightSearchMapPreviewStep extends StatelessWidget {
                     count: poiCount,
                   ),
                   (false, true) =>
-                    context.t.createFlight.mapPreview.proGateHint(
-                      count: proPoiCount,
-                    ),
-                  _ => context.t.createFlight.mapPreview.basicHint(
-                    count: poiCount,
-                  ),
+                    context.t.createFlight.mapPreview.proGateHint,
+                  _ => context.t.createFlight.mapPreview.basicHint,
                 },
                 details: context.t.createFlight.mapPreview.estimatedMapSize(
                   size: estimatedMapSize,

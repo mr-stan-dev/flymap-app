@@ -967,8 +967,8 @@ class TranslationsOnboardingEn {
 	/// en: 'No airports found for that search.'
 	String get noHomeAirportFound => 'No airports found for that search.';
 
-	/// en: 'What places you want to see more?'
-	String get interestsTitle => 'What places you want to see more?';
+	/// en: 'What places you want to see more on a map?'
+	String get interestsTitle => 'What places you want to see more on a map?';
 
 	/// en: 'Choose up to 3 topics to see more relevant places and stories along your flight.'
 	String get interestsSubtitle => 'Choose up to 3 topics to see more relevant places and stories along your flight.';
@@ -1159,11 +1159,11 @@ class TranslationsCreateFlightMapPreviewEn {
 	/// en: 'Upgrade to Pro'
 	String get upgradeToPro => 'Upgrade to Pro';
 
-	/// en: 'Basic map detail with $count places'
-	String basicHint({required Object count}) => 'Basic map detail with ${count} places';
+	/// en: 'Basic map detail with limited places'
+	String get basicHint => 'Basic map detail with limited places';
 
-	/// en: 'Upgrade for a detailed map with $count places'
-	String proGateHint({required Object count}) => 'Upgrade for a detailed map with ${count} places';
+	/// en: 'Upgrade for a detailed map with all places'
+	String get proGateHint => 'Upgrade for a detailed map with all places';
 
 	/// en: 'Detailed offline map with $count places'
 	String proHint({required Object count}) => 'Detailed offline map with ${count} places';
@@ -1186,8 +1186,8 @@ class TranslationsCreateFlightOverviewEn {
 	/// en: 'Route is not ready yet.'
 	String get routeNotReady => 'Route is not ready yet.';
 
-	/// en: 'Free plan includes basic map and $current places'
-	String proPoiUpsell({required Object current}) => 'Free plan includes basic map and ${current} places';
+	/// en: 'Free plan includes basic map and limited places'
+	String get proPoiUpsell => 'Free plan includes basic map and limited places';
 }
 
 // Path: createFlight.wikipedia
@@ -1936,13 +1936,13 @@ extension on Translations {
 			'createFlight.mapPreview.legendTitle' => 'POI legend',
 			'createFlight.mapPreview.estimatedMapSize' => ({required Object size}) => 'Estimated map size: ${size}',
 			'createFlight.mapPreview.upgradeToPro' => 'Upgrade to Pro',
-			'createFlight.mapPreview.basicHint' => ({required Object count}) => 'Basic map detail with ${count} places',
-			'createFlight.mapPreview.proGateHint' => ({required Object count}) => 'Upgrade for a detailed map with ${count} places',
+			'createFlight.mapPreview.basicHint' => 'Basic map detail with limited places',
+			'createFlight.mapPreview.proGateHint' => 'Upgrade for a detailed map with all places',
 			'createFlight.mapPreview.proHint' => ({required Object count}) => 'Detailed offline map with ${count} places',
 			'createFlight.mapPreview.optionsTitle' => 'Approximate route',
 			'createFlight.mapPreview.optionsBody' => 'Route is approximate — actual path may vary, especially on long-haul flights.',
 			'createFlight.overview.routeNotReady' => 'Route is not ready yet.',
-			'createFlight.overview.proPoiUpsell' => ({required Object current}) => 'Free plan includes basic map and ${current} places',
+			'createFlight.overview.proPoiUpsell' => 'Free plan includes basic map and limited places',
 			'createFlight.wikipedia.title' => 'Select articles to download with map',
 			'createFlight.wikipedia.loadingIntro' => 'Finding route-related articles...',
 			'createFlight.wikipedia.foundIntro' => ({required Object count}) => 'Based on your route we found ${count} relevant articles',
@@ -2177,7 +2177,7 @@ extension on Translations {
 			'onboarding.popularAirports' => 'Popular airports',
 			'onboarding.removeHomeAirport' => 'Remove home airport',
 			'onboarding.noHomeAirportFound' => 'No airports found for that search.',
-			'onboarding.interestsTitle' => 'What places you want to see more?',
+			'onboarding.interestsTitle' => 'What places you want to see more on a map?',
 			'onboarding.interestsSubtitle' => 'Choose up to 3 topics to see more relevant places and stories along your flight.',
 			'onboarding.interestsHelper' => 'Pick up to 3 topics.',
 			'onboarding.interestsSelected' => ({required Object count, required Object max}) => '${count} of ${max} selected',
