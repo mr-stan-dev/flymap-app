@@ -4,6 +4,7 @@ import 'package:flymap/entity/flight.dart';
 import 'package:flymap/entity/flight_poi_type.dart';
 import 'package:flymap/entity/route_poi_rank.dart';
 import 'package:flymap/entity/route_poi_summary.dart';
+import 'package:flymap/entity/units.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/router/app_router.dart';
 import 'package:flymap/size_utils.dart';
@@ -13,14 +14,22 @@ import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dial
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_cubit.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_route_preview_strip.dart';
 import 'package:flymap/utils/route_utils.dart';
+import 'package:flymap/utils/unit_format_utils.dart';
 
 class HomeFlightCard extends StatelessWidget {
-  const HomeFlightCard({required this.flight, super.key});
+  const HomeFlightCard({
+    required this.flight,
+    required this.distanceUnit,
+    required this.dateDisplayFormat,
+    super.key,
+  });
 
   // TODO: Re-enable share route menu item after we fix android snapshot.
   static const bool _shareRouteMenuEnabled = false;
 
   final Flight flight;
+  final DistanceUnit distanceUnit;
+  final DateDisplayFormat dateDisplayFormat;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +38,7 @@ class HomeFlightCard extends StatelessWidget {
     final route = flight.route;
     final departure = route.departure;
     final arrival = route.arrival;
-    final distanceKm = route.distanceInKm.toStringAsFixed(0);
+    final distance = UnitFormatUtils.formatDistance(route.distanceInKm, distanceUnit);
     final offlineSize = _formatOfflineSize(flight);
     final poiCount = flight.info.poi.length;
     final articleCount = flight.info.articles.length;
@@ -104,9 +113,9 @@ class HomeFlightCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             _SavedFlightCardBody(
-              distanceKm: distanceKm,
+              distance: distance,
               offlineSize: offlineSize,
-              createdLabel: _createdLabel(flight.createdAt),
+              createdLabel: _createdLabel(flight.createdAt, format: dateDisplayFormat),
               poiCount: poiCount,
               articleCount: articleCount,
               departureCode: departure.city,
@@ -169,13 +178,13 @@ class HomeFlightCard extends StatelessWidget {
     return flight.maps.fold<int>(0, (sum, map) => sum + map.sizeBytes);
   }
 
-  String _createdLabel(DateTime createdAt) {
+  String _createdLabel(
+    DateTime createdAt, {
+    required DateDisplayFormat format,
+  }) {
     final delta = DateTime.now().difference(createdAt);
     if (delta.inDays >= 1) {
-      final mm = createdAt.month.toString().padLeft(2, '0');
-      final dd = createdAt.day.toString().padLeft(2, '0');
-      final yyyy = createdAt.year.toString();
-      return '$mm/$dd/$yyyy';
+      return UnitFormatUtils.formatDate(createdAt, format: format);
     }
     if (delta.inHours >= 1) return t.home.hoursAgo(hours: delta.inHours);
     if (delta.inMinutes >= 1) {
@@ -237,7 +246,7 @@ class HomeFlightCard extends StatelessWidget {
 
 class _SavedFlightCardBody extends StatelessWidget {
   const _SavedFlightCardBody({
-    required this.distanceKm,
+    required this.distance,
     required this.offlineSize,
     required this.createdLabel,
     required this.poiCount,
@@ -247,7 +256,7 @@ class _SavedFlightCardBody extends StatelessWidget {
     required this.routePreviewPoi,
   });
 
-  final String distanceKm;
+  final String distance;
   final String offlineSize;
   final String createdLabel;
   final int poiCount;
@@ -270,7 +279,7 @@ class _SavedFlightCardBody extends StatelessWidget {
           children: [
             MetaPill(
               icon: Icons.route,
-              text: context.t.flight.info.distanceKm(distance: distanceKm),
+              text: distance,
             ),
             MetaPill(
               icon: Icons.place_outlined,

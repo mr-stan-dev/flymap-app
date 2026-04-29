@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/entity/flight.dart';
+import 'package:flymap/entity/units.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_flight_card.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_flights_empty_state.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_flights_section_header.dart';
@@ -10,6 +11,8 @@ class HomeFlightsList extends StatelessWidget {
     required this.hasCompletedFlights,
     required this.onViewAll,
     required this.onAddFirstFlight,
+    required this.distanceUnit,
+    required this.dateDisplayFormat,
     super.key,
   });
 
@@ -17,6 +20,8 @@ class HomeFlightsList extends StatelessWidget {
   final bool hasCompletedFlights;
   final VoidCallback onViewAll;
   final VoidCallback onAddFirstFlight;
+  final DistanceUnit distanceUnit;
+  final DateDisplayFormat dateDisplayFormat;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +54,11 @@ class HomeFlightsList extends StatelessWidget {
         final flight = flights[index];
         return Padding(
           padding: EdgeInsets.only(bottom: index < flights.length - 1 ? 12 : 0),
-          child: HomeFlightCard(flight: flight),
+          child: HomeFlightCard(
+            flight: flight,
+            distanceUnit: distanceUnit,
+            dateDisplayFormat: dateDisplayFormat,
+          ),
         );
       },
     );

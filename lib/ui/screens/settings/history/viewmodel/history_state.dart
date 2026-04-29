@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flymap/entity/flight.dart';
+import 'package:flymap/entity/units.dart';
+import 'package:flymap/utils/unit_format_utils.dart';
 
 enum HistorySort { name, distance, date }
 
@@ -29,31 +31,47 @@ final class HistorySuccess extends HistoryState {
     required this.sort,
     required this.totalFlights,
     required this.totalDistanceKm,
+    this.distanceUnit = DistanceUnit.km,
+    this.dateDisplayFormat = DateDisplayFormat.us,
   });
 
   final List<HistoryItem> items;
   final HistorySort sort;
   final int totalFlights;
   final double totalDistanceKm;
+  final DistanceUnit distanceUnit;
+  final DateDisplayFormat dateDisplayFormat;
 
-  String get formattedTotalDistanceKm => totalDistanceKm.toStringAsFixed(0);
+  String get formattedTotalDistance =>
+      UnitFormatUtils.formatDistance(totalDistanceKm, distanceUnit);
 
   HistorySuccess copyWith({
     List<HistoryItem>? items,
     HistorySort? sort,
     int? totalFlights,
     double? totalDistanceKm,
+    DistanceUnit? distanceUnit,
+    DateDisplayFormat? dateDisplayFormat,
   }) {
     return HistorySuccess(
       items: items ?? this.items,
       sort: sort ?? this.sort,
       totalFlights: totalFlights ?? this.totalFlights,
       totalDistanceKm: totalDistanceKm ?? this.totalDistanceKm,
+      distanceUnit: distanceUnit ?? this.distanceUnit,
+      dateDisplayFormat: dateDisplayFormat ?? this.dateDisplayFormat,
     );
   }
 
   @override
-  List<Object?> get props => [items, sort, totalFlights, totalDistanceKm];
+  List<Object?> get props => [
+    items,
+    sort,
+    totalFlights,
+    totalDistanceKm,
+    distanceUnit,
+    dateDisplayFormat,
+  ];
 }
 
 final class HistoryError extends HistoryState {
@@ -64,4 +82,3 @@ final class HistoryError extends HistoryState {
   @override
   List<Object?> get props => [message];
 }
-

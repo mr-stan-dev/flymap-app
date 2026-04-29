@@ -86,7 +86,7 @@ class HomeSummaryHeaderPro extends StatelessWidget {
                 _ProSummaryPill(
                   icon: Icons.route,
                   label: context.t.home.totalDistance,
-                  value: '${statistics.formattedTotalDistanceKm} km',
+                  value: statistics.formattedTotalDistance,
                 ),
               ],
             ),

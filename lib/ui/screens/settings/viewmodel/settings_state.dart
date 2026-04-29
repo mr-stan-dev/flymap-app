@@ -7,6 +7,8 @@ class SettingsState extends Equatable {
   final String altitudeUnit; // 'ft' | 'm'
   final String speedUnit; // 'km/h' | 'mph'
   final String timeFormat; // '24h' | '12h'
+  final String distanceUnit; // 'km' | 'mi'
+  final String dateDisplayFormat; // 'MM/DD/YYYY' | 'DD/MM/YYYY'
   final UserProfile profile;
   final String? homeAirportDisplayCode;
   final bool isLoading;
@@ -16,6 +18,8 @@ class SettingsState extends Equatable {
     this.altitudeUnit = 'ft',
     this.speedUnit = 'km/h',
     this.timeFormat = '24h',
+    this.distanceUnit = 'km',
+    this.dateDisplayFormat = 'MM/DD/YYYY',
     this.profile = const UserProfile.empty(),
     this.homeAirportDisplayCode,
     this.isLoading = true,
@@ -26,6 +30,8 @@ class SettingsState extends Equatable {
     String? altitudeUnit,
     String? speedUnit,
     String? timeFormat,
+    String? distanceUnit,
+    String? dateDisplayFormat,
     UserProfile? profile,
     String? homeAirportDisplayCode,
     bool clearHomeAirportDisplayCode = false,
@@ -36,6 +42,8 @@ class SettingsState extends Equatable {
       altitudeUnit: altitudeUnit ?? this.altitudeUnit,
       speedUnit: speedUnit ?? this.speedUnit,
       timeFormat: timeFormat ?? this.timeFormat,
+      distanceUnit: distanceUnit ?? this.distanceUnit,
+      dateDisplayFormat: dateDisplayFormat ?? this.dateDisplayFormat,
       profile: profile ?? this.profile,
       homeAirportDisplayCode: clearHomeAirportDisplayCode
           ? null
@@ -50,6 +58,8 @@ class SettingsState extends Equatable {
     altitudeUnit,
     speedUnit,
     timeFormat,
+    distanceUnit,
+    dateDisplayFormat,
     profile,
     homeAirportDisplayCode,
     isLoading,

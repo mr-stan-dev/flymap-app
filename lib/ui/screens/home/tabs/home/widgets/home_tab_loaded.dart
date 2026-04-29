@@ -40,6 +40,8 @@ class HomeTabLoaded extends StatelessWidget {
                   const SizedBox(height: 24),
                   HomeFlightsList(
                     flights: state.flights,
+                    distanceUnit: state.distanceUnit,
+                    dateDisplayFormat: state.dateDisplayFormat,
                     hasCompletedFlights:
                         state.statistics.totalFlights > 0 &&
                         state.flights.isEmpty,

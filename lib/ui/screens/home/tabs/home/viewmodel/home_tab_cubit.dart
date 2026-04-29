@@ -1,9 +1,11 @@
 import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/entity/flight.dart';
+import 'package:flymap/entity/units.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/repository/flight_repository.dart';
+import 'package:flymap/repository/metric_units_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_state.dart';
 import 'package:flymap/usecase/complete_flight_use_case.dart';
@@ -17,6 +19,7 @@ class HomeTabCubit extends Cubit<HomeTabState> {
   final DeleteFlightUseCase _deleteFlightUseCase;
   final CompleteFlightUseCase? _completeFlightUseCase;
   final ConnectivityChecker _connectivityChecker;
+  final MetricUnitsRepository _unitsRepository;
 
   HomeFlightsSort _sort = HomeFlightsSort.mostRecent;
   List<Flight> _allFlights = const [];
@@ -27,11 +30,13 @@ class HomeTabCubit extends Cubit<HomeTabState> {
     required DeleteFlightUseCase deleteFlightUseCase,
     CompleteFlightUseCase? completeFlightUseCase,
     ConnectivityChecker? connectivityChecker,
+    MetricUnitsRepository? unitsRepository,
   }) : _repository = repository,
        _onboardingRepository = onboardingRepository,
        _deleteFlightUseCase = deleteFlightUseCase,
        _completeFlightUseCase = completeFlightUseCase,
        _connectivityChecker = connectivityChecker ?? const ConnectivityChecker(),
+       _unitsRepository = unitsRepository ?? MetricUnitsRepository(),
        super(const HomeTabLoading()) {
     _loadData();
   }
@@ -47,21 +52,27 @@ class HomeTabCubit extends Cubit<HomeTabState> {
         _loadFlights(),
         _loadDisplayName(),
         _loadConnectivity(),
+        _loadDistanceUnit(),
+        _loadDateDisplayFormat(),
       ]);
 
       final statistics = results[0] as FlightStatistics;
       final flights = results[1] as List<Flight>;
       final displayName = results[2] as String;
       final hasInternet = results[3] as bool;
+      final distanceUnit = results[4] as DistanceUnit;
+      final dateDisplayFormat = results[5] as DateDisplayFormat;
       _allFlights = flights;
 
       emit(
         HomeTabSuccess(
-          statistics: statistics,
+          statistics: statistics.copyWithDistanceUnit(distanceUnit),
           flights: _sortedFlights(),
           sort: _sort,
           displayName: displayName,
           hasInternet: hasInternet,
+          distanceUnit: distanceUnit,
+          dateDisplayFormat: dateDisplayFormat,
         ),
       );
     } catch (e) {
@@ -124,23 +135,29 @@ class HomeTabCubit extends Cubit<HomeTabState> {
         _loadFlights(),
         _loadDisplayName(),
         _loadConnectivity(),
+        _loadDistanceUnit(),
+        _loadDateDisplayFormat(),
       ]);
 
       final statistics = results[0] as FlightStatistics;
       final flights = results[1] as List<Flight>;
       final displayName = results[2] as String;
       final hasInternet = results[3] as bool;
+      final distanceUnit = results[4] as DistanceUnit;
+      final dateDisplayFormat = results[5] as DateDisplayFormat;
       _allFlights = flights;
 
       _logger.log('Refresh completed: ${flights.length} flights loaded');
       emit(
         HomeTabSuccess(
-          statistics: statistics,
+          statistics: statistics.copyWithDistanceUnit(distanceUnit),
           flights: _sortedFlights(),
           sort: _sort,
           displayName: displayName,
           hasInternet: hasInternet,
           isRefreshing: false,
+          distanceUnit: distanceUnit,
+          dateDisplayFormat: dateDisplayFormat,
         ),
       );
     } catch (e) {
@@ -261,6 +278,24 @@ class HomeTabCubit extends Cubit<HomeTabState> {
     } catch (e) {
       _logger.error('Error checking internet connectivity: $e');
       return true;
+    }
+  }
+
+  Future<DistanceUnit> _loadDistanceUnit() async {
+    try {
+      return await _unitsRepository.getDistanceUnit();
+    } catch (e) {
+      _logger.error('Error loading distance unit: $e');
+      return DistanceUnit.km;
+    }
+  }
+
+  Future<DateDisplayFormat> _loadDateDisplayFormat() async {
+    try {
+      return await _unitsRepository.getDateDisplayFormat();
+    } catch (e) {
+      _logger.error('Error loading date display format: $e');
+      return DateDisplayFormat.us;
     }
   }
 

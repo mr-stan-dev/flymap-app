@@ -1,8 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/entity/flight.dart';
+import 'package:flymap/entity/units.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/repository/flight_repository.dart';
+import 'package:flymap/repository/metric_units_repository.dart';
 import 'package:flymap/usecase/complete_flight_use_case.dart';
 import 'package:flymap/usecase/delete_flight_use_case.dart';
 
@@ -11,10 +13,12 @@ import 'history_state.dart';
 class HistoryCubit extends Cubit<HistoryState> {
   HistoryCubit({
     required FlightRepository repository,
+    required MetricUnitsRepository unitsRepository,
     required DeleteFlightUseCase deleteFlightUseCase,
     required CompleteFlightUseCase completeFlightUseCase,
   })
     : _repository = repository,
+      _unitsRepository = unitsRepository,
       _deleteFlightUseCase = deleteFlightUseCase,
       _completeFlightUseCase = completeFlightUseCase,
       super(const HistoryLoading()) {
@@ -22,6 +26,7 @@ class HistoryCubit extends Cubit<HistoryState> {
   }
 
   final FlightRepository _repository;
+  final MetricUnitsRepository _unitsRepository;
   final DeleteFlightUseCase _deleteFlightUseCase;
   final CompleteFlightUseCase _completeFlightUseCase;
   final Logger _logger = const Logger('HistoryCubit');
@@ -33,6 +38,8 @@ class HistoryCubit extends Cubit<HistoryState> {
     emit(const HistoryLoading());
     try {
       final flights = await _repository.getAllFlights();
+      final distanceUnit = await _loadDistanceUnit();
+      final dateDisplayFormat = await _loadDateDisplayFormat();
       _allItems = flights.map((f) => HistoryItem(flight: f)).toList();
       emit(
         HistorySuccess(
@@ -40,6 +47,8 @@ class HistoryCubit extends Cubit<HistoryState> {
           sort: _sort,
           totalFlights: flights.length,
           totalDistanceKm: _totalDistanceKm(flights),
+          distanceUnit: distanceUnit,
+          dateDisplayFormat: dateDisplayFormat,
         ),
       );
     } catch (e) {
@@ -110,5 +119,21 @@ class HistoryCubit extends Cubit<HistoryState> {
         break;
     }
     return sorted;
+  }
+
+  Future<DistanceUnit> _loadDistanceUnit() async {
+    try {
+      return await _unitsRepository.getDistanceUnit();
+    } catch (_) {
+      return DistanceUnit.km;
+    }
+  }
+
+  Future<DateDisplayFormat> _loadDateDisplayFormat() async {
+    try {
+      return await _unitsRepository.getDateDisplayFormat();
+    } catch (_) {
+      return DateDisplayFormat.us;
+    }
   }
 }

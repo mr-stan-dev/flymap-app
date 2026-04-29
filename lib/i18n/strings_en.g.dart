@@ -430,6 +430,12 @@ class TranslationsSettingsEn {
 	/// en: 'Time format'
 	String get timeFormat => 'Time format';
 
+	/// en: 'Distance unit'
+	String get distanceUnit => 'Distance unit';
+
+	/// en: 'Date format'
+	String get dateFormat => 'Date format';
+
 	/// en: 'Support'
 	String get support => 'Support';
 
@@ -1830,6 +1836,8 @@ extension on Translations {
 			'settings.speed' => 'Speed',
 			'settings.speedUnit' => 'Speed unit',
 			'settings.timeFormat' => 'Time format',
+			'settings.distanceUnit' => 'Distance unit',
+			'settings.dateFormat' => 'Date format',
 			'settings.support' => 'Support',
 			'settings.about' => 'About',
 			'settings.aboutSubtitle' => 'Learn more about the app',

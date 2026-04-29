@@ -19,7 +19,7 @@ class UnitsSettingItem extends StatelessWidget {
       title: context.t.settings.units,
       leading: const Icon(Icons.straighten),
       subtitle:
-          '${state.altitudeUnit} • ${state.speedUnit} • ${state.timeFormat}',
+          '${state.altitudeUnit} • ${state.speedUnit} • ${state.timeFormat} • ${state.distanceUnit} • ${state.dateDisplayFormat}',
       onTap: () => showUnitsSheet(context, initialState: state),
     );
   }
@@ -33,6 +33,8 @@ Future<void> showUnitsSheet(
   var altitudeUnit = initialState.altitudeUnit;
   var speedUnit = initialState.speedUnit;
   var timeFormat = initialState.timeFormat;
+  var distanceUnit = initialState.distanceUnit;
+  var dateDisplayFormat = initialState.dateDisplayFormat;
 
   await showModalBottomSheet<void>(
     context: context,
@@ -54,6 +56,12 @@ Future<void> showUnitsSheet(
               if (timeFormat != initialState.timeFormat) {
                 await cubit.setTimeFormat(timeFormat);
               }
+              if (distanceUnit != initialState.distanceUnit) {
+                await cubit.setDistanceUnit(distanceUnit);
+              }
+              if (dateDisplayFormat != initialState.dateDisplayFormat) {
+                await cubit.setDateDisplayFormat(dateDisplayFormat);
+              }
               if (ctx.mounted) {
                 Navigator.of(ctx).pop();
               }
@@ -72,7 +80,7 @@ Future<void> showUnitsSheet(
                     });
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 SettingsChoiceSection(
                   title: context.t.settings.speedUnit,
                   options: const ['km/h', 'mph'],
@@ -83,7 +91,7 @@ Future<void> showUnitsSheet(
                     });
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 SettingsChoiceSection(
                   title: context.t.settings.timeFormat,
                   options: const ['24h', '12h'],
@@ -91,6 +99,28 @@ Future<void> showUnitsSheet(
                   onChanged: (value) {
                     setModalState(() {
                       timeFormat = value;
+                    });
+                  },
+                ),
+                const SizedBox(height: 12),
+                SettingsChoiceSection(
+                  title: context.t.settings.distanceUnit,
+                  options: const ['km', 'mi'],
+                  current: distanceUnit,
+                  onChanged: (value) {
+                    setModalState(() {
+                      distanceUnit = value;
+                    });
+                  },
+                ),
+                const SizedBox(height: 12),
+                SettingsChoiceSection(
+                  title: context.t.settings.dateFormat,
+                  options: const ['MM/DD/YYYY', 'DD/MM/YYYY'],
+                  current: dateDisplayFormat,
+                  onChanged: (value) {
+                    setModalState(() {
+                      dateDisplayFormat = value;
                     });
                   },
                 ),

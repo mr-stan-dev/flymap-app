@@ -5,6 +5,8 @@ class MetricUnitsRepository {
   static const _kAltitude = 'settings.altitudeUnit';
   static const _kSpeed = 'settings.speedUnit';
   static const _kTime = 'settings.timeFormat';
+  static const _kDistance = 'settings.distanceUnit';
+  static const _kDateDisplay = 'settings.dateDisplayFormat';
 
   // Altitude
   Future<AltitudeUnit> getAltitudeUnit() async {
@@ -42,6 +44,30 @@ class MetricUnitsRepository {
     await prefs.setString(_kTime, format.name);
   }
 
+  // Distance unit
+  Future<DistanceUnit> getDistanceUnit() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString(_kDistance);
+    return _parseDistance(stored);
+  }
+
+  Future<void> setDistanceUnit(DistanceUnit unit) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kDistance, unit.name);
+  }
+
+  // Date display format
+  Future<DateDisplayFormat> getDateDisplayFormat() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString(_kDateDisplay);
+    return _parseDateDisplay(stored);
+  }
+
+  Future<void> setDateDisplayFormat(DateDisplayFormat format) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kDateDisplay, format.name);
+  }
+
   // Backward-compatible parsing helpers
   AltitudeUnit _parseAltitude(String? v) {
     switch (v) {
@@ -70,6 +96,26 @@ class MetricUnitsRepository {
       case 'format24h':
       default:
         return TimeFormat.format24h;
+    }
+  }
+
+  DistanceUnit _parseDistance(String? v) {
+    switch (v) {
+      case 'mile':
+        return DistanceUnit.mile;
+      case 'km':
+      default:
+        return DistanceUnit.km;
+    }
+  }
+
+  DateDisplayFormat _parseDateDisplay(String? v) {
+    switch (v) {
+      case 'international':
+        return DateDisplayFormat.international;
+      case 'us':
+      default:
+        return DateDisplayFormat.us;
     }
   }
 }

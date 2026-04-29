@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:flymap/entity/units.dart';
 import 'package:flymap/entity/flight.dart';
 import 'package:flymap/size_utils.dart';
+import 'package:flymap/utils/unit_format_utils.dart';
 
 enum HomeFlightsSort { mostRecent, longestDistance, alphabetical }
 
@@ -25,6 +27,8 @@ final class HomeTabSuccess extends HomeTabState {
   final String displayName;
   final bool hasInternet;
   final bool isRefreshing;
+  final DistanceUnit distanceUnit;
+  final DateDisplayFormat dateDisplayFormat;
 
   const HomeTabSuccess({
     required this.statistics,
@@ -33,6 +37,8 @@ final class HomeTabSuccess extends HomeTabState {
     this.displayName = '',
     this.hasInternet = true,
     this.isRefreshing = false,
+    this.distanceUnit = DistanceUnit.km,
+    this.dateDisplayFormat = DateDisplayFormat.us,
   });
 
   HomeTabSuccess copyWith({
@@ -42,6 +48,8 @@ final class HomeTabSuccess extends HomeTabState {
     String? displayName,
     bool? hasInternet,
     bool? isRefreshing,
+    DistanceUnit? distanceUnit,
+    DateDisplayFormat? dateDisplayFormat,
   }) {
     return HomeTabSuccess(
       statistics: statistics ?? this.statistics,
@@ -50,6 +58,8 @@ final class HomeTabSuccess extends HomeTabState {
       displayName: displayName ?? this.displayName,
       hasInternet: hasInternet ?? this.hasInternet,
       isRefreshing: isRefreshing ?? this.isRefreshing,
+      distanceUnit: distanceUnit ?? this.distanceUnit,
+      dateDisplayFormat: dateDisplayFormat ?? this.dateDisplayFormat,
     );
   }
 
@@ -61,6 +71,8 @@ final class HomeTabSuccess extends HomeTabState {
     displayName,
     hasInternet,
     isRefreshing,
+    distanceUnit,
+    dateDisplayFormat,
   ];
 }
 
@@ -93,12 +105,14 @@ class FlightStatistics extends Equatable {
   final int totalDownloadedMaps;
   final int totalMapSize; // in bytes
   final double totalDistanceKm;
+  final DistanceUnit distanceUnit;
 
   const FlightStatistics({
     required this.totalFlights,
     required this.totalDownloadedMaps,
     required this.totalMapSize,
     required this.totalDistanceKm,
+    this.distanceUnit = DistanceUnit.km,
   });
 
   factory FlightStatistics.zero() {
@@ -107,6 +121,17 @@ class FlightStatistics extends Equatable {
       totalDownloadedMaps: 0,
       totalMapSize: 0,
       totalDistanceKm: 0,
+      distanceUnit: DistanceUnit.km,
+    );
+  }
+
+  FlightStatistics copyWithDistanceUnit(DistanceUnit nextDistanceUnit) {
+    return FlightStatistics(
+      totalFlights: totalFlights,
+      totalDownloadedMaps: totalDownloadedMaps,
+      totalMapSize: totalMapSize,
+      totalDistanceKm: totalDistanceKm,
+      distanceUnit: nextDistanceUnit,
     );
   }
 
@@ -120,7 +145,8 @@ class FlightStatistics extends Equatable {
   String get formattedTotalMapSize => SizeUtils.formatBytes(totalMapSize);
 
   /// Format total distance as integer km string.
-  String get formattedTotalDistanceKm => totalDistanceKm.toStringAsFixed(0);
+  String get formattedTotalDistance =>
+      UnitFormatUtils.formatDistance(totalDistanceKm, distanceUnit);
 
   @override
   List<Object?> get props => [
@@ -128,5 +154,6 @@ class FlightStatistics extends Equatable {
     totalDownloadedMaps,
     totalMapSize,
     totalDistanceKm,
+    distanceUnit,
   ];
 }

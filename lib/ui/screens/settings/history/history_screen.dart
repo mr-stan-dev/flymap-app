@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/entity/flight.dart';
+import 'package:flymap/entity/units.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/repository/flight_repository.dart';
-import 'package:flymap/router/app_router.dart';
+import 'package:flymap/repository/metric_units_repository.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/flight/widgets/complete_flight_confirmation_dialog.dart';
 import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dialog.dart';
@@ -11,6 +12,7 @@ import 'package:flymap/usecase/complete_flight_use_case.dart';
 import 'package:flymap/usecase/delete_flight_use_case.dart';
 import 'package:flymap/size_utils.dart';
 import 'package:flymap/utils/route_utils.dart';
+import 'package:flymap/utils/unit_format_utils.dart';
 import 'package:get_it/get_it.dart';
 
 import 'viewmodel/history_cubit.dart';
@@ -24,6 +26,7 @@ class HistoryScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) => HistoryCubit(
         repository: GetIt.I<FlightRepository>(),
+        unitsRepository: GetIt.I<MetricUnitsRepository>(),
         deleteFlightUseCase: GetIt.I<DeleteFlightUseCase>(),
         completeFlightUseCase: GetIt.I<CompleteFlightUseCase>(),
       ),
@@ -103,7 +106,7 @@ class _HistoryContentState extends State<_HistoryContent> {
               if (!_isSearching) ...[
                 _HistorySummaryCard(
                   totalFlights: success.totalFlights,
-                  totalDistanceKm: success.formattedTotalDistanceKm,
+                  totalDistance: success.formattedTotalDistance,
                 ),
                 const SizedBox(height: 12),
               ],
@@ -125,6 +128,8 @@ class _HistoryContentState extends State<_HistoryContent> {
                 ...visibleItems.map(
                   (item) => _HistoryTile(
                     item: item,
+                    distanceUnit: success.distanceUnit,
+                    dateDisplayFormat: success.dateDisplayFormat,
                     onActionSelected: (action) =>
                         _onHistoryActionSelected(context, item, action),
                   ),
@@ -242,11 +247,11 @@ class _HistoryContentState extends State<_HistoryContent> {
 class _HistorySummaryCard extends StatelessWidget {
   const _HistorySummaryCard({
     required this.totalFlights,
-    required this.totalDistanceKm,
+    required this.totalDistance,
   });
 
   final int totalFlights;
-  final String totalDistanceKm;
+  final String totalDistance;
 
   @override
   Widget build(BuildContext context) {
@@ -269,7 +274,7 @@ class _HistorySummaryCard extends StatelessWidget {
           Expanded(
             child: _SummaryValue(
               label: context.t.settings.historyDistanceLabel,
-              value: '$totalDistanceKm km',
+              value: totalDistance,
             ),
           ),
         ],
@@ -367,10 +372,14 @@ class _HistoryListHeader extends StatelessWidget {
 class _HistoryTile extends StatelessWidget {
   const _HistoryTile({
     required this.item,
+    required this.distanceUnit,
+    required this.dateDisplayFormat,
     required this.onActionSelected,
   });
 
   final HistoryItem item;
+  final DistanceUnit distanceUnit;
+  final DateDisplayFormat dateDisplayFormat;
   final ValueChanged<_HistoryItemAction> onActionSelected;
 
   @override
@@ -378,12 +387,18 @@ class _HistoryTile extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final route = item.flight.route;
-    final distanceLabel = route.distanceInKm.toStringAsFixed(0);
+    final distanceLabel = UnitFormatUtils.formatDistance(
+      route.distanceInKm,
+      distanceUnit,
+    );
     final dateSource =
         item.flight.status == FlightStatus.completed
             ? (item.flight.completedAt ?? item.flight.createdAt)
             : item.flight.createdAt;
-    final dateLabel = _dateUs(dateSource);
+    final dateLabel = UnitFormatUtils.formatDate(
+      dateSource,
+      format: dateDisplayFormat,
+    );
 
     return ListTile(
       dense: true,
@@ -398,7 +413,7 @@ class _HistoryTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${RouteUtils.routeCountries(route)} • $distanceLabel km',
+            '${RouteUtils.routeCountries(route)} • $distanceLabel',
             style: theme.textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -465,12 +480,6 @@ class _HistoryTile extends StatelessWidget {
     ];
   }
 
-  String _dateUs(DateTime date) {
-    final mm = date.month.toString().padLeft(2, '0');
-    final dd = date.day.toString().padLeft(2, '0');
-    final yyyy = date.year.toString();
-    return '$mm/$dd/$yyyy';
-  }
 }
 
 enum _HistoryItemAction { complete, deleteOfflineData, deleteFlight }

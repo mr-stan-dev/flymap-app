@@ -58,7 +58,7 @@ class HomeSummaryHeaderFree extends StatelessWidget {
                 _FreeSummaryPill(
                   icon: Icons.route,
                   label: context.t.home.totalDistance,
-                  value: '${statistics.formattedTotalDistanceKm} km',
+                  value: statistics.formattedTotalDistance,
                 ),
               ],
             ),

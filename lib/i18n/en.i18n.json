@@ -124,6 +124,8 @@
     "speed": "Speed",
     "speedUnit": "Speed unit",
     "timeFormat": "Time format",
+    "distanceUnit": "Distance unit",
+    "dateFormat": "Date format",
     "support": "Support",
     "about": "About",
     "aboutSubtitle": "Learn more about the app",

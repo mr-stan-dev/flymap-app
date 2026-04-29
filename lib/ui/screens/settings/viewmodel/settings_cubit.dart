@@ -6,6 +6,7 @@ import 'package:flymap/entity/units.dart';
 import 'package:flymap/repository/metric_units_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/repository/settings_repository.dart';
+import 'package:flymap/utils/unit_format_utils.dart';
 
 import 'settings_state.dart';
 
@@ -31,6 +32,8 @@ class SettingsCubit extends Cubit<SettingsState> {
     final altitude = await _unitsRepo.getAltitudeUnit();
     final speed = await _unitsRepo.getSpeedUnit();
     final time = await _unitsRepo.getTimeFormat();
+    final distance = await _unitsRepo.getDistanceUnit();
+    final dateDisplay = await _unitsRepo.getDateDisplayFormat();
     final profile = await _onboardingRepository.getProfile();
     await _airportsDb.initialize();
     final homeAirportDisplayCode = _resolveHomeAirportDisplayCode(profile);
@@ -41,6 +44,8 @@ class SettingsCubit extends Cubit<SettingsState> {
         altitudeUnit: _formatAltitude(altitude),
         speedUnit: _formatSpeed(speed),
         timeFormat: _formatTime(time),
+        distanceUnit: _formatDistance(distance),
+        dateDisplayFormat: _formatDateDisplay(dateDisplay),
         profile: profile,
         homeAirportDisplayCode: homeAirportDisplayCode,
         isLoading: false,
@@ -75,10 +80,26 @@ class SettingsCubit extends Cubit<SettingsState> {
     await _unitsRepo.setTimeFormat(enumFmt);
   }
 
-  String _formatAltitude(AltitudeUnit u) =>
-      u == AltitudeUnit.meter ? 'm' : 'ft';
-  String _formatSpeed(SpeedUnit u) => u == SpeedUnit.mph ? 'mph' : 'km/h';
-  String _formatTime(TimeFormat t) => t == TimeFormat.format12h ? '12h' : '24h';
+  Future<void> setDistanceUnit(String unit) async {
+    final enumUnit = unit == 'mi' ? DistanceUnit.mile : DistanceUnit.km;
+    emit(state.copyWith(distanceUnit: unit));
+    await _unitsRepo.setDistanceUnit(enumUnit);
+  }
+
+  Future<void> setDateDisplayFormat(String format) async {
+    final enumFormat = format == 'DD/MM/YYYY'
+        ? DateDisplayFormat.international
+        : DateDisplayFormat.us;
+    emit(state.copyWith(dateDisplayFormat: format));
+    await _unitsRepo.setDateDisplayFormat(enumFormat);
+  }
+
+  String _formatAltitude(AltitudeUnit u) => UnitFormatUtils.formatAltitude(u);
+  String _formatSpeed(SpeedUnit u) => UnitFormatUtils.formatSpeed(u);
+  String _formatTime(TimeFormat t) => UnitFormatUtils.formatTime(t);
+  String _formatDistance(DistanceUnit u) => UnitFormatUtils.formatDistanceUnit(u);
+  String _formatDateDisplay(DateDisplayFormat f) =>
+      UnitFormatUtils.formatDateDisplay(f);
 
   String? _resolveHomeAirportDisplayCode(UserProfile profile) {
     final code = profile.homeAirportCode;
