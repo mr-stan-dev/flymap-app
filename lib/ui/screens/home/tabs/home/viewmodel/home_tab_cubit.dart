@@ -71,11 +71,13 @@ class HomeTabCubit extends Cubit<HomeTabState> {
       final totalFlights = await _repository.getTotalFlights();
       final totalDownloadedMaps = await _repository.getTotalDownloadedMaps();
       final totalMapSize = await _repository.getTotalMapSize();
+      final totalDistanceKm = await _repository.getTotalFlightDistanceKm();
 
       return FlightStatistics(
         totalFlights: totalFlights,
         totalDownloadedMaps: totalDownloadedMaps,
         totalMapSize: totalMapSize,
+        totalDistanceKm: totalDistanceKm,
       );
     } catch (e) {
       _logger.error('Error loading statistics: $e');

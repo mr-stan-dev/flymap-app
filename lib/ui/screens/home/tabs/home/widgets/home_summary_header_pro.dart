@@ -3,14 +3,17 @@ import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/tokens/ds_brand_colors.dart';
 import 'package:flymap/ui/design_system/tokens/ds_radii.dart';
 import 'package:flymap/ui/design_system/tokens/ds_spacing.dart';
+import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_state.dart';
 
 class HomeSummaryHeaderPro extends StatelessWidget {
   const HomeSummaryHeaderPro({
+    required this.statistics,
     required this.displayName,
     required this.hasInternet,
     super.key,
   });
 
+  final FlightStatistics statistics;
   final String displayName;
   final bool hasInternet;
 
@@ -70,6 +73,23 @@ class HomeSummaryHeaderPro extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: DsSpacing.md),
+            Wrap(
+              spacing: DsSpacing.sm,
+              runSpacing: DsSpacing.sm,
+              children: [
+                _ProSummaryPill(
+                  icon: Icons.flight,
+                  label: context.t.home.flightsSaved,
+                  value: '${statistics.totalFlights}',
+                ),
+                _ProSummaryPill(
+                  icon: Icons.route,
+                  label: context.t.home.totalDistance,
+                  value: '${statistics.formattedTotalDistanceKm} km',
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -86,5 +106,50 @@ class HomeSummaryHeaderPro extends StatelessWidget {
     return hasInternet
         ? context.t.home.greetingOnline
         : context.t.home.greetingOffline;
+  }
+}
+
+class _ProSummaryPill extends StatelessWidget {
+  const _ProSummaryPill({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: DsBrandColors.proAmber),
+          const SizedBox(width: 6),
+          Text(
+            '$label: ',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurface.withValues(alpha: 0.72),
+            ),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: colorScheme.onSurface,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

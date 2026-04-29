@@ -60,4 +60,14 @@ class FlightRepository {
     return totalBytes;
   }
 
+  /// Get total distance of all flights in kilometers.
+  Future<double> getTotalFlightDistanceKm() async {
+    final flights = await _flightsService.getAllFlights();
+    double totalDistance = 0;
+    for (final flight in flights) {
+      totalDistance += flight.route.distanceInKm;
+    }
+    return totalDistance;
+  }
+
 }

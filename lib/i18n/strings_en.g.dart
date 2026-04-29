@@ -158,6 +158,9 @@ class TranslationsHomeEn {
 	/// en: 'Storage used'
 	String get storageUsed => 'Storage used';
 
+	/// en: 'Total distance'
+	String get totalDistance => 'Total distance';
+
 	/// en: 'Flights ($count)'
 	String flightsCount({required Object count}) => 'Flights (${count})';
 
@@ -1656,6 +1659,7 @@ extension on Translations {
 			'home.greetingOfflineWithName' => ({required Object name}) => 'Hi ${name}, ready to explore your flight?',
 			'home.flightsSaved' => 'Flights saved',
 			'home.storageUsed' => 'Storage used',
+			'home.totalDistance' => 'Total distance',
 			'home.flightsCount' => ({required Object count}) => 'Flights (${count})',
 			'home.noFlightsTitle' => 'Ready to explore the world from above?',
 			'home.noFlightsSubtitle' => 'Add your first flight and start discovering your next journey.',

@@ -33,6 +33,7 @@ class HomeTabLoaded extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   HomeSummaryHeader(
+                    statistics: state.statistics,
                     displayName: state.displayName,
                     hasInternet: state.hasInternet,
                   ),

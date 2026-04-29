@@ -92,11 +92,13 @@ class FlightStatistics extends Equatable {
   final int totalFlights;
   final int totalDownloadedMaps;
   final int totalMapSize; // in bytes
+  final double totalDistanceKm;
 
   const FlightStatistics({
     required this.totalFlights,
     required this.totalDownloadedMaps,
     required this.totalMapSize,
+    required this.totalDistanceKm,
   });
 
   factory FlightStatistics.zero() {
@@ -104,6 +106,7 @@ class FlightStatistics extends Equatable {
       totalFlights: 0,
       totalDownloadedMaps: 0,
       totalMapSize: 0,
+      totalDistanceKm: 0,
     );
   }
 
@@ -116,6 +119,14 @@ class FlightStatistics extends Equatable {
   /// Format total map size as string
   String get formattedTotalMapSize => SizeUtils.formatBytes(totalMapSize);
 
+  /// Format total distance as integer km string.
+  String get formattedTotalDistanceKm => totalDistanceKm.toStringAsFixed(0);
+
   @override
-  List<Object?> get props => [totalFlights, totalDownloadedMaps, totalMapSize];
+  List<Object?> get props => [
+    totalFlights,
+    totalDownloadedMaps,
+    totalMapSize,
+    totalDistanceKm,
+  ];
 }
