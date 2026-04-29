@@ -19,13 +19,12 @@ class HomeRoutePreviewStrip extends StatelessWidget {
     final lineColor = Theme.of(
       context,
     ).colorScheme.outline.withValues(alpha: 0.32);
-    final markerPositions = _markerPositions();
-
     return SizedBox(
       height: 42,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.maxWidth;
+          final poiOffsets = _poiOffsets(width);
           return Stack(
             clipBehavior: Clip.none,
             children: [
@@ -41,7 +40,7 @@ class HomeRoutePreviewStrip extends StatelessWidget {
               ),
               for (var i = 0; i < poi.length; i++)
                 Positioned(
-                  left: width * markerPositions[i] - 12,
+                  left: poiOffsets[i],
                   top: 4,
                   child: _PoiRouteMarker(type: poi[i].type),
                 ),
@@ -80,6 +79,21 @@ class HomeRoutePreviewStrip extends StatelessWidget {
     }
     return adjusted;
   }
+
+  List<double> _poiOffsets(double width) {
+    final positions = _markerPositions();
+    if (positions.isEmpty) return const [];
+
+    const markerSize = 24.0;
+    const lineInset = 12.0;
+    const edgePadding = 8.0;
+    final minLeft = lineInset + edgePadding;
+    final maxLeft = width - lineInset - edgePadding - markerSize;
+
+    return positions
+        .map((p) => (width * p - markerSize / 2).clamp(minLeft, maxLeft))
+        .toList();
+  }
 }
 
 class _AirportEndpointMarker extends StatelessWidget {
@@ -90,23 +104,37 @@ class _AirportEndpointMarker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        Image.asset(
-          'assets/images/poi/airport.png',
-          width: 24,
-          height: 24,
-          fit: BoxFit.contain,
-        ),
-        const SizedBox(height: 3),
-        Text(
-          code,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w700,
+    return SizedBox(
+      width: 24,
+      child: Column(
+        children: [
+          Image.asset(
+            'assets/images/poi/airport.png',
+            width: 24,
+            height: 24,
+            fit: BoxFit.contain,
           ),
-        ),
-      ],
+          const SizedBox(height: 3),
+          OverflowBox(
+            minWidth: 24,
+            maxWidth: 96,
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: 96,
+              child: Text(
+                code,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
