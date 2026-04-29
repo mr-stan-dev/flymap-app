@@ -10,6 +10,7 @@ import 'package:flymap/ui/screens/flight/widgets/tabs/info/route_copy_builder.da
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 import 'package:flymap/ui/theme/app_theme_ext.dart';
 import 'package:flymap/ui/widgets/pro_widgets.dart';
+import 'package:flymap/utils/route_utils.dart';
 
 class FlightAppBar extends StatelessWidget {
   const FlightAppBar({required this.flight, this.hideProgress = 0, super.key});
@@ -81,19 +82,36 @@ class FlightAppBar extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Flexible(
-                                child: Text(
-                                  '${flight.route.departure.displayCode}-${flight.route.arrival.displayCode}',
-                                  style: context.textTheme.button18Bold,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      RouteUtils.routeCities(flight.route),
+                                      style: context.textTheme.button18Bold,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                  if (isProUser) ...[
+                                    const SizedBox(width: 8),
+                                    const ProBadge(compact: true),
+                                  ],
+                                ],
                               ),
-                              if (isProUser) ...[
-                                const SizedBox(width: 8),
-                                const ProBadge(compact: true),
-                              ],
+                              const SizedBox(height: 2),
+                              Text(
+                                RouteUtils.routeCountries(flight.route),
+                                style: context.textTheme.caption14Regular
+                                    .copyWith(
+                                      color: context.colorTheme.textSecondary,
+                                    ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
                             ],
                           ),
                         ),
