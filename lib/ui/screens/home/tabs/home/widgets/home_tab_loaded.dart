@@ -40,6 +40,9 @@ class HomeTabLoaded extends StatelessWidget {
                   const SizedBox(height: 24),
                   HomeFlightsList(
                     flights: state.flights,
+                    hasCompletedFlights:
+                        state.statistics.totalFlights > 0 &&
+                        state.flights.isEmpty,
                     onViewAll: () => AppRouter.goToSettingsHistory(context),
                     onAddFirstFlight: () =>
                         context.push(AppRouter.flightSearchRoute),

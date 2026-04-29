@@ -3,9 +3,14 @@ import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 
 class HomeFlightsEmptyState extends StatelessWidget {
-  const HomeFlightsEmptyState({required this.onAddFirstFlight, super.key});
+  const HomeFlightsEmptyState({
+    required this.onAddFirstFlight,
+    required this.hasCompletedFlights,
+    super.key,
+  });
 
   final VoidCallback onAddFirstFlight;
+  final bool hasCompletedFlights;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +32,9 @@ class HomeFlightsEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            context.t.home.noFlightsTitle,
+            hasCompletedFlights
+                ? context.t.home.noFlightsTitleNext
+                : context.t.home.noFlightsTitle,
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -35,7 +42,9 @@ class HomeFlightsEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            context.t.home.noFlightsSubtitle,
+            hasCompletedFlights
+                ? context.t.home.noFlightsSubtitleNext
+                : context.t.home.noFlightsSubtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -43,7 +52,9 @@ class HomeFlightsEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           SecondaryButton(
-            label: context.t.home.addFirstFlight,
+            label: hasCompletedFlights
+                ? context.t.home.addNextFlight
+                : context.t.home.addFirstFlight,
             leadingIcon: Icons.add,
             onPressed: onAddFirstFlight,
           ),

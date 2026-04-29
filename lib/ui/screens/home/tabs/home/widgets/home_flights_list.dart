@@ -7,12 +7,14 @@ import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_fligh
 class HomeFlightsList extends StatelessWidget {
   const HomeFlightsList({
     required this.flights,
+    required this.hasCompletedFlights,
     required this.onViewAll,
     required this.onAddFirstFlight,
     super.key,
   });
 
   final List<Flight> flights;
+  final bool hasCompletedFlights;
   final VoidCallback onViewAll;
   final VoidCallback onAddFirstFlight;
 
@@ -33,7 +35,10 @@ class HomeFlightsList extends StatelessWidget {
 
   Widget _buildFlightsContent() {
     if (flights.isEmpty) {
-      return HomeFlightsEmptyState(onAddFirstFlight: onAddFirstFlight);
+      return HomeFlightsEmptyState(
+        onAddFirstFlight: onAddFirstFlight,
+        hasCompletedFlights: hasCompletedFlights,
+      );
     }
 
     return ListView.builder(

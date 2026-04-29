@@ -131,6 +131,9 @@ class TranslationsHomeEn {
 	/// en: 'Add first flight'
 	String get addFirstFlight => 'Add first flight';
 
+	/// en: 'Add next flight'
+	String get addNextFlight => 'Add next flight';
+
 	/// en: 'Welcome to Flymap'
 	String get welcomeTitle => 'Welcome to Flymap';
 
@@ -169,6 +172,12 @@ class TranslationsHomeEn {
 
 	/// en: 'Add your first flight and start discovering your next journey.'
 	String get noFlightsSubtitle => 'Add your first flight and start discovering your next journey.';
+
+	/// en: 'Ready for your next trip?'
+	String get noFlightsTitleNext => 'Ready for your next trip?';
+
+	/// en: 'Your completed flights are in History. Add your next flight to keep going.'
+	String get noFlightsSubtitleNext => 'Your completed flights are in History. Add your next flight to keep going.';
 
 	/// en: 'Flight actions'
 	String get flightActions => 'Flight actions';
@@ -1725,6 +1734,7 @@ extension on Translations {
 			'home.failedToLoadFlights' => 'Failed to load flights',
 			'home.newFlight' => 'New flight',
 			'home.addFirstFlight' => 'Add first flight',
+			'home.addNextFlight' => 'Add next flight',
 			'home.welcomeTitle' => 'Welcome to Flymap',
 			'home.welcomeTitlePro' => 'Welcome to Flymap Pro',
 			'home.welcomeSubtitle' => 'Offline maps for flights',
@@ -1738,6 +1748,8 @@ extension on Translations {
 			'home.upcomingFlightsCount' => ({required Object count}) => 'Upcoming flights (${count})',
 			'home.noFlightsTitle' => 'Ready to explore the world from above?',
 			'home.noFlightsSubtitle' => 'Add your first flight and start discovering your next journey.',
+			'home.noFlightsTitleNext' => 'Ready for your next trip?',
+			'home.noFlightsSubtitleNext' => 'Your completed flights are in History. Add your next flight to keep going.',
 			'home.flightActions' => 'Flight actions',
 			'home.viewAll' => 'View all',
 			'home.open' => 'Open',
