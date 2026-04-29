@@ -97,10 +97,6 @@ class FlightAppBar extends StatelessWidget {
                                       maxLines: 1,
                                     ),
                                   ),
-                                  if (isProUser) ...[
-                                    const SizedBox(width: 8),
-                                    const ProBadge(compact: true),
-                                  ],
                                 ],
                               ),
                               const SizedBox(height: 2),
