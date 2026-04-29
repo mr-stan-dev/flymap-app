@@ -9,6 +9,8 @@ import 'flight_map_mapper.dart';
 class FlightDBKeys {
   static const flightMaps = 'maps';
   static const id = 'id';
+  static const status = 'status';
+  static const completedAt = 'completedAt';
   static const flightInfo = 'flightInfo';
   static const createdAt = 'createdAt';
   static const updatedAt = 'updatedAt';
@@ -35,11 +37,14 @@ class FlightDbMapper {
     final nowIso = DateTime.now().toIso8601String();
     final out = <String, dynamic>{
       FlightDBKeys.id: flight.id,
+      FlightDBKeys.status: flight.status.rawValue,
       FlightDBKeys.flightMaps: flight.maps
           .map((m) => _mapMapper.toDb(m))
           .toList(),
       FlightDBKeys.flightInfo: _infoMapper.toFlightInfoMap(flight.info),
       FlightDBKeys.createdAt: flight.createdAt.toIso8601String(),
+      if (flight.completedAt != null)
+        FlightDBKeys.completedAt: flight.completedAt!.toIso8601String(),
       FlightDBKeys.updatedAt: nowIso,
     };
 
@@ -104,6 +109,10 @@ class FlightDbMapper {
     final createdAt = createdAtStr.isNotEmpty
         ? DateTime.tryParse(createdAtStr) ?? DateTime.now()
         : DateTime.now();
+    final completedAtStr = (map[FlightDBKeys.completedAt] ?? '').toString();
+    final completedAt = completedAtStr.isNotEmpty
+        ? DateTime.tryParse(completedAtStr)
+        : null;
 
     return Flight(
       id: (map[FlightDBKeys.id] ?? '').toString(),
@@ -111,6 +120,8 @@ class FlightDbMapper {
       maps: mapsList,
       info: info,
       createdAt: createdAt,
+      completedAt: completedAt,
+      status: FlightStatus.fromRaw((map[FlightDBKeys.status] ?? '').toString()),
     );
   }
 }

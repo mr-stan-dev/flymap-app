@@ -3,17 +3,27 @@ import 'package:flymap/entity/flight.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/repository/flight_repository.dart';
+import 'package:flymap/usecase/complete_flight_use_case.dart';
+import 'package:flymap/usecase/delete_flight_use_case.dart';
 
 import 'history_state.dart';
 
 class HistoryCubit extends Cubit<HistoryState> {
-  HistoryCubit({required FlightRepository repository})
+  HistoryCubit({
+    required FlightRepository repository,
+    required DeleteFlightUseCase deleteFlightUseCase,
+    required CompleteFlightUseCase completeFlightUseCase,
+  })
     : _repository = repository,
+      _deleteFlightUseCase = deleteFlightUseCase,
+      _completeFlightUseCase = completeFlightUseCase,
       super(const HistoryLoading()) {
     load();
   }
 
   final FlightRepository _repository;
+  final DeleteFlightUseCase _deleteFlightUseCase;
+  final CompleteFlightUseCase _completeFlightUseCase;
   final Logger _logger = const Logger('HistoryCubit');
 
   HistorySort _sort = HistorySort.date;
@@ -46,6 +56,36 @@ class HistoryCubit extends Cubit<HistoryState> {
     emit(current.copyWith(items: _sortedItems(), sort: _sort));
   }
 
+  Future<bool> deleteFlight(String flightId) async {
+    try {
+      final ok = await _deleteFlightUseCase(flightId);
+      if (!ok) return false;
+      await load();
+      return true;
+    } catch (e) {
+      _logger.error('Failed to delete flight in history: $e');
+      return false;
+    }
+  }
+
+  Future<bool> completeFlight({
+    required String flightId,
+    required bool deleteOfflineData,
+  }) async {
+    try {
+      final ok = await _completeFlightUseCase(
+        flightId: flightId,
+        deleteOfflineData: deleteOfflineData,
+      );
+      if (!ok) return false;
+      await load();
+      return true;
+    } catch (e) {
+      _logger.error('Failed to complete flight in history: $e');
+      return false;
+    }
+  }
+
   double _totalDistanceKm(List<Flight> flights) {
     return flights.fold<double>(0, (sum, f) => sum + f.route.distanceInKm);
   }
@@ -72,4 +112,3 @@ class HistoryCubit extends Cubit<HistoryState> {
     return sorted;
   }
 }
-

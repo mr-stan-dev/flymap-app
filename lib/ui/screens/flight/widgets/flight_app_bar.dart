@@ -5,6 +5,7 @@ import 'package:flymap/entity/flight.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/router/app_router.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
+import 'package:flymap/ui/screens/flight/widgets/complete_flight_confirmation_dialog.dart';
 import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dialog.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/info/route_copy_builder.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
@@ -138,6 +139,10 @@ class FlightAppBar extends StatelessWidget {
                               ),
                               PopupMenuDivider(),
                               PopupMenuItem(
+                                value: 'complete_flight',
+                                child: Text(context.t.home.completeFlight),
+                              ),
+                              PopupMenuItem(
                                 value: 'delete_flight',
                                 child: Text(context.t.flight.deleteFlight),
                               ),
@@ -177,6 +182,15 @@ class FlightAppBar extends StatelessWidget {
         );
         if (confirmed != true || !context.mounted) return;
         await context.read<FlightScreenCubit>().deleteFlight();
+        break;
+      case 'complete_flight':
+        final result = await CompleteFlightConfirmationDialog.show(context);
+        if (result == null || !context.mounted) return;
+        final completed = await context.read<FlightScreenCubit>().completeFlight(
+          deleteOfflineData: result.deleteOfflineData,
+        );
+        if (!completed || !context.mounted) return;
+        AppRouter.goHome(context);
         break;
     }
   }

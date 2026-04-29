@@ -12,6 +12,9 @@ import 'package:flymap/data/local/flight_poi_repository_impl.dart';
 import 'package:flymap/data/local/flights_db_service.dart';
 import 'package:flymap/data/local/learn_pack_local_db.dart';
 import 'package:flymap/data/local/learn_repository_impl.dart';
+import 'package:flymap/data/local/migrations/flights_db_migration.dart';
+import 'package:flymap/data/local/migrations/flights_db_migration_runner.dart';
+import 'package:flymap/data/local/migrations/flights_db_migration_v1_to_v2.dart';
 import 'package:flymap/data/local/places_wiki_local_data_source.dart';
 import 'package:flymap/data/local/mappers/flight_db_mapper.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
@@ -40,6 +43,7 @@ import 'package:flymap/subscription/revenuecat_client.dart';
 import 'package:flymap/subscription/revenuecat_env_config.dart';
 import 'package:flymap/subscription/subscription_status_cache.dart';
 import 'package:flymap/usecase/delete_flight_use_case.dart';
+import 'package:flymap/usecase/complete_flight_use_case.dart';
 import 'package:flymap/usecase/can_open_learn_article_use_case.dart';
 import 'package:flymap/usecase/download_map_use_case.dart';
 import 'package:flymap/usecase/download_poi_summaries_use_case.dart';
@@ -76,6 +80,17 @@ class DiModule {
 
     // Register database
     i.registerLazySingleton<AppDatabase>(() => AppDatabase.instance);
+    i.registerLazySingleton<List<FlightsDbMigration>>(
+      () => <FlightsDbMigration>[FlightsDbMigrationV1ToV2(database: i.get())],
+    );
+    i.registerLazySingleton<FlightsDbMigrationRunner>(
+      () => FlightsDbMigrationRunner(
+        database: i.get(),
+        migrations: i.get<List<FlightsDbMigration>>(),
+        connectivityChecker: i.get(),
+        crashlytics: i.get(),
+      ),
+    );
 
     i.registerFactory<FlightInfoApiMapper>(() => FlightInfoApiMapper());
 
@@ -139,6 +154,9 @@ class DiModule {
     );
     i.registerLazySingleton<DeleteFlightUseCase>(
       () => DeleteFlightUseCase(service: GetIt.I.get()),
+    );
+    i.registerLazySingleton<CompleteFlightUseCase>(
+      () => CompleteFlightUseCase(service: GetIt.I.get()),
     );
 
     i.registerLazySingleton<FavoriteAirportsRepository>(

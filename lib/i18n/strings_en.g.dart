@@ -152,8 +152,8 @@ class TranslationsHomeEn {
 	/// en: 'Hi $name, ready to explore your flight?'
 	String greetingOfflineWithName({required Object name}) => 'Hi ${name}, ready to explore your flight?';
 
-	/// en: 'Flights saved'
-	String get flightsSaved => 'Flights saved';
+	/// en: 'Total flights'
+	String get totalFlights => 'Total flights';
 
 	/// en: 'Storage used'
 	String get storageUsed => 'Storage used';
@@ -161,8 +161,8 @@ class TranslationsHomeEn {
 	/// en: 'Total distance'
 	String get totalDistance => 'Total distance';
 
-	/// en: 'Flights ($count)'
-	String flightsCount({required Object count}) => 'Flights (${count})';
+	/// en: 'Upcoming flights ($count)'
+	String upcomingFlightsCount({required Object count}) => 'Upcoming flights (${count})';
 
 	/// en: 'Ready to explore the world from above?'
 	String get noFlightsTitle => 'Ready to explore the world from above?';
@@ -173,11 +173,17 @@ class TranslationsHomeEn {
 	/// en: 'Flight actions'
 	String get flightActions => 'Flight actions';
 
+	/// en: 'View all'
+	String get viewAll => 'View all';
+
 	/// en: 'Open'
 	String get open => 'Open';
 
 	/// en: 'Share route'
 	String get shareRoute => 'Share route';
+
+	/// en: 'Complete flight'
+	String get completeFlight => 'Complete flight';
 
 	/// en: 'Delete flight'
 	String get deleteFlight => 'Delete flight';
@@ -310,6 +316,21 @@ class TranslationsSettingsEn {
 	/// en: 'All flights'
 	String get historyAllFlights => 'All flights';
 
+	/// en: 'Upcoming'
+	String get historyStatusUpcoming => 'Upcoming';
+
+	/// en: 'In progress'
+	String get historyStatusInProgress => 'In progress';
+
+	/// en: 'Completed'
+	String get historyStatusCompleted => 'Completed';
+
+	/// en: 'Map $size'
+	String historyMapChip({required Object size}) => 'Map ${size}';
+
+	/// en: 'No map'
+	String get historyNoMapChip => 'No map';
+
 	/// en: 'Name'
 	String get historySortName => 'Name';
 
@@ -327,6 +348,9 @@ class TranslationsSettingsEn {
 
 	/// en: 'No matching flights found.'
 	String get historyNoResults => 'No matching flights found.';
+
+	/// en: 'Delete map only'
+	String get historyDeleteOfflineData => 'Delete map only';
 
 	/// en: 'Appearance'
 	String get appearance => 'Appearance';
@@ -696,11 +720,23 @@ class TranslationsFlightEn {
 	/// en: 'Info'
 	String get tabInfo => 'Info';
 
+	/// en: 'Complete flight?'
+	String get completeDialogTitle => 'Complete flight?';
+
+	/// en: 'This marks your flight as completed.'
+	String get completeDialogBody => 'This marks your flight as completed.';
+
+	/// en: 'Delete map and offline articles'
+	String get completeDialogDeleteOffline => 'Delete map and offline articles';
+
+	/// en: 'Complete'
+	String get completeDialogConfirm => 'Complete';
+
 	/// en: 'Are you sure?'
 	String get deleteDialogTitle => 'Are you sure?';
 
-	/// en: 'This will permanently delete this flight. Space to be regained: $size.'
-	String deleteDialogMessage({required Object size}) => 'This will permanently delete this flight.\n\nSpace to be regained: ${size}.';
+	/// en: 'This permanently deletes this flight, including offline map and saved offline articles. Space to be regained: $size.'
+	String deleteDialogMessage({required Object size}) => 'This permanently deletes this flight, including offline map and saved offline articles.\n\nSpace to be regained: ${size}.';
 
 	/// en: 'Yes'
 	String get yes => 'Yes';
@@ -1696,15 +1732,17 @@ extension on Translations {
 			'home.greetingOnlineWithName' => ({required Object name}) => 'Hi ${name}, ready for the next flight?',
 			'home.greetingOffline' => 'Ready to explore your flight?',
 			'home.greetingOfflineWithName' => ({required Object name}) => 'Hi ${name}, ready to explore your flight?',
-			'home.flightsSaved' => 'Flights saved',
+			'home.totalFlights' => 'Total flights',
 			'home.storageUsed' => 'Storage used',
 			'home.totalDistance' => 'Total distance',
-			'home.flightsCount' => ({required Object count}) => 'Flights (${count})',
+			'home.upcomingFlightsCount' => ({required Object count}) => 'Upcoming flights (${count})',
 			'home.noFlightsTitle' => 'Ready to explore the world from above?',
 			'home.noFlightsSubtitle' => 'Add your first flight and start discovering your next journey.',
 			'home.flightActions' => 'Flight actions',
+			'home.viewAll' => 'View all',
 			'home.open' => 'Open',
 			'home.shareRoute' => 'Share route',
+			'home.completeFlight' => 'Complete flight',
 			'home.deleteFlight' => 'Delete flight',
 			'home.failedDeleteFlight' => 'Failed to delete flight',
 			'home.noOfflineMap' => 'No offline map',
@@ -1745,12 +1783,18 @@ extension on Translations {
 			'settings.historyFlightsLabel' => 'Total flights',
 			'settings.historyDistanceLabel' => 'Total distance',
 			'settings.historyAllFlights' => 'All flights',
+			'settings.historyStatusUpcoming' => 'Upcoming',
+			'settings.historyStatusInProgress' => 'In progress',
+			'settings.historyStatusCompleted' => 'Completed',
+			'settings.historyMapChip' => ({required Object size}) => 'Map ${size}',
+			'settings.historyNoMapChip' => 'No map',
 			'settings.historySortName' => 'Name',
 			'settings.historySortDistance' => 'Distance',
 			'settings.historySortDate' => 'Date',
 			'settings.historyEmpty' => 'No flights yet.',
 			'settings.historySearchHint' => 'Search by airport or city',
 			'settings.historyNoResults' => 'No matching flights found.',
+			'settings.historyDeleteOfflineData' => 'Delete map only',
 			'settings.appearance' => 'Appearance',
 			'settings.theme' => 'Theme',
 			'settings.system' => 'System',
@@ -1955,8 +1999,12 @@ extension on Translations {
 			'flight.tabMap' => 'Map',
 			'flight.tabDashboard' => 'Dashboard',
 			'flight.tabInfo' => 'Info',
+			'flight.completeDialogTitle' => 'Complete flight?',
+			'flight.completeDialogBody' => 'This marks your flight as completed.',
+			'flight.completeDialogDeleteOffline' => 'Delete map and offline articles',
+			'flight.completeDialogConfirm' => 'Complete',
 			'flight.deleteDialogTitle' => 'Are you sure?',
-			'flight.deleteDialogMessage' => ({required Object size}) => 'This will permanently delete this flight.\n\nSpace to be regained: ${size}.',
+			'flight.deleteDialogMessage' => ({required Object size}) => 'This permanently deletes this flight, including offline map and saved offline articles.\n\nSpace to be regained: ${size}.',
 			'flight.yes' => 'Yes',
 			'flight.shareRoute' => 'Share route',
 			'flight.copyRoute' => 'Copy route',

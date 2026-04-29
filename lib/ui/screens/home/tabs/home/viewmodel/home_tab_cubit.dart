@@ -6,6 +6,7 @@ import 'package:flymap/logger.dart';
 import 'package:flymap/repository/flight_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_state.dart';
+import 'package:flymap/usecase/complete_flight_use_case.dart';
 import 'package:flymap/usecase/delete_flight_use_case.dart';
 
 /// Cubit for managing home tab state
@@ -14,6 +15,7 @@ class HomeTabCubit extends Cubit<HomeTabState> {
   final FlightRepository _repository;
   final OnboardingRepository _onboardingRepository;
   final DeleteFlightUseCase _deleteFlightUseCase;
+  final CompleteFlightUseCase? _completeFlightUseCase;
   final ConnectivityChecker _connectivityChecker;
 
   HomeFlightsSort _sort = HomeFlightsSort.mostRecent;
@@ -23,10 +25,12 @@ class HomeTabCubit extends Cubit<HomeTabState> {
     required FlightRepository repository,
     required OnboardingRepository onboardingRepository,
     required DeleteFlightUseCase deleteFlightUseCase,
+    CompleteFlightUseCase? completeFlightUseCase,
     ConnectivityChecker? connectivityChecker,
   }) : _repository = repository,
        _onboardingRepository = onboardingRepository,
        _deleteFlightUseCase = deleteFlightUseCase,
+       _completeFlightUseCase = completeFlightUseCase,
        _connectivityChecker = connectivityChecker ?? const ConnectivityChecker(),
        super(const HomeTabLoading()) {
     _loadData();
@@ -89,9 +93,14 @@ class HomeTabCubit extends Cubit<HomeTabState> {
   Future<List<Flight>> _loadFlights() async {
     try {
       final flights = await _repository.getAllFlights();
-      _logger.log('Loaded ${flights.length} flights from database');
+      final activeFlights = flights
+          .where((flight) => flight.status != FlightStatus.completed)
+          .toList();
+      _logger.log(
+        'Loaded ${flights.length} flights from database (${activeFlights.length} active)',
+      );
       // Sort by createdAt descending (newest first)
-      final sorted = [...flights]
+      final sorted = [...activeFlights]
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return sorted;
     } catch (e) {
@@ -212,6 +221,26 @@ class HomeTabCubit extends Cubit<HomeTabState> {
       return true;
     } catch (e) {
       _logger.error('Failed to delete flight $flightId: $e');
+      return false;
+    }
+  }
+
+  Future<bool> completeFlight({
+    required String flightId,
+    required bool deleteOfflineData,
+  }) async {
+    final useCase = _completeFlightUseCase;
+    if (useCase == null) return false;
+    try {
+      final ok = await useCase(
+        flightId: flightId,
+        deleteOfflineData: deleteOfflineData,
+      );
+      if (!ok) return false;
+      await refresh();
+      return true;
+    } catch (e) {
+      _logger.error('Failed to complete flight $flightId: $e');
       return false;
     }
   }

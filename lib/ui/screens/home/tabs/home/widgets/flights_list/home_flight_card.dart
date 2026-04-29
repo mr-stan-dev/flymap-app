@@ -8,10 +8,10 @@ import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/router/app_router.dart';
 import 'package:flymap/size_utils.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
+import 'package:flymap/ui/screens/flight/widgets/complete_flight_confirmation_dialog.dart';
 import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dialog.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_cubit.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_route_preview_strip.dart';
-import 'package:flymap/utils/country_name_utils.dart';
 import 'package:flymap/utils/route_utils.dart';
 
 class HomeFlightCard extends StatelessWidget {
@@ -91,7 +91,11 @@ class HomeFlightCard extends StatelessWidget {
                       ),
                     PopupMenuDivider(),
                     PopupMenuItem(
-                      value: _FlightCardAction.delete,
+                      value: _FlightCardAction.completeFlight,
+                      child: Text(context.t.home.completeFlight),
+                    ),
+                    PopupMenuItem(
+                      value: _FlightCardAction.deleteFlight,
                       child: Text(context.t.home.deleteFlight),
                     ),
                   ],
@@ -125,7 +129,19 @@ class HomeFlightCard extends StatelessWidget {
         AppRouter.goToFlight(context, flight: flight);
       case _FlightCardAction.share:
         AppRouter.goToShareFlight(context, flight: flight);
-      case _FlightCardAction.delete:
+      case _FlightCardAction.completeFlight:
+        final result = await CompleteFlightConfirmationDialog.show(context);
+        if (result == null || !context.mounted) return;
+        final completed = await context.read<HomeTabCubit>().completeFlight(
+          flightId: flight.id,
+          deleteOfflineData: result.deleteOfflineData,
+        );
+        if (!completed && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.t.home.failedDeleteFlight)),
+          );
+        }
+      case _FlightCardAction.deleteFlight:
         final confirmed = await DeleteFlightConfirmationDialog.show(
           context,
           reclaimedBytes: _mapSizeBytes(flight),
@@ -285,4 +301,4 @@ class _SavedFlightCardBody extends StatelessWidget {
   }
 }
 
-enum _FlightCardAction { open, share, delete }
+enum _FlightCardAction { open, share, completeFlight, deleteFlight }

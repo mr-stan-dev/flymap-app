@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flymap/entity/flight.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/repository/flight_repository.dart';
 import 'package:flymap/router/app_router.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
+import 'package:flymap/ui/screens/flight/widgets/complete_flight_confirmation_dialog.dart';
+import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dialog.dart';
+import 'package:flymap/usecase/complete_flight_use_case.dart';
+import 'package:flymap/usecase/delete_flight_use_case.dart';
+import 'package:flymap/size_utils.dart';
 import 'package:flymap/utils/route_utils.dart';
 import 'package:get_it/get_it.dart';
 
@@ -16,7 +22,11 @@ class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => HistoryCubit(repository: GetIt.I<FlightRepository>()),
+      create: (_) => HistoryCubit(
+        repository: GetIt.I<FlightRepository>(),
+        deleteFlightUseCase: GetIt.I<DeleteFlightUseCase>(),
+        completeFlightUseCase: GetIt.I<CompleteFlightUseCase>(),
+      ),
       child: const _HistoryContent(),
     );
   }
@@ -115,7 +125,8 @@ class _HistoryContentState extends State<_HistoryContent> {
                 ...visibleItems.map(
                   (item) => _HistoryTile(
                     item: item,
-                    onTap: () => AppRouter.goToFlight(context, flight: item.flight),
+                    onActionSelected: (action) =>
+                        _onHistoryActionSelected(context, item, action),
                   ),
                 ),
             ],
@@ -123,6 +134,87 @@ class _HistoryContentState extends State<_HistoryContent> {
         },
       ),
     );
+  }
+
+  Future<void> _onHistoryActionSelected(
+    BuildContext context,
+    HistoryItem item,
+    _HistoryItemAction action,
+  ) async {
+    switch (action) {
+      case _HistoryItemAction.complete:
+        final result = await CompleteFlightConfirmationDialog.show(context);
+        if (result == null || !context.mounted) return;
+        final ok = await context.read<HistoryCubit>().completeFlight(
+          flightId: item.flight.id,
+          deleteOfflineData: result.deleteOfflineData,
+        );
+        if (!ok && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.t.home.failedDeleteFlight)),
+          );
+        }
+      case _HistoryItemAction.deleteOfflineData:
+        final confirmed = await _showDeleteOfflineDataDialog(context, item.flight);
+        if (confirmed != true || !context.mounted) return;
+        final ok = await context.read<HistoryCubit>().completeFlight(
+          flightId: item.flight.id,
+          deleteOfflineData: true,
+        );
+        if (!ok && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.t.home.failedDeleteFlight)),
+          );
+        }
+      case _HistoryItemAction.deleteFlight:
+        final confirmed = await DeleteFlightConfirmationDialog.show(
+          context,
+          reclaimedBytes: _offlineBytes(item.flight),
+        );
+        if (confirmed != true || !context.mounted) return;
+        final ok = await context.read<HistoryCubit>().deleteFlight(item.flight.id);
+        if (!ok && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.t.home.failedDeleteFlight)),
+          );
+        }
+    }
+  }
+
+  Future<bool?> _showDeleteOfflineDataDialog(
+    BuildContext context,
+    Flight flight,
+  ) {
+    final bytes = _offlineBytes(flight);
+    final size = SizeUtils.formatBytes(bytes);
+    return showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(context.t.settings.historyDeleteOfflineData),
+        content: Text('This removes offline map and saved articles.\n\nSpace to be regained: $size.'),
+        actions: [
+          SecondaryButton(
+            label: context.t.common.cancel,
+            onPressed: () => Navigator.of(context).pop(false),
+            expand: false,
+          ),
+          DestructiveButton(
+            label: context.t.flight.yes,
+            onPressed: () => Navigator.of(context).pop(true),
+            expand: false,
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _offlineBytes(Flight flight) {
+    final mapBytes = flight.maps.fold<int>(0, (sum, map) => sum + map.sizeBytes);
+    final articleBytes = flight.info.articles.fold<int>(
+      0,
+      (sum, article) => sum + article.sizeBytes,
+    );
+    return mapBytes + articleBytes;
   }
 
   List<HistoryItem> _filterItems(List<HistoryItem> items) {
@@ -275,11 +367,11 @@ class _HistoryListHeader extends StatelessWidget {
 class _HistoryTile extends StatelessWidget {
   const _HistoryTile({
     required this.item,
-    required this.onTap,
+    required this.onActionSelected,
   });
 
   final HistoryItem item;
-  final VoidCallback onTap;
+  final ValueChanged<_HistoryItemAction> onActionSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -287,7 +379,11 @@ class _HistoryTile extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final route = item.flight.route;
     final distanceLabel = route.distanceInKm.toStringAsFixed(0);
-    final dateLabel = _dateUs(item.flight.createdAt);
+    final dateSource =
+        item.flight.status == FlightStatus.completed
+            ? (item.flight.completedAt ?? item.flight.createdAt)
+            : item.flight.createdAt;
+    final dateLabel = _dateUs(dateSource);
 
     return ListTile(
       dense: true,
@@ -298,17 +394,75 @@ class _HistoryTile extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text(
-        '${RouteUtils.routeCountries(route)} • $distanceLabel km • $dateLabel',
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: colorScheme.onSurfaceVariant,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${RouteUtils.routeCountries(route)} • $distanceLabel km',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              _StatusChip(status: item.flight.status),
+              const SizedBox(width: 8),
+              _MapChip(flight: item.flight),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  dateLabel,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
-      onTap: onTap,
-      trailing: const Icon(Icons.chevron_right),
+      trailing: PopupMenuButton<_HistoryItemAction>(
+        tooltip: context.t.home.flightActions,
+        onSelected: onActionSelected,
+        itemBuilder: (_) => _menuItems(context),
+      ),
     );
+  }
+
+  List<PopupMenuEntry<_HistoryItemAction>> _menuItems(BuildContext context) {
+    final status = item.flight.status;
+    final hasOfflineData =
+        item.flight.maps.isNotEmpty || item.flight.info.articles.isNotEmpty;
+
+    if (status == FlightStatus.completed) {
+      return [
+        if (hasOfflineData)
+          PopupMenuItem(
+            value: _HistoryItemAction.deleteOfflineData,
+            child: Text(context.t.settings.historyDeleteOfflineData),
+          ),
+        PopupMenuItem(
+          value: _HistoryItemAction.deleteFlight,
+          child: Text(context.t.home.deleteFlight),
+        ),
+      ];
+    }
+
+    return [
+      PopupMenuItem(
+        value: _HistoryItemAction.complete,
+        child: Text(context.t.home.completeFlight),
+      ),
+      PopupMenuItem(
+        value: _HistoryItemAction.deleteFlight,
+        child: Text(context.t.home.deleteFlight),
+      ),
+    ];
   }
 
   String _dateUs(DateTime date) {
@@ -316,5 +470,75 @@ class _HistoryTile extends StatelessWidget {
     final dd = date.day.toString().padLeft(2, '0');
     final yyyy = date.year.toString();
     return '$mm/$dd/$yyyy';
+  }
+}
+
+enum _HistoryItemAction { complete, deleteOfflineData, deleteFlight }
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.status});
+
+  final FlightStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final label = switch (status) {
+      FlightStatus.upcoming => context.t.settings.historyStatusUpcoming,
+      FlightStatus.inProgress => context.t.settings.historyStatusInProgress,
+      FlightStatus.completed => context.t.settings.historyStatusCompleted,
+    };
+    final bg = switch (status) {
+      FlightStatus.upcoming => colorScheme.secondaryContainer,
+      FlightStatus.inProgress => colorScheme.tertiaryContainer,
+      FlightStatus.completed => colorScheme.primaryContainer,
+    };
+    final fg = switch (status) {
+      FlightStatus.upcoming => colorScheme.onSecondaryContainer,
+      FlightStatus.inProgress => colorScheme.onTertiaryContainer,
+      FlightStatus.completed => colorScheme.onPrimaryContainer,
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(
+          context,
+        ).textTheme.labelSmall?.copyWith(color: fg, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+}
+
+class _MapChip extends StatelessWidget {
+  const _MapChip({required this.flight});
+
+  final Flight flight;
+
+  @override
+  Widget build(BuildContext context) {
+    final mapBytes = flight.maps.fold<int>(0, (sum, map) => sum + map.sizeBytes);
+    final label = mapBytes > 0
+        ? context.t.settings.historyMapChip(size: SizeUtils.formatBytes(mapBytes))
+        : context.t.settings.historyNoMapChip;
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
   }
 }

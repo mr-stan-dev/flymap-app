@@ -71,7 +71,7 @@ class DownloadFlowDelegate {
     final poiToDownloadCount = _poiDownloadTargetCount(
       _cubit.state.flightInfo.poi,
     );
-    final flightId = DownloadMapUseCase.flightIdForRoute(route);
+    final flightId = DownloadMapUseCase.newFlightId();
     final articleBundleId = _articleBundleId(route);
     _activeArticleBundleId = articleBundleId;
     final initialSections = DownloadSectionsState(
@@ -146,6 +146,7 @@ class DownloadFlowDelegate {
     );
 
     final mapPhase = await _runMapDownloadPhase(
+      flightId: flightId,
       route: route,
       infoForSave: enrichedInfo,
       effectiveMaxZoom: effectiveMaxZoom,
@@ -513,6 +514,7 @@ class DownloadFlowDelegate {
   }
 
   Future<_MapDownloadPhaseResult> _runMapDownloadPhase({
+    required String flightId,
     required FlightRoute route,
     required FlightInfo infoForSave,
     required int effectiveMaxZoom,
@@ -522,6 +524,7 @@ class DownloadFlowDelegate {
     try {
       _downloadSubscription = _downloadMapUseCase
           .call(
+            flightId: flightId,
             flightRoute: route,
             flightInfo: infoForSave,
             maxZoom: effectiveMaxZoom,

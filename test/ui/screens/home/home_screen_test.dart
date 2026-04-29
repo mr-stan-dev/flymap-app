@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/data/local/airports_database.dart';
+import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flymap/entity/flight.dart';
 import 'package:flymap/entity/flight_info.dart';
 import 'package:flymap/entity/learn_access.dart';
@@ -50,6 +51,9 @@ void main() {
     await GetIt.I.reset();
     GetIt.I.registerSingleton<FlightRepository>(_FakeFlightRepository());
     GetIt.I.registerSingleton<DeleteFlightUseCase>(_FakeDeleteFlightUseCase());
+    GetIt.I.registerSingleton<ConnectivityChecker>(
+      const _FakeConnectivityChecker(),
+    );
     GetIt.I.registerSingleton<OnboardingRepository>(
       OnboardingRepository(prefsStorage: UserFlightPrefsStorage()),
     );
@@ -209,6 +213,9 @@ class _FakeFlightRepository implements FlightRepository {
   Future<int> getTotalMapSize() async => 0;
 
   @override
+  Future<double> getTotalFlightDistanceKm() async => 0;
+
+  @override
   Future<String> insertFlight(Flight flight) async => 'flight-id';
 
   @override
@@ -218,6 +225,22 @@ class _FakeFlightRepository implements FlightRepository {
   Future<bool> updateFlightInfo({
     required String flightId,
     required FlightInfo info,
+  }) async => true;
+
+  @override
+  Future<bool> updateFlightStatus({
+    required String flightId,
+    required FlightStatus status,
+    DateTime? completedAt,
+  }) async => true;
+}
+
+class _FakeConnectivityChecker extends ConnectivityChecker {
+  const _FakeConnectivityChecker();
+
+  @override
+  Future<bool> hasInternetConnectivity({
+    Duration timeout = const Duration(seconds: 2),
   }) async => true;
 }
 

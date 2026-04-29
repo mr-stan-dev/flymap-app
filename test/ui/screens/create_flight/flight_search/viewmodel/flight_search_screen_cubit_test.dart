@@ -396,6 +396,7 @@ class _FakeDownloadMapUseCase implements DownloadMapUseCase {
 
   @override
   Stream<DownloadMapEvent> call({
+    required String flightId,
     required FlightRoute flightRoute,
     required FlightInfo flightInfo,
     required int maxZoom,
@@ -553,6 +554,9 @@ class _FakeFlightRepository implements FlightRepository {
   Future<int> getTotalMapSize() async => 0;
 
   @override
+  Future<double> getTotalFlightDistanceKm() async => 0;
+
+  @override
   Future<String> insertFlight(Flight flight) async => flight.id;
 
   @override
@@ -562,6 +566,13 @@ class _FakeFlightRepository implements FlightRepository {
   Future<bool> updateFlightInfo({
     required String flightId,
     required FlightInfo info,
+  }) async => true;
+
+  @override
+  Future<bool> updateFlightStatus({
+    required String flightId,
+    required FlightStatus status,
+    DateTime? completedAt,
   }) async => true;
 }
 

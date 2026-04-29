@@ -11,6 +11,7 @@ import 'package:flymap/entity/flight_info.dart';
 import 'package:flymap/entity/flight_map.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/map_download_config.dart';
+import 'package:uuid/uuid.dart';
 
 import '../logger.dart';
 
@@ -91,6 +92,7 @@ class DownloadMapUseCase {
   final ConnectivityChecker _connectivity;
   final _logger = Logger('DownloadMapUseCase');
   VectorTilesDownloader? _currentDownloader;
+  static const Uuid _uuid = Uuid();
 
   DownloadMapUseCase({
     required FlightsDBService service,
@@ -102,11 +104,14 @@ class DownloadMapUseCase {
     _currentDownloader?.cancel();
   }
 
-  static String flightIdForRoute(FlightRoute route) {
+  static String newFlightId() => _uuid.v4();
+
+  static String routeKeyForRoute(FlightRoute route) {
     return '${route.routeCode}_${MapDownloadConfig.mapLayerId}';
   }
 
   Stream<DownloadMapEvent> call({
+    required String flightId,
     required FlightRoute flightRoute,
     required FlightInfo flightInfo,
     required int maxZoom,
@@ -130,9 +135,6 @@ class DownloadMapUseCase {
 
       final mapLayer = MapDownloadConfig.mapLayerId;
       final fileName = '${flightRoute.routeCode}_$mapLayer';
-      final id = flightIdForRoute(
-        flightRoute,
-      ); // Same key for DB record and MBTiles file
 
       // Forward the download stream and handle completion
       await for (final event in downloader.download(fileName)) {
@@ -147,7 +149,7 @@ class DownloadMapUseCase {
           );
 
           final result = await _saveFlightData(
-            flightId: id,
+            flightId: flightId,
             flightMap: mapData,
             flightRoute: flightRoute,
             flightInfo: flightInfo,
@@ -184,6 +186,7 @@ class DownloadMapUseCase {
         maps: [flightMap],
         info: flightInfo,
         createdAt: DateTime.now(),
+        completedAt: null,
       );
       _logger.log('Inserting flight into DB: id=${flight.id}');
       await _flightsService.saveOrUpdateFlight(flight);

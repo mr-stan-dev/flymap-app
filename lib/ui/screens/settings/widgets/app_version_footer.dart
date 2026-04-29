@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flymap/data/local/app_database.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AppVersionFooter extends StatelessWidget {
@@ -21,16 +22,14 @@ class AppVersionFooter extends StatelessWidget {
 
         final packageInfo = snapshot.data!;
         final version = packageInfo.version.trim();
-        final build = packageInfo.buildNumber.trim();
-        final label = build.isEmpty
-            ? 'Version $version'
-            : 'Version $version ($build)';
+        final label = 'Version $version';
+        final withDb = '$label • db v${AppDatabase.schemaVersion}';
 
         return Padding(
           padding: const EdgeInsets.only(top: 20, bottom: 8),
           child: Center(
             child: Text(
-              label,
+              withDb,
               style: theme.textTheme.bodySmall?.copyWith(color: muted),
             ),
           ),

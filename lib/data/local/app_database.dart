@@ -6,8 +6,13 @@ class AppDatabase {
   static AppDatabase? _instance;
   static Database? _database;
   static StoreRef<String, Map<String, dynamic>>? _flightsStore;
+  static StoreRef<String, Map<String, dynamic>>? _flightAssetsStore;
+  static StoreRef<String, Map<String, dynamic>>? _migrationsStore;
   static const _dbName = 'flymap.db';
   static const _flightsStoreName = 'flights';
+  static const _flightAssetsStoreName = 'flight_assets';
+  static const _migrationsStoreName = 'migrations';
+  static const int schemaVersion = 2;
 
   AppDatabase._();
 
@@ -23,6 +28,8 @@ class AppDatabase {
       _database = await databaseFactoryIo.openDatabase(dbPath);
 
       _flightsStore = stringMapStoreFactory.store(_flightsStoreName);
+      _flightAssetsStore = stringMapStoreFactory.store(_flightAssetsStoreName);
+      _migrationsStore = stringMapStoreFactory.store(_migrationsStoreName);
     }
   }
 
@@ -40,9 +47,25 @@ class AppDatabase {
     return _flightsStore!;
   }
 
+  StoreRef<String, Map<String, dynamic>> get flightAssetsStore {
+    if (_flightAssetsStore == null) {
+      throw StateError('Database not initialized. Call initialize() first.');
+    }
+    return _flightAssetsStore!;
+  }
+
+  StoreRef<String, Map<String, dynamic>> get migrationsStore {
+    if (_migrationsStore == null) {
+      throw StateError('Database not initialized. Call initialize() first.');
+    }
+    return _migrationsStore!;
+  }
+
   Future<void> close() async {
     await _database?.close();
     _database = null;
     _flightsStore = null;
+    _flightAssetsStore = null;
+    _migrationsStore = null;
   }
 }

@@ -28,6 +28,18 @@ class FlightRepository {
     return await _flightsService.updateFlightInfo(flightId, info);
   }
 
+  Future<bool> updateFlightStatus({
+    required String flightId,
+    required FlightStatus status,
+    DateTime? completedAt,
+  }) async {
+    return await _flightsService.updateFlightStatus(
+      flightId,
+      status,
+      completedAt: completedAt,
+    );
+  }
+
   /// Get all flights
   Future<List<Flight>> getAllFlights() async {
     return await _flightsService.getAllFlights();

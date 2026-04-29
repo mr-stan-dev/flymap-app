@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/entity/flight.dart';
-import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_state.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_flight_card.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_flights_empty_state.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_flights_section_header.dart';
@@ -8,15 +7,13 @@ import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_fligh
 class HomeFlightsList extends StatelessWidget {
   const HomeFlightsList({
     required this.flights,
-    required this.selectedSort,
-    required this.onSortChanged,
+    required this.onViewAll,
     required this.onAddFirstFlight,
     super.key,
   });
 
   final List<Flight> flights;
-  final HomeFlightsSort selectedSort;
-  final Future<void> Function(HomeFlightsSort sort) onSortChanged;
+  final VoidCallback onViewAll;
   final VoidCallback onAddFirstFlight;
 
   @override
@@ -26,8 +23,7 @@ class HomeFlightsList extends StatelessWidget {
       children: [
         HomeFlightsSectionHeader(
           count: flights.length,
-          selectedSort: selectedSort,
-          onSortChanged: onSortChanged,
+          onViewAll: onViewAll,
         ),
         const SizedBox(height: 12),
         _buildFlightsContent(),

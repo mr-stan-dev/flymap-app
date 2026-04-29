@@ -40,8 +40,7 @@ class HomeTabLoaded extends StatelessWidget {
                   const SizedBox(height: 24),
                   HomeFlightsList(
                     flights: state.flights,
-                    selectedSort: state.sort,
-                    onSortChanged: context.read<HomeTabCubit>().setSort,
+                    onViewAll: () => AppRouter.goToSettingsHistory(context),
                     onAddFirstFlight: () =>
                         context.push(AppRouter.flightSearchRoute),
                   ),

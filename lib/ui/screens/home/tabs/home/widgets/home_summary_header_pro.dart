@@ -80,7 +80,7 @@ class HomeSummaryHeaderPro extends StatelessWidget {
               children: [
                 _ProSummaryPill(
                   icon: Icons.flight,
-                  label: context.t.home.flightsSaved,
+                  label: context.t.home.totalFlights,
                   value: '${statistics.totalFlights}',
                 ),
                 _ProSummaryPill(

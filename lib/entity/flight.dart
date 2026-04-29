@@ -6,12 +6,31 @@ import 'flight_info.dart';
 import 'flight_map.dart';
 import 'flight_route.dart';
 
+enum FlightStatus {
+  upcoming('upcoming'),
+  inProgress('in_progress'),
+  completed('completed');
+
+  const FlightStatus(this.rawValue);
+
+  final String rawValue;
+
+  static FlightStatus fromRaw(String raw) {
+    for (final value in FlightStatus.values) {
+      if (value.rawValue == raw) return value;
+    }
+    return FlightStatus.upcoming;
+  }
+}
+
 class Flight extends Equatable {
   final String id;
   final FlightRoute route;
   final List<FlightMap> maps;
   final FlightInfo info;
   final DateTime createdAt;
+  final DateTime? completedAt;
+  final FlightStatus status;
 
   const Flight({
     required this.id,
@@ -19,6 +38,8 @@ class Flight extends Equatable {
     this.maps = const [],
     required this.info,
     required this.createdAt,
+    this.completedAt,
+    this.status = FlightStatus.upcoming,
   });
 
   FlightMap? get flightMap => maps.isNotEmpty ? maps[0] : null;
@@ -35,5 +56,5 @@ class Flight extends Equatable {
   String get routeName => '${departure.nameShort} -> ${arrival.nameShort}';
 
   @override
-  List<Object?> get props => [id, route, maps, info, createdAt];
+  List<Object?> get props => [id, route, maps, info, createdAt, completedAt, status];
 }

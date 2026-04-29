@@ -10,6 +10,7 @@ import 'package:flymap/crashlytics/app_crashlytics_initializer.dart';
 import 'package:flymap/cubit_state_observer.dart';
 import 'package:flymap/data/map_asset_cache_service.dart';
 import 'package:flymap/data/local/app_database.dart';
+import 'package:flymap/data/local/migrations/flights_db_migration_runner.dart';
 import 'package:flymap/firebase_options.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
@@ -32,6 +33,7 @@ void main() async {
         enableCollection: kReleaseMode,
       );
       await GetIt.I<AppDatabase>().initialize();
+      await GetIt.I<FlightsDbMigrationRunner>().migrateIfNeeded();
 
       final hasSeenOnboarding = await GetIt.I<OnboardingRepository>()
           .hasSeenOnboarding();

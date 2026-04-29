@@ -6,7 +6,9 @@ import 'package:flymap/entity/flight.dart';
 import 'package:flymap/entity/gps_data.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
+import 'package:flymap/repository/flight_repository.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
+import 'package:flymap/usecase/complete_flight_use_case.dart';
 import 'package:flymap/usecase/delete_flight_use_case.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
@@ -15,7 +17,9 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
   final _logger = Logger('FlightScreenCubit');
   static const _gpsStaleThreshold = Duration(seconds: 20);
   final Flight flight;
+  final FlightRepository _flightRepository = GetIt.I.get();
   final DeleteFlightUseCase _deleteFlightUseCase = GetIt.I.get();
+  final CompleteFlightUseCase _completeFlightUseCase = GetIt.I.get();
   final GpsDataProvider _gpsProvider = GpsDataProvider();
   Timer? _gpsCheckTimer;
   int _gpsUpdateTick = 0;
@@ -27,7 +31,16 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
   }
 
   Future<void> load() async {
+    await _markInProgressIfNeeded();
     await _startGpsListening();
+  }
+
+  Future<void> _markInProgressIfNeeded() async {
+    if (flight.status != FlightStatus.upcoming) return;
+    await _flightRepository.updateFlightStatus(
+      flightId: flight.id,
+      status: FlightStatus.inProgress,
+    );
   }
 
   Future<void> _startGpsListening() async {
@@ -81,6 +94,38 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
           flight: flight,
         ),
       );
+    }
+  }
+
+  Future<bool> completeFlight({required bool deleteOfflineData}) async {
+    try {
+      final ok = await _completeFlightUseCase(
+        flightId: flight.id,
+        deleteOfflineData: deleteOfflineData,
+      );
+      if (!ok) return false;
+
+      if (deleteOfflineData) {
+        final current = state;
+        if (current is FlightScreenLoaded) {
+          emit(
+            current.copyWith(
+              flight: Flight(
+                id: current.flight.id,
+                route: current.flight.route,
+                maps: const [],
+                info: current.flight.info.copyWith(articles: const []),
+                createdAt: current.flight.createdAt,
+                completedAt: DateTime.now(),
+                status: FlightStatus.completed,
+              ),
+            ),
+          );
+        }
+      }
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 
