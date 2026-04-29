@@ -23,7 +23,7 @@ class HomeRoutePreviewStrip extends StatelessWidget {
       height: 42,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final width = constraints.maxWidth;
+          final width = constraints.maxWidth.isFinite ? constraints.maxWidth : 0.0;
           final poiOffsets = _poiOffsets(width);
           return Stack(
             clipBehavior: Clip.none,
@@ -82,13 +82,17 @@ class HomeRoutePreviewStrip extends StatelessWidget {
 
   List<double> _poiOffsets(double width) {
     final positions = _markerPositions();
-    if (positions.isEmpty) return const [];
+    if (positions.isEmpty || !width.isFinite || width <= 0) return const [];
 
     const markerSize = 24.0;
     const lineInset = 12.0;
     const edgePadding = 8.0;
     final minLeft = lineInset + edgePadding;
     final maxLeft = width - lineInset - edgePadding - markerSize;
+
+    if (maxLeft <= minLeft) {
+      return List<double>.filled(positions.length, minLeft);
+    }
 
     return positions
         .map((p) => (width * p - markerSize / 2).clamp(minLeft, maxLeft))
@@ -115,22 +119,15 @@ class _AirportEndpointMarker extends StatelessWidget {
             fit: BoxFit.contain,
           ),
           const SizedBox(height: 3),
-          OverflowBox(
-            minWidth: 24,
-            maxWidth: 96,
-            alignment: Alignment.topCenter,
-            child: SizedBox(
-              width: 96,
-              child: Text(
-                code,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+          Text(
+            code,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

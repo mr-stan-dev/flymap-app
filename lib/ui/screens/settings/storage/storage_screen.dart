@@ -7,6 +7,7 @@ import 'package:flymap/size_utils.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dialog.dart';
 import 'package:flymap/usecase/delete_flight_use_case.dart';
+import 'package:flymap/utils/route_utils.dart';
 import 'package:get_it/get_it.dart';
 
 import 'viewmodel/storage_cubit.dart';
@@ -258,7 +259,7 @@ class _StorageTile extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
       title: Text(
-        '${departure.city}, ${departure.countryCode} → ${arrival.city}, ${arrival.countryCode}',
+        '${RouteUtils.cityLabel(departure.city)}, ${departure.countryCode} → ${RouteUtils.cityLabel(arrival.city)}, ${arrival.countryCode}',
         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
       ),
       trailing: PopupMenuButton<_StorageItemAction>(

@@ -15,6 +15,7 @@ import 'package:flymap/ui/screens/share_flight/widgets/share_distance_chip.dart'
 import 'package:flymap/ui/screens/share_flight/widgets/share_flight_map_preview.dart';
 import 'package:flymap/ui/screens/share_flight/widgets/share_flymap_watermark.dart';
 import 'package:flymap/ui/screens/share_flight/widgets/share_route_cities_chip.dart';
+import 'package:flymap/utils/route_utils.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -155,9 +156,12 @@ class _ShareFlightViewState extends State<_ShareFlightView> {
                                       );
                                     },
                                     child: ShareRouteCitiesChip(
-                                      fromCity:
-                                          state.flight.route.departure.city,
-                                      toCity: state.flight.route.arrival.city,
+                                      fromCity: RouteUtils.cityLabel(
+                                        state.flight.route.departure.city,
+                                      ),
+                                      toCity: RouteUtils.cityLabel(
+                                        state.flight.route.arrival.city,
+                                      ),
                                       fromCode: state
                                           .flight
                                           .route

@@ -1,6 +1,7 @@
 import 'package:flymap/entity/airport.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/utils/route_utils.dart';
 
 class RouteCopyBuilder {
   const RouteCopyBuilder._();
@@ -30,7 +31,7 @@ class RouteCopyBuilder {
     final icao = _codeOrFallback(airport.icaoCode);
     return [
       t.flight.info.copyCity(
-        city: airport.city,
+        city: RouteUtils.cityLabel(airport.city),
         countryCode: airport.countryCode,
       ),
       t.flight.info.copyAirport(airport: airport.name),

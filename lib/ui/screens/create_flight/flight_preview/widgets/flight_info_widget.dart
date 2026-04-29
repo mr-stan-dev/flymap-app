@@ -6,6 +6,7 @@ import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_highlights_section.dart';
 import 'package:flymap/ui/screens/shared/airport_info_tile.dart';
 import 'package:flymap/ui/screens/shared/flight_overview_content.dart';
+import 'package:flymap/utils/route_utils.dart';
 
 class FlightInfoWidget extends StatelessWidget {
   final FlightRoute route;
@@ -50,7 +51,7 @@ class FlightInfoWidget extends StatelessWidget {
                 title: t.flight.info.departure,
                 code: route.departure.displayCode,
                 subtitle:
-                    '${route.departure.name}, ${route.departure.city}, ${route.departure.countryCode}',
+                    '${route.departure.name}, ${RouteUtils.cityLabel(route.departure.city)}, ${route.departure.countryCode}',
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
@@ -78,7 +79,7 @@ class FlightInfoWidget extends StatelessWidget {
                 title: t.flight.info.arrival,
                 code: route.arrival.displayCode,
                 subtitle:
-                    '${route.arrival.name}, ${route.arrival.city}, ${route.arrival.countryCode}',
+                    '${route.arrival.name}, ${RouteUtils.cityLabel(route.arrival.city)}, ${route.arrival.countryCode}',
               ),
             ],
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
+import 'package:flymap/utils/route_utils.dart';
 
 class RouteTimelineCard extends StatelessWidget {
   const RouteTimelineCard({required this.route, super.key});
@@ -18,7 +19,8 @@ class RouteTimelineCard extends StatelessWidget {
         children: [
           _TimelineRow(
             icon: Icons.flight_takeoff,
-            label: '${route.departure.displayCode} • ${route.departure.city}',
+            label:
+                '${route.departure.displayCode} • ${RouteUtils.cityLabel(route.departure.city)}',
           ),
           if (route.waypoints.isNotEmpty) ...[
             _connector(context),
@@ -32,7 +34,8 @@ class RouteTimelineCard extends StatelessWidget {
           _connector(context),
           _TimelineRow(
             icon: Icons.flight_land,
-            label: '${route.arrival.displayCode} • ${route.arrival.city}',
+            label:
+                '${route.arrival.displayCode} • ${RouteUtils.cityLabel(route.arrival.city)}',
           ),
         ],
       ),
