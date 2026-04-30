@@ -4,24 +4,21 @@ class PreviewPreparationDelegate {
   PreviewPreparationDelegate(
     this._cubit, {
     required ConnectivityChecker connectivityChecker,
-    required FlightRouteProvider routeProvider,
+    required GetRoutePreviewUseCase getRoutePreviewUseCase,
     required GetFlightInfoUseCase getFlightInfoUseCase,
     required GetWikiArticlesUseCase getWikiArticlesUseCase,
-    required GetFlightPOIUseCase getFlightPOIUseCase,
     required UserFlightPrefsRepository userFlightPrefsRepository,
   }) : _connectivityChecker = connectivityChecker,
-       _routeProvider = routeProvider,
+       _getRoutePreviewUseCase = getRoutePreviewUseCase,
        _getFlightInfoUseCase = getFlightInfoUseCase,
        _getWikiArticlesUseCase = getWikiArticlesUseCase,
-       _getFlightPOIUseCase = getFlightPOIUseCase,
        _userFlightPrefsRepository = userFlightPrefsRepository;
 
   final FlightPreviewCubit _cubit;
   final ConnectivityChecker _connectivityChecker;
-  final FlightRouteProvider _routeProvider;
+  final GetRoutePreviewUseCase _getRoutePreviewUseCase;
   final GetFlightInfoUseCase _getFlightInfoUseCase;
   final GetWikiArticlesUseCase _getWikiArticlesUseCase;
-  final GetFlightPOIUseCase _getFlightPOIUseCase;
   final UserFlightPrefsRepository _userFlightPrefsRepository;
 
   Future<void> preparePreview() async {
@@ -43,10 +40,11 @@ class PreviewPreparationDelegate {
         return;
       }
 
-      final route = _routeProvider.getRoute(
+      final preview = await _getRoutePreviewUseCase.call(
         departure: departure,
         arrival: arrival,
       );
+      final route = preview.route;
       final routeLength = MapDownloadConfig.resolveRouteLength(
         route.distanceInKm,
       );
@@ -99,10 +97,21 @@ class PreviewPreparationDelegate {
       _cubit._emitState(
         _cubit.state.copyWith(
           flightRoute: route,
+          allRoutePois: preview.topPois,
           isPreviewLoading: false,
           hasInternetForMapPreview: true,
-          flightInfo: FlightInfo.empty,
-          clearProPoiCount: true,
+          flightInfo: FlightInfo.empty.copyWith(
+            poi: preview.topPois
+                .take(
+                  PoiSelectionConfig.maxPois(
+                    _cubit.state.selectedMapDetailLevel,
+                  ),
+                )
+                .toList(growable: false),
+          ),
+          proPoiCount: preview.topPois.length < PoiSelectionConfig.proMaxPois
+              ? preview.topPois.length
+              : PoiSelectionConfig.proMaxPois,
           articleCandidates: const [],
           clearSelectedArticleUrls: true,
           isWikiSuggestionsLoading: true,
@@ -111,14 +120,9 @@ class PreviewPreparationDelegate {
       );
 
       final userPrefs = await _loadUserPrefs();
-      unawaited(
-        prefetchLocalPois(
-          route: route,
-          mapDetail: _cubit.state.selectedMapDetailLevel,
-          userPrefs: userPrefs,
-        ),
+      _cubit._logger.log(
+        'Route preview POIs cached total=${preview.topPois.length} basic=${preview.topPois.take(PoiSelectionConfig.basicMaxPois).length} pro=${preview.topPois.take(PoiSelectionConfig.proMaxPois).length}',
       );
-      unawaited(_prefetchProPoiCount(route, userPrefs: userPrefs));
       unawaited(_prefetchOverview(route, userPrefs: userPrefs));
     } catch (e, stackTrace) {
       _cubit._logger.error('Failed to prepare map preview: $e');
@@ -137,66 +141,6 @@ class PreviewPreparationDelegate {
           errorMessage: t.createFlight.errors.failedBuildPreview,
         ),
       );
-    }
-  }
-
-  Future<void> prefetchLocalPois({
-    required FlightRoute route,
-    required MapDetailLevel mapDetail,
-    UserFlightPrefs? userPrefs,
-  }) async {
-    try {
-      _cubit._logger.log(
-        'Prefetch local route POIs start route=${route.routeCode} mapDetail=${mapDetail.name}',
-      );
-      final prefs = userPrefs ?? await _loadUserPrefs();
-      final pois = await _getFlightPOIUseCase.call(
-        route: route,
-        mapDetail: mapDetail,
-        prefs: prefs,
-      );
-      final currentRoute = _cubit.state.flightRoute;
-      if (currentRoute == null || currentRoute.routeCode != route.routeCode) {
-        _cubit._logger.log(
-          'Skip applying local POIs due to route mismatch current=${currentRoute?.routeCode} expected=${route.routeCode}',
-        );
-        return;
-      }
-      _cubit._emitState(
-        _cubit.state.copyWith(
-          flightInfo: _cubit.state.flightInfo.copyWith(poi: pois),
-          proPoiCount: mapDetail == MapDetailLevel.pro
-              ? pois.length
-              : _cubit.state.proPoiCount,
-        ),
-      );
-      final sample = pois.take(5).map((e) => '${e.name}/${e.type}').join(', ');
-      _cubit._logger.log(
-        'Local route POIs loaded=${pois.length}${sample.isEmpty ? '' : ' sample=[$sample]'}',
-      );
-    } catch (e) {
-      _cubit._logger.error('Failed to prefetch local route POIs: $e');
-    }
-  }
-
-  Future<void> _prefetchProPoiCount(
-    FlightRoute route, {
-    UserFlightPrefs? userPrefs,
-  }) async {
-    try {
-      final prefs = userPrefs ?? await _loadUserPrefs();
-      final pois = await _getFlightPOIUseCase.call(
-        route: route,
-        mapDetail: MapDetailLevel.pro,
-        prefs: prefs,
-      );
-      final currentRoute = _cubit.state.flightRoute;
-      if (currentRoute == null || currentRoute.routeCode != route.routeCode) {
-        return;
-      }
-      _cubit._emitState(_cubit.state.copyWith(proPoiCount: pois.length));
-    } catch (e) {
-      _cubit._logger.error('Failed to prefetch Pro route POI count: $e');
     }
   }
 

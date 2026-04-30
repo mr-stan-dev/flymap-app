@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/crashlytics/app_crashlytics.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
-import 'package:flymap/data/route/flight_route_provider.dart';
 import 'package:flymap/entity/airport.dart';
 import 'package:flymap/entity/flight_article.dart';
 import 'package:flymap/entity/flight_info.dart';
@@ -27,7 +26,8 @@ import 'package:flymap/usecase/download_poi_summaries_use_case.dart';
 import 'package:flymap/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/usecase/get_flight_info_use_case.dart';
 import 'package:flymap/usecase/get_wiki_articles_use_case.dart';
-import 'package:flymap/usecase/get_flight_poi_use_case.dart';
+import 'package:flymap/usecase/get_route_preview_use_case.dart';
+import 'package:flymap/usecase/poi_selection_config.dart';
 
 part 'delegates/preview_preparation_delegate.dart';
 part 'delegates/map_and_step_navigation_delegate.dart';
@@ -39,13 +39,12 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     required this.departure,
     required this.arrival,
     required ConnectivityChecker connectivityChecker,
-    required FlightRouteProvider routeProvider,
+    required GetRoutePreviewUseCase getRoutePreviewUseCase,
     required DownloadMapUseCase downloadMapUseCase,
     required DownloadPoiSummariesUseCase downloadPoiSummariesUseCase,
     required DownloadWikipediaArticlesUseCase downloadWikipediaArticlesUseCase,
     required GetFlightInfoUseCase getFlightInfoUseCase,
     required GetWikiArticlesUseCase getWikiArticlesUseCase,
-    required GetFlightPOIUseCase getFlightPOIUseCase,
     required UserFlightPrefsRepository userFlightPrefsRepository,
     required FlightRepository flightRepository,
     required SubscriptionRepository subscriptionRepository,
@@ -65,10 +64,9 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     _previewPreparationDelegate = PreviewPreparationDelegate(
       this,
       connectivityChecker: connectivityChecker,
-      routeProvider: routeProvider,
+      getRoutePreviewUseCase: getRoutePreviewUseCase,
       getFlightInfoUseCase: getFlightInfoUseCase,
       getWikiArticlesUseCase: getWikiArticlesUseCase,
-      getFlightPOIUseCase: getFlightPOIUseCase,
       userFlightPrefsRepository: userFlightPrefsRepository,
     );
     _navigationDelegate = MapAndStepNavigationDelegate(this);
@@ -118,18 +116,24 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
 
   Future<bool> handleBackAction() => _navigationDelegate.handleBackAction();
 
-  Future<void> _prefetchLocalPois(
-    FlightRoute route, {
+  void _applyPoisForDetail(
+    List<RoutePoiSummary> allPois, {
     required MapDetailLevel mapDetail,
-  }) => _previewPreparationDelegate.prefetchLocalPois(
-    route: route,
-    mapDetail: mapDetail,
-  );
+  }) {
+    final maxPois = PoiSelectionConfig.maxPois(mapDetail);
+    final selected = allPois.take(maxPois).toList(growable: false);
+    final proMax = PoiSelectionConfig.maxPois(MapDetailLevel.pro);
+    final proCount = allPois.length < proMax ? allPois.length : proMax;
+    _emitState(
+      state.copyWith(
+        flightInfo: state.flightInfo.copyWith(poi: selected),
+        proPoiCount: proCount,
+      ),
+    );
+  }
 
   Future<void> refreshPoisForPro() async {
-    final route = state.flightRoute;
-    if (route == null) return;
-    await _prefetchLocalPois(route, mapDetail: MapDetailLevel.pro);
+    _applyPoisForDetail(state.allRoutePois, mapDetail: MapDetailLevel.pro);
   }
 
   void _emitState(FlightPreviewState nextState) {

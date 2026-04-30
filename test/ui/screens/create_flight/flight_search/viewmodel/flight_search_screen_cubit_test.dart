@@ -3,14 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/crashlytics/app_crashlytics.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
-import 'package:flymap/data/route/flight_route_provider.dart';
 import 'package:flymap/entity/airport.dart';
 import 'package:flymap/entity/flight.dart';
 import 'package:flymap/entity/flight_info.dart';
 import 'package:flymap/entity/user_profile.dart';
 import 'package:flymap/entity/route_poi_summary.dart';
+import 'package:flymap/entity/route_poi.dart';
+import 'package:flymap/entity/flight_poi_type.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/entity/map_detail_level.dart';
+import 'package:flymap/entity/route_preview.dart';
 import 'package:flymap/entity/user_flight_prefs.dart';
 import 'package:flymap/entity/wiki_article_candidate.dart';
 import 'package:flymap/repository/flight_repository.dart';
@@ -27,7 +29,7 @@ import 'package:flymap/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/usecase/get_flight_info_use_case.dart';
 import 'package:flymap/usecase/get_wiki_articles_use_case.dart';
 import 'package:flymap/usecase/delete_flight_use_case.dart';
-import 'package:flymap/usecase/get_flight_poi_use_case.dart';
+import 'package:flymap/usecase/get_route_preview_use_case.dart';
 import 'package:latlong2/latlong.dart';
 
 void main() {
@@ -36,7 +38,6 @@ void main() {
     late _FakeDownloadPoiSummariesUseCase poiDownloadUseCase;
     late _FakeDownloadMapUseCase mapUseCase;
     late _FakeConnectivityChecker connectivityChecker;
-    late _FakeGetFlightPOIUseCase poiUseCase;
     late _FakeSubscriptionRepository subscriptionRepository;
     late _TestFlightPreviewCubit cubit;
 
@@ -45,20 +46,18 @@ void main() {
       poiDownloadUseCase = _FakeDownloadPoiSummariesUseCase();
       mapUseCase = _FakeDownloadMapUseCase();
       connectivityChecker = _FakeConnectivityChecker();
-      poiUseCase = _FakeGetFlightPOIUseCase();
       subscriptionRepository = _FakeSubscriptionRepository();
       final route = _route();
       cubit = _TestFlightPreviewCubit(
         departure: route.departure,
         arrival: route.arrival,
         connectivityChecker: connectivityChecker,
-        routeProvider: _FakeRouteProvider(),
+        getRoutePreviewUseCase: _FakeGetRoutePreviewUseCase(),
         downloadMapUseCase: mapUseCase,
         downloadPoiSummariesUseCase: poiDownloadUseCase,
         downloadWikipediaArticlesUseCase: wikiDownloadUseCase,
         getFlightInfoUseCase: _FakeGetFlightInfoUseCase(),
         getWikiArticlesUseCase: _FakeGetWikiArticlesUseCase(),
-        getFlightPOIUseCase: poiUseCase,
         userFlightPrefsRepository: _FakeUserFlightPrefsRepository(),
         flightRepository: _FakeFlightRepository(),
         subscriptionRepository: subscriptionRepository,
@@ -163,14 +162,13 @@ void main() {
         departure: route.departure,
         arrival: route.arrival,
         connectivityChecker: _FakeConnectivityChecker(),
-        routeProvider: _FakeRouteProvider(),
+        getRoutePreviewUseCase: _FakeGetRoutePreviewUseCase(),
         downloadMapUseCase: _FakeDownloadMapUseCase(),
         downloadPoiSummariesUseCase: _FakeDownloadPoiSummariesUseCase(),
         downloadWikipediaArticlesUseCase:
             _FakeDownloadWikipediaArticlesUseCase(),
         getFlightInfoUseCase: _FakeGetFlightInfoUseCase(),
         getWikiArticlesUseCase: _FakeGetWikiArticlesUseCase(),
-        getFlightPOIUseCase: _FakeGetFlightPOIUseCase(),
         userFlightPrefsRepository: _FakeUserFlightPrefsRepository(),
         flightRepository: _FakeFlightRepository(),
         subscriptionRepository: proSubscriptionRepository,
@@ -236,7 +234,6 @@ void main() {
       await cubit.startDownload();
 
       expect(mapUseCase.lastMaxZoom, 11);
-      expect(poiUseCase.lastRequestedMapDetail, MapDetailLevel.pro);
     });
 
     test('startDownload passes z10 for pro long route', () async {
@@ -266,9 +263,14 @@ void main() {
       expect(cubit.state.hasInternetForMapPreview, isFalse);
     });
 
-    test('refreshPoisForPro requests POIs with pro detail level', () async {
+    test('refreshPoisForPro applies cached pro POI slice', () async {
+      final pois = _routePoiSummaries(80);
       cubit.setStateForTest(
         cubit.state.copyWith(
+          allRoutePois: pois,
+          flightInfo: cubit.state.flightInfo.copyWith(
+            poi: pois.take(10).toList(),
+          ),
           flightRoute: _route(),
           selectedMapDetailLevel: MapDetailLevel.basic,
         ),
@@ -276,7 +278,7 @@ void main() {
 
       await cubit.refreshPoisForPro();
 
-      expect(poiUseCase.lastRequestedMapDetail, MapDetailLevel.pro);
+      expect(cubit.state.flightInfo.poi.length, 60);
     });
   });
 }
@@ -348,18 +350,33 @@ FlightRoute _longRoute() {
   );
 }
 
+List<RoutePoiSummary> _routePoiSummaries(int count) {
+  return List.generate(
+    count,
+    (i) => RoutePoiSummary(
+      poi: RoutePoi(
+        qid: 'Q${1000 + i}',
+        name: 'POI ${i + 1}',
+        latLon: LatLng(10 + i / 10, 10 + i / 10),
+        type: FlightPoiType.mountain,
+        sitelinks: 1000 - i,
+      ),
+      routeProgress: i / count,
+    ),
+  );
+}
+
 class _TestFlightPreviewCubit extends FlightPreviewCubit {
   _TestFlightPreviewCubit({
     required super.departure,
     required super.arrival,
     required super.connectivityChecker,
-    required super.routeProvider,
+    required super.getRoutePreviewUseCase,
     required super.downloadMapUseCase,
     required super.downloadPoiSummariesUseCase,
     required super.downloadWikipediaArticlesUseCase,
     required super.getFlightInfoUseCase,
     required super.getWikiArticlesUseCase,
-    required super.getFlightPOIUseCase,
     required super.userFlightPrefsRepository,
     required super.flightRepository,
     required super.subscriptionRepository,
@@ -380,12 +397,12 @@ class _FakeConnectivityChecker implements ConnectivityChecker {
   }) async => hasInternet;
 }
 
-class _FakeRouteProvider implements FlightRouteProvider {
+class _FakeGetRoutePreviewUseCase implements GetRoutePreviewUseCase {
   @override
-  FlightRoute getRoute({
+  Future<RoutePreview> call({
     required Airport departure,
     required Airport arrival,
-  }) => _route();
+  }) async => RoutePreview(route: _route(), topPois: _routePoiSummaries(80));
 }
 
 class _FakeDownloadMapUseCase implements DownloadMapUseCase {
@@ -470,20 +487,6 @@ class _FakeGetWikiArticlesUseCase implements GetWikiArticlesUseCase {
     required List<LatLng> waypoints,
     List<UsersInterests>? interests,
   }) async => const [];
-}
-
-class _FakeGetFlightPOIUseCase implements GetFlightPOIUseCase {
-  MapDetailLevel? lastRequestedMapDetail;
-
-  @override
-  Future<List<RoutePoiSummary>> call({
-    required FlightRoute route,
-    required MapDetailLevel mapDetail,
-    UserFlightPrefs? prefs,
-  }) async {
-    lastRequestedMapDetail = mapDetail;
-    return const [];
-  }
 }
 
 class _FakeUserFlightPrefsRepository implements UserFlightPrefsRepository {

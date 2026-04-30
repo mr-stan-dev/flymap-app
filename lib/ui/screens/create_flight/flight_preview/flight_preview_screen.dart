@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/crashlytics/app_crashlytics.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
-import 'package:flymap/data/route/flight_route_provider.dart';
 import 'package:flymap/entity/map_detail_level.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/rating/rate_prompt_policy_service.dart';
@@ -35,7 +34,7 @@ import 'package:flymap/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/usecase/get_flight_info_use_case.dart';
 import 'package:flymap/usecase/get_wiki_articles_use_case.dart';
 import 'package:flymap/usecase/delete_flight_use_case.dart';
-import 'package:flymap/usecase/get_flight_poi_use_case.dart';
+import 'package:flymap/usecase/get_route_preview_use_case.dart';
 import 'package:get_it/get_it.dart';
 
 class FlightPreviewScreen extends StatelessWidget {
@@ -50,14 +49,13 @@ class FlightPreviewScreen extends StatelessWidget {
         departure: args.departure,
         arrival: args.arrival,
         connectivityChecker: GetIt.I.get<ConnectivityChecker>(),
-        routeProvider: GetIt.I.get<FlightRouteProvider>(),
+        getRoutePreviewUseCase: GetIt.I.get<GetRoutePreviewUseCase>(),
         downloadMapUseCase: GetIt.I.get<DownloadMapUseCase>(),
         downloadPoiSummariesUseCase: GetIt.I.get<DownloadPoiSummariesUseCase>(),
         downloadWikipediaArticlesUseCase: GetIt.I
             .get<DownloadWikipediaArticlesUseCase>(),
         getFlightInfoUseCase: GetIt.I.get<GetFlightInfoUseCase>(),
         getWikiArticlesUseCase: GetIt.I.get<GetWikiArticlesUseCase>(),
-        getFlightPOIUseCase: GetIt.I.get<GetFlightPOIUseCase>(),
         userFlightPrefsRepository: GetIt.I.get<UserFlightPrefsRepository>(),
         flightRepository: GetIt.I.get<FlightRepository>(),
         subscriptionRepository: GetIt.I.get<SubscriptionRepository>(),

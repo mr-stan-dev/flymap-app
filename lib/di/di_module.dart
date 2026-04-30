@@ -4,22 +4,20 @@ import 'package:flymap/crashlytics/app_crashlytics.dart';
 import 'package:flymap/crashlytics/app_crashlytics_initializer.dart';
 import 'package:flymap/data/api/feedback_api.dart';
 import 'package:flymap/data/api/flight_info_api.dart';
+import 'package:flymap/data/api/route_places_api.dart';
 import 'package:flymap/data/api/flight_info_api_mapper.dart';
 import 'package:flymap/data/map_asset_cache_service.dart';
 import 'package:flymap/data/local/airports_database.dart';
 import 'package:flymap/data/local/app_database.dart';
-import 'package:flymap/data/local/flight_poi_repository_impl.dart';
 import 'package:flymap/data/local/flights_db_service.dart';
 import 'package:flymap/data/local/learn_pack_local_db.dart';
 import 'package:flymap/data/local/learn_repository_impl.dart';
 import 'package:flymap/data/local/migrations/flights_db_migration.dart';
 import 'package:flymap/data/local/migrations/flights_db_migration_runner.dart';
 import 'package:flymap/data/local/migrations/flights_db_migration_v1_to_v2.dart';
-import 'package:flymap/data/local/places_wiki_local_data_source.dart';
 import 'package:flymap/data/local/mappers/flight_db_mapper.dart';
+import 'package:flymap/data/mappers/route_places_api_mapper.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
-import 'package:flymap/data/route/flight_route_provider.dart';
-import 'package:flymap/data/route/great_circle_route_provider.dart';
 import 'package:flymap/data/wiki/wikipedia_article_client.dart';
 import 'package:flymap/data/wiki/wikimedia_api_client.dart';
 import 'package:flymap/data/wiki/wikidata_wikipedia_preview_repository.dart';
@@ -27,7 +25,6 @@ import 'package:flymap/rating/rate_prompt_policy_service.dart';
 import 'package:flymap/rating/rate_prompt_repository.dart';
 import 'package:flymap/rating/rate_store_launcher.dart';
 import 'package:flymap/repository/favorite_airports_repository.dart';
-import 'package:flymap/repository/flight_poi_repository.dart';
 import 'package:flymap/repository/flight_repository.dart';
 import 'package:flymap/repository/learn_article_progress_repository.dart';
 import 'package:flymap/repository/learn_repository.dart';
@@ -35,6 +32,7 @@ import 'package:flymap/repository/metric_units_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/repository/poi_wiki_preview_repository.dart';
 import 'package:flymap/repository/recent_airports_repository.dart';
+import 'package:flymap/repository/route_preview_repository.dart';
 import 'package:flymap/repository/settings_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_repository.dart';
@@ -49,7 +47,7 @@ import 'package:flymap/usecase/download_map_use_case.dart';
 import 'package:flymap/usecase/download_poi_summaries_use_case.dart';
 import 'package:flymap/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/usecase/get_flight_info_use_case.dart';
-import 'package:flymap/usecase/get_flight_poi_use_case.dart';
+import 'package:flymap/usecase/get_route_preview_use_case.dart';
 import 'package:flymap/usecase/get_wiki_articles_use_case.dart';
 import 'package:flymap/usecase/get_learn_article_progress_use_case.dart';
 import 'package:flymap/usecase/get_learn_article_content_use_case.dart';
@@ -57,7 +55,6 @@ import 'package:flymap/usecase/get_learn_categories_use_case.dart';
 import 'package:flymap/usecase/get_learn_category_articles_use_case.dart';
 import 'package:flymap/usecase/mark_learn_article_seen_use_case.dart';
 import 'package:flymap/usecase/get_poi_wiki_preview_use_case.dart';
-import 'package:flymap/usecase/poi_preferences_booster.dart';
 import 'package:flymap/usecase/submit_feedback_use_case.dart';
 import 'package:flymap/usecase/toggle_learn_article_favorite_use_case.dart';
 import 'package:get_it/get_it.dart';
@@ -102,7 +99,19 @@ class DiModule {
       () => FlightsDBService(database: i.get(), flightMapper: i.get()),
     );
 
-    i.registerFactory<FlightRouteProvider>(() => GreatCircleRouteProvider());
+    i.registerFactory<RoutePlacesApiMapper>(() => RoutePlacesApiMapper());
+    i.registerLazySingleton<RoutePlacesApi>(
+      () => RoutePlacesApi(httpClient: i.get()),
+    );
+    i.registerLazySingleton<RoutePreviewRepository>(
+      () => HybridRoutePreviewRepository(
+        api: i.get(),
+        mapper: i.get(),
+      ),
+    );
+    i.registerLazySingleton<GetRoutePreviewUseCase>(
+      () => GetRoutePreviewUseCase(repository: i.get()),
+    );
 
     // Connectivity checker
     i.registerLazySingleton<ConnectivityChecker>(
@@ -168,19 +177,6 @@ class DiModule {
     );
     i.registerLazySingleton<RecentAirportsRepository>(
       () => RecentAirportsRepository(),
-    );
-    i.registerLazySingleton<PlacesWikiLocalDataSource>(
-      () => PlacesWikiLocalDataSource(),
-    );
-    i.registerLazySingleton<FlightPOIRepository>(
-      () => LocalFlightPOIRepository(localDataSource: i.get()),
-    );
-    i.registerLazySingleton<PoiPreferencesBooster>(
-      () => const PoiPreferencesBooster(),
-    );
-    i.registerLazySingleton<GetFlightPOIUseCase>(
-      () =>
-          GetFlightPOIUseCase(repository: i.get(), preferencesBooster: i.get()),
     );
     i.registerLazySingleton<PoiWikiPreviewRepository>(
       () => WikidataWikipediaPreviewRepository(apiClient: i.get()),

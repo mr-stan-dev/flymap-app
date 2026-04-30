@@ -25,10 +25,10 @@ class MapAndStepNavigationDelegate {
         clearErrorMessage: true,
       ),
     );
-    final route = _cubit.state.flightRoute;
-    if (route != null) {
-      unawaited(_cubit._prefetchLocalPois(route, mapDetail: detailLevel));
-    }
+    _cubit._applyPoisForDetail(
+      _cubit.state.allRoutePois,
+      mapDetail: detailLevel,
+    );
   }
 
   void continueFromOverview() {

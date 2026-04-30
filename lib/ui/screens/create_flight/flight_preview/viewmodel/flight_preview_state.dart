@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flymap/entity/flight_info.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/entity/map_detail_level.dart';
+import 'package:flymap/entity/route_poi_summary.dart';
 import 'package:flymap/entity/wiki_article_candidate.dart';
 
 enum CreateFlightStep {
@@ -127,19 +128,122 @@ class DownloadSectionsState extends Equatable {
   List<Object?> get props => [map, poi, articles];
 }
 
-class FlightPreviewState extends Equatable {
-  const FlightPreviewState({
-    required this.step,
+class RoutePreviewState extends Equatable {
+  const RoutePreviewState({
     required this.flightRoute,
+    required this.allRoutePois,
     required this.flightInfo,
     required this.proPoiCount,
     required this.selectedMapDetailLevel,
     required this.articleCandidates,
     required this.selectedArticleUrls,
+  });
+
+  const RoutePreviewState.initial({
+    MapDetailLevel initialSelectedMapDetailLevel = MapDetailLevel.basic,
+  }) : flightRoute = null,
+       allRoutePois = const [],
+       flightInfo = FlightInfo.empty,
+       proPoiCount = null,
+       selectedMapDetailLevel = initialSelectedMapDetailLevel,
+       articleCandidates = const [],
+       selectedArticleUrls = const [];
+
+  final FlightRoute? flightRoute;
+  final List<RoutePoiSummary> allRoutePois;
+  final FlightInfo flightInfo;
+  final int? proPoiCount;
+  final MapDetailLevel selectedMapDetailLevel;
+  final List<WikiArticleCandidate> articleCandidates;
+  final List<String> selectedArticleUrls;
+
+  RoutePreviewState copyWith({
+    FlightRoute? flightRoute,
+    bool clearFlightRoute = false,
+    List<RoutePoiSummary>? allRoutePois,
+    bool clearAllRoutePois = false,
+    FlightInfo? flightInfo,
+    int? proPoiCount,
+    bool clearProPoiCount = false,
+    MapDetailLevel? selectedMapDetailLevel,
+    List<WikiArticleCandidate>? articleCandidates,
+    List<String>? selectedArticleUrls,
+    bool clearSelectedArticleUrls = false,
+  }) {
+    return RoutePreviewState(
+      flightRoute: clearFlightRoute ? null : flightRoute ?? this.flightRoute,
+      allRoutePois: clearAllRoutePois
+          ? const []
+          : allRoutePois ?? this.allRoutePois,
+      flightInfo: flightInfo ?? this.flightInfo,
+      proPoiCount: clearProPoiCount ? null : proPoiCount ?? this.proPoiCount,
+      selectedMapDetailLevel:
+          selectedMapDetailLevel ?? this.selectedMapDetailLevel,
+      articleCandidates: articleCandidates ?? this.articleCandidates,
+      selectedArticleUrls: clearSelectedArticleUrls
+          ? const []
+          : selectedArticleUrls ?? this.selectedArticleUrls,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    flightRoute,
+    allRoutePois,
+    flightInfo,
+    proPoiCount,
+    selectedMapDetailLevel,
+    articleCandidates,
+    selectedArticleUrls,
+  ];
+}
+
+class PreviewLoadState extends Equatable {
+  const PreviewLoadState({
     required this.isWikiSuggestionsLoading,
     required this.isPreviewLoading,
     required this.isOverviewLoading,
     required this.hasInternetForMapPreview,
+  });
+
+  const PreviewLoadState.initial()
+    : isWikiSuggestionsLoading = false,
+      isPreviewLoading = true,
+      isOverviewLoading = false,
+      hasInternetForMapPreview = true;
+
+  final bool isWikiSuggestionsLoading;
+  final bool isPreviewLoading;
+  final bool isOverviewLoading;
+  final bool hasInternetForMapPreview;
+
+  PreviewLoadState copyWith({
+    bool? isWikiSuggestionsLoading,
+    bool? isPreviewLoading,
+    bool? isOverviewLoading,
+    bool? hasInternetForMapPreview,
+  }) {
+    return PreviewLoadState(
+      isWikiSuggestionsLoading:
+          isWikiSuggestionsLoading ?? this.isWikiSuggestionsLoading,
+      isPreviewLoading: isPreviewLoading ?? this.isPreviewLoading,
+      isOverviewLoading: isOverviewLoading ?? this.isOverviewLoading,
+      hasInternetForMapPreview:
+          hasInternetForMapPreview ?? this.hasInternetForMapPreview,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    isWikiSuggestionsLoading,
+    isPreviewLoading,
+    isOverviewLoading,
+    hasInternetForMapPreview,
+  ];
+}
+
+class PreviewDownloadState extends Equatable {
+  const PreviewDownloadState({
     required this.downloadSections,
     required this.isDownloading,
     required this.downloadProgress,
@@ -154,55 +258,24 @@ class FlightPreviewState extends Equatable {
     required this.downloadTileCount,
     required this.downloadWorkerCount,
     required this.downloadDone,
-    required this.errorMessage,
-    required this.downloadErrorMessage,
   });
 
-  factory FlightPreviewState.initial({
-    MapDetailLevel selectedMapDetailLevel = MapDetailLevel.basic,
-  }) {
-    return FlightPreviewState(
-      step: CreateFlightStep.mapPreview,
-      flightRoute: null,
-      flightInfo: FlightInfo.empty,
-      proPoiCount: null,
-      selectedMapDetailLevel: selectedMapDetailLevel,
-      articleCandidates: [],
-      selectedArticleUrls: [],
-      isWikiSuggestionsLoading: false,
-      isPreviewLoading: true,
-      isOverviewLoading: false,
-      hasInternetForMapPreview: true,
-      downloadSections: DownloadSectionsState.initial(),
-      isDownloading: false,
-      downloadProgress: 0.0,
-      downloadedBytes: 0,
-      downloadStage: DownloadStage.idle,
-      poiDownloadCompleted: 0,
-      poiDownloadTotal: 0,
-      poiDownloadFailed: 0,
-      articleDownloadCompleted: 0,
-      articleDownloadTotal: 0,
-      articleDownloadFailed: 0,
-      downloadTileCount: null,
-      downloadWorkerCount: null,
-      downloadDone: false,
-      errorMessage: null,
-      downloadErrorMessage: null,
-    );
-  }
+  const PreviewDownloadState.initial()
+    : downloadSections = const DownloadSectionsState.initial(),
+      isDownloading = false,
+      downloadProgress = 0.0,
+      downloadedBytes = 0,
+      downloadStage = DownloadStage.idle,
+      poiDownloadCompleted = 0,
+      poiDownloadTotal = 0,
+      poiDownloadFailed = 0,
+      articleDownloadCompleted = 0,
+      articleDownloadTotal = 0,
+      articleDownloadFailed = 0,
+      downloadTileCount = null,
+      downloadWorkerCount = null,
+      downloadDone = false;
 
-  final CreateFlightStep step;
-  final FlightRoute? flightRoute;
-  final FlightInfo flightInfo;
-  final int? proPoiCount;
-  final MapDetailLevel selectedMapDetailLevel;
-  final List<WikiArticleCandidate> articleCandidates;
-  final List<String> selectedArticleUrls;
-  final bool isWikiSuggestionsLoading;
-  final bool isPreviewLoading;
-  final bool isOverviewLoading;
-  final bool hasInternetForMapPreview;
   final DownloadSectionsState downloadSections;
   final bool isDownloading;
   final double downloadProgress;
@@ -217,8 +290,162 @@ class FlightPreviewState extends Equatable {
   final int? downloadTileCount;
   final int? downloadWorkerCount;
   final bool downloadDone;
+
+  PreviewDownloadState copyWith({
+    DownloadSectionsState? downloadSections,
+    bool? isDownloading,
+    double? downloadProgress,
+    int? downloadedBytes,
+    DownloadStage? downloadStage,
+    int? poiDownloadCompleted,
+    int? poiDownloadTotal,
+    int? poiDownloadFailed,
+    int? articleDownloadCompleted,
+    int? articleDownloadTotal,
+    int? articleDownloadFailed,
+    int? downloadTileCount,
+    bool clearDownloadTileCount = false,
+    int? downloadWorkerCount,
+    bool clearDownloadWorkerCount = false,
+    bool? downloadDone,
+  }) {
+    return PreviewDownloadState(
+      downloadSections: downloadSections ?? this.downloadSections,
+      isDownloading: isDownloading ?? this.isDownloading,
+      downloadProgress: downloadProgress ?? this.downloadProgress,
+      downloadedBytes: downloadedBytes ?? this.downloadedBytes,
+      downloadStage: downloadStage ?? this.downloadStage,
+      poiDownloadCompleted: poiDownloadCompleted ?? this.poiDownloadCompleted,
+      poiDownloadTotal: poiDownloadTotal ?? this.poiDownloadTotal,
+      poiDownloadFailed: poiDownloadFailed ?? this.poiDownloadFailed,
+      articleDownloadCompleted:
+          articleDownloadCompleted ?? this.articleDownloadCompleted,
+      articleDownloadTotal: articleDownloadTotal ?? this.articleDownloadTotal,
+      articleDownloadFailed:
+          articleDownloadFailed ?? this.articleDownloadFailed,
+      downloadTileCount: clearDownloadTileCount
+          ? null
+          : downloadTileCount ?? this.downloadTileCount,
+      downloadWorkerCount: clearDownloadWorkerCount
+          ? null
+          : downloadWorkerCount ?? this.downloadWorkerCount,
+      downloadDone: downloadDone ?? this.downloadDone,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    downloadSections,
+    isDownloading,
+    downloadProgress,
+    downloadedBytes,
+    downloadStage,
+    poiDownloadCompleted,
+    poiDownloadTotal,
+    poiDownloadFailed,
+    articleDownloadCompleted,
+    articleDownloadTotal,
+    articleDownloadFailed,
+    downloadTileCount,
+    downloadWorkerCount,
+    downloadDone,
+  ];
+}
+
+class PreviewMessageState extends Equatable {
+  const PreviewMessageState({
+    required this.errorMessage,
+    required this.downloadErrorMessage,
+  });
+
+  const PreviewMessageState.initial()
+    : errorMessage = null,
+      downloadErrorMessage = null;
+
   final String? errorMessage;
   final String? downloadErrorMessage;
+
+  PreviewMessageState copyWith({
+    String? errorMessage,
+    bool clearErrorMessage = false,
+    String? downloadErrorMessage,
+    bool clearDownloadErrorMessage = false,
+  }) {
+    return PreviewMessageState(
+      errorMessage: clearErrorMessage
+          ? null
+          : errorMessage ?? this.errorMessage,
+      downloadErrorMessage: clearDownloadErrorMessage
+          ? null
+          : downloadErrorMessage ?? this.downloadErrorMessage,
+    );
+  }
+
+  @override
+  List<Object?> get props => [errorMessage, downloadErrorMessage];
+}
+
+class FlightPreviewState extends Equatable {
+  const FlightPreviewState({
+    required this.step,
+    required this.routeState,
+    required this.loadState,
+    required this.downloadState,
+    required this.messageState,
+  });
+
+  factory FlightPreviewState.initial({
+    MapDetailLevel selectedMapDetailLevel = MapDetailLevel.basic,
+  }) {
+    return FlightPreviewState(
+      step: CreateFlightStep.mapPreview,
+      routeState: RoutePreviewState.initial(
+        initialSelectedMapDetailLevel: selectedMapDetailLevel,
+      ),
+      loadState: const PreviewLoadState.initial(),
+      downloadState: const PreviewDownloadState.initial(),
+      messageState: const PreviewMessageState.initial(),
+    );
+  }
+
+  final CreateFlightStep step;
+  final RoutePreviewState routeState;
+  final PreviewLoadState loadState;
+  final PreviewDownloadState downloadState;
+  final PreviewMessageState messageState;
+
+  FlightRoute? get flightRoute => routeState.flightRoute;
+  List<RoutePoiSummary> get allRoutePois => routeState.allRoutePois;
+  FlightInfo get flightInfo => routeState.flightInfo;
+  int? get proPoiCount => routeState.proPoiCount;
+  MapDetailLevel get selectedMapDetailLevel =>
+      routeState.selectedMapDetailLevel;
+  List<WikiArticleCandidate> get articleCandidates =>
+      routeState.articleCandidates;
+  List<String> get selectedArticleUrls => routeState.selectedArticleUrls;
+
+  bool get isWikiSuggestionsLoading => loadState.isWikiSuggestionsLoading;
+  bool get isPreviewLoading => loadState.isPreviewLoading;
+  bool get isOverviewLoading => loadState.isOverviewLoading;
+  bool get hasInternetForMapPreview => loadState.hasInternetForMapPreview;
+
+  DownloadSectionsState get downloadSections => downloadState.downloadSections;
+  bool get isDownloading => downloadState.isDownloading;
+  double get downloadProgress => downloadState.downloadProgress;
+  int get downloadedBytes => downloadState.downloadedBytes;
+  DownloadStage get downloadStage => downloadState.downloadStage;
+  int get poiDownloadCompleted => downloadState.poiDownloadCompleted;
+  int get poiDownloadTotal => downloadState.poiDownloadTotal;
+  int get poiDownloadFailed => downloadState.poiDownloadFailed;
+  int get articleDownloadCompleted => downloadState.articleDownloadCompleted;
+  int get articleDownloadTotal => downloadState.articleDownloadTotal;
+  int get articleDownloadFailed => downloadState.articleDownloadFailed;
+  int? get downloadTileCount => downloadState.downloadTileCount;
+  int? get downloadWorkerCount => downloadState.downloadWorkerCount;
+  bool get downloadDone => downloadState.downloadDone;
+
+  String? get errorMessage => messageState.errorMessage;
+  String? get downloadErrorMessage => messageState.downloadErrorMessage;
 
   bool get canContinueFromMap =>
       flightRoute != null && !isPreviewLoading && !isDownloading;
@@ -227,6 +454,8 @@ class FlightPreviewState extends Equatable {
     CreateFlightStep? step,
     FlightRoute? flightRoute,
     bool clearFlightRoute = false,
+    List<RoutePoiSummary>? allRoutePois,
+    bool clearAllRoutePois = false,
     FlightInfo? flightInfo,
     int? proPoiCount,
     bool clearProPoiCount = false,
@@ -261,78 +490,72 @@ class FlightPreviewState extends Equatable {
   }) {
     return FlightPreviewState(
       step: step ?? this.step,
-      flightRoute: clearFlightRoute ? null : flightRoute ?? this.flightRoute,
-      flightInfo: flightInfo ?? this.flightInfo,
-      proPoiCount: clearProPoiCount ? null : proPoiCount ?? this.proPoiCount,
-      selectedMapDetailLevel:
-          selectedMapDetailLevel ?? this.selectedMapDetailLevel,
-      articleCandidates: articleCandidates ?? this.articleCandidates,
-      selectedArticleUrls: clearSelectedArticleUrls
-          ? const []
-          : selectedArticleUrls ?? this.selectedArticleUrls,
-      isWikiSuggestionsLoading:
-          isWikiSuggestionsLoading ?? this.isWikiSuggestionsLoading,
-      isPreviewLoading: isPreviewLoading ?? this.isPreviewLoading,
-      isOverviewLoading: isOverviewLoading ?? this.isOverviewLoading,
-      hasInternetForMapPreview:
-          hasInternetForMapPreview ?? this.hasInternetForMapPreview,
-      downloadSections: downloadSections ?? this.downloadSections,
-      isDownloading: isDownloading ?? this.isDownloading,
-      downloadProgress: downloadProgress ?? this.downloadProgress,
-      downloadedBytes: downloadedBytes ?? this.downloadedBytes,
-      downloadStage: downloadStage ?? this.downloadStage,
-      poiDownloadCompleted: poiDownloadCompleted ?? this.poiDownloadCompleted,
-      poiDownloadTotal: poiDownloadTotal ?? this.poiDownloadTotal,
-      poiDownloadFailed: poiDownloadFailed ?? this.poiDownloadFailed,
-      articleDownloadCompleted:
-          articleDownloadCompleted ?? this.articleDownloadCompleted,
-      articleDownloadTotal: articleDownloadTotal ?? this.articleDownloadTotal,
-      articleDownloadFailed:
-          articleDownloadFailed ?? this.articleDownloadFailed,
-      downloadTileCount: clearDownloadTileCount
-          ? null
-          : downloadTileCount ?? this.downloadTileCount,
-      downloadWorkerCount: clearDownloadWorkerCount
-          ? null
-          : downloadWorkerCount ?? this.downloadWorkerCount,
-      downloadDone: downloadDone ?? this.downloadDone,
-      errorMessage: clearErrorMessage
-          ? null
-          : errorMessage ?? this.errorMessage,
-      downloadErrorMessage: clearDownloadErrorMessage
-          ? null
-          : downloadErrorMessage ?? this.downloadErrorMessage,
+      routeState: routeState.copyWith(
+        flightRoute: flightRoute,
+        clearFlightRoute: clearFlightRoute,
+        allRoutePois: allRoutePois,
+        clearAllRoutePois: clearAllRoutePois,
+        flightInfo: flightInfo,
+        proPoiCount: proPoiCount,
+        clearProPoiCount: clearProPoiCount,
+        selectedMapDetailLevel: selectedMapDetailLevel,
+        articleCandidates: articleCandidates,
+        selectedArticleUrls: selectedArticleUrls,
+        clearSelectedArticleUrls: clearSelectedArticleUrls,
+      ),
+      loadState: loadState.copyWith(
+        isWikiSuggestionsLoading: isWikiSuggestionsLoading,
+        isPreviewLoading: isPreviewLoading,
+        isOverviewLoading: isOverviewLoading,
+        hasInternetForMapPreview: hasInternetForMapPreview,
+      ),
+      downloadState: downloadState.copyWith(
+        downloadSections: downloadSections,
+        isDownloading: isDownloading,
+        downloadProgress: downloadProgress,
+        downloadedBytes: downloadedBytes,
+        downloadStage: downloadStage,
+        poiDownloadCompleted: poiDownloadCompleted,
+        poiDownloadTotal: poiDownloadTotal,
+        poiDownloadFailed: poiDownloadFailed,
+        articleDownloadCompleted: articleDownloadCompleted,
+        articleDownloadTotal: articleDownloadTotal,
+        articleDownloadFailed: articleDownloadFailed,
+        downloadTileCount: downloadTileCount,
+        clearDownloadTileCount: clearDownloadTileCount,
+        downloadWorkerCount: downloadWorkerCount,
+        clearDownloadWorkerCount: clearDownloadWorkerCount,
+        downloadDone: downloadDone,
+      ),
+      messageState: messageState.copyWith(
+        errorMessage: errorMessage,
+        clearErrorMessage: clearErrorMessage,
+        downloadErrorMessage: downloadErrorMessage,
+        clearDownloadErrorMessage: clearDownloadErrorMessage,
+      ),
     );
   }
 
   @override
   List<Object?> get props => [
     step,
-    flightRoute,
-    flightInfo,
-    proPoiCount,
-    selectedMapDetailLevel,
-    articleCandidates,
-    selectedArticleUrls,
-    isWikiSuggestionsLoading,
-    isPreviewLoading,
-    isOverviewLoading,
-    hasInternetForMapPreview,
-    downloadSections,
-    isDownloading,
-    downloadProgress,
-    downloadedBytes,
-    downloadStage,
-    poiDownloadCompleted,
-    poiDownloadTotal,
-    poiDownloadFailed,
-    articleDownloadCompleted,
-    articleDownloadTotal,
-    articleDownloadFailed,
-    downloadTileCount,
-    downloadWorkerCount,
-    downloadDone,
-    errorMessage,
-    downloadErrorMessage,
+    routeState,
+    loadState,
+    downloadState,
+    messageState,
   ];
+
+  @override
+  String toString() {
+    return 'FlightPreviewState('
+        'step:${step.name}, '
+        'route:${flightRoute?.routeCode ?? 'none'}, '
+        'detail:${selectedMapDetailLevel.name}, '
+        'poi:${flightInfo.poi.length}/${allRoutePois.length}, '
+        'articlesSel:${selectedArticleUrls.length}, '
+        'loading(p:${isPreviewLoading ? 1 : 0},o:${isOverviewLoading ? 1 : 0},w:${isWikiSuggestionsLoading ? 1 : 0}), '
+        'downloading:${isDownloading ? 1 : 0}/${downloadStage.name}, '
+        'errors:${errorMessage != null ? 1 : 0}/${downloadErrorMessage != null ? 1 : 0}'
+        ')';
+  }
 }
