@@ -4,7 +4,9 @@ import 'package:flymap/crashlytics/app_crashlytics.dart';
 import 'package:flymap/crashlytics/app_crashlytics_initializer.dart';
 import 'package:flymap/data/api/feedback_api.dart';
 import 'package:flymap/data/api/flight_info_api.dart';
+import 'package:flymap/data/api/route_overview_api.dart';
 import 'package:flymap/data/api/route_places_api.dart';
+import 'package:flymap/data/api/route_regions_api.dart';
 import 'package:flymap/data/api/flight_info_api_mapper.dart';
 import 'package:flymap/data/map_asset_cache_service.dart';
 import 'package:flymap/data/local/airports_database.dart';
@@ -17,6 +19,8 @@ import 'package:flymap/data/local/migrations/flights_db_migration_runner.dart';
 import 'package:flymap/data/local/migrations/flights_db_migration_v1_to_v2.dart';
 import 'package:flymap/data/local/mappers/flight_db_mapper.dart';
 import 'package:flymap/data/mappers/route_places_api_mapper.dart';
+import 'package:flymap/data/mappers/route_regions_api_mapper.dart';
+import 'package:flymap/data/mappers/route_overview_api_mapper.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flymap/data/wiki/wikipedia_article_client.dart';
 import 'package:flymap/data/wiki/wikimedia_api_client.dart';
@@ -33,6 +37,8 @@ import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/repository/poi_wiki_preview_repository.dart';
 import 'package:flymap/repository/recent_airports_repository.dart';
 import 'package:flymap/repository/route_preview_repository.dart';
+import 'package:flymap/repository/route_overview_repository.dart';
+import 'package:flymap/repository/route_timeline_repository.dart';
 import 'package:flymap/repository/settings_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_repository.dart';
@@ -45,16 +51,19 @@ import 'package:flymap/usecase/complete_flight_use_case.dart';
 import 'package:flymap/usecase/can_open_learn_article_use_case.dart';
 import 'package:flymap/usecase/download_map_use_case.dart';
 import 'package:flymap/usecase/download_poi_summaries_use_case.dart';
+import 'package:flymap/usecase/download_region_wiki_articles_use_case.dart';
 import 'package:flymap/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/usecase/get_flight_info_use_case.dart';
+import 'package:flymap/usecase/get_place_info_use_case.dart';
 import 'package:flymap/usecase/get_route_preview_use_case.dart';
+import 'package:flymap/usecase/get_route_overview_use_case.dart';
+import 'package:flymap/usecase/get_route_regions_use_case.dart';
 import 'package:flymap/usecase/get_wiki_articles_use_case.dart';
 import 'package:flymap/usecase/get_learn_article_progress_use_case.dart';
 import 'package:flymap/usecase/get_learn_article_content_use_case.dart';
 import 'package:flymap/usecase/get_learn_categories_use_case.dart';
 import 'package:flymap/usecase/get_learn_category_articles_use_case.dart';
 import 'package:flymap/usecase/mark_learn_article_seen_use_case.dart';
-import 'package:flymap/usecase/get_poi_wiki_preview_use_case.dart';
 import 'package:flymap/usecase/submit_feedback_use_case.dart';
 import 'package:flymap/usecase/toggle_learn_article_favorite_use_case.dart';
 import 'package:get_it/get_it.dart';
@@ -100,17 +109,34 @@ class DiModule {
     );
 
     i.registerFactory<RoutePlacesApiMapper>(() => RoutePlacesApiMapper());
+    i.registerFactory<RouteRegionsApiMapper>(() => RouteRegionsApiMapper());
+    i.registerFactory<RouteOverviewApiMapper>(() => RouteOverviewApiMapper());
+    i.registerLazySingleton<RouteOverviewApi>(
+      () => RouteOverviewApi(httpClient: i.get()),
+    );
     i.registerLazySingleton<RoutePlacesApi>(
       () => RoutePlacesApi(httpClient: i.get()),
     );
+    i.registerLazySingleton<RouteRegionsApi>(
+      () => RouteRegionsApi(httpClient: i.get()),
+    );
     i.registerLazySingleton<RoutePreviewRepository>(
-      () => HybridRoutePreviewRepository(
-        api: i.get(),
-        mapper: i.get(),
-      ),
+      () => HybridRoutePreviewRepository(api: i.get(), mapper: i.get()),
+    );
+    i.registerLazySingleton<RouteOverviewRepository>(
+      () => ApiRouteOverviewRepository(api: i.get(), mapper: i.get()),
+    );
+    i.registerLazySingleton<RouteTimelineRepository>(
+      () => ApiRouteTimelineRepository(api: i.get(), mapper: i.get()),
+    );
+    i.registerLazySingleton<GetRouteOverviewUseCase>(
+      () => GetRouteOverviewUseCase(repository: i.get()),
     );
     i.registerLazySingleton<GetRoutePreviewUseCase>(
       () => GetRoutePreviewUseCase(repository: i.get()),
+    );
+    i.registerLazySingleton<GetRouteRegionsUseCase>(
+      () => GetRouteRegionsUseCase(repository: i.get()),
     );
 
     // Connectivity checker
@@ -181,11 +207,14 @@ class DiModule {
     i.registerLazySingleton<PoiWikiPreviewRepository>(
       () => WikidataWikipediaPreviewRepository(apiClient: i.get()),
     );
-    i.registerLazySingleton<GetPoiWikiPreviewUseCase>(
-      () => GetPoiWikiPreviewUseCase(repository: i.get()),
+    i.registerLazySingleton<GetPlaceInfoUseCase>(
+      () => GetPlaceInfoUseCase(repository: i.get()),
     );
     i.registerLazySingleton<DownloadPoiSummariesUseCase>(
       () => DownloadPoiSummariesUseCase(repository: i.get()),
+    );
+    i.registerLazySingleton<DownloadRegionWikiArticlesUseCase>(
+      () => DownloadRegionWikiArticlesUseCase(repository: i.get()),
     );
 
     i.registerLazySingleton<UserFlightPrefsStorage>(

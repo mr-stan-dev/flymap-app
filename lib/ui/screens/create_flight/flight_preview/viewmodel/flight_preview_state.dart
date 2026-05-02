@@ -2,15 +2,11 @@ import 'package:equatable/equatable.dart';
 import 'package:flymap/entity/flight_info.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/entity/map_detail_level.dart';
+import 'package:flymap/entity/route_region.dart';
 import 'package:flymap/entity/route_poi_summary.dart';
 import 'package:flymap/entity/wiki_article_candidate.dart';
 
-enum CreateFlightStep {
-  routeNotSupported,
-  mapPreview,
-  overview,
-  wikipediaArticles,
-}
+enum CreateFlightStep { routeNotSupported, overview, wikipediaArticles }
 
 enum DownloadStage {
   idle,
@@ -132,6 +128,9 @@ class RoutePreviewState extends Equatable {
   const RoutePreviewState({
     required this.flightRoute,
     required this.allRoutePois,
+    required this.routeRegions,
+    required this.routeTotalMinutes,
+    required this.routeCruiseSpeedKmh,
     required this.flightInfo,
     required this.proPoiCount,
     required this.selectedMapDetailLevel,
@@ -143,6 +142,9 @@ class RoutePreviewState extends Equatable {
     MapDetailLevel initialSelectedMapDetailLevel = MapDetailLevel.basic,
   }) : flightRoute = null,
        allRoutePois = const [],
+       routeRegions = const [],
+       routeTotalMinutes = 0,
+       routeCruiseSpeedKmh = 850,
        flightInfo = FlightInfo.empty,
        proPoiCount = null,
        selectedMapDetailLevel = initialSelectedMapDetailLevel,
@@ -151,6 +153,9 @@ class RoutePreviewState extends Equatable {
 
   final FlightRoute? flightRoute;
   final List<RoutePoiSummary> allRoutePois;
+  final List<RouteRegion> routeRegions;
+  final int routeTotalMinutes;
+  final int routeCruiseSpeedKmh;
   final FlightInfo flightInfo;
   final int? proPoiCount;
   final MapDetailLevel selectedMapDetailLevel;
@@ -162,6 +167,10 @@ class RoutePreviewState extends Equatable {
     bool clearFlightRoute = false,
     List<RoutePoiSummary>? allRoutePois,
     bool clearAllRoutePois = false,
+    List<RouteRegion>? routeRegions,
+    bool clearRouteRegions = false,
+    int? routeTotalMinutes,
+    int? routeCruiseSpeedKmh,
     FlightInfo? flightInfo,
     int? proPoiCount,
     bool clearProPoiCount = false,
@@ -175,6 +184,11 @@ class RoutePreviewState extends Equatable {
       allRoutePois: clearAllRoutePois
           ? const []
           : allRoutePois ?? this.allRoutePois,
+      routeRegions: clearRouteRegions
+          ? const []
+          : routeRegions ?? this.routeRegions,
+      routeTotalMinutes: routeTotalMinutes ?? this.routeTotalMinutes,
+      routeCruiseSpeedKmh: routeCruiseSpeedKmh ?? this.routeCruiseSpeedKmh,
       flightInfo: flightInfo ?? this.flightInfo,
       proPoiCount: clearProPoiCount ? null : proPoiCount ?? this.proPoiCount,
       selectedMapDetailLevel:
@@ -190,6 +204,9 @@ class RoutePreviewState extends Equatable {
   List<Object?> get props => [
     flightRoute,
     allRoutePois,
+    routeRegions,
+    routeTotalMinutes,
+    routeCruiseSpeedKmh,
     flightInfo,
     proPoiCount,
     selectedMapDetailLevel,
@@ -398,7 +415,7 @@ class FlightPreviewState extends Equatable {
     MapDetailLevel selectedMapDetailLevel = MapDetailLevel.basic,
   }) {
     return FlightPreviewState(
-      step: CreateFlightStep.mapPreview,
+      step: CreateFlightStep.overview,
       routeState: RoutePreviewState.initial(
         initialSelectedMapDetailLevel: selectedMapDetailLevel,
       ),
@@ -416,6 +433,9 @@ class FlightPreviewState extends Equatable {
 
   FlightRoute? get flightRoute => routeState.flightRoute;
   List<RoutePoiSummary> get allRoutePois => routeState.allRoutePois;
+  List<RouteRegion> get routeRegions => routeState.routeRegions;
+  int get routeTotalMinutes => routeState.routeTotalMinutes;
+  int get routeCruiseSpeedKmh => routeState.routeCruiseSpeedKmh;
   FlightInfo get flightInfo => routeState.flightInfo;
   int? get proPoiCount => routeState.proPoiCount;
   MapDetailLevel get selectedMapDetailLevel =>
@@ -456,6 +476,10 @@ class FlightPreviewState extends Equatable {
     bool clearFlightRoute = false,
     List<RoutePoiSummary>? allRoutePois,
     bool clearAllRoutePois = false,
+    List<RouteRegion>? routeRegions,
+    bool clearRouteRegions = false,
+    int? routeTotalMinutes,
+    int? routeCruiseSpeedKmh,
     FlightInfo? flightInfo,
     int? proPoiCount,
     bool clearProPoiCount = false,
@@ -495,6 +519,10 @@ class FlightPreviewState extends Equatable {
         clearFlightRoute: clearFlightRoute,
         allRoutePois: allRoutePois,
         clearAllRoutePois: clearAllRoutePois,
+        routeRegions: routeRegions,
+        clearRouteRegions: clearRouteRegions,
+        routeTotalMinutes: routeTotalMinutes,
+        routeCruiseSpeedKmh: routeCruiseSpeedKmh,
         flightInfo: flightInfo,
         proPoiCount: proPoiCount,
         clearProPoiCount: clearProPoiCount,
@@ -552,6 +580,7 @@ class FlightPreviewState extends Equatable {
         'route:${flightRoute?.routeCode ?? 'none'}, '
         'detail:${selectedMapDetailLevel.name}, '
         'poi:${flightInfo.poi.length}/${allRoutePois.length}, '
+        'regions:${routeRegions.length}@${routeTotalMinutes}m, '
         'articlesSel:${selectedArticleUrls.length}, '
         'loading(p:${isPreviewLoading ? 1 : 0},o:${isOverviewLoading ? 1 : 0},w:${isWikiSuggestionsLoading ? 1 : 0}), '
         'downloading:${isDownloading ? 1 : 0}/${downloadStage.name}, '

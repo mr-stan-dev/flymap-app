@@ -8,7 +8,6 @@ import 'package:flymap/ui/screens/create_flight/flight_preview/steps/map_preview
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/map/map_utils.dart';
-import 'package:flymap/usecase/poi_selection_config.dart';
 
 class FlightSearchMapPreviewStep extends StatelessWidget {
   const FlightSearchMapPreviewStep({
@@ -41,11 +40,6 @@ class FlightSearchMapPreviewStep extends StatelessWidget {
     final isFreeUserWithProSelection =
         !isProUser && selectedDetailLevel == MapDetailLevel.pro;
     final poiCount = state.flightInfo.poi.length;
-    final proPoiCount =
-        state.proPoiCount ??
-        (selectedDetailLevel == MapDetailLevel.pro
-            ? poiCount
-            : PoiSelectionConfig.proMaxPois);
     final resolvedMaxZoom = MapDownloadConfig.resolveMaxZoom(
       distanceKm: route.distanceInKm,
       detailLevel: selectedDetailLevel,

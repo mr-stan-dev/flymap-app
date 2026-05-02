@@ -102,20 +102,21 @@ class DownloadPoiSummariesUseCase {
         preferredLanguageCode: preferredLanguageCode,
       );
       previews.addAll(chunkPreviews);
-
       for (final qid in chunk) {
+        completed++;
         if (!chunkPreviews.containsKey(qid)) {
           failed++;
         }
+        onProgress(
+          PoiSummariesDownloadProgress(
+            completed: completed,
+            total: targetPois.length,
+            failed: failed,
+          ),
+        );
+        // Yield between item updates so UI can render incremental counters.
+        await Future<void>.delayed(const Duration(milliseconds: 12));
       }
-      completed += chunk.length;
-      onProgress(
-        PoiSummariesDownloadProgress(
-          completed: completed,
-          total: targetPois.length,
-          failed: failed,
-        ),
-      );
     }
 
     final updatedPois = List<RoutePoiSummary>.from(pois);

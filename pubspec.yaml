@@ -73,6 +73,7 @@ flutter:
     - assets/glyphs/Noto Sans Bold/
     - assets/app_icon.png
     - assets/images/
+    - assets/images/icons/
     - assets/images/learn/
     - assets/images/learn/categories/
     - assets/images/poi/

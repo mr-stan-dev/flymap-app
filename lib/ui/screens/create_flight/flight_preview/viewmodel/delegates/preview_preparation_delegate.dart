@@ -4,20 +4,17 @@ class PreviewPreparationDelegate {
   PreviewPreparationDelegate(
     this._cubit, {
     required ConnectivityChecker connectivityChecker,
-    required GetRoutePreviewUseCase getRoutePreviewUseCase,
-    required GetFlightInfoUseCase getFlightInfoUseCase,
+    required GetRouteOverviewUseCase getRouteOverviewUseCase,
     required GetWikiArticlesUseCase getWikiArticlesUseCase,
     required UserFlightPrefsRepository userFlightPrefsRepository,
   }) : _connectivityChecker = connectivityChecker,
-       _getRoutePreviewUseCase = getRoutePreviewUseCase,
-       _getFlightInfoUseCase = getFlightInfoUseCase,
+       _getRouteOverviewUseCase = getRouteOverviewUseCase,
        _getWikiArticlesUseCase = getWikiArticlesUseCase,
        _userFlightPrefsRepository = userFlightPrefsRepository;
 
   final FlightPreviewCubit _cubit;
   final ConnectivityChecker _connectivityChecker;
-  final GetRoutePreviewUseCase _getRoutePreviewUseCase;
-  final GetFlightInfoUseCase _getFlightInfoUseCase;
+  final GetRouteOverviewUseCase _getRouteOverviewUseCase;
   final GetWikiArticlesUseCase _getWikiArticlesUseCase;
   final UserFlightPrefsRepository _userFlightPrefsRepository;
 
@@ -40,11 +37,12 @@ class PreviewPreparationDelegate {
         return;
       }
 
-      final preview = await _getRoutePreviewUseCase.call(
+      final overview = await _getRouteOverviewUseCase.call(
         departure: departure,
         arrival: arrival,
       );
-      final route = preview.route;
+      final route = overview.route;
+      final timeline = overview.timeline;
       final routeLength = MapDownloadConfig.resolveRouteLength(
         route.distanceInKm,
       );
@@ -97,33 +95,36 @@ class PreviewPreparationDelegate {
       _cubit._emitState(
         _cubit.state.copyWith(
           flightRoute: route,
-          allRoutePois: preview.topPois,
+          allRoutePois: overview.topPois,
+          routeRegions: timeline.regions,
+          routeTotalMinutes: timeline.totalRouteMinutes,
+          routeCruiseSpeedKmh: timeline.cruiseSpeedKmh,
           isPreviewLoading: false,
           hasInternetForMapPreview: true,
           flightInfo: FlightInfo.empty.copyWith(
-            poi: preview.topPois
+            poi: overview.topPois
                 .take(
                   PoiSelectionConfig.maxPois(
                     _cubit.state.selectedMapDetailLevel,
                   ),
                 )
                 .toList(growable: false),
+            routeRegions: timeline.regions,
+            routeTotalMinutes: timeline.totalRouteMinutes,
+            routeCruiseSpeedKmh: timeline.cruiseSpeedKmh,
           ),
-          proPoiCount: preview.topPois.length < PoiSelectionConfig.proMaxPois
-              ? preview.topPois.length
+          proPoiCount: overview.topPois.length < PoiSelectionConfig.proMaxPois
+              ? overview.topPois.length
               : PoiSelectionConfig.proMaxPois,
           articleCandidates: const [],
           clearSelectedArticleUrls: true,
           isWikiSuggestionsLoading: true,
-          isOverviewLoading: true,
+          isOverviewLoading: false,
         ),
       );
 
       final userPrefs = await _loadUserPrefs();
-      _cubit._logger.log(
-        'Route preview POIs cached total=${preview.topPois.length} basic=${preview.topPois.take(PoiSelectionConfig.basicMaxPois).length} pro=${preview.topPois.take(PoiSelectionConfig.proMaxPois).length}',
-      );
-      unawaited(_prefetchOverview(route, userPrefs: userPrefs));
+      unawaited(_prefetchWiki(route, userPrefs: userPrefs));
     } catch (e, stackTrace) {
       _cubit._logger.error('Failed to prepare map preview: $e');
       unawaited(
@@ -144,42 +145,11 @@ class PreviewPreparationDelegate {
     }
   }
 
-  Future<void> _prefetchOverview(
+  Future<void> _prefetchWiki(
     FlightRoute route, {
     UserFlightPrefs? userPrefs,
   }) async {
     final prefs = userPrefs ?? await _loadUserPrefs();
-    try {
-      final info = await _getFlightInfoUseCase.call(
-        airportArrival: route.arrival.name,
-        airportDeparture: route.departure.name,
-        waypoints: route.waypoints,
-      );
-
-      final currentRoute = _cubit.state.flightRoute;
-      if (currentRoute == null || currentRoute.routeCode != route.routeCode) {
-        return;
-      }
-
-      final currentInfo = _cubit.state.flightInfo;
-      _cubit._emitState(
-        _cubit.state.copyWith(
-          flightInfo: currentInfo.copyWith(overview: info.overview),
-          isOverviewLoading: false,
-          isWikiSuggestionsLoading: true,
-        ),
-      );
-    } catch (e) {
-      _cubit._logger.error('Failed to prefetch route overview: $e');
-      _cubit._emitState(
-        _cubit.state.copyWith(
-          isOverviewLoading: false,
-          isWikiSuggestionsLoading: false,
-          errorMessage: t.createFlight.errors.overviewUnavailableContinue,
-        ),
-      );
-      return;
-    }
 
     try {
       final suggestedCandidates = await _getWikiArticlesUseCase.call(
@@ -188,20 +158,10 @@ class PreviewPreparationDelegate {
         waypoints: route.waypoints,
         interests: prefs.interests,
       );
-      _cubit._logger.log(
-        'Backend wiki candidates received=${suggestedCandidates.length}',
-      );
-      if (suggestedCandidates.isNotEmpty) {
-        final sample = suggestedCandidates.take(3).map((e) => e.url).join(', ');
-        _cubit._logger.log('Backend wiki sample=[$sample]');
-      }
 
       final routeAfterWikiCall = _cubit.state.flightRoute;
       if (routeAfterWikiCall == null ||
           routeAfterWikiCall.routeCode != route.routeCode) {
-        _cubit._logger.log(
-          'Skip applying backend wiki candidates due to route mismatch',
-        );
         return;
       }
 
@@ -215,11 +175,7 @@ class PreviewPreparationDelegate {
           isWikiSuggestionsLoading: false,
         ),
       );
-      _cubit._logger.log(
-        'Applied backend wiki candidates to state: ${suggestedCandidates.length}',
-      );
     } catch (e) {
-      _cubit._logger.error('Failed to fetch wiki article suggestions: $e');
       _cubit._emitState(_cubit.state.copyWith(isWikiSuggestionsLoading: false));
     }
   }

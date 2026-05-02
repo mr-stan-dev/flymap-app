@@ -4,7 +4,6 @@ import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/map_preview/map_detail_hint.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/flight_info_widget.dart';
-import 'package:flymap/usecase/poi_selection_config.dart';
 
 class FlightSearchOverviewStep extends StatelessWidget {
   const FlightSearchOverviewStep({
@@ -26,9 +25,6 @@ class FlightSearchOverviewStep extends StatelessWidget {
     if (route == null) {
       return Center(child: Text(context.t.createFlight.overview.routeNotReady));
     }
-    final currentPoiCount = state.flightInfo.poi.length;
-    final proPoiCount = state.proPoiCount ?? PoiSelectionConfig.proMaxPois;
-
     return Column(
       children: [
         Expanded(

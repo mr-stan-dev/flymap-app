@@ -12,7 +12,10 @@ import 'package:flymap/entity/route_poi.dart';
 import 'package:flymap/entity/flight_poi_type.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/entity/map_detail_level.dart';
-import 'package:flymap/entity/route_preview.dart';
+import 'package:flymap/entity/route_overview.dart';
+import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/entity/route_region_type.dart';
+import 'package:flymap/entity/route_timeline.dart';
 import 'package:flymap/entity/user_flight_prefs.dart';
 import 'package:flymap/entity/wiki_article_candidate.dart';
 import 'package:flymap/repository/flight_repository.dart';
@@ -25,17 +28,18 @@ import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
 import 'package:flymap/usecase/download_map_use_case.dart';
 import 'package:flymap/usecase/download_poi_summaries_use_case.dart';
+import 'package:flymap/usecase/download_region_wiki_articles_use_case.dart';
 import 'package:flymap/usecase/download_wikipedia_articles_use_case.dart';
-import 'package:flymap/usecase/get_flight_info_use_case.dart';
 import 'package:flymap/usecase/get_wiki_articles_use_case.dart';
 import 'package:flymap/usecase/delete_flight_use_case.dart';
-import 'package:flymap/usecase/get_route_preview_use_case.dart';
+import 'package:flymap/usecase/get_route_overview_use_case.dart';
 import 'package:latlong2/latlong.dart';
 
 void main() {
   group('FlightPreviewCubit wiki selection', () {
     late _FakeDownloadWikipediaArticlesUseCase wikiDownloadUseCase;
     late _FakeDownloadPoiSummariesUseCase poiDownloadUseCase;
+    late _FakeDownloadRegionWikiArticlesUseCase regionWikiDownloadUseCase;
     late _FakeDownloadMapUseCase mapUseCase;
     late _FakeConnectivityChecker connectivityChecker;
     late _FakeSubscriptionRepository subscriptionRepository;
@@ -44,6 +48,7 @@ void main() {
     setUp(() {
       wikiDownloadUseCase = _FakeDownloadWikipediaArticlesUseCase();
       poiDownloadUseCase = _FakeDownloadPoiSummariesUseCase();
+      regionWikiDownloadUseCase = _FakeDownloadRegionWikiArticlesUseCase();
       mapUseCase = _FakeDownloadMapUseCase();
       connectivityChecker = _FakeConnectivityChecker();
       subscriptionRepository = _FakeSubscriptionRepository();
@@ -52,11 +57,11 @@ void main() {
         departure: route.departure,
         arrival: route.arrival,
         connectivityChecker: connectivityChecker,
-        getRoutePreviewUseCase: _FakeGetRoutePreviewUseCase(),
+        getRouteOverviewUseCase: _FakeGetRouteOverviewUseCase(),
         downloadMapUseCase: mapUseCase,
         downloadPoiSummariesUseCase: poiDownloadUseCase,
+        downloadRegionWikiArticlesUseCase: regionWikiDownloadUseCase,
         downloadWikipediaArticlesUseCase: wikiDownloadUseCase,
-        getFlightInfoUseCase: _FakeGetFlightInfoUseCase(),
         getWikiArticlesUseCase: _FakeGetWikiArticlesUseCase(),
         userFlightPrefsRepository: _FakeUserFlightPrefsRepository(),
         flightRepository: _FakeFlightRepository(),
@@ -162,12 +167,13 @@ void main() {
         departure: route.departure,
         arrival: route.arrival,
         connectivityChecker: _FakeConnectivityChecker(),
-        getRoutePreviewUseCase: _FakeGetRoutePreviewUseCase(),
+        getRouteOverviewUseCase: _FakeGetRouteOverviewUseCase(),
         downloadMapUseCase: _FakeDownloadMapUseCase(),
         downloadPoiSummariesUseCase: _FakeDownloadPoiSummariesUseCase(),
+        downloadRegionWikiArticlesUseCase:
+            _FakeDownloadRegionWikiArticlesUseCase(),
         downloadWikipediaArticlesUseCase:
             _FakeDownloadWikipediaArticlesUseCase(),
-        getFlightInfoUseCase: _FakeGetFlightInfoUseCase(),
         getWikiArticlesUseCase: _FakeGetWikiArticlesUseCase(),
         userFlightPrefsRepository: _FakeUserFlightPrefsRepository(),
         flightRepository: _FakeFlightRepository(),
@@ -181,9 +187,9 @@ void main() {
       expect(proCubit.state.selectedMapDetailLevel, MapDetailLevel.pro);
     });
 
-    test('selectMapDetailLevel updates state in map preview step', () {
+    test('selectMapDetailLevel updates state in overview step', () {
       cubit.setStateForTest(
-        cubit.state.copyWith(step: CreateFlightStep.mapPreview),
+        cubit.state.copyWith(step: CreateFlightStep.overview),
       );
 
       cubit.selectMapDetailLevel(MapDetailLevel.pro);
@@ -251,14 +257,14 @@ void main() {
       expect(mapUseCase.lastMaxZoom, 10);
     });
 
-    test('offline map preview shows error state flag', () async {
+    test('offline overview shows error state flag', () async {
       connectivityChecker.hasInternet = false;
       cubit.setStateForTest(
-        cubit.state.copyWith(step: CreateFlightStep.mapPreview),
+        cubit.state.copyWith(step: CreateFlightStep.overview),
       );
       await cubit.preparePreview();
 
-      expect(cubit.state.step, CreateFlightStep.mapPreview);
+      expect(cubit.state.step, CreateFlightStep.overview);
       expect(cubit.state.isPreviewLoading, isFalse);
       expect(cubit.state.hasInternetForMapPreview, isFalse);
     });
@@ -279,6 +285,32 @@ void main() {
       await cubit.refreshPoisForPro();
 
       expect(cubit.state.flightInfo.poi.length, 60);
+    });
+
+    test('region wiki resolution uses english language for download', () async {
+      subscriptionRepository.isPro = true;
+      cubit.setStateForTest(
+        cubit.state.copyWith(
+          selectedArticleUrls: const [],
+          flightRoute: _route(),
+          flightInfo: cubit.state.flightInfo.copyWith(
+            routeRegions: const [
+              RouteRegion(
+                qid: 'Q84',
+                name: 'London',
+                regionType: RouteRegionType.region,
+                pathFirstEncounterKm: 0,
+                pathLengthInsideKm: 42,
+                geometry: RouteRegionGeometry(type: 'Polygon', geoJson: {}),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await cubit.startDownload();
+
+      expect(regionWikiDownloadUseCase.lastPreferredLanguageCode, 'en');
     });
   });
 }
@@ -371,11 +403,11 @@ class _TestFlightPreviewCubit extends FlightPreviewCubit {
     required super.departure,
     required super.arrival,
     required super.connectivityChecker,
-    required super.getRoutePreviewUseCase,
+    required super.getRouteOverviewUseCase,
     required super.downloadMapUseCase,
     required super.downloadPoiSummariesUseCase,
+    required super.downloadRegionWikiArticlesUseCase,
     required super.downloadWikipediaArticlesUseCase,
-    required super.getFlightInfoUseCase,
     required super.getWikiArticlesUseCase,
     required super.userFlightPrefsRepository,
     required super.flightRepository,
@@ -397,12 +429,66 @@ class _FakeConnectivityChecker implements ConnectivityChecker {
   }) async => hasInternet;
 }
 
-class _FakeGetRoutePreviewUseCase implements GetRoutePreviewUseCase {
+class _FakeGetRouteOverviewUseCase implements GetRouteOverviewUseCase {
   @override
-  Future<RoutePreview> call({
+  Future<RouteOverview> call({
     required Airport departure,
     required Airport arrival,
-  }) async => RoutePreview(route: _route(), topPois: _routePoiSummaries(80));
+  }) async {
+    return const RouteOverview(
+      route: FlightRoute(
+        departure: Airport(
+          name: 'A',
+          city: 'A',
+          countryCode: 'US',
+          latLon: LatLng(10, 10),
+          iataCode: 'AAA',
+          icaoCode: 'AAAA',
+          wikipediaUrl: '',
+        ),
+        arrival: Airport(
+          name: 'B',
+          city: 'B',
+          countryCode: 'US',
+          latLon: LatLng(20, 20),
+          iataCode: 'BBB',
+          icaoCode: 'BBBB',
+          wikipediaUrl: '',
+        ),
+        waypoints: [LatLng(10, 10), LatLng(20, 20)],
+        corridor: [LatLng(10, 10), LatLng(20, 20)],
+      ),
+      topPois: [],
+      timeline: RouteTimeline(
+        regions: [
+          RouteRegion(
+            qid: 'Q1',
+            name: 'France',
+            regionType: RouteRegionType.country,
+            pathFirstEncounterKm: 100,
+            pathLengthInsideKm: 120,
+            geometry: RouteRegionGeometry(
+              type: 'Polygon',
+              geoJson: {
+                'type': 'Polygon',
+                'coordinates': [
+                  [
+                    [2.0, 45.0],
+                    [2.1, 45.0],
+                    [2.1, 45.1],
+                    [2.0, 45.1],
+                    [2.0, 45.0],
+                  ],
+                ],
+              },
+            ),
+          ),
+        ],
+        totalRouteMinutes: 95,
+        cruiseSpeedKmh: 850,
+      ),
+    );
+  }
 }
 
 class _FakeDownloadMapUseCase implements DownloadMapUseCase {
@@ -470,13 +556,38 @@ class _FakeDownloadPoiSummariesUseCase implements DownloadPoiSummariesUseCase {
   }
 }
 
-class _FakeGetFlightInfoUseCase implements GetFlightInfoUseCase {
+class _FakeDownloadRegionWikiArticlesUseCase
+    implements DownloadRegionWikiArticlesUseCase {
+  String? lastPreferredLanguageCode;
+
   @override
-  Future<FlightInfo> call({
-    required String airportDeparture,
-    required String airportArrival,
-    required List<LatLng> waypoints,
-  }) async => FlightInfo.empty;
+  void cancel() {}
+
+  @override
+  int downloadTargetCount(List<RouteRegion> regions) => regions.length;
+
+  @override
+  Future<RegionWikiArticlesDownloadResult> call({
+    required List<RouteRegion> regions,
+    required String preferredLanguageCode,
+    required void Function(RegionWikiArticlesDownloadProgress progress)
+    onProgress,
+  }) async {
+    lastPreferredLanguageCode = preferredLanguageCode;
+    onProgress(
+      RegionWikiArticlesDownloadProgress(
+        completed: regions.length,
+        total: regions.length,
+        failed: 0,
+      ),
+    );
+    return RegionWikiArticlesDownloadResult(
+      regions: List<RouteRegion>.from(regions),
+      articleUrls: const [],
+      failedCount: 0,
+      cancelled: false,
+    );
+  }
 }
 
 class _FakeGetWikiArticlesUseCase implements GetWikiArticlesUseCase {

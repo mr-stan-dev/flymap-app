@@ -5,11 +5,15 @@ import 'package:flymap/ui/design_system/tokens/ds_spacing.dart';
 
 enum DsMessageTone { neutral, info, success, warning, error }
 
+typedef DsExpandableCardTrailingBuilder =
+    Widget Function(BuildContext context, bool isExpanded);
+
 class SectionCard extends StatelessWidget {
   const SectionCard({
     required this.child,
     this.title,
     this.trailing,
+    this.expandChild = false,
     this.padding = const EdgeInsets.all(DsSpacing.md),
     super.key,
   });
@@ -17,6 +21,7 @@ class SectionCard extends StatelessWidget {
   final String? title;
   final Widget? trailing;
   final Widget child;
+  final bool expandChild;
   final EdgeInsetsGeometry padding;
 
   @override
@@ -43,7 +48,7 @@ class SectionCard extends StatelessWidget {
               ),
               const SizedBox(height: DsSpacing.sm),
             ],
-            child,
+            if (expandChild) Expanded(child: child) else child,
           ],
         ),
       ),
@@ -89,6 +94,122 @@ class ExpandableSectionCard extends StatelessWidget {
           childrenPadding: childrenPadding,
           children: [child],
         ),
+      ),
+    );
+  }
+}
+
+class ExpandableCard extends StatefulWidget {
+  const ExpandableCard({
+    required this.header,
+    required this.child,
+    this.trailingBuilder,
+    this.initiallyExpanded = false,
+    this.headerPadding = const EdgeInsets.all(DsSpacing.md),
+    this.childPadding = const EdgeInsets.fromLTRB(
+      DsSpacing.md,
+      0,
+      DsSpacing.md,
+      DsSpacing.md,
+    ),
+    this.animationDuration = const Duration(milliseconds: 300),
+    this.animationCurve = Curves.easeOutCubic,
+    super.key,
+  });
+
+  final Widget header;
+  final Widget child;
+  final DsExpandableCardTrailingBuilder? trailingBuilder;
+  final bool initiallyExpanded;
+  final EdgeInsetsGeometry headerPadding;
+  final EdgeInsetsGeometry childPadding;
+  final Duration animationDuration;
+  final Curve animationCurve;
+
+  @override
+  State<ExpandableCard> createState() => _ExpandableCardState();
+}
+
+class _ExpandableCardState extends State<ExpandableCard>
+    with TickerProviderStateMixin {
+  late bool _isExpanded = widget.initiallyExpanded;
+  late final AnimationController _controller;
+  late Animation<double> _sizeFactor;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.animationDuration,
+      value: _isExpanded ? 1 : 0,
+    );
+    _sizeFactor = CurvedAnimation(
+      parent: _controller,
+      curve: widget.animationCurve,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant ExpandableCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animationDuration != widget.animationDuration) {
+      _controller.duration = widget.animationDuration;
+    }
+    if (oldWidget.animationCurve != widget.animationCurve) {
+      _sizeFactor = CurvedAnimation(
+        parent: _controller,
+        curve: widget.animationCurve,
+      );
+    }
+  }
+
+  void _toggle() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+    });
+    if (_isExpanded) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: _toggle,
+            child: Padding(
+              padding: widget.headerPadding,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: widget.header),
+                  if (widget.trailingBuilder != null)
+                    widget.trailingBuilder!(context, _isExpanded),
+                ],
+              ),
+            ),
+          ),
+          ClipRect(
+            child: SizeTransition(
+              sizeFactor: _sizeFactor,
+              axis: Axis.vertical,
+              axisAlignment: -1,
+              child: Padding(padding: widget.childPadding, child: widget.child),
+            ),
+          ),
+        ],
       ),
     );
   }

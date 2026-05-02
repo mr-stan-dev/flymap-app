@@ -9,7 +9,7 @@ import 'package:latlong2/latlong.dart';
 
 void main() {
   group('DownloadPoiSummariesUseCase', () {
-    test('emits incremental progress in chunks', () async {
+    test('emits incremental progress per item', () async {
       final pois = List.generate(45, (i) => _poi('Q${i + 1}'));
       final repository = _FakePoiWikiPreviewRepository();
       final useCase = DownloadPoiSummariesUseCase(repository: repository);
@@ -23,7 +23,9 @@ void main() {
 
       expect(result.cancelled, isFalse);
       expect(result.failedCount, 0);
-      expect(progress.map((p) => p.completed), [0, 10, 20, 30, 40, 45]);
+      expect(progress.first.completed, 0);
+      expect(progress.last.completed, 45);
+      expect(progress.length, 46);
       expect(progress.last.total, 45);
       expect(repository.calls.map((c) => c.length), [10, 10, 10, 10, 5]);
     });

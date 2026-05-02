@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flymap/entity/poi_wiki_preview.dart';
 import 'package:flymap/repository/poi_wiki_preview_repository.dart';
-import 'package:flymap/usecase/get_poi_wiki_preview_use_case.dart';
+import 'package:flymap/usecase/get_place_info_use_case.dart';
 
 void main() {
   group('GetPoiWikiPreviewUseCase', () {
     test('returns cached result for repeated qid lookups', () async {
       final repository = _FakePoiWikiPreviewRepository();
-      final useCase = GetPoiWikiPreviewUseCase(repository: repository);
+      final useCase = GetPlaceInfoUseCase(repository: repository);
 
       final first = await useCase.call(
         qid: 'q123',

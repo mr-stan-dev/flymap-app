@@ -38,6 +38,8 @@ String composeScrollableHtml({
     padding: 0 !important;
     background: $bgHex !important;
     color: $textHex !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
   }
   .offline-shell {
     min-height: 100vh;
@@ -50,6 +52,24 @@ String composeScrollableHtml({
   .offline-shell * {
     background-color: transparent !important;
     color: $textHex !important;
+    max-height: none !important;
+  }
+  .offline-shell div,
+  .offline-shell section,
+  .offline-shell article,
+  .offline-shell main,
+  .offline-shell aside,
+  .offline-shell p,
+  .offline-shell ul,
+  .offline-shell ol,
+  .offline-shell li {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .offline-shell table,
+  .offline-shell pre,
+  .offline-shell code {
+    overflow-x: auto !important;
   }
   .offline-shell a,
   .offline-shell a:visited {

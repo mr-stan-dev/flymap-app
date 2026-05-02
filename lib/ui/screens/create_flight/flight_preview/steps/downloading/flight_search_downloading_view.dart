@@ -47,7 +47,9 @@ class FlightSearchDownloadingView extends StatelessWidget {
                 ),
                 const SizedBox(height: DsSpacing.sm),
                 _DownloadSectionCard(
-                  title: context.t.createFlight.downloading.poiSectionTitle,
+                  title:
+                      '${context.t.createFlight.downloading.poiSectionTitle} & '
+                      '${context.t.createFlight.overview.routeSummaryRegionsLabel}',
                   subtitle: _poiSubtitle(context, sections.poi),
                   status: sections.poi.status,
                   statusLabel: _statusLabel(context, sections.poi.status),
@@ -134,6 +136,10 @@ class FlightSearchDownloadingView extends StatelessWidget {
   }
 
   String _poiSubtitle(BuildContext context, DownloadSectionState section) {
+    final custom = section.message?.trim() ?? '';
+    if (custom.isNotEmpty) {
+      return custom;
+    }
     if (section.total > 0) {
       if (section.failed > 0) {
         return context.t.createFlight.downloading.poiProgressWithFailed(

@@ -23,10 +23,10 @@ import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_
 import 'package:flymap/usecase/delete_flight_use_case.dart';
 import 'package:flymap/usecase/download_map_use_case.dart';
 import 'package:flymap/usecase/download_poi_summaries_use_case.dart';
+import 'package:flymap/usecase/download_region_wiki_articles_use_case.dart';
 import 'package:flymap/usecase/download_wikipedia_articles_use_case.dart';
-import 'package:flymap/usecase/get_flight_info_use_case.dart';
+import 'package:flymap/usecase/get_route_overview_use_case.dart';
 import 'package:flymap/usecase/get_wiki_articles_use_case.dart';
-import 'package:flymap/usecase/get_route_preview_use_case.dart';
 import 'package:flymap/usecase/poi_selection_config.dart';
 
 part 'delegates/preview_preparation_delegate.dart';
@@ -39,11 +39,12 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     required this.departure,
     required this.arrival,
     required ConnectivityChecker connectivityChecker,
-    required GetRoutePreviewUseCase getRoutePreviewUseCase,
+    required GetRouteOverviewUseCase getRouteOverviewUseCase,
     required DownloadMapUseCase downloadMapUseCase,
     required DownloadPoiSummariesUseCase downloadPoiSummariesUseCase,
+    required DownloadRegionWikiArticlesUseCase
+    downloadRegionWikiArticlesUseCase,
     required DownloadWikipediaArticlesUseCase downloadWikipediaArticlesUseCase,
-    required GetFlightInfoUseCase getFlightInfoUseCase,
     required GetWikiArticlesUseCase getWikiArticlesUseCase,
     required UserFlightPrefsRepository userFlightPrefsRepository,
     required FlightRepository flightRepository,
@@ -64,8 +65,7 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     _previewPreparationDelegate = PreviewPreparationDelegate(
       this,
       connectivityChecker: connectivityChecker,
-      getRoutePreviewUseCase: getRoutePreviewUseCase,
-      getFlightInfoUseCase: getFlightInfoUseCase,
+      getRouteOverviewUseCase: getRouteOverviewUseCase,
       getWikiArticlesUseCase: getWikiArticlesUseCase,
       userFlightPrefsRepository: userFlightPrefsRepository,
     );
@@ -75,6 +75,7 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
       this,
       downloadMapUseCase: downloadMapUseCase,
       downloadPoiSummariesUseCase: downloadPoiSummariesUseCase,
+      downloadRegionWikiArticlesUseCase: downloadRegionWikiArticlesUseCase,
       downloadWikipediaArticlesUseCase: downloadWikipediaArticlesUseCase,
       flightRepository: flightRepository,
       subscriptionRepository: subscriptionRepository,
@@ -96,8 +97,6 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
   late final DownloadFlowDelegate _downloadFlowDelegate;
 
   Future<void> preparePreview() => _previewPreparationDelegate.preparePreview();
-
-  Future<void> continueFromMap() => _navigationDelegate.continueFromMap();
 
   void selectMapDetailLevel(MapDetailLevel detailLevel) =>
       _navigationDelegate.selectMapDetailLevel(detailLevel);

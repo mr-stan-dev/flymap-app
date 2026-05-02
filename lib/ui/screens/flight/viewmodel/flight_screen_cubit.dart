@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/data/gps_data_provider.dart';
 import 'package:flymap/entity/flight.dart';
 import 'package:flymap/entity/gps_data.dart';
+import 'package:flymap/entity/route_region_geo_contains.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
@@ -38,6 +39,9 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
 
     await _gpsProvider.start(
       onUpdate: (status, {data}) {
+        final current = state is FlightScreenLoaded
+            ? state as FlightScreenLoaded
+            : null;
         switch (status) {
           case GpsStatus.gpsActive:
           case GpsStatus.weakSignal:
@@ -49,6 +53,18 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
             _lastGpsEventAt = null;
             break;
         }
+        var lastVisitedRegionQid = current?.lastVisitedRegionQid;
+        final latitude = data?.latitude;
+        final longitude = data?.longitude;
+        if (latitude != null && longitude != null) {
+          final latest = _findLatestContainingRegionQid(
+            latitude: latitude,
+            longitude: longitude,
+          );
+          if (latest != null && latest.isNotEmpty) {
+            lastVisitedRegionQid = latest;
+          }
+        }
         _gpsUpdateTick++;
         emit(
           FlightScreenLoaded(
@@ -56,6 +72,7 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
             gpsStatus: status,
             gpsData: data,
             gpsUpdateTick: _gpsUpdateTick,
+            lastVisitedRegionQid: lastVisitedRegionQid,
           ),
         );
       },
@@ -158,6 +175,28 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
 
   void openLocationSettings() {
     Geolocator.openLocationSettings();
+  }
+
+  String? _findLatestContainingRegionQid({
+    required double latitude,
+    required double longitude,
+  }) {
+    String? bestQid;
+    var bestPathFirstEncounterKm = double.negativeInfinity;
+    for (final region in flight.info.routeRegions) {
+      if (!RouteRegionGeoContains.contains(
+        region,
+        latitude: latitude,
+        longitude: longitude,
+      )) {
+        continue;
+      }
+      if (region.pathFirstEncounterKm > bestPathFirstEncounterKm) {
+        bestPathFirstEncounterKm = region.pathFirstEncounterKm;
+        bestQid = region.qid;
+      }
+    }
+    return bestQid;
   }
 
   @override

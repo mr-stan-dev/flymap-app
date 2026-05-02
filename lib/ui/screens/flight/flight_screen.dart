@@ -7,8 +7,8 @@ import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/flight/widgets/flight_app_bar.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/dashboard_tab_view.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/info_tab_view.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_tab.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/route/flight_route_tab_view.dart';
 import 'package:flymap/ui/screens/home/tabs/home/home_tab.dart';
 
 class FlightScreen extends StatelessWidget {
@@ -40,6 +40,13 @@ class _FlightScreenViewState extends State<_FlightScreenView> {
     final t = context.t;
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Theme.of(
+          context,
+        ).colorScheme.onSurface.withValues(alpha: 0.72),
+        showUnselectedLabels: true,
         currentIndex: _tabIndex,
         onTap: (index) => setState(() => _tabIndex = index),
         items: [
@@ -54,9 +61,9 @@ class _FlightScreenViewState extends State<_FlightScreenView> {
             label: t.flight.tabDashboard,
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.info_outline),
-            activeIcon: const Icon(Icons.info),
-            label: t.flight.tabInfo,
+            icon: const Icon(Icons.timeline_outlined),
+            activeIcon: const Icon(Icons.timeline),
+            label: t.flight.tabRoute,
           ),
         ],
       ),
@@ -89,7 +96,7 @@ class _FlightScreenViewState extends State<_FlightScreenView> {
                       state: state,
                       topPadding: _tabTopPadding(context),
                     ),
-                    FlightInfoTabView(
+                    FlightRouteTabView(
                       state: state,
                       topPadding: _tabTopPadding(context),
                     ),

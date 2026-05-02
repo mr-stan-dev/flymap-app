@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flymap/entity/poi_wiki_preview.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/common/html_content_page.dart';
-import 'package:flymap/usecase/get_poi_wiki_preview_use_case.dart';
+import 'package:flymap/usecase/get_place_info_use_case.dart';
 import 'package:flymap/utils/wiki_text_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -17,11 +17,11 @@ Future<void> showPoiPreviewDialog({
   required String typeRaw,
   required String qid,
   PoiPreviewActionMode actionMode = PoiPreviewActionMode.cancelAndOpen,
-  GetPoiWikiPreviewUseCase? wikiPreviewUseCase,
+  GetPlaceInfoUseCase? wikiPreviewUseCase,
   PoiWikiPreview? preloadedPreview,
 }) async {
   if (name.trim().isEmpty) return;
-  final useCase = wikiPreviewUseCase ?? GetIt.I.get<GetPoiWikiPreviewUseCase>();
+  final useCase = wikiPreviewUseCase ?? GetIt.I.get<GetPlaceInfoUseCase>();
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -55,7 +55,7 @@ class PoiPreviewBottomSheet extends StatefulWidget {
   final String typeRaw;
   final String qid;
   final String preferredLanguageCode;
-  final GetPoiWikiPreviewUseCase wikiPreviewUseCase;
+  final GetPlaceInfoUseCase wikiPreviewUseCase;
   final PoiPreviewActionMode actionMode;
   final PoiWikiPreview? preloadedPreview;
 

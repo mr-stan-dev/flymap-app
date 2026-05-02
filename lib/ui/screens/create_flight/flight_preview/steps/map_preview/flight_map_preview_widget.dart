@@ -13,7 +13,7 @@ import 'package:flymap/ui/map/layers/poi_layer.dart';
 import 'package:flymap/ui/map/map_style_safety.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_preview_bottom_sheet.dart';
-import 'package:flymap/usecase/get_poi_wiki_preview_use_case.dart';
+import 'package:flymap/usecase/get_place_info_use_case.dart';
 import 'package:flymap/utils/url_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
@@ -55,8 +55,8 @@ class _FlightMapPreviewWidgetState extends State<FlightMapPreviewWidget> {
   bool _isPoiDialogVisible = false;
   bool _featureTapListenerAttached = false;
   late final AppAnalytics _analytics = GetIt.I.get<AppAnalytics>();
-  late final GetPoiWikiPreviewUseCase _wikiPreviewUseCase = GetIt.I
-      .get<GetPoiWikiPreviewUseCase>();
+  late final GetPlaceInfoUseCase _wikiPreviewUseCase = GetIt.I
+      .get<GetPlaceInfoUseCase>();
 
   late final LatLng _center = MapUtils.routeCenter(
     widget.flightRoute,

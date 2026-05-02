@@ -18,8 +18,7 @@ import 'package:flymap/subscription/pro_limits.dart';
 import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/flight_preview_args.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/downloading/flight_search_downloading_view.dart';
-import 'package:flymap/ui/screens/create_flight/flight_preview/steps/map_preview/flight_search_map_preview_step.dart';
-import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/flight_search_overview_step.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview/flight_search_route_overview_step.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/route_not_supported/flight_search_route_not_supported_step.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/wikipedia_articles/flight_search_wikipedia_articles_step.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_cubit.dart';
@@ -30,11 +29,11 @@ import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart
 import 'package:flymap/ui/widgets/rate_app_dialog.dart';
 import 'package:flymap/usecase/download_map_use_case.dart';
 import 'package:flymap/usecase/download_poi_summaries_use_case.dart';
+import 'package:flymap/usecase/download_region_wiki_articles_use_case.dart';
 import 'package:flymap/usecase/download_wikipedia_articles_use_case.dart';
-import 'package:flymap/usecase/get_flight_info_use_case.dart';
+import 'package:flymap/usecase/get_route_overview_use_case.dart';
 import 'package:flymap/usecase/get_wiki_articles_use_case.dart';
 import 'package:flymap/usecase/delete_flight_use_case.dart';
-import 'package:flymap/usecase/get_route_preview_use_case.dart';
 import 'package:get_it/get_it.dart';
 
 class FlightPreviewScreen extends StatelessWidget {
@@ -49,12 +48,13 @@ class FlightPreviewScreen extends StatelessWidget {
         departure: args.departure,
         arrival: args.arrival,
         connectivityChecker: GetIt.I.get<ConnectivityChecker>(),
-        getRoutePreviewUseCase: GetIt.I.get<GetRoutePreviewUseCase>(),
+        getRouteOverviewUseCase: GetIt.I.get<GetRouteOverviewUseCase>(),
         downloadMapUseCase: GetIt.I.get<DownloadMapUseCase>(),
         downloadPoiSummariesUseCase: GetIt.I.get<DownloadPoiSummariesUseCase>(),
+        downloadRegionWikiArticlesUseCase: GetIt.I
+            .get<DownloadRegionWikiArticlesUseCase>(),
         downloadWikipediaArticlesUseCase: GetIt.I
             .get<DownloadWikipediaArticlesUseCase>(),
-        getFlightInfoUseCase: GetIt.I.get<GetFlightInfoUseCase>(),
         getWikiArticlesUseCase: GetIt.I.get<GetWikiArticlesUseCase>(),
         userFlightPrefsRepository: GetIt.I.get<UserFlightPrefsRepository>(),
         flightRepository: GetIt.I.get<FlightRepository>(),
@@ -142,14 +142,11 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
                 onPressed: () => _onBackPressed(context),
               ),
               title: Text(_titleForState(context, state)),
-              actions: state.step == CreateFlightStep.mapPreview
+              actions: state.step == CreateFlightStep.overview
                   ? [
                       IconButton(
-                        tooltip: context
-                            .t
-                            .createFlight
-                            .mapPreview
-                            .mapDetailInfoTooltip,
+                        tooltip:
+                            context.t.createFlight.overview.routeNoteTooltip,
                         onPressed: () => _showRouteNoteDialog(context),
                         icon: const Icon(Icons.info_outline_rounded),
                       ),
@@ -217,7 +214,10 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
               context.t.createFlight.mapPreview.routeNotSupportedMsg,
           onBack: () => unawaited(_onBackPressed(context)),
         );
-      case CreateFlightStep.mapPreview:
+      case CreateFlightStep.overview:
+        if (state.isPreviewLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
         if (!state.hasInternetForMapPreview) {
           return Center(
             child: Padding(
@@ -230,28 +230,15 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
             ),
           );
         }
-        return FlightSearchMapPreviewStep(
-          state: state,
-          isProUser: isProUser,
-          onContinue: () => unawaited(
-            _handleContinueFromMap(
-              context: context,
-              state: state,
-              cubit: cubit,
-              subscriptionCubit: subscriptionCubit,
-            ),
-          ),
-          onSelectMapDetailLevel: cubit.selectMapDetailLevel,
-        );
-      case CreateFlightStep.overview:
-        return FlightSearchOverviewStep(
+        return FlightSearchRouteOverviewStep(
           state: state,
           isProUser: isProUser,
           onContinue: cubit.continueFromOverview,
+          onSelectMapDetailLevel: cubit.selectMapDetailLevel,
           onUpgradeToPro: () => unawaited(
-            _handleUpgradeFromOverview(
+            _handleUpgradeToProFromOverview(
               context: context,
-              cubit: cubit,
+              state: state,
               subscriptionCubit: subscriptionCubit,
             ),
           ),
@@ -279,8 +266,8 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: Text(context.t.createFlight.mapPreview.optionsTitle),
-          content: Text(context.t.createFlight.mapPreview.optionsBody),
+          title: Text(context.t.createFlight.overview.routeNoteTitle),
+          content: Text(context.t.createFlight.overview.routeNoteBody),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
@@ -292,23 +279,15 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
     );
   }
 
-  Future<void> _handleContinueFromMap({
+  Future<void> _handleUpgradeToProFromOverview({
     required BuildContext context,
     required FlightPreviewState state,
-    required FlightPreviewCubit cubit,
     required SubscriptionCubit subscriptionCubit,
   }) async {
-    final isProUser = subscriptionCubit.state.isPro;
-    if (isProUser && state.selectedMapDetailLevel != MapDetailLevel.pro) {
-      cubit.selectMapDetailLevel(MapDetailLevel.pro);
-    }
-    final shouldUpgradeFirst =
-        !isProUser && state.selectedMapDetailLevel == MapDetailLevel.pro;
-    if (!shouldUpgradeFirst) {
-      await cubit.continueFromMap();
+    if (subscriptionCubit.state.isPro ||
+        state.selectedMapDetailLevel != MapDetailLevel.pro) {
       return;
     }
-
     final result = await subscriptionCubit.presentPaywallForCreateFlight(
       shouldUpgradeForArticles: false,
       shouldUpgradeForMapConfig: true,
@@ -366,36 +345,6 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
     switch (result) {
       case SubscriptionPaywallResult.purchased:
       case SubscriptionPaywallResult.restored:
-        _showSnackBar(context, context.t.settings.flymapProActivated);
-        return;
-      case SubscriptionPaywallResult.cancelled:
-        _showSnackBar(context, context.t.createFlight.paywall.upgradeCancelled);
-        return;
-      case SubscriptionPaywallResult.notPresented:
-        _showSnackBar(context, context.t.createFlight.paywall.noPaywall);
-        return;
-      case SubscriptionPaywallResult.error:
-        _showSnackBar(
-          context,
-          context.t.createFlight.paywall.failedOpenPaywall,
-        );
-        return;
-    }
-  }
-
-  Future<void> _handleUpgradeFromOverview({
-    required BuildContext context,
-    required FlightPreviewCubit cubit,
-    required SubscriptionCubit subscriptionCubit,
-  }) async {
-    final result = await subscriptionCubit.presentPaywallFromOverviewPoi();
-    if (!context.mounted) return;
-
-    switch (result) {
-      case SubscriptionPaywallResult.purchased:
-      case SubscriptionPaywallResult.restored:
-        await cubit.refreshPoisForPro();
-        if (!context.mounted) return;
         _showSnackBar(context, context.t.settings.flymapProActivated);
         return;
       case SubscriptionPaywallResult.cancelled:
@@ -483,10 +432,9 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
 
   int _stepIndex(CreateFlightStep step) {
     return switch (step) {
-      CreateFlightStep.mapPreview => 0,
       CreateFlightStep.routeNotSupported => 0,
-      CreateFlightStep.overview => 1,
-      CreateFlightStep.wikipediaArticles => 2,
+      CreateFlightStep.overview => 0,
+      CreateFlightStep.wikipediaArticles => 1,
     };
   }
 
@@ -496,10 +444,8 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
     }
     final step = state.step;
     return switch (step) {
-      CreateFlightStep.mapPreview =>
-        context.t.createFlight.steps.mapPreviewTitle,
       CreateFlightStep.routeNotSupported =>
-        context.t.createFlight.steps.mapPreviewTitle,
+        context.t.createFlight.steps.routeNotSupportedTitle,
       CreateFlightStep.overview => context.t.createFlight.steps.overviewTitle,
       CreateFlightStep.wikipediaArticles =>
         context.t.createFlight.steps.wikipediaTitle,

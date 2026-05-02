@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/entity/gps_data.dart';
 import 'package:flymap/i18n/strings.g.dart';
-import 'package:flymap/ui/map/map_utils.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/shared/route_progress_estimator.dart';
 
 class RouteProgressCard extends StatelessWidget {
   const RouteProgressCard({
@@ -12,15 +11,16 @@ class RouteProgressCard extends StatelessWidget {
     super.key,
   });
 
-  static const _betweenAirportsToleranceMultiplier = 1.3;
-
   final FlightRoute route;
   final GpsData? gpsData;
 
   @override
   Widget build(BuildContext context) {
     final totalKm = route.distanceInKm;
-    final progress = _estimateProgress();
+    final progress = RouteProgressEstimator.estimateProgress(
+      route: route,
+      gpsData: gpsData,
+    );
     final coveredKm = progress * totalKm;
     final remainingKm = (totalKm - coveredKm).clamp(0, totalKm);
     final colorScheme = Theme.of(context).colorScheme;
@@ -111,34 +111,6 @@ class RouteProgressCard extends StatelessWidget {
     );
   }
 
-  double _estimateProgress() {
-    final lat = gpsData?.latitude;
-    final lon = gpsData?.longitude;
-    if (lat == null || lon == null) return 0;
-
-    final airportToAirportDistanceKm = route.distanceInKm;
-    if (airportToAirportDistanceKm <= 0) return 0;
-
-    final current = LatLng(lat, lon);
-    final distanceToDepartureKm = MapUtils.distanceKm(
-      departure: route.departure.latLon,
-      arrival: current,
-    );
-    final distanceToArrivalKm = MapUtils.distanceKm(
-      departure: current,
-      arrival: route.arrival.latLon,
-    );
-
-  if (distanceToArrivalKm > airportToAirportDistanceKm) return 0;
-
-    final span = distanceToDepartureKm + distanceToArrivalKm;
-    if (span <= 0) return 0;
-    final maxAllowedSpanKm =
-        airportToAirportDistanceKm * _betweenAirportsToleranceMultiplier;
-    if (span > maxAllowedSpanKm) return 0;
-
-    return (distanceToDepartureKm / span).clamp(0.0, 1.0);
-  }
 }
 
 class _Metric extends StatelessWidget {

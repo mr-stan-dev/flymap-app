@@ -732,6 +732,9 @@ class TranslationsFlightEn {
 	/// en: 'Dashboard'
 	String get tabDashboard => 'Dashboard';
 
+	/// en: 'Route'
+	String get tabRoute => 'Route';
+
 	/// en: 'Info'
 	String get tabInfo => 'Info';
 
@@ -777,6 +780,7 @@ class TranslationsFlightEn {
 	late final TranslationsFlightMapEn map = TranslationsFlightMapEn.internal(_root);
 	late final TranslationsFlightDashboardEn dashboard = TranslationsFlightDashboardEn.internal(_root);
 	late final TranslationsFlightInfoEn info = TranslationsFlightInfoEn.internal(_root);
+	late final TranslationsFlightRouteEn route = TranslationsFlightRouteEn.internal(_root);
 }
 
 // Path: shareFlight
@@ -1188,6 +1192,61 @@ class TranslationsCreateFlightOverviewEn {
 
 	/// en: 'Free plan includes basic map and limited places'
 	String get proPoiUpsell => 'Free plan includes basic map and limited places';
+
+	/// en: 'Route note'
+	String get routeNoteTooltip => 'Route note';
+
+	/// en: 'Approximate route'
+	String get routeNoteTitle => 'Approximate route';
+
+	/// en: 'Route is approximate — actual path may vary, especially on long-haul flights.'
+	String get routeNoteBody => 'Route is approximate — actual path may vary, especially on long-haul flights.';
+
+	/// en: 'Route'
+	String get routeTitleLabel => 'Route';
+
+	/// en: 'Start'
+	String get start => 'Start';
+
+	/// en: 'Route summary'
+	String get routeSummaryButton => 'Route summary';
+
+	/// en: 'All regions you'd fly over'
+	String get allRegionsYouFlyOver => 'All regions you\'d fly over';
+
+	/// en: 'Full summary'
+	String get fullSummary => 'Full summary';
+
+	/// en: 'Route Summary'
+	String get routeSummaryTitle => 'Route Summary';
+
+	/// en: 'Distance'
+	String get routeSummaryDistanceLabel => 'Distance';
+
+	/// en: 'Duration'
+	String get routeSummaryDurationLabel => 'Duration';
+
+	/// en: 'Regions'
+	String get routeSummaryRegionsLabel => 'Regions';
+
+	/// en: 'Places'
+	String get routeSummaryPlacesLabel => 'Places';
+
+	/// en: 'Timeline'
+	String get routeSummaryTimelineTitle => 'Timeline';
+
+	/// en: 'Places along the route'
+	String get routeSummaryPlacesTitle => 'Places along the route';
+
+	/// en: 'Search places'
+	String get routeSummaryPoiSearchHint => 'Search places';
+
+	/// en: 'No places match your search.'
+	String get routeSummaryPoiNoMatches => 'No places match your search.';
+
+	late final TranslationsCreateFlightOverviewAirportCardEn airportCard = TranslationsCreateFlightOverviewAirportCardEn.internal(_root);
+	late final TranslationsCreateFlightOverviewRegionInfoEn regionInfo = TranslationsCreateFlightOverviewRegionInfoEn.internal(_root);
+	late final TranslationsCreateFlightOverviewTimelineEn timeline = TranslationsCreateFlightOverviewTimelineEn.internal(_root);
 }
 
 // Path: createFlight.wikipedia
@@ -1198,8 +1257,8 @@ class TranslationsCreateFlightWikipediaEn {
 
 	// Translations
 
-	/// en: 'Select articles to download with map'
-	String get title => 'Select articles to download with map';
+	/// en: 'Add articles to read while you’re in the air'
+	String get title => 'Add articles to read while you’re in the air';
 
 	/// en: 'Finding route-related articles...'
 	String get loadingIntro => 'Finding route-related articles...';
@@ -1712,6 +1771,194 @@ class TranslationsFlightInfoEn {
 	String copyCodes({required Object iata, required Object icao}) => 'Codes: IATA ${iata} | ICAO ${icao}';
 }
 
+// Path: flight.route
+class TranslationsFlightRouteEn {
+	TranslationsFlightRouteEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Loading route timeline...'
+	String get loadingRouteTimeline => 'Loading route timeline...';
+
+	/// en: 'No saved offline regions for this flight.'
+	String get noSavedOfflineRegions => 'No saved offline regions for this flight.';
+
+	/// en: 'Current progress: $percentage% (around $minute from takeoff)'
+	String currentProgress({required Object percentage, required Object minute}) => 'Current progress: ${percentage}% (around ${minute} from takeoff)';
+
+	/// en: 'Now'
+	String get nowLabel => 'Now';
+}
+
+// Path: createFlight.overview.airportCard
+class TranslationsCreateFlightOverviewAirportCardEn {
+	TranslationsCreateFlightOverviewAirportCardEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'You'll start your journey from $airport.'
+	String departureDescription({required Object airport}) => 'You\'ll start your journey from ${airport}.';
+
+	/// en: 'You'll arrive at $airport.'
+	String arrivalDescription({required Object airport}) => 'You\'ll arrive at ${airport}.';
+}
+
+// Path: createFlight.overview.regionInfo
+class TranslationsCreateFlightOverviewRegionInfoEn {
+	TranslationsCreateFlightOverviewRegionInfoEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Description is not available yet.'
+	String get descriptionUnavailable => 'Description is not available yet.';
+
+	/// en: 'Wikipedia'
+	String get wikipediaSectionTitle => 'Wikipedia';
+
+	/// en: 'Wikipedia article is not available right now.'
+	String get wikipediaUnavailable => 'Wikipedia article is not available right now.';
+
+	/// en: 'Open Wikipedia'
+	String get openWikipedia => 'Open Wikipedia';
+}
+
+// Path: createFlight.overview.timeline
+class TranslationsCreateFlightOverviewTimelineEn {
+	TranslationsCreateFlightOverviewTimelineEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Take off'
+	String get takeOffTimeline => 'Take\noff';
+
+	/// en: 'Land'
+	String get land => 'Land';
+
+	/// en: 'Also around same time:'
+	String get alsoAroundThisTime => 'Also around same time:';
+
+	/// en: 'min'
+	String get minuteUnit => 'min';
+
+	/// en: 'h'
+	String get hourCompactUnit => 'h';
+
+	/// en: 'm'
+	String get minuteCompactUnit => 'm';
+
+	late final TranslationsCreateFlightOverviewTimelineRegionTypeEn regionType = TranslationsCreateFlightOverviewTimelineRegionTypeEn.internal(_root);
+}
+
+// Path: createFlight.overview.timeline.regionType
+class TranslationsCreateFlightOverviewTimelineRegionTypeEn {
+	TranslationsCreateFlightOverviewTimelineRegionTypeEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Country'
+	String get country => 'Country';
+
+	/// en: 'Region'
+	String get region => 'Region';
+
+	/// en: 'State'
+	String get state => 'State';
+
+	/// en: 'Province'
+	String get province => 'Province';
+
+	/// en: 'Sea'
+	String get sea => 'Sea';
+
+	/// en: 'Ocean'
+	String get ocean => 'Ocean';
+
+	/// en: 'Strait'
+	String get strait => 'Strait';
+
+	/// en: 'Channel'
+	String get channel => 'Channel';
+
+	/// en: 'Gulf'
+	String get gulf => 'Gulf';
+
+	/// en: 'Bay'
+	String get bay => 'Bay';
+
+	/// en: 'Lake'
+	String get lake => 'Lake';
+
+	/// en: 'Alkaline lake'
+	String get alkalineLake => 'Alkaline lake';
+
+	/// en: 'Island'
+	String get island => 'Island';
+
+	/// en: 'Archipelago'
+	String get archipelago => 'Archipelago';
+
+	/// en: 'Peninsula'
+	String get peninsula => 'Peninsula';
+
+	/// en: 'Coast'
+	String get coast => 'Coast';
+
+	/// en: 'Mountain range'
+	String get mountainRange => 'Mountain range';
+
+	/// en: 'Valley'
+	String get valley => 'Valley';
+
+	/// en: 'Plateau'
+	String get plateau => 'Plateau';
+
+	/// en: 'Plain'
+	String get plain => 'Plain';
+
+	/// en: 'Basin'
+	String get basin => 'Basin';
+
+	/// en: 'Lowland'
+	String get lowland => 'Lowland';
+
+	/// en: 'Tundra'
+	String get tundra => 'Tundra';
+
+	/// en: 'Wetlands'
+	String get wetlands => 'Wetlands';
+
+	/// en: 'Desert'
+	String get desert => 'Desert';
+
+	/// en: 'Delta'
+	String get delta => 'Delta';
+
+	/// en: 'Reservoir'
+	String get reservoir => 'Reservoir';
+
+	/// en: 'Continent'
+	String get continent => 'Continent';
+
+	/// en: 'Geographic area'
+	String get geoarea => 'Geographic area';
+
+	/// en: 'Isthmus'
+	String get isthmus => 'Isthmus';
+
+	/// en: 'Unknown region type'
+	String get unknown => 'Unknown region type';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -1943,7 +2190,67 @@ extension on Translations {
 			'createFlight.mapPreview.optionsBody' => 'Route is approximate — actual path may vary, especially on long-haul flights.',
 			'createFlight.overview.routeNotReady' => 'Route is not ready yet.',
 			'createFlight.overview.proPoiUpsell' => 'Free plan includes basic map and limited places',
-			'createFlight.wikipedia.title' => 'Select articles to download with map',
+			'createFlight.overview.routeNoteTooltip' => 'Route note',
+			'createFlight.overview.routeNoteTitle' => 'Approximate route',
+			'createFlight.overview.routeNoteBody' => 'Route is approximate — actual path may vary, especially on long-haul flights.',
+			'createFlight.overview.routeTitleLabel' => 'Route',
+			'createFlight.overview.start' => 'Start',
+			'createFlight.overview.routeSummaryButton' => 'Route summary',
+			'createFlight.overview.allRegionsYouFlyOver' => 'All regions you\'d fly over',
+			'createFlight.overview.fullSummary' => 'Full summary',
+			'createFlight.overview.routeSummaryTitle' => 'Route Summary',
+			'createFlight.overview.routeSummaryDistanceLabel' => 'Distance',
+			'createFlight.overview.routeSummaryDurationLabel' => 'Duration',
+			'createFlight.overview.routeSummaryRegionsLabel' => 'Regions',
+			'createFlight.overview.routeSummaryPlacesLabel' => 'Places',
+			'createFlight.overview.routeSummaryTimelineTitle' => 'Timeline',
+			'createFlight.overview.routeSummaryPlacesTitle' => 'Places along the route',
+			'createFlight.overview.routeSummaryPoiSearchHint' => 'Search places',
+			'createFlight.overview.routeSummaryPoiNoMatches' => 'No places match your search.',
+			'createFlight.overview.airportCard.departureDescription' => ({required Object airport}) => 'You\'ll start your journey from ${airport}.',
+			'createFlight.overview.airportCard.arrivalDescription' => ({required Object airport}) => 'You\'ll arrive at ${airport}.',
+			'createFlight.overview.regionInfo.descriptionUnavailable' => 'Description is not available yet.',
+			'createFlight.overview.regionInfo.wikipediaSectionTitle' => 'Wikipedia',
+			'createFlight.overview.regionInfo.wikipediaUnavailable' => 'Wikipedia article is not available right now.',
+			'createFlight.overview.regionInfo.openWikipedia' => 'Open Wikipedia',
+			'createFlight.overview.timeline.takeOffTimeline' => 'Take\noff',
+			'createFlight.overview.timeline.land' => 'Land',
+			'createFlight.overview.timeline.alsoAroundThisTime' => 'Also around same time:',
+			'createFlight.overview.timeline.minuteUnit' => 'min',
+			'createFlight.overview.timeline.hourCompactUnit' => 'h',
+			'createFlight.overview.timeline.minuteCompactUnit' => 'm',
+			'createFlight.overview.timeline.regionType.country' => 'Country',
+			'createFlight.overview.timeline.regionType.region' => 'Region',
+			'createFlight.overview.timeline.regionType.state' => 'State',
+			'createFlight.overview.timeline.regionType.province' => 'Province',
+			'createFlight.overview.timeline.regionType.sea' => 'Sea',
+			'createFlight.overview.timeline.regionType.ocean' => 'Ocean',
+			'createFlight.overview.timeline.regionType.strait' => 'Strait',
+			'createFlight.overview.timeline.regionType.channel' => 'Channel',
+			'createFlight.overview.timeline.regionType.gulf' => 'Gulf',
+			'createFlight.overview.timeline.regionType.bay' => 'Bay',
+			'createFlight.overview.timeline.regionType.lake' => 'Lake',
+			'createFlight.overview.timeline.regionType.alkalineLake' => 'Alkaline lake',
+			'createFlight.overview.timeline.regionType.island' => 'Island',
+			'createFlight.overview.timeline.regionType.archipelago' => 'Archipelago',
+			'createFlight.overview.timeline.regionType.peninsula' => 'Peninsula',
+			'createFlight.overview.timeline.regionType.coast' => 'Coast',
+			'createFlight.overview.timeline.regionType.mountainRange' => 'Mountain range',
+			'createFlight.overview.timeline.regionType.valley' => 'Valley',
+			'createFlight.overview.timeline.regionType.plateau' => 'Plateau',
+			'createFlight.overview.timeline.regionType.plain' => 'Plain',
+			'createFlight.overview.timeline.regionType.basin' => 'Basin',
+			'createFlight.overview.timeline.regionType.lowland' => 'Lowland',
+			'createFlight.overview.timeline.regionType.tundra' => 'Tundra',
+			'createFlight.overview.timeline.regionType.wetlands' => 'Wetlands',
+			'createFlight.overview.timeline.regionType.desert' => 'Desert',
+			'createFlight.overview.timeline.regionType.delta' => 'Delta',
+			'createFlight.overview.timeline.regionType.reservoir' => 'Reservoir',
+			'createFlight.overview.timeline.regionType.continent' => 'Continent',
+			'createFlight.overview.timeline.regionType.geoarea' => 'Geographic area',
+			'createFlight.overview.timeline.regionType.isthmus' => 'Isthmus',
+			'createFlight.overview.timeline.regionType.unknown' => 'Unknown region type',
+			'createFlight.wikipedia.title' => 'Add articles to read while you’re in the air',
 			'createFlight.wikipedia.loadingIntro' => 'Finding route-related articles...',
 			'createFlight.wikipedia.foundIntro' => ({required Object count}) => 'Based on your route we found ${count} relevant articles',
 			'createFlight.wikipedia.emptyIntro' => 'No route-related Wikipedia articles found. You can continue with map download only.',
@@ -2018,6 +2325,7 @@ extension on Translations {
 			'preview.flightRoute' => ({required Object distance}) => 'Flight route (~ ${distance})',
 			'flight.tabMap' => 'Map',
 			'flight.tabDashboard' => 'Dashboard',
+			'flight.tabRoute' => 'Route',
 			'flight.tabInfo' => 'Info',
 			'flight.completeDialogTitle' => 'Complete flight?',
 			'flight.completeDialogBody' => 'This marks your flight as completed.',
@@ -2123,6 +2431,10 @@ extension on Translations {
 			'flight.info.copyCity' => ({required Object city, required Object countryCode}) => 'City: ${city}, ${countryCode}',
 			'flight.info.copyAirport' => ({required Object airport}) => 'Airport: ${airport}',
 			'flight.info.copyCodes' => ({required Object iata, required Object icao}) => 'Codes: IATA ${iata} | ICAO ${icao}',
+			'flight.route.loadingRouteTimeline' => 'Loading route timeline...',
+			'flight.route.noSavedOfflineRegions' => 'No saved offline regions for this flight.',
+			'flight.route.currentProgress' => ({required Object percentage, required Object minute}) => 'Current progress: ${percentage}% (around ${minute} from takeoff)',
+			'flight.route.nowLabel' => 'Now',
 			'shareFlight.title' => 'Share flight',
 			'shareFlight.preparingMap' => 'Preparing share preview map...',
 			'shareFlight.preparingScreenshot' => 'Preparing screenshot...',
@@ -2167,6 +2479,8 @@ extension on Translations {
 			'onboarding.nameSubtitle' => 'Make discovery personal. You can change it anytime.',
 			'onboarding.frequencyTitle' => 'How often do you fly?',
 			'onboarding.frequencySubtitle' => 'Flymap will personalize your experience and make suggestions more relevant',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.frequencyFirstFlight' => 'This is my first flight',
 			'onboarding.frequencyFewPerYear' => 'A few times a year',
 			'onboarding.frequencyMonthly' => 'About monthly',

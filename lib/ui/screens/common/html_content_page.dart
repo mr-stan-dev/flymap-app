@@ -100,10 +100,30 @@ class HtmlContentPage extends StatelessWidget {
     padding: 0 !important;
     background: $bgHex !important;
     color: $textHex !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
   }
   body, body * {
     color: $textHex !important;
     background-color: transparent !important;
+    max-height: none !important;
+  }
+  body div,
+  body section,
+  body article,
+  body main,
+  body aside,
+  body p,
+  body ul,
+  body ol,
+  body li {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  body table,
+  body pre,
+  body code {
+    overflow-x: auto !important;
   }
   a, a:visited {
     color: $linkHex !important;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/flight_poi_type.dart';
 import 'package:flymap/entity/route_poi_rank.dart';
 import 'package:flymap/entity/route_poi_summary.dart';
 import 'package:flymap/i18n/strings.g.dart';

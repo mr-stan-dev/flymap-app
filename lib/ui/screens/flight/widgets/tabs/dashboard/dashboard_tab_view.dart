@@ -4,7 +4,6 @@ import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/dashboard_panel.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/gps_live_status_card.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/route_progress_card.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/telemetry_searching_overlay.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/shared/tab_state_placeholder.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/weak_signal_banner.dart';
@@ -68,16 +67,6 @@ class _LoadedDashboardTab extends StatelessWidget {
               gpsData: state.gpsData,
               gpsUpdateTick: state.gpsUpdateTick,
             ),
-            if (_showTelemetryCards) ...[
-              const SizedBox(height: 12),
-              TelemetrySearchingOverlay(
-                enabled: _isSearching,
-                child: RouteProgressCard(
-                  route: state.flight.route,
-                  gpsData: state.gpsData,
-                ),
-              ),
-            ],
             const SizedBox(height: 12),
             if (_showTelemetryCards)
               TelemetrySearchingOverlay(

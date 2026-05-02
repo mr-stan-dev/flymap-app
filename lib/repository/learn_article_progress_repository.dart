@@ -62,8 +62,9 @@ class SharedPrefsLearnArticleProgressRepository
   Future<Map<String, LearnArticleProgress>> _readAll() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_storageKey);
-    if (raw == null || raw.trim().isEmpty)
+    if (raw == null || raw.trim().isEmpty) {
       return <String, LearnArticleProgress>{};
+    }
 
     try {
       final decoded = jsonDecode(raw);

@@ -9,7 +9,7 @@ import 'package:flymap/entity/poi_wiki_preview.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/layers/poi_layer.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_preview_bottom_sheet.dart';
-import 'package:flymap/usecase/get_poi_wiki_preview_use_case.dart';
+import 'package:flymap/usecase/get_place_info_use_case.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 class FlightMapPoiController {
@@ -17,7 +17,7 @@ class FlightMapPoiController {
     required Logger logger,
     required Flight flight,
     required AppAnalytics analytics,
-    required GetPoiWikiPreviewUseCase wikiPreviewUseCase,
+    required GetPlaceInfoUseCase wikiPreviewUseCase,
     required ConnectivityChecker connectivityChecker,
   }) : _logger = logger,
        _flight = flight,
@@ -28,7 +28,7 @@ class FlightMapPoiController {
   final Logger _logger;
   final Flight _flight;
   final AppAnalytics _analytics;
-  final GetPoiWikiPreviewUseCase _wikiPreviewUseCase;
+  final GetPlaceInfoUseCase _wikiPreviewUseCase;
   final ConnectivityChecker _connectivityChecker;
 
   bool _isPoiDialogVisible = false;

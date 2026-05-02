@@ -5,7 +5,7 @@ import 'package:flymap/entity/poi_wiki_preview.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/repository/poi_wiki_preview_repository.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_preview_bottom_sheet.dart';
-import 'package:flymap/usecase/get_poi_wiki_preview_use_case.dart';
+import 'package:flymap/usecase/get_place_info_use_case.dart';
 
 void main() {
   setUpAll(() {
@@ -59,7 +59,7 @@ void main() {
 }
 
 Widget _testApp({
-  required GetPoiWikiPreviewUseCase useCase,
+  required GetPlaceInfoUseCase useCase,
   required PoiWikiPreview preloaded,
 }) {
   return TranslationProvider(
@@ -90,7 +90,7 @@ Widget _testApp({
   );
 }
 
-class _FakeGetPoiWikiPreviewUseCase extends GetPoiWikiPreviewUseCase {
+class _FakeGetPoiWikiPreviewUseCase extends GetPlaceInfoUseCase {
   _FakeGetPoiWikiPreviewUseCase()
     : super(repository: _FakePoiWikiPreviewRepository());
 

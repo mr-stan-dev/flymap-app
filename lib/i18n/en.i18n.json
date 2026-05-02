@@ -241,10 +241,78 @@
     },
     "overview": {
       "routeNotReady": "Route is not ready yet.",
-      "proPoiUpsell": "Free plan includes basic map and limited places"
+      "proPoiUpsell": "Free plan includes basic map and limited places",
+      "routeNoteTooltip": "Route note",
+      "routeNoteTitle": "Approximate route",
+      "routeNoteBody": "Route is approximate — actual path may vary, especially on long-haul flights.",
+      "routeTitleLabel": "Route",
+      "start": "Start",
+      "routeSummaryButton": "Route summary",
+      "allRegionsYouFlyOver": "All regions you'd fly over",
+      "fullSummary": "Full summary",
+      "routeSummaryTitle": "Route Summary",
+      "routeSummaryDistanceLabel": "Distance",
+      "routeSummaryDurationLabel": "Duration",
+      "routeSummaryRegionsLabel": "Regions",
+      "routeSummaryPlacesLabel": "Places",
+      "routeSummaryTimelineTitle": "Timeline",
+      "routeSummaryPlacesTitle": "Places along the route",
+      "routeSummaryPoiSearchHint": "Search places",
+      "routeSummaryPoiNoMatches": "No places match your search.",
+      "airportCard": {
+        "departureDescription": "You'll start your journey from $airport.",
+        "arrivalDescription": "You'll arrive at $airport."
+      },
+      "regionInfo": {
+        "descriptionUnavailable": "Description is not available yet.",
+        "wikipediaSectionTitle": "Wikipedia",
+        "wikipediaUnavailable": "Wikipedia article is not available right now.",
+        "openWikipedia": "Open Wikipedia"
+      },
+      "timeline": {
+        "takeOffTimeline": "Take\noff",
+        "land": "Land",
+        "alsoAroundThisTime": "Also around same time:",
+        "minuteUnit": "min",
+        "hourCompactUnit": "h",
+        "minuteCompactUnit": "m",
+        "regionType": {
+          "country": "Country",
+          "region": "Region",
+          "state": "State",
+          "province": "Province",
+          "sea": "Sea",
+          "ocean": "Ocean",
+          "strait": "Strait",
+          "channel": "Channel",
+          "gulf": "Gulf",
+          "bay": "Bay",
+          "lake": "Lake",
+          "alkalineLake": "Alkaline lake",
+          "island": "Island",
+          "archipelago": "Archipelago",
+          "peninsula": "Peninsula",
+          "coast": "Coast",
+          "mountainRange": "Mountain range",
+          "valley": "Valley",
+          "plateau": "Plateau",
+          "plain": "Plain",
+          "basin": "Basin",
+          "lowland": "Lowland",
+          "tundra": "Tundra",
+          "wetlands": "Wetlands",
+          "desert": "Desert",
+          "delta": "Delta",
+          "reservoir": "Reservoir",
+          "continent": "Continent",
+          "geoarea": "Geographic area",
+          "isthmus": "Isthmus",
+          "unknown": "Unknown region type"
+        }
+      }
     },
     "wikipedia": {
-      "title": "Select articles to download with map",
+      "title": "Add articles to read while you’re in the air",
       "loadingIntro": "Finding route-related articles...",
       "foundIntro": "Based on your route we found $count relevant articles",
       "emptyIntro": "No route-related Wikipedia articles found. You can continue with map download only.",
@@ -330,6 +398,7 @@
   "flight": {
     "tabMap": "Map",
     "tabDashboard": "Dashboard",
+    "tabRoute": "Route",
     "tabInfo": "Info",
     "completeDialogTitle": "Complete flight?",
     "completeDialogBody": "This marks your flight as completed.",
@@ -440,6 +509,12 @@
       "copyCity": "City: $city, $countryCode",
       "copyAirport": "Airport: $airport",
       "copyCodes": "Codes: IATA $iata | ICAO $icao"
+    },
+    "route": {
+      "loadingRouteTimeline": "Loading route timeline...",
+      "noSavedOfflineRegions": "No saved offline regions for this flight.",
+      "currentProgress": "Current progress: $percentage% (around $minute from takeoff)",
+      "nowLabel": "Now"
     }
   },
   "shareFlight": {

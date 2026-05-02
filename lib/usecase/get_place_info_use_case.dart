@@ -1,8 +1,8 @@
 import 'package:flymap/entity/poi_wiki_preview.dart';
 import 'package:flymap/repository/poi_wiki_preview_repository.dart';
 
-class GetPoiWikiPreviewUseCase {
-  GetPoiWikiPreviewUseCase({required PoiWikiPreviewRepository repository})
+class GetPlaceInfoUseCase {
+  GetPlaceInfoUseCase({required PoiWikiPreviewRepository repository})
     : _repository = repository;
 
   final PoiWikiPreviewRepository _repository;

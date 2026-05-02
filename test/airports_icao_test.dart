@@ -87,30 +87,37 @@ void main() {
     }
 
     // Log summaries
-    // Using print so it shows in test output
-    print('ICAO blanks (relevant types): ${blanks.length}');
+    stdout.writeln('ICAO blanks (relevant types): ${blanks.length}');
     for (final s in blanks.take(20)) {
-      print('  - $s');
+      stdout.writeln('  - $s');
     }
-    if (blanks.length > 20) print('  ... ${blanks.length - 20} more');
+    if (blanks.length > 20) {
+      stdout.writeln('  ... ${blanks.length - 20} more');
+    }
 
-    print('Invalid ICAO format: ${invalidIcao.length}');
+    stdout.writeln('Invalid ICAO format: ${invalidIcao.length}');
     for (final s in invalidIcao.take(20)) {
-      print('  - $s');
+      stdout.writeln('  - $s');
     }
-    if (invalidIcao.length > 20) print('  ... ${invalidIcao.length - 20} more');
+    if (invalidIcao.length > 20) {
+      stdout.writeln('  ... ${invalidIcao.length - 20} more');
+    }
 
-    print('Missing Wikipedia (relevant types): ${wikiMissing.length}');
+    stdout.writeln('Missing Wikipedia (relevant types): ${wikiMissing.length}');
     for (final s in wikiMissing.take(20)) {
-      print('  - $s');
+      stdout.writeln('  - $s');
     }
-    if (wikiMissing.length > 20) print('  ... ${wikiMissing.length - 20} more');
+    if (wikiMissing.length > 20) {
+      stdout.writeln('  ... ${wikiMissing.length - 20} more');
+    }
 
-    print('Non-wikipedia wiki links: ${wikiWeird.length}');
+    stdout.writeln('Non-wikipedia wiki links: ${wikiWeird.length}');
     for (final s in wikiWeird.take(20)) {
-      print('  - $s');
+      stdout.writeln('  - $s');
     }
-    if (wikiWeird.length > 20) print('  ... ${wikiWeird.length - 20} more');
+    if (wikiWeird.length > 20) {
+      stdout.writeln('  ... ${wikiWeird.length - 20} more');
+    }
 
     // Do not fail the test; this is informational
     expect(true, isTrue);

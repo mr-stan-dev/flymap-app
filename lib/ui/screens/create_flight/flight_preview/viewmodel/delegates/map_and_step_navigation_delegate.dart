@@ -5,19 +5,8 @@ class MapAndStepNavigationDelegate {
 
   final FlightPreviewCubit _cubit;
 
-  Future<void> continueFromMap() async {
-    if (!_cubit.state.canContinueFromMap) return;
-    _cubit._emitState(
-      _cubit.state.copyWith(
-        step: CreateFlightStep.overview,
-        clearErrorMessage: true,
-        clearDownloadErrorMessage: true,
-      ),
-    );
-  }
-
   void selectMapDetailLevel(MapDetailLevel detailLevel) {
-    if (_cubit.state.step != CreateFlightStep.mapPreview) return;
+    if (_cubit.state.step != CreateFlightStep.overview) return;
     if (_cubit.state.selectedMapDetailLevel == detailLevel) return;
     _cubit._emitState(
       _cubit.state.copyWith(
@@ -46,18 +35,9 @@ class MapAndStepNavigationDelegate {
     if (_cubit.state.isDownloading) return false;
 
     switch (_cubit.state.step) {
-      case CreateFlightStep.mapPreview:
       case CreateFlightStep.routeNotSupported:
-        return true;
       case CreateFlightStep.overview:
-        _cubit._emitState(
-          _cubit.state.copyWith(
-            step: CreateFlightStep.mapPreview,
-            clearErrorMessage: true,
-            clearDownloadErrorMessage: true,
-          ),
-        );
-        return false;
+        return true;
       case CreateFlightStep.wikipediaArticles:
         _cubit._emitState(
           _cubit.state.copyWith(
