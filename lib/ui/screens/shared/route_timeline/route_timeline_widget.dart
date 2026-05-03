@@ -267,6 +267,9 @@ class _RouteTimelineRow extends StatelessWidget {
     required this.card,
   });
 
+  static const double _dotSize = 14.0;
+  static const double _railWidth = 20.0;
+
   final _TimingLabel timingLabel;
   final bool isFirst;
   final bool isLast;
@@ -314,70 +317,54 @@ class _RouteTimelineRow extends StatelessWidget {
       unitStyle: unitStyle,
     );
 
-    return IntrinsicHeight(
+    final dot = pointState == _RouteTimelinePointState.current
+        ? _PulsingTimelineDot(color: pointColor)
+        : Container(
+            width: _dotSize,
+            height: _dotSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: pointColor, width: 2),
+            ),
+          );
+
+    return CustomPaint(
+      painter: _TimelineLinePainter(
+        lineAboveColor: isFirst ? Colors.transparent : colorFor(lineAboveState),
+        lineBelowColor: isLast ? Colors.transparent : colorFor(lineBelowState),
+        railCenterX: timingMaxWidth + 8 + _railWidth / 2,
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: timingMaxWidth,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: _TimingLabelText(
-                  label: timingLabel,
-                  digitStyle: digitStyle,
-                  unitStyle: unitStyle,
-                ),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: _TimingLabelText(
+                label: timingLabel,
+                digitStyle: digitStyle,
+                unitStyle: unitStyle,
               ),
             ),
           ),
           const SizedBox(width: 8),
           SizedBox(
-            width: 20,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: 20,
-                  child: Container(
-                    width: 2,
-                    color: isFirst
-                        ? Colors.transparent
-                        : colorFor(lineAboveState),
-                  ),
+            width: _railWidth,
+            child: Center(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  shape: BoxShape.circle,
                 ),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    shape: BoxShape.circle,
-                  ),
-                  child: pointState == _RouteTimelinePointState.current
-                      ? _PulsingTimelineDot(color: pointColor)
-                      : Container(
-                          width: 14,
-                          height: 14,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: pointColor, width: 2),
-                          ),
-                        ),
-                ),
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    color: isLast
-                        ? Colors.transparent
-                        : colorFor(lineBelowState),
-                  ),
-                ),
-              ],
+                child: dot,
+              ),
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 2, 0, 6),
+              padding: const EdgeInsets.symmetric(vertical: 4),
               child: card,
             ),
           ),
@@ -402,6 +389,50 @@ class _RouteTimelineRow extends StatelessWidget {
       ),
     )..layout();
     return painter.width.ceilToDouble() + 2;
+  }
+}
+
+class _TimelineLinePainter extends CustomPainter {
+  const _TimelineLinePainter({
+    required this.lineAboveColor,
+    required this.lineBelowColor,
+    required this.railCenterX,
+  });
+
+  final Color lineAboveColor;
+  final Color lineBelowColor;
+  final double railCenterX;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerY = size.height / 2;
+    const strokeWidth = 2.0;
+
+    if (lineAboveColor != Colors.transparent) {
+      canvas.drawLine(
+        Offset(railCenterX, 0),
+        Offset(railCenterX, centerY - _RouteTimelineRow._dotSize / 2),
+        Paint()
+          ..color = lineAboveColor
+          ..strokeWidth = strokeWidth,
+      );
+    }
+    if (lineBelowColor != Colors.transparent) {
+      canvas.drawLine(
+        Offset(railCenterX, centerY + _RouteTimelineRow._dotSize / 2),
+        Offset(railCenterX, size.height),
+        Paint()
+          ..color = lineBelowColor
+          ..strokeWidth = strokeWidth,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_TimelineLinePainter oldDelegate) {
+    return oldDelegate.lineAboveColor != lineAboveColor ||
+        oldDelegate.lineBelowColor != lineBelowColor ||
+        oldDelegate.railCenterX != railCenterX;
   }
 }
 

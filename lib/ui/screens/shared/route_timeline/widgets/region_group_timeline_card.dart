@@ -121,21 +121,53 @@ class _RegionGroupTimelineCardState extends State<RegionGroupTimelineCard> {
                           ),
                           const SizedBox(height: 2),
                           for (final region in others)
-                            ListTile(
-                              dense: true,
-                              contentPadding: EdgeInsets.zero,
+                            InkWell(
                               onTap: widget.onOpenRegion == null
                                   ? null
                                   : () => widget.onOpenRegion!(region),
-                              leading: Icon(
-                                _typeMapper.mapIcon(region.regionType),
-                                size: 18,
-                              ),
-                              title: Text(region.name),
-                              subtitle: Text(
-                                _typeMapper.mapLabel(
-                                  context,
-                                  region.regionType,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      _typeMapper.mapIcon(region.regionType),
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            region.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                          Text(
+                                            _typeMapper.mapLabel(
+                                              context,
+                                              region.regionType,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
