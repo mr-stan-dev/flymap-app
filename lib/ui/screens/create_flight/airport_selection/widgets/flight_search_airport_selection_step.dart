@@ -3,6 +3,10 @@ import 'package:flymap/entity/airport.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/create_flight/airport_selection/viewmodel/airport_selection_screen_state.dart';
+import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/airport_category_section.dart';
+import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/search_input_area.dart';
+import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/search_results_area.dart';
+import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/selected_departure_row.dart';
 
 class FlightSearchAirportSelectionStep extends StatelessWidget {
   const FlightSearchAirportSelectionStep({
@@ -52,13 +56,6 @@ class FlightSearchAirportSelectionStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gpsActiveColor = DsSemanticColors.success(context);
-    final selectedAirportCode = _airportCode(selectedAirport);
-    final isSelectedAirportHome =
-        selectedAirportCode.isNotEmpty &&
-        homeAirportCode.isNotEmpty &&
-        selectedAirportCode == homeAirportCode;
-
     return Column(
       children: [
         Expanded(
@@ -69,123 +66,50 @@ class FlightSearchAirportSelectionStep extends StatelessWidget {
               children: [
                 if (step == AirportSelectionStep.arrival &&
                     selectedDeparture != null) ...[
-                  _SelectedDepartureRow(
+                  SelectedDepartureRow(
                     airport: selectedDeparture!,
                     onEdit: onEditDeparture,
                   ),
                   const SizedBox(height: 12),
                 ],
-                SearchInputField(
-                  controller: searchController,
-                  onChanged: (value) {
-                    if (selectedAirport != null) {
-                      onClearSelectedAirport();
-                    }
-                    onSearchChanged(value);
-                  },
-                  hintText: step == AirportSelectionStep.departure
-                      ? context.t.createFlight.search.departureHint
-                      : context.t.createFlight.search.arrivalHint,
-                  isSelected: selectedAirport != null,
-                  selectedBorderColor: gpsActiveColor,
-                  onClear: onClearSearch,
-                  suffixActions: selectedAirport != null
-                      ? [
-                          if (isSelectedAirportHome)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
-                              child: Icon(
-                                Icons.home_rounded,
-                                color: Theme.of(context).colorScheme.primary,
-                                size: 20,
-                              ),
-                            )
-                          else
-                            IconButton(
-                              icon: Icon(
-                                selectedAirportIsFavorite
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                color: selectedAirportIsFavorite
-                                    ? DsSemanticColors.warning(context)
-                                    : null,
-                              ),
-                              tooltip: selectedAirportIsFavorite
-                                  ? context.t.createFlight.search.removeFavorite
-                                  : context.t.createFlight.search.addFavorite,
-                              onPressed: onToggleFavoriteForSelected,
-                            ),
-                          IconButton(
-                            icon: const Icon(Icons.close),
-                            tooltip: context
-                                .t
-                                .createFlight
-                                .search
-                                .removeSelectedAirport,
-                            onPressed: onClearSelectedAirport,
-                          ),
-                        ]
-                      : const [],
+                SearchInputArea(
+                  step: step,
+                  searchController: searchController,
+                  selectedAirport: selectedAirport,
+                  selectedAirportIsFavorite: selectedAirportIsFavorite,
+                  homeAirportCode: homeAirportCode,
+                  onSearchChanged: onSearchChanged,
+                  onClearSearch: onClearSearch,
+                  onClearSelectedAirport: onClearSelectedAirport,
+                  onToggleFavoriteForSelected: onToggleFavoriteForSelected,
                 ),
                 const SizedBox(height: 12),
-                if (isSearchLoading && selectedAirport == null)
-                  const Center(child: CircularProgressIndicator())
-                else if (searchQuery.isNotEmpty &&
-                    results.isEmpty &&
-                    selectedAirport == null)
-                  _EmptySearchResults(step: step)
-                else if (results.isNotEmpty && selectedAirport == null)
-                  _SearchResultList(
-                    airports: results,
-                    onSelectAirport: onSelectAirport,
-                  ),
-                if (favorites.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    context.t.createFlight.search.favorites,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _AirportChipWrap(
-                    airports: favorites,
-                    homeAirportCode: homeAirportCode,
-                    onSelectAirport: onSelectAirport,
-                    showFavoriteTrailingIcon: true,
-                    onToggleFavorite: onToggleFavoriteForAirport,
-                  ),
-                ],
-                if (recent.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    context.t.createFlight.search.recentAirports,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _AirportChipWrap(
-                    airports: recent,
-                    onSelectAirport: onSelectAirport,
-                  ),
-                ],
-                if (popular.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    context.t.createFlight.search.popularAirports,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _AirportChipWrap(
-                    airports: popular,
-                    onSelectAirport: onSelectAirport,
-                  ),
-                ],
+                SearchResultsArea(
+                  step: step,
+                  isSearchLoading: isSearchLoading,
+                  searchQuery: searchQuery,
+                  results: results,
+                  selectedAirport: selectedAirport,
+                  onSelectAirport: onSelectAirport,
+                ),
+                AirportCategorySection(
+                  title: context.t.createFlight.search.favorites,
+                  airports: favorites,
+                  onSelectAirport: onSelectAirport,
+                  homeAirportCode: homeAirportCode,
+                  showFavoriteTrailingIcon: true,
+                  onToggleFavorite: onToggleFavoriteForAirport,
+                ),
+                AirportCategorySection(
+                  title: context.t.createFlight.search.recentAirports,
+                  airports: recent,
+                  onSelectAirport: onSelectAirport,
+                ),
+                AirportCategorySection(
+                  title: context.t.createFlight.search.popularAirports,
+                  airports: popular,
+                  onSelectAirport: onSelectAirport,
+                ),
               ],
             ),
           ),
@@ -202,203 +126,6 @@ class FlightSearchAirportSelectionStep extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  String _airportCode(Airport? airport) {
-    if (airport == null) return '';
-    final primary = airport.primaryCode.trim().toUpperCase();
-    if (primary.isNotEmpty) return primary;
-    return airport.displayCode.trim().toUpperCase();
-  }
-}
-
-class _SelectedDepartureRow extends StatelessWidget {
-  const _SelectedDepartureRow({required this.airport, required this.onEdit});
-
-  final Airport airport;
-  final VoidCallback onEdit;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.42),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.10)),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.flight_takeoff_rounded,
-            size: 16,
-            color: colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            '${context.t.flight.info.departure}:',
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              '${airport.name} (${airport.displayCode})',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          InkWell(
-            onTap: onEdit,
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-              child: Text(
-                context.t.common.edit,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AirportChipWrap extends StatelessWidget {
-  const _AirportChipWrap({
-    required this.airports,
-    required this.onSelectAirport,
-    this.homeAirportCode = '',
-    this.showFavoriteTrailingIcon = false,
-    this.onToggleFavorite,
-  });
-
-  final List<Airport> airports;
-  final Future<void> Function(Airport airport) onSelectAirport;
-  final String homeAirportCode;
-  final bool showFavoriteTrailingIcon;
-  final Future<void> Function(Airport airport)? onToggleFavorite;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      children: airports.map((airport) {
-        final code = _airportCode(airport);
-        final isHomeAirport =
-            homeAirportCode.isNotEmpty && code == homeAirportCode;
-        return SelectionChip(
-          label: context.t.createFlight.search.airportNameCode(
-            name: airport.nameShort,
-            code: airport.displayCode,
-          ),
-          leading: isHomeAirport
-              ? Icon(
-                  Icons.home_rounded,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.primary,
-                )
-              : null,
-          onPressed: () => onSelectAirport(airport),
-          onDeleted:
-              showFavoriteTrailingIcon &&
-                  onToggleFavorite != null &&
-                  !isHomeAirport
-              ? () => onToggleFavorite!(airport)
-              : null,
-          deleteIcon: showFavoriteTrailingIcon && !isHomeAirport
-              ? Icon(
-                  Icons.star,
-                  color: DsSemanticColors.warning(context),
-                  size: 18,
-                )
-              : null,
-          deleteTooltip: showFavoriteTrailingIcon
-              ? context.t.createFlight.search.removeFromFavorites
-              : null,
-        );
-      }).toList(),
-    );
-  }
-
-  String _airportCode(Airport airport) {
-    final primary = airport.primaryCode.trim().toUpperCase();
-    if (primary.isNotEmpty) return primary;
-    return airport.displayCode.trim().toUpperCase();
-  }
-}
-
-class _SearchResultList extends StatelessWidget {
-  const _SearchResultList({
-    required this.airports,
-    required this.onSelectAirport,
-  });
-
-  final List<Airport> airports;
-  final Future<void> Function(Airport airport) onSelectAirport;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: airports.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        final airport = airports[index];
-        return ListTile(
-          onTap: () => onSelectAirport(airport),
-          dense: true,
-          visualDensity: const VisualDensity(vertical: -2),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-          title: Text(
-            context.t.createFlight.search.airportNameCode(
-              name: airport.name,
-              code: airport.displayCode,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _EmptySearchResults extends StatelessWidget {
-  const _EmptySearchResults({required this.step});
-
-  final AirportSelectionStep step;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = step == AirportSelectionStep.departure
-        ? context.t.createFlight.search.noDepartureFound
-        : context.t.createFlight.search.noArrivalFound;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      ),
     );
   }
 }

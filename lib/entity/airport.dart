@@ -1,6 +1,41 @@
 import 'package:equatable/equatable.dart';
 import 'package:latlong2/latlong.dart';
 
+enum AirportType {
+  large,
+  medium,
+  small,
+  other,
+}
+
+extension AirportTypeX on AirportType {
+  static AirportType fromString(String type) {
+    switch (type.toLowerCase()) {
+      case 'large_airport':
+        return AirportType.large;
+      case 'medium_airport':
+        return AirportType.medium;
+      case 'small_airport':
+        return AirportType.small;
+      default:
+        return AirportType.other;
+    }
+  }
+
+  int get priority {
+    switch (this) {
+      case AirportType.large:
+        return 1;
+      case AirportType.medium:
+        return 2;
+      case AirportType.small:
+        return 3;
+      case AirportType.other:
+        return 4;
+    }
+  }
+}
+
 class Airport extends Equatable {
   final String name;
   final String city;
@@ -9,6 +44,7 @@ class Airport extends Equatable {
   final String iataCode;
   final String icaoCode;
   final String wikipediaUrl;
+  final AirportType type;
 
   const Airport({
     required this.name,
@@ -18,6 +54,7 @@ class Airport extends Equatable {
     required this.iataCode,
     required this.icaoCode,
     required this.wikipediaUrl,
+    this.type = AirportType.other,
   });
 
   /// Preferred ops/ID code
@@ -54,5 +91,6 @@ class Airport extends Equatable {
     iataCode,
     icaoCode,
     wikipediaUrl,
+    type,
   ];
 }

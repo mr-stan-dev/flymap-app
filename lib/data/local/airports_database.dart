@@ -56,6 +56,7 @@ class AirportsDatabase {
         final parts = rows[i].map((e) => (e ?? '').toString().trim()).toList();
 
         final ident = parts[1].toUpperCase(); // e.g., EGGW
+        final type = parts[2];
         final name = parts[3];
         final latStr = parts[4];
         final lonStr = parts[5];
@@ -87,6 +88,7 @@ class AirportsDatabase {
           iataCode: iata,
           icaoCode: icao,
           wikipediaUrl: wiki,
+          type: AirportTypeX.fromString(type),
         );
 
         _airports.add(airport);
@@ -110,10 +112,47 @@ class AirportsDatabase {
     for (final airport in _airports) {
       if (airport.name.toUpperCase().contains(upperQuery) ||
           airport.city.toUpperCase().contains(upperQuery) ||
-          airport.displayCode.toUpperCase().contains(upperQuery)) {
+          airport.displayCode.toUpperCase().contains(upperQuery) ||
+          airport.icaoCode.toUpperCase().contains(upperQuery)) {
         results.add(airport);
       }
     }
+
+    results.sort((a, b) {
+      final aName = a.name.toUpperCase();
+      final aCity = a.city.toUpperCase();
+      final aCode = a.displayCode.toUpperCase();
+      final aIcao = a.icaoCode.toUpperCase();
+      
+      final bName = b.name.toUpperCase();
+      final bCity = b.city.toUpperCase();
+      final bCode = b.displayCode.toUpperCase();
+      final bIcao = b.icaoCode.toUpperCase();
+
+      int getRank(String name, String city, String code, String icao) {
+        if (city.startsWith(upperQuery)) return 1;
+        if (name.startsWith(upperQuery)) return 2;
+        if (code == upperQuery || icao == upperQuery) return 3;
+        if (code.startsWith(upperQuery) || icao.startsWith(upperQuery)) return 4;
+        if (city.contains(upperQuery)) return 5;
+        if (name.contains(upperQuery)) return 6;
+        return 7;
+      }
+
+      int rankA = getRank(aName, aCity, aCode, aIcao);
+      int rankB = getRank(bName, bCity, bCode, bIcao);
+
+      if (rankA != rankB) return rankA.compareTo(rankB);
+
+      int typeRankA = a.type.priority;
+      int typeRankB = b.type.priority;
+
+      if (typeRankA != typeRankB) return typeRankA.compareTo(typeRankB);
+
+      // Fallback: alphabetize by city then name
+      if (aCity != bCity) return aCity.compareTo(bCity);
+      return aName.compareTo(bName);
+    });
 
     _logger.log('Search for "$query" returned ${results.length} results');
     return results;
