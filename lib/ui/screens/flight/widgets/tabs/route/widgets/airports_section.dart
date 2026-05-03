@@ -3,7 +3,7 @@ import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/shared/airport_info_tile.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/section_card.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/shared/section_card.dart';
 import 'package:flymap/utils/route_utils.dart';
 
 class AirportsSection extends StatelessWidget {

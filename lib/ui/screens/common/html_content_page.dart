@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/articles/offline_article_html_view.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/read/articles/offline_article_html_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HtmlContentPage extends StatelessWidget {

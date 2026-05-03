@@ -3,11 +3,12 @@ import 'package:flymap/entity/flight_article.dart';
 import 'package:flymap/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
-import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview/region_info_screen.dart';
+import 'package:flymap/ui/screens/common/route/route_places_by_type.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/region_info_screen.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_highlights_section.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/route_progress_card.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/articles/articles_section.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/info_content.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/route/widgets/info_content.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/shared/tab_state_placeholder.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
@@ -79,10 +80,6 @@ class _LoadedRouteTab extends StatelessWidget {
       info.routeRegions,
       cruiseSpeedKmh: info.routeCruiseSpeedKmh,
     );
-    final visibleArticles = _visibleArticles(
-      articles: info.articles,
-      regions: info.routeRegions,
-    );
 
     return SafeArea(
       top: false,
@@ -114,10 +111,8 @@ class _LoadedRouteTab extends StatelessWidget {
               onOpenRegion: (region) =>
                   _openRegionInfo(context, region, state.flight.info.articles),
             ),
-            if (visibleArticles.isNotEmpty) ...[
-              const SizedBox(height: DsSpacing.sm),
-              ArticlesSection(articles: visibleArticles),
-            ],
+            const SizedBox(height: DsSpacing.sm),
+            RoutePlacesByTypeSection(places: info.poi),
           ],
         ),
       ),
@@ -164,32 +159,6 @@ class _LoadedRouteTab extends StatelessWidget {
       }
     }
     return null;
-  }
-
-  List<FlightArticle> _visibleArticles({
-    required List<FlightArticle> articles,
-    required List<RouteRegion> regions,
-  }) {
-    if (articles.isEmpty || regions.isEmpty) return articles;
-    final regionWikiUrls = regions
-        .map((r) => r.wikipediaUrl?.trim() ?? '')
-        .where((url) => url.isNotEmpty)
-        .map(_normalizeUrl)
-        .toSet();
-    final regionNames = regions
-        .map((r) => r.name.trim().toLowerCase())
-        .where((name) => name.isNotEmpty)
-        .toSet();
-
-    return articles
-        .where((article) {
-          final normalizedArticleUrl = _normalizeUrl(article.sourceUrl);
-          if (regionWikiUrls.contains(normalizedArticleUrl)) return false;
-          final articleTitle = article.title.trim().toLowerCase();
-          if (regionNames.contains(articleTitle)) return false;
-          return true;
-        })
-        .toList(growable: false);
   }
 
   String _normalizeUrl(String url) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/shared/flight_overview_content.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/section_card.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/shared/section_card.dart';
 
 class OverviewSection extends StatelessWidget {
   const OverviewSection({

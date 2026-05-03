@@ -8,6 +8,7 @@ import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/flight/widgets/flight_app_bar.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/dashboard_tab_view.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_tab.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/read/read_tab_view.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/route/flight_route_tab_view.dart';
 import 'package:flymap/ui/screens/home/tabs/home/home_tab.dart';
 
@@ -65,6 +66,11 @@ class _FlightScreenViewState extends State<_FlightScreenView> {
             activeIcon: const Icon(Icons.timeline),
             label: t.flight.tabRoute,
           ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.article_outlined),
+            activeIcon: const Icon(Icons.article),
+            label: 'Read',
+          ),
         ],
       ),
       body: BlocConsumer<FlightScreenCubit, FlightScreenState>(
@@ -100,6 +106,10 @@ class _FlightScreenViewState extends State<_FlightScreenView> {
                       state: state,
                       topPadding: _tabTopPadding(context),
                     ),
+                    ReadTabView(
+                      state: state,
+                      topPadding: _tabTopPadding(context),
+                    ),
                   ],
                 ),
               ),
@@ -108,7 +118,7 @@ class _FlightScreenViewState extends State<_FlightScreenView> {
                   top: 0,
                   left: 0,
                   right: 0,
-                  child: FlightAppBar(flight: flight, hideProgress: 0.0),
+                  child: FlightAppBar(flight: flight),
                 ),
             ],
           );

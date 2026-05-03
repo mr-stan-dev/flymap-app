@@ -7,14 +7,14 @@ import 'package:flymap/router/app_router.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/widgets/complete_flight_confirmation_dialog.dart';
 import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dialog.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/route_copy_builder.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/shared/route_copy_builder.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 import 'package:flymap/ui/theme/app_theme_ext.dart';
 import 'package:flymap/ui/widgets/pro_widgets.dart';
 import 'package:flymap/utils/route_utils.dart';
 
 class FlightAppBar extends StatelessWidget {
-  const FlightAppBar({required this.flight, this.hideProgress = 0, super.key});
+  const FlightAppBar({required this.flight, super.key});
 
   // TODO: Re-enable share route menu item after we fix android snapshot
   static const bool _shareRouteMenuEnabled = false;
@@ -33,7 +33,6 @@ class FlightAppBar extends StatelessWidget {
   }
 
   final Flight flight;
-  final double hideProgress; // 0..1 where 1 = fully hidden (pushed up)
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +41,7 @@ class FlightAppBar extends StatelessWidget {
     );
     return SafeArea(
       bottom: false,
-      child: AnimatedSlide(
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOut,
-        // Slide a bit more than full height to fully hide any residual edge
-        offset: Offset(0, -1.1 * hideProgress),
-        child: Padding(
+      child: Padding(
           padding: const EdgeInsets.all(_outerPadding),
           child: Container(
             decoration: BoxDecoration(
@@ -153,7 +147,6 @@ class FlightAppBar extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 

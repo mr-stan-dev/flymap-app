@@ -18,7 +18,7 @@ import 'package:flymap/subscription/pro_limits.dart';
 import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/flight_preview_args.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/downloading/flight_search_downloading_view.dart';
-import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview/flight_search_route_overview_step.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/flight_search_route_overview_step.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/route_not_supported/flight_search_route_not_supported_step.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/wikipedia_articles/flight_search_wikipedia_articles_step.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_cubit.dart';

@@ -3,8 +3,8 @@ import 'package:flymap/entity/flight_article.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/common/html_content_page.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/articles/article_html_composer.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/articles/plain_text_article_view.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/read/articles/article_html_composer.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/read/articles/plain_text_article_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ArticleDetailsPage extends StatelessWidget {

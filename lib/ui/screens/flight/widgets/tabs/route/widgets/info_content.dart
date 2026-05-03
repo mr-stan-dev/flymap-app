@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flymap/entity/flight_info.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/articles/articles_section.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/airports_section.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/overview_section.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/info/route_facts_wrap.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/route/widgets/airports_section.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/route/widgets/overview_section.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/route/widgets/route_facts_wrap.dart';
 
 class FlightInfoContent extends StatelessWidget {
   const FlightInfoContent({
@@ -38,8 +37,6 @@ class FlightInfoContent extends StatelessWidget {
             AirportsSection(route: route),
             const SizedBox(height: DsSpacing.sm),
             OverviewSection(overview: info.overview),
-            const SizedBox(height: DsSpacing.sm),
-            ArticlesSection(articles: info.articles),
           ],
         ),
       ),

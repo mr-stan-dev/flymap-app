@@ -4,11 +4,11 @@ import 'package:flymap/entity/map_detail_level.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/theme/app_colours.dart';
-import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview/route_overview_page_entry.dart';
-import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview/route_summary_screen.dart';
-import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview/widgets/route_overview_map_widget.dart';
-import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview/widgets/route_overview_pager.dart';
-import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview/widgets/route_overview_progress_timeline.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview_page_entry.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_summary_screen.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_map_widget.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_pager.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_progress_timeline.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
 
