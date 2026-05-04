@@ -210,8 +210,8 @@ class VectorTilesDownloader {
             tilesDownloaded++;
             bytesDownloaded += tile.bytes.length;
 
-            // Log progress updates every 50 tiles
-            if (tilesDownloaded % 50 == 0) {
+            // Log progress updates every 10 tiles
+            if (tilesDownloaded % 10 == 0) {
               final progress = tilesDownloaded / filteredTiles.length;
               controller.add(
                 DownloadMapProgress(progress, downloadedBytes: bytesDownloaded),
