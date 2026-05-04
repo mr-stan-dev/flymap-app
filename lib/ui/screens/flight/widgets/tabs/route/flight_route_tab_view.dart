@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/entity/flight_article.dart';
 import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/utils/wikipedia_article_utils.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/common/route/route_places_by_type.dart';
@@ -125,7 +126,7 @@ class _LoadedRouteTab extends StatelessWidget {
     List<FlightArticle> articles,
   ) async {
     final typeLabel = _typeMapper.mapLabel(context, region.regionType);
-    final offlineArticle = _matchRegionArticle(region, articles);
+    final offlineArticle = WikipediaArticleUtils.matchRegionArticle(region, articles);
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => RegionInfoScreen(
@@ -138,34 +139,4 @@ class _LoadedRouteTab extends StatelessWidget {
     );
   }
 
-  FlightArticle? _matchRegionArticle(
-    RouteRegion region,
-    List<FlightArticle> articles,
-  ) {
-    if (articles.isEmpty) return null;
-    final regionUrl = region.wikipediaUrl?.trim() ?? '';
-    if (regionUrl.isNotEmpty) {
-      for (final article in articles) {
-        if (_normalizeUrl(article.sourceUrl) == _normalizeUrl(regionUrl)) {
-          return article;
-        }
-      }
-    }
-    final regionName = region.name.trim().toLowerCase();
-    if (regionName.isEmpty) return null;
-    for (final article in articles) {
-      if (article.title.trim().toLowerCase() == regionName) {
-        return article;
-      }
-    }
-    return null;
-  }
-
-  String _normalizeUrl(String url) {
-    final parsed = Uri.tryParse(url.trim());
-    if (parsed == null) return url.trim().toLowerCase();
-    final host = parsed.host.toLowerCase();
-    final path = parsed.path.toLowerCase();
-    return '$host$path';
-  }
 }

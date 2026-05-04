@@ -61,8 +61,8 @@ class _RegionInfoScreenState extends State<RegionInfoScreen> {
   Widget build(BuildContext context) {
     final t = context.t;
     final description =
-        widget.region.fromAboveDescription?.trim().isNotEmpty == true
-        ? widget.region.fromAboveDescription!.trim()
+        widget.region.description?.trim().isNotEmpty == true
+        ? widget.region.description!.trim()
         : t.createFlight.overview.regionInfo.descriptionUnavailable;
     final offlineArticle = widget.offlineArticle;
     if (offlineArticle != null) {

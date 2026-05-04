@@ -71,7 +71,7 @@ class RouteRegionsApiMapper {
       pathLengthInsideKm: pathLengthInsideKm,
       geometry: geometry,
       wikidataQid: wikidataQid ?? _normalizeWikidataQid(qid),
-      fromAboveDescription: fromAboveDescription,
+      description: fromAboveDescription,
     );
   }
 

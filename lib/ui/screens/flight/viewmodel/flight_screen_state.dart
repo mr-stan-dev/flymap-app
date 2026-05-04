@@ -25,6 +25,8 @@ final class FlightScreenLoaded extends FlightScreenState {
   final GpsData? gpsData;
   final int gpsUpdateTick;
   final String? lastVisitedRegionQid;
+  final List<String> currentRegionQids;
+  final String? nextRegionQid;
 
   const FlightScreenLoaded({
     required this.flight,
@@ -32,6 +34,8 @@ final class FlightScreenLoaded extends FlightScreenState {
     this.gpsData,
     this.gpsUpdateTick = 0,
     this.lastVisitedRegionQid,
+    this.currentRegionQids = const [],
+    this.nextRegionQid,
   });
 
   FlightScreenLoaded copyWith({
@@ -41,6 +45,9 @@ final class FlightScreenLoaded extends FlightScreenState {
     int? gpsUpdateTick,
     String? lastVisitedRegionQid,
     bool clearLastVisitedRegionQid = false,
+    List<String>? currentRegionQids,
+    String? nextRegionQid,
+    bool clearNextRegionQid = false,
   }) {
     return FlightScreenLoaded(
       flight: flight ?? this.flight,
@@ -50,6 +57,10 @@ final class FlightScreenLoaded extends FlightScreenState {
       lastVisitedRegionQid: clearLastVisitedRegionQid
           ? null
           : lastVisitedRegionQid ?? this.lastVisitedRegionQid,
+      currentRegionQids: currentRegionQids ?? this.currentRegionQids,
+      nextRegionQid: clearNextRegionQid
+          ? null
+          : nextRegionQid ?? this.nextRegionQid,
     );
   }
 
@@ -60,6 +71,8 @@ final class FlightScreenLoaded extends FlightScreenState {
     gpsData,
     gpsUpdateTick,
     lastVisitedRegionQid,
+    currentRegionQids,
+    nextRegionQid,
   ];
 
   @override

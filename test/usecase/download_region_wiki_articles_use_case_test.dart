@@ -29,8 +29,8 @@ void main() {
       expect(result.cancelled, isFalse);
       expect(result.failedCount, 0);
       expect(progress.map((p) => p.completed), [0, 1, 2]);
-      expect(result.regions[0].fromAboveDescription, 'Backend description 1');
-      expect(result.regions[1].fromAboveDescription, 'Backend description 2');
+      expect(result.regions[0].description, 'Backend description 1');
+      expect(result.regions[1].description, 'Backend description 2');
       expect(result.articleUrls.toSet(), {
         'https://en.wikipedia.org/wiki/Q23154',
         'https://en.wikipedia.org/wiki/Q55488',
@@ -62,7 +62,7 @@ RouteRegion _region({
   return RouteRegion(
     qid: qid,
     wikidataQid: wikidataQid,
-    fromAboveDescription: fromAboveDescription,
+    description: fromAboveDescription,
     name: qid,
     regionType: RouteRegionType.region,
     pathFirstEncounterKm: 0,

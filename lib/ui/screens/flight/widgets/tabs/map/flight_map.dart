@@ -17,6 +17,7 @@ import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_style_loade
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_session_controller.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_user_location_controller.dart';
 import 'package:get_it/get_it.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_chips/geo_awareness_chips.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_gps_status_badge.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_initializing_overlay.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_style_loading_view.dart';
@@ -275,7 +276,7 @@ class _FlightMapState extends State<FlightMap> {
 
     final initialZoom = _initialZoom();
     final double controlsTopOffset =
-        MediaQuery.of(context).padding.top + 2 * kToolbarHeight + 8;
+        2 * kToolbarHeight;
 
     return BlocListener<FlightScreenCubit, FlightScreenState>(
       listener: (context, state) {
@@ -307,17 +308,10 @@ class _FlightMapState extends State<FlightMap> {
               onStyleLoadedCallback: _onStyleLoaded,
             ),
           ),
-          FlightMapControls(
-            topOffset: controlsTopOffset,
-            visible: _showControls || _followUser,
-            is3D: _is3D,
-            followUser: _followUser,
-            onToggle3D: _toggle3D,
-            onToggleFollowUser: _toggleUserFollow,
-          ),
+          // GPS badge — top-right, just below the app bar
           Positioned(
-            left: 8,
-            bottom: 16,
+            top: controlsTopOffset + 12,
+            left: 16,
             child: BlocBuilder<FlightScreenCubit, FlightScreenState>(
               buildWhen: (previous, current) {
                 if (previous is FlightScreenLoaded &&
@@ -335,6 +329,41 @@ class _FlightMapState extends State<FlightMap> {
                 return MapGpsStatusBadge(
                   gpsStatus: state.gpsStatus,
                   gpsData: state.gpsData,
+                );
+              },
+            ),
+          ),
+          // Map controls (3D / follow) — pushed below GPS badge
+          FlightMapControls(
+            topOffset: controlsTopOffset  + 12,
+            visible: _showControls || _followUser,
+            is3D: _is3D,
+            followUser: _followUser,
+            onToggle3D: _toggle3D,
+            onToggleFollowUser: _toggleUserFollow,
+          ),
+          // Geo-awareness chips — bottom-left
+          Positioned(
+            bottom: 16,
+            child: BlocBuilder<FlightScreenCubit, FlightScreenState>(
+              buildWhen: (previous, current) {
+                if (previous is FlightScreenLoaded &&
+                    current is FlightScreenLoaded) {
+                  return previous.currentRegionQids !=
+                          current.currentRegionQids ||
+                      previous.nextRegionQid != current.nextRegionQid;
+                }
+                return previous.runtimeType != current.runtimeType;
+              },
+              builder: (context, state) {
+                if (state is! FlightScreenLoaded) {
+                  return const SizedBox.shrink();
+                }
+                return GeoAwarenessChips(
+                  currentRegionQids: state.currentRegionQids,
+                  nextRegionQid: state.nextRegionQid,
+                  allRegions: state.flight.info.routeRegions,
+                  articles: state.flight.info.articles,
                 );
               },
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/entity/flight_article.dart';
 import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/utils/wikipedia_article_utils.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/read/articles/articles_section.dart';
@@ -110,7 +111,7 @@ class _LoadedReadTab extends StatelessWidget {
     final regionArticles = <FlightArticle>[];
     
     for (final region in regions) {
-      final article = _matchRegionArticle(region, articles);
+      final article = WikipediaArticleUtils.matchRegionArticle(region, articles);
       if (article != null && !regionArticles.contains(article)) {
         regionArticles.add(article);
       }
@@ -126,7 +127,7 @@ class _LoadedReadTab extends StatelessWidget {
     final regionWikiUrls = regions
         .map((r) => r.wikipediaUrl?.trim() ?? '')
         .where((url) => url.isNotEmpty)
-        .map(_normalizeUrl)
+        .map(WikipediaArticleUtils.normalizeUrl)
         .toSet();
     final regionNames = regions
         .map((r) => r.name.trim().toLowerCase())
@@ -135,7 +136,7 @@ class _LoadedReadTab extends StatelessWidget {
 
     return articles
         .where((article) {
-          final normalizedArticleUrl = _normalizeUrl(article.sourceUrl);
+          final normalizedArticleUrl = WikipediaArticleUtils.normalizeUrl(article.sourceUrl);
           if (regionWikiUrls.contains(normalizedArticleUrl)) return false;
           final articleTitle = article.title.trim().toLowerCase();
           if (regionNames.contains(articleTitle)) return false;
@@ -144,34 +145,4 @@ class _LoadedReadTab extends StatelessWidget {
         .toList(growable: false);
   }
 
-  FlightArticle? _matchRegionArticle(
-    RouteRegion region,
-    List<FlightArticle> articles,
-  ) {
-    if (articles.isEmpty) return null;
-    final regionUrl = region.wikipediaUrl?.trim() ?? '';
-    if (regionUrl.isNotEmpty) {
-      for (final article in articles) {
-        if (_normalizeUrl(article.sourceUrl) == _normalizeUrl(regionUrl)) {
-          return article;
-        }
-      }
-    }
-    final regionName = region.name.trim().toLowerCase();
-    if (regionName.isEmpty) return null;
-    for (final article in articles) {
-      if (article.title.trim().toLowerCase() == regionName) {
-        return article;
-      }
-    }
-    return null;
-  }
-
-  String _normalizeUrl(String url) {
-    final parsed = Uri.tryParse(url.trim());
-    if (parsed == null) return url.trim().toLowerCase();
-    final host = parsed.host.toLowerCase();
-    final path = parsed.path.toLowerCase();
-    return '$host$path';
-  }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/data/gps_data_provider.dart';
 import 'package:flymap/entity/flight.dart';
 import 'package:flymap/entity/gps_data.dart';
+import 'package:flymap/entity/route_region.dart';
 import 'package:flymap/entity/route_region_geo_contains.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
@@ -54,15 +55,19 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
             break;
         }
         var lastVisitedRegionQid = current?.lastVisitedRegionQid;
+        var currentRegionQids = current?.currentRegionQids ?? const <String>[];
+        String? nextRegionQid = current?.nextRegionQid;
         final latitude = data?.latitude;
         final longitude = data?.longitude;
         if (latitude != null && longitude != null) {
-          final latest = _findLatestContainingRegionQid(
+          final geoResult = _computeGeoAwareness(
             latitude: latitude,
             longitude: longitude,
           );
-          if (latest != null && latest.isNotEmpty) {
-            lastVisitedRegionQid = latest;
+          currentRegionQids = geoResult.currentQids;
+          nextRegionQid = geoResult.nextQid;
+          if (currentRegionQids.isNotEmpty) {
+            lastVisitedRegionQid = currentRegionQids.last;
           }
         }
         _gpsUpdateTick++;
@@ -73,6 +78,8 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
             gpsData: data,
             gpsUpdateTick: _gpsUpdateTick,
             lastVisitedRegionQid: lastVisitedRegionQid,
+            currentRegionQids: currentRegionQids,
+            nextRegionQid: nextRegionQid,
           ),
         );
       },
@@ -177,26 +184,42 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
     Geolocator.openLocationSettings();
   }
 
-  String? _findLatestContainingRegionQid({
+  _GeoAwarenessResult _computeGeoAwareness({
     required double latitude,
     required double longitude,
   }) {
-    String? bestQid;
-    var bestPathFirstEncounterKm = double.negativeInfinity;
-    for (final region in flight.info.routeRegions) {
-      if (!RouteRegionGeoContains.contains(
+    final regions = flight.info.routeRegions;
+    final currentQids = <String>[];
+    double maxEncounterKm = double.negativeInfinity;
+
+    for (final region in regions) {
+      if (RouteRegionGeoContains.contains(
         region,
         latitude: latitude,
         longitude: longitude,
       )) {
-        continue;
-      }
-      if (region.pathFirstEncounterKm > bestPathFirstEncounterKm) {
-        bestPathFirstEncounterKm = region.pathFirstEncounterKm;
-        bestQid = region.qid;
+        currentQids.add(region.qid);
+        if (region.pathFirstEncounterKm > maxEncounterKm) {
+          maxEncounterKm = region.pathFirstEncounterKm;
+        }
       }
     }
-    return bestQid;
+
+    // Next region: first region by timeline order that user is NOT currently in
+    String? nextQid;
+    final currentSet = currentQids.toSet();
+    final sorted = List<RouteRegion>.from(regions)
+      ..sort((a, b) =>
+          a.pathFirstEncounterKm.compareTo(b.pathFirstEncounterKm));
+    for (final region in sorted) {
+      if (!currentSet.contains(region.qid) &&
+          region.pathFirstEncounterKm > maxEncounterKm) {
+        nextQid = region.qid;
+        break;
+      }
+    }
+
+    return _GeoAwarenessResult(currentQids: currentQids, nextQid: nextQid);
   }
 
   @override
@@ -205,4 +228,11 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
     _gpsProvider.stop();
     return super.close();
   }
+}
+
+class _GeoAwarenessResult {
+  const _GeoAwarenessResult({required this.currentQids, this.nextQid});
+
+  final List<String> currentQids;
+  final String? nextQid;
 }

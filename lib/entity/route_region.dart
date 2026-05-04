@@ -10,7 +10,7 @@ class RouteRegion extends Equatable {
     required this.pathLengthInsideKm,
     required this.geometry,
     this.wikidataQid,
-    this.fromAboveDescription,
+    this.description,
     this.wikipediaUrl,
   });
 
@@ -21,7 +21,7 @@ class RouteRegion extends Equatable {
   final double pathLengthInsideKm;
   final RouteRegionGeometry geometry;
   final String? wikidataQid;
-  final String? fromAboveDescription;
+  final String? description;
   final String? wikipediaUrl;
 
   RouteRegion copyWith({
@@ -46,9 +46,9 @@ class RouteRegion extends Equatable {
       pathLengthInsideKm: pathLengthInsideKm ?? this.pathLengthInsideKm,
       geometry: geometry ?? this.geometry,
       wikidataQid: clearWikidataQid ? null : wikidataQid ?? this.wikidataQid,
-      fromAboveDescription: clearFromAboveDescription
+      description: clearFromAboveDescription
           ? null
-          : fromAboveDescription ?? this.fromAboveDescription,
+          : fromAboveDescription ?? this.description,
       wikipediaUrl: clearWikipediaUrl
           ? null
           : wikipediaUrl ?? this.wikipediaUrl,
@@ -64,7 +64,7 @@ class RouteRegion extends Equatable {
     pathLengthInsideKm,
     geometry,
     wikidataQid,
-    fromAboveDescription,
+    description,
     wikipediaUrl,
   ];
 }

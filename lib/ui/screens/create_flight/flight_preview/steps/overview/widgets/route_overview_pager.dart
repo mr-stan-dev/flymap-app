@@ -120,8 +120,8 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
         return OverviewRegionCard(
           title: region.name,
           subtitle: typeLabel,
-          description: region.fromAboveDescription?.trim().isNotEmpty == true
-              ? region.fromAboveDescription!.trim()
+          description: region.description?.trim().isNotEmpty == true
+              ? region.description!.trim()
               : t.createFlight.overview.regionInfo.descriptionUnavailable,
           readMoreLabel: t.common.readMore,
           onReadMore: () =>

@@ -51,7 +51,7 @@ class RouteRegionDbMapper {
       wikidataQid: map.getString(RouteRegionDbKeys.wikidataQid).trim().isEmpty
           ? null
           : map.getString(RouteRegionDbKeys.wikidataQid),
-      fromAboveDescription:
+      description:
           map.getString(RouteRegionDbKeys.fromAboveDescription).trim().isEmpty
           ? null
           : map.getString(RouteRegionDbKeys.fromAboveDescription),
@@ -72,7 +72,7 @@ class RouteRegionDbMapper {
       RouteRegionDbKeys.geometryGeoJson: region.geometry.geoJson,
     },
     RouteRegionDbKeys.wikidataQid: region.wikidataQid ?? '',
-    RouteRegionDbKeys.fromAboveDescription: region.fromAboveDescription ?? '',
+    RouteRegionDbKeys.fromAboveDescription: region.description ?? '',
     RouteRegionDbKeys.wikipediaUrl: region.wikipediaUrl ?? '',
   };
 }
