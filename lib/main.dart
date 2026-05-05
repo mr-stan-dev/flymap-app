@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/analytics/app_analytics_initializer.dart';
@@ -23,6 +24,9 @@ void main() async {
     () async {
       // Must be initialized in the same zone where runApp is called.
       WidgetsFlutterBinding.ensureInitialized();
+      await SystemChrome.setPreferredOrientations(const [
+        DeviceOrientation.portraitUp,
+      ]);
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
