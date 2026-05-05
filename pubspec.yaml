@@ -47,7 +47,7 @@ dependencies:
   uuid: ^4.5.1
   slang: ^4.8.0
   slang_flutter: ^4.8.0
-  circle_flags: ^3.0.1
+  country_flags: ^3.0.1
 
 dev_dependencies:
   flutter_test:
@@ -78,6 +78,7 @@ flutter:
     - assets/images/learn/
     - assets/images/learn/categories/
     - assets/images/poi/
+    - assets/images/regions/
 
 flutter_launcher_icons:
   android: true

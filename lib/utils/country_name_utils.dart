@@ -189,6 +189,30 @@ class CountryNameUtils {
     'ZW': 'Zimbabwe',
   };
 
+  static final Map<String, String> _nameToCode = _names.map((k, v) => MapEntry(v.toLowerCase(), k));
+
+  static String? toCode(String name) {
+    final normalized = name.trim().toLowerCase();
+    if (normalized.isEmpty) return null;
+
+    // Direct match
+    if (_nameToCode.containsKey(normalized)) {
+      return _nameToCode[normalized];
+    }
+
+    // Partial match for cases like "Iran, Islamic Rep. of" or "Russian Federation"
+    for (final entry in _nameToCode.entries) {
+      if (entry.key.contains(normalized) || normalized.contains(entry.key)) {
+        // Basic check to avoid false positives for very short names
+        if (normalized.length > 3 || entry.key.length > 3) {
+           return entry.value;
+        }
+      }
+    }
+
+    return null;
+  }
+
   static String fromCode(String code) {
     final normalized = code.trim().toUpperCase();
     if (normalized.isEmpty) return code;

@@ -1,5 +1,8 @@
+import 'package:country_flags/country_flags.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flymap/entity/route_region_type.dart';
+import 'package:flymap/utils/country_name_utils.dart';
 
 class OverviewRegionCard extends StatefulWidget {
   const OverviewRegionCard({
@@ -8,6 +11,7 @@ class OverviewRegionCard extends StatefulWidget {
     required this.description,
     required this.readMoreLabel,
     required this.onReadMore,
+    required this.regionType,
     super.key,
   });
 
@@ -16,6 +20,7 @@ class OverviewRegionCard extends StatefulWidget {
   final String description;
   final String readMoreLabel;
   final VoidCallback onReadMore;
+  final RouteRegionType regionType;
 
   @override
   State<OverviewRegionCard> createState() => _OverviewRegionCardState();
@@ -62,7 +67,10 @@ class _OverviewRegionCardState extends State<OverviewRegionCard> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _RegionArtworkPlaceholder(),
+                    _RegionArtworkPlaceholder(
+                      regionName: widget.title,
+                      regionType: widget.regionType,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -204,22 +212,63 @@ class _AlwaysReadMoreInlineText extends StatelessWidget {
 }
 
 class _RegionArtworkPlaceholder extends StatelessWidget {
-  const _RegionArtworkPlaceholder();
+  const _RegionArtworkPlaceholder({
+    required this.regionName,
+    required this.regionType,
+  });
+
+  final String regionName;
+  final RouteRegionType regionType;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+    final assetPath = regionType.assetImagePath;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        ),
+        child: _buildArtwork(context, assetPath),
       ),
-      child: Icon(
-        Icons.image_outlined,
-        size: 24,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      ),
+    );
+  }
+
+  Widget _buildArtwork(BuildContext context, String? assetPath) {
+    if (regionType == RouteRegionType.country) {
+      final countryCode = CountryNameUtils.toCode(regionName);
+      if (countryCode != null) {
+        return Center(
+          child: Opacity(
+            opacity: 0.70,
+            child: CountryFlag.fromCountryCode(
+              countryCode,
+              width: 64,
+              height: 64,
+              shape: Rectangle(),
+            ),
+          ),
+        );
+      }
+    }
+    if (assetPath != null) {
+      return Image.asset(
+        assetPath,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            _buildFallbackIcon(context),
+      );
+    }
+    return _buildFallbackIcon(context);
+  }
+
+  Widget _buildFallbackIcon(BuildContext context) {
+    return Icon(
+      Icons.image_outlined,
+      size: 24,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
   }
 }

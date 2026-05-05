@@ -1257,8 +1257,8 @@ class TranslationsCreateFlightWikipediaEn {
 
 	// Translations
 
-	/// en: 'Add articles to read while you’re in the air'
-	String get title => 'Add articles to read while you’re in the air';
+	/// en: 'Download articles and read while you’re in the air'
+	String get title => 'Download articles and read while you’re in the air';
 
 	/// en: 'Finding route-related articles...'
 	String get loadingIntro => 'Finding route-related articles...';
@@ -2250,7 +2250,7 @@ extension on Translations {
 			'createFlight.overview.timeline.regionType.geoarea' => 'Geographic area',
 			'createFlight.overview.timeline.regionType.isthmus' => 'Isthmus',
 			'createFlight.overview.timeline.regionType.unknown' => 'Unknown region type',
-			'createFlight.wikipedia.title' => 'Add articles to read while you’re in the air',
+			'createFlight.wikipedia.title' => 'Download articles and read while you’re in the air',
 			'createFlight.wikipedia.loadingIntro' => 'Finding route-related articles...',
 			'createFlight.wikipedia.foundIntro' => ({required Object count}) => 'Based on your route we found ${count} relevant articles',
 			'createFlight.wikipedia.emptyIntro' => 'No route-related Wikipedia articles found. You can continue with map download only.',

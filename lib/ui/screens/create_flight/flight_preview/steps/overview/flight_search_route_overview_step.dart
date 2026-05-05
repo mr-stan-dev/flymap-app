@@ -3,7 +3,6 @@ import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/entity/map_detail_level.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
-import 'package:flymap/ui/theme/app_colours.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview_page_entry.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_summary_screen.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_map_widget.dart';
@@ -11,6 +10,7 @@ import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/wi
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_progress_timeline.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
+import 'package:flymap/ui/theme/app_colours.dart';
 
 class FlightSearchRouteOverviewStep extends StatefulWidget {
   const FlightSearchRouteOverviewStep({
@@ -62,21 +62,15 @@ class _FlightSearchRouteOverviewStepState
     if (route == null) {
       return Center(child: Text(context.t.createFlight.overview.routeNotReady));
     }
-    final selectedDetailLevel = widget.isProUser
-        ? MapDetailLevel.pro
-        : widget.state.selectedMapDetailLevel;
     if (widget.isProUser &&
         widget.state.selectedMapDetailLevel != MapDetailLevel.pro) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         widget.onSelectMapDetailLevel(MapDetailLevel.pro);
       });
     }
-    final isFreeUserWithProSelection =
-        !widget.isProUser && selectedDetailLevel == MapDetailLevel.pro;
 
     final entries = _buildEntries(route, widget.state);
-    final topSection = Expanded(
-      child: Column(
+    return Column(
         children: [
           Expanded(
             flex: 5,
@@ -103,15 +97,6 @@ class _FlightSearchRouteOverviewStepState
                         selectedRegion: selectedRegion,
                         selectedAirport: selectedAirport,
                         showWholeRoute: showWholeRoute,
-                      ),
-                    ),
-                    Positioned(
-                      top: widget.state.isOverviewLoading ? 52 : 12,
-                      right: 12,
-                      child: _MapDetailSwitcher(
-                        isProUser: widget.isProUser,
-                        selected: selectedDetailLevel,
-                        onSelect: widget.onSelectMapDetailLevel,
                       ),
                     ),
                     if (widget.state.isOverviewLoading)
@@ -187,30 +172,11 @@ class _FlightSearchRouteOverviewStepState
                 totalRouteMinutes:
                     entries[entries.length - 2].minuteFromDeparture,
               ),
+              onSkipReview: widget.onContinue,
             ),
           ),
         ],
-      ),
-    );
-
-    return Column(
-      children: [
-        topSection,
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: isFreeUserWithProSelection
-              ? PremiumButton(
-                  onPressed: widget.onUpgradeToPro,
-                  label: context.t.createFlight.mapPreview.upgradeToPro,
-                  icon: Icons.workspace_premium_rounded,
-                )
-              : PrimaryButton(
-                  onPressed: widget.onContinue,
-                  label: context.t.common.kContinue,
-                ),
-        ),
-      ],
-    );
+      );
   }
 
   List<RouteOverviewPageEntry> _buildEntries(

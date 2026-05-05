@@ -75,17 +75,15 @@ class _AirportArtworkPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(
-        icon,
-        size: 28,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 64,
+        height: 64,
+        child: Image.asset(
+          'assets/images/airport.webp',
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }

@@ -7,8 +7,10 @@ class OverviewTitleCard extends StatelessWidget {
     required this.routeCodeLine,
     required this.routeCitiesLine,
     required this.routeMetaLine,
-    required this.startLabel,
-    required this.onStart,
+    required this.reviewRouteLabel,
+    required this.onReviewRoute,
+    required this.skipReviewLabel,
+    required this.onSkipReview,
     super.key,
   });
 
@@ -16,22 +18,21 @@ class OverviewTitleCard extends StatelessWidget {
   final String routeCodeLine;
   final String routeCitiesLine;
   final String routeMetaLine;
-  final String startLabel;
-  final VoidCallback onStart;
+  final String reviewRouteLabel;
+  final VoidCallback onReviewRoute;
+  final String skipReviewLabel;
+  final VoidCallback onSkipReview;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              routeTitleLabel,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
+            const SizedBox(height: 16),
             Text(
               routeCodeLine,
               style: Theme.of(
@@ -52,8 +53,12 @@ class OverviewTitleCard extends StatelessWidget {
                 context,
               ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 12),
-            SecondaryButton(label: startLabel, onPressed: onStart, expand: false),
+            Spacer(),
+            const SizedBox(height: 16),
+            PrimaryButton(label: reviewRouteLabel, onPressed: onReviewRoute, expand: true),
+            const SizedBox(height: 4),
+            TertiaryButton(label: skipReviewLabel, onPressed: onSkipReview, expand: true),
+            const SizedBox(height: 4),
           ],
         ),
       ),

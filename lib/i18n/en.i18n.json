@@ -312,7 +312,7 @@
       }
     },
     "wikipedia": {
-      "title": "Add articles to read while you’re in the air",
+      "title": "Download articles and read while you’re in the air",
       "loadingIntro": "Finding route-related articles...",
       "foundIntro": "Based on your route we found $count relevant articles",
       "emptyIntro": "No route-related Wikipedia articles found. You can continue with map download only.",

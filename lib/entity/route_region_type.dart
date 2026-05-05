@@ -48,6 +48,65 @@ enum RouteRegionType {
   }
 }
 
+extension RouteRegionTypeAssetX on RouteRegionType {
+  String? get assetImagePath {
+    const base = 'assets/images/regions';
+    switch (this) {
+      case RouteRegionType.sea:
+        return '$base/sea.webp';
+      case RouteRegionType.ocean:
+        return '$base/ocean.webp';
+      case RouteRegionType.strait:
+        return '$base/strait.webp';
+      case RouteRegionType.channel:
+        return '$base/channel.webp';
+      case RouteRegionType.gulf:
+        return '$base/gulf.webp';
+      case RouteRegionType.bay:
+        return '$base/bay.webp';
+      case RouteRegionType.lake:
+      case RouteRegionType.alkalineLake:
+        return '$base/lake.webp';
+      case RouteRegionType.island:
+        return '$base/island.webp';
+      case RouteRegionType.archipelago:
+        return '$base/archipelago.webp';
+      case RouteRegionType.peninsula:
+        return '$base/peninsula.webp';
+      case RouteRegionType.coast:
+        return '$base/coast.webp';
+      case RouteRegionType.mountainRange:
+        return '$base/mountains.webp';
+      case RouteRegionType.valley:
+        return '$base/valley.webp';
+      case RouteRegionType.plateau:
+        return '$base/plateau.webp';
+      case RouteRegionType.plain:
+        return '$base/plain.webp';
+      case RouteRegionType.basin:
+        return '$base/basin.webp';
+      case RouteRegionType.lowland:
+        return '$base/lowland.webp';
+      case RouteRegionType.tundra:
+        return '$base/tundra.webp';
+      case RouteRegionType.wetlands:
+        return '$base/wetland.webp';
+      case RouteRegionType.desert:
+        return '$base/desert.webp';
+      case RouteRegionType.delta:
+        return '$base/delta.webp';
+      case RouteRegionType.reservoir:
+        return '$base/reservoir.webp';
+      case RouteRegionType.continent:
+        return '$base/continent.webp';
+      case RouteRegionType.isthmus:
+        return '$base/isthmus.webp';
+      default:
+        return null;
+    }
+  }
+}
+
 class RouteRegionGeometry extends Equatable {
   const RouteRegionGeometry({required this.type, required this.geoJson});
 

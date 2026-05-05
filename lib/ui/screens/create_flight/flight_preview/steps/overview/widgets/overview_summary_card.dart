@@ -7,6 +7,8 @@ class OverviewSummaryCard extends StatelessWidget {
     required this.chipLabels,
     required this.fullSummaryLabel,
     required this.onFullSummary,
+    required this.continueLabel,
+    required this.onContinue,
     super.key,
   });
 
@@ -14,6 +16,8 @@ class OverviewSummaryCard extends StatelessWidget {
   final List<String> chipLabels;
   final String fullSummaryLabel;
   final VoidCallback onFullSummary;
+  final String continueLabel;
+  final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +44,16 @@ class OverviewSummaryCard extends StatelessWidget {
                     .toList(),
               ),
               const Spacer(),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TertiaryButton(
-                  label: fullSummaryLabel,
-                  onPressed: onFullSummary,
-                  expand: false,
-                ),
+              TertiaryButton(
+                label: fullSummaryLabel,
+                onPressed: onFullSummary,
+                expand: true,
+              ),
+              const SizedBox(height: 8),
+              PrimaryButton(
+                label: continueLabel,
+                onPressed: onContinue,
+                expand: true,
               ),
             ],
           ),

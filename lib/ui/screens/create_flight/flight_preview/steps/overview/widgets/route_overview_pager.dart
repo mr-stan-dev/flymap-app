@@ -21,6 +21,7 @@ class RouteOverviewPager extends StatefulWidget {
     required this.onRouteSummaryRequested,
     this.initialPage = 0,
     required this.onPageChanged,
+    required this.onSkipReview,
     super.key,
   });
 
@@ -30,6 +31,7 @@ class RouteOverviewPager extends StatefulWidget {
   final VoidCallback onRouteSummaryRequested;
   final int initialPage;
   final ValueChanged<int> onPageChanged;
+  final VoidCallback onSkipReview;
 
   @override
   State<RouteOverviewPager> createState() => _RouteOverviewPagerState();
@@ -89,8 +91,10 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
               '${RouteUtils.cityLabel(route.departure.city)} → ${RouteUtils.cityLabel(route.arrival.city)}',
           routeMetaLine:
               '${MapUtils.distanceFormatted(departure: route.departure, arrival: route.arrival)} • ${_formatMinutesCompact(context, widget.totalRouteMinutes)}',
-          startLabel: t.createFlight.overview.start,
-          onStart: _animateToNextCard,
+          reviewRouteLabel: 'Review route',
+          onReviewRoute: _animateToNextCard,
+          skipReviewLabel: 'Skip review',
+          onSkipReview: widget.onSkipReview,
         );
       case RouteOverviewPageKind.departure:
         final airport = entry.airport!;
@@ -126,6 +130,7 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
           readMoreLabel: t.common.readMore,
           onReadMore: () =>
               _openRegionInfo(context, region: region, typeLabel: typeLabel),
+          regionType: region.regionType,
         );
       case RouteOverviewPageKind.summaryEnd:
         final typeCounts = _collectRegionTypeCounts();
@@ -135,8 +140,10 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
             final label = _typeMapper.mapLabel(context, item.type);
             return _formatTypeCount(item.count, label);
           }).toList(),
-          fullSummaryLabel: t.createFlight.overview.fullSummary,
+          fullSummaryLabel: 'Full summary',
           onFullSummary: widget.onRouteSummaryRequested,
+          continueLabel: t.common.kContinue,
+          onContinue: widget.onSkipReview,
         );
     }
   }

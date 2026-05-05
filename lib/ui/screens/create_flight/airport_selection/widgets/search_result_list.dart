@@ -1,4 +1,4 @@
-import 'package:circle_flags/circle_flags.dart';
+import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flymap/entity/airport.dart';
 
@@ -77,9 +77,11 @@ class SearchResultList extends StatelessWidget {
           visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
           contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
           minVerticalPadding: 0,
-          leading: CircleFlag(
+          leading: CountryFlag.fromCountryCode(
             airport.countryCode,
-            size: 24,
+            width: 24,
+            height: 24,
+            shape: Circle(),
           ),
           title: RichText(
             maxLines: 1,
