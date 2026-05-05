@@ -1790,6 +1790,24 @@ class TranslationsFlightRouteEn {
 
 	/// en: 'Now'
 	String get nowLabel => 'Now';
+
+	/// en: 'Current'
+	String get currentRegionLabel => 'Current';
+
+	/// en: 'Next'
+	String get nextRegionLabel => 'Next';
+
+	/// en: 'ETA: $time'
+	String etaLabel({required Object time}) => 'ETA: ${time}';
+
+	/// en: 'You are flying over:'
+	String get flyingOverLabel => 'You are flying over:';
+
+	/// en: 'Next: $region ($eta)'
+	String nextHintLabel({required Object region, required Object eta}) => 'Next: ${region} (${eta})';
+
+	/// en: 'estimating...'
+	String get etaUnknownLabel => 'estimating...';
 }
 
 // Path: createFlight.overview.airportCard
@@ -2435,6 +2453,12 @@ extension on Translations {
 			'flight.route.noSavedOfflineRegions' => 'No saved offline regions for this flight.',
 			'flight.route.currentProgress' => ({required Object percentage, required Object minute}) => 'Current progress: ${percentage}% (around ${minute} from takeoff)',
 			'flight.route.nowLabel' => 'Now',
+			'flight.route.currentRegionLabel' => 'Current',
+			'flight.route.nextRegionLabel' => 'Next',
+			'flight.route.etaLabel' => ({required Object time}) => 'ETA: ${time}',
+			'flight.route.flyingOverLabel' => 'You are flying over:',
+			'flight.route.nextHintLabel' => ({required Object region, required Object eta}) => 'Next: ${region} (${eta})',
+			'flight.route.etaUnknownLabel' => 'estimating...',
 			'shareFlight.title' => 'Share flight',
 			'shareFlight.preparingMap' => 'Preparing share preview map...',
 			'shareFlight.preparingScreenshot' => 'Preparing screenshot...',
@@ -2473,14 +2497,14 @@ extension on Translations {
 			'about.tip2' => 'Signal can drop in the middle of the aircraft. Flymap keeps the last known route view while searching.',
 			'onboarding.skip' => 'Skip',
 			'onboarding.letsStart' => 'Let\'s start',
+			_ => null,
+		} ?? switch (path) {
 			'onboarding.welcomeTitle' => 'Discover what’s below',
 			'onboarding.welcomeSubtitle' => 'shows you offline maps and interesting places along your flight',
 			'onboarding.nameTitle' => 'Pick a username',
 			'onboarding.nameSubtitle' => 'Make discovery personal. You can change it anytime.',
 			'onboarding.frequencyTitle' => 'How often do you fly?',
 			'onboarding.frequencySubtitle' => 'Flymap will personalize your experience and make suggestions more relevant',
-			_ => null,
-		} ?? switch (path) {
 			'onboarding.frequencyFirstFlight' => 'This is my first flight',
 			'onboarding.frequencyFewPerYear' => 'A few times a year',
 			'onboarding.frequencyMonthly' => 'About monthly',

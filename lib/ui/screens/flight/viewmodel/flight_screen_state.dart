@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flymap/entity/flight.dart';
 import 'package:flymap/entity/gps_data.dart';
+import 'package:flymap/entity/route_region.dart';
 
 /// Sealed class for flight screen states
 sealed class FlightScreenState extends Equatable {
@@ -24,18 +25,22 @@ final class FlightScreenLoaded extends FlightScreenState {
   final GpsStatus gpsStatus;
   final GpsData? gpsData;
   final int gpsUpdateTick;
-  final String? lastVisitedRegionQid;
-  final List<String> currentRegionQids;
-  final String? nextRegionQid;
+  final List<RouteRegion> routeRegions;
+  final String? lastVisitedRegionId;
+  final List<String> currentRegionIds;
+  final String? nextRegionId;
+  final int? nextRegionEtaMinutes;
 
   const FlightScreenLoaded({
     required this.flight,
     this.gpsStatus = GpsStatus.off,
     this.gpsData,
     this.gpsUpdateTick = 0,
-    this.lastVisitedRegionQid,
-    this.currentRegionQids = const [],
-    this.nextRegionQid,
+    required this.routeRegions,
+    this.lastVisitedRegionId,
+    this.currentRegionIds = const [],
+    this.nextRegionId,
+    this.nextRegionEtaMinutes,
   });
 
   FlightScreenLoaded copyWith({
@@ -43,24 +48,31 @@ final class FlightScreenLoaded extends FlightScreenState {
     GpsStatus? gpsStatus,
     GpsData? gpsData,
     int? gpsUpdateTick,
-    String? lastVisitedRegionQid,
-    bool clearLastVisitedRegionQid = false,
-    List<String>? currentRegionQids,
-    String? nextRegionQid,
-    bool clearNextRegionQid = false,
+    List<RouteRegion>? routeRegions,
+    String? lastVisitedRegionId,
+    bool clearLastVisitedRegionId = false,
+    List<String>? currentRegionIds,
+    String? nextRegionId,
+    bool clearNextRegionId = false,
+    int? nextRegionEtaMinutes,
+    bool clearNextRegionEtaMinutes = false,
   }) {
     return FlightScreenLoaded(
       flight: flight ?? this.flight,
       gpsStatus: gpsStatus ?? this.gpsStatus,
       gpsData: gpsData ?? this.gpsData,
       gpsUpdateTick: gpsUpdateTick ?? this.gpsUpdateTick,
-      lastVisitedRegionQid: clearLastVisitedRegionQid
+      routeRegions: routeRegions ?? this.routeRegions,
+      lastVisitedRegionId: clearLastVisitedRegionId
           ? null
-          : lastVisitedRegionQid ?? this.lastVisitedRegionQid,
-      currentRegionQids: currentRegionQids ?? this.currentRegionQids,
-      nextRegionQid: clearNextRegionQid
+          : lastVisitedRegionId ?? this.lastVisitedRegionId,
+      currentRegionIds: currentRegionIds ?? this.currentRegionIds,
+      nextRegionId: clearNextRegionId
           ? null
-          : nextRegionQid ?? this.nextRegionQid,
+          : nextRegionId ?? this.nextRegionId,
+      nextRegionEtaMinutes: clearNextRegionEtaMinutes
+          ? null
+          : nextRegionEtaMinutes ?? this.nextRegionEtaMinutes,
     );
   }
 
@@ -70,9 +82,11 @@ final class FlightScreenLoaded extends FlightScreenState {
     gpsStatus,
     gpsData,
     gpsUpdateTick,
-    lastVisitedRegionQid,
-    currentRegionQids,
-    nextRegionQid,
+    routeRegions,
+    lastVisitedRegionId,
+    currentRegionIds,
+    nextRegionId,
+    nextRegionEtaMinutes,
   ];
 
   @override
@@ -81,8 +95,11 @@ final class FlightScreenLoaded extends FlightScreenState {
         'flightId:${flight.id}, '
         'gpsStatus:${gpsStatus.name}, '
         'hasGpsData:${gpsData != null ? 1 : 0}, '
-        'lastVisitedRegionQid:${lastVisitedRegionQid ?? '-'}, '
-        'tick:$gpsUpdateTick'
+        'lastVisitedRegionId:${lastVisitedRegionId ?? '-'}, '
+        'tick:$gpsUpdateTick, '
+        'currentRegionCount:${currentRegionIds.length}, '
+        'hasNext:${nextRegionId != null ? 1 : 0}, '
+        'eta:${nextRegionEtaMinutes ?? '-'}'
         ')';
   }
 }

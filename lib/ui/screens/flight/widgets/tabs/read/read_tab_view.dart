@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/entity/flight_article.dart';
 import 'package:flymap/entity/route_region.dart';
-import 'package:flymap/utils/wikipedia_article_utils.dart';
+import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/read/articles/articles_section.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/shared/tab_state_placeholder.dart';
-import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/utils/wikipedia_article_utils.dart';
 
 class ReadTabView extends StatelessWidget {
-  const ReadTabView({
-    required this.state,
-    required this.topPadding,
-    super.key,
-  });
+  const ReadTabView({required this.state, required this.topPadding, super.key});
 
   final FlightScreenState state;
   final double topPadding;
@@ -31,7 +27,10 @@ class ReadTabView extends StatelessWidget {
       final error = state as FlightScreenError;
       if (error.flight != null) {
         return _LoadedReadTab(
-          state: FlightScreenLoaded(flight: error.flight!),
+          state: FlightScreenLoaded(
+            flight: error.flight!,
+            routeRegions: error.flight!.info.routeRegions,
+          ),
           topPadding: topPadding,
         );
       }
@@ -57,15 +56,16 @@ class _LoadedReadTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final info = state.flight.info;
-    
+    final routeRegions = state.routeRegions;
+
     final regionArticles = _regionArticles(
       articles: info.articles,
-      regions: info.routeRegions,
+      regions: routeRegions,
     );
-    
+
     final otherArticles = _otherArticles(
       articles: info.articles,
-      regions: info.routeRegions,
+      regions: routeRegions,
     );
 
     if (regionArticles.isEmpty && otherArticles.isEmpty) {
@@ -91,10 +91,7 @@ class _LoadedReadTab extends StatelessWidget {
             ],
             if (otherArticles.isNotEmpty) ...[
               const SizedBox(height: DsSpacing.sm),
-              ArticlesSection(
-                articles: otherArticles,
-                title: 'Other articles',
-              ),
+              ArticlesSection(articles: otherArticles, title: 'Other articles'),
             ],
           ],
         ),
@@ -107,11 +104,14 @@ class _LoadedReadTab extends StatelessWidget {
     required List<RouteRegion> regions,
   }) {
     if (articles.isEmpty || regions.isEmpty) return [];
-    
+
     final regionArticles = <FlightArticle>[];
-    
+
     for (final region in regions) {
-      final article = WikipediaArticleUtils.matchRegionArticle(region, articles);
+      final article = WikipediaArticleUtils.matchRegionArticle(
+        region,
+        articles,
+      );
       if (article != null && !regionArticles.contains(article)) {
         regionArticles.add(article);
       }
@@ -136,7 +136,9 @@ class _LoadedReadTab extends StatelessWidget {
 
     return articles
         .where((article) {
-          final normalizedArticleUrl = WikipediaArticleUtils.normalizeUrl(article.sourceUrl);
+          final normalizedArticleUrl = WikipediaArticleUtils.normalizeUrl(
+            article.sourceUrl,
+          );
           if (regionWikiUrls.contains(normalizedArticleUrl)) return false;
           final articleTitle = article.title.trim().toLowerCase();
           if (regionNames.contains(articleTitle)) return false;
@@ -144,5 +146,4 @@ class _LoadedReadTab extends StatelessWidget {
         })
         .toList(growable: false);
   }
-
 }

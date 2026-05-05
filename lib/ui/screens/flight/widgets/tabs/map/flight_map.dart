@@ -2,25 +2,29 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/data/local/mappers/flight_map_mapper.dart';
 import 'package:flymap/entity/flight.dart';
 import 'package:flymap/entity/gps_data.dart';
+import 'package:flymap/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
+import 'package:flymap/ui/map/map_style_safety.dart';
 import 'package:flymap/ui/map/map_utils.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_poi_controller.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_controls.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_style_loader.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_poi_controller.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_session_controller.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_style_loader.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_user_location_controller.dart';
-import 'package:get_it/get_it.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_chips/geo_awareness_chips.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/geo_awareness_card.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_controls.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_gps_status_badge.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_initializing_overlay.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_style_loading_view.dart';
+import 'package:get_it/get_it.dart';
+import 'package:latlong2/latlong.dart' as ll;
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 class FlightMap extends StatefulWidget {
@@ -33,6 +37,15 @@ class FlightMap extends StatefulWidget {
 }
 
 class _FlightMapState extends State<FlightMap> {
+  static const String _selectedRegionSourceId =
+      'flight-map-selected-region-source';
+  static const String _selectedRegionFillLayerId =
+      'flight-map-selected-region-fill';
+  static const String _selectedRegionLineLayerId =
+      'flight-map-selected-region-line';
+  static const String _routePathLayerId = 'flight-route-path-layer';
+  static const String _regionHighlightColor = '#8B5CF6';
+
   String? _styleString;
   final _logger = const Logger('FlightMapLoaded');
   bool _is3D = false;
@@ -42,6 +55,9 @@ class _FlightMapState extends State<FlightMap> {
   int? _lastLoggedZoomTenths;
   String? _mapLoadError;
   bool _featureTapListenerAttached = false;
+  String? _selectedGeoRegionId;
+  String? _lastFocusedGeoRegionId;
+  late List<RouteRegion> _routeRegions;
   late final FlightMapSessionController _mapSession;
   late final FlightMapPoiController _poiController = FlightMapPoiController(
     logger: _logger,
@@ -73,6 +89,7 @@ class _FlightMapState extends State<FlightMap> {
   @override
   void initState() {
     super.initState();
+    _routeRegions = widget.flight.info.routeRegions;
     _mapSession = FlightMapSessionController(
       logger: _logger,
       flight: widget.flight,
@@ -199,6 +216,9 @@ class _FlightMapState extends State<FlightMap> {
       onStateChanged: () {
         if (mounted) {
           setState(() {});
+          if (_mapSession.routeLayersAdded) {
+            unawaited(_syncSelectedRegionOverlayAndFocus());
+          }
         }
       },
       flushPendingGpsData: _flushPendingGpsData,
@@ -223,6 +243,18 @@ class _FlightMapState extends State<FlightMap> {
         routeLayersAdded: _mapSession.routeLayersAdded,
       ),
     );
+  }
+
+  void _onGeoRegionSelectionChanged(RouteRegion? region) {
+    final nextId = region?.qid;
+    if (_selectedGeoRegionId == nextId) return;
+    setState(() {
+      _selectedGeoRegionId = nextId;
+      if (nextId != null && _followUser) {
+        _followUser = false;
+      }
+    });
+    unawaited(_syncSelectedRegionOverlayAndFocus());
   }
 
   Future<void> _updateUserLocation(GpsData data) async {
@@ -265,6 +297,224 @@ class _FlightMapState extends State<FlightMap> {
     _logger.log('Camera zoom: ${nextZoom.toStringAsFixed(1)}');
   }
 
+  RouteRegion? _selectedGeoRegion() {
+    final selectedId = _selectedGeoRegionId;
+    if (selectedId == null || selectedId.isEmpty) {
+      return null;
+    }
+    for (final region in _routeRegions) {
+      if (region.qid == selectedId) return region;
+    }
+    return null;
+  }
+
+  Future<void> _syncSelectedRegionOverlayAndFocus() async {
+    final controller = _mapSession.controller;
+    if (controller == null || !_mapSession.routeLayersAdded) return;
+    final selectedRegion = _selectedGeoRegion();
+    await _removeLayerIfExists(controller, _selectedRegionLineLayerId);
+    await _removeLayerIfExists(controller, _selectedRegionFillLayerId);
+    await _removeSourceIfExists(controller, _selectedRegionSourceId);
+
+    if (selectedRegion == null) {
+      _lastFocusedGeoRegionId = null;
+      return;
+    }
+
+    try {
+      await controller.addSource(
+        _selectedRegionSourceId,
+        GeojsonSourceProperties(
+          data: {
+            'type': 'FeatureCollection',
+            'features': [_toRegionFeature(selectedRegion)],
+          },
+        ),
+      );
+      await controller.addLayer(
+        _selectedRegionSourceId,
+        _selectedRegionFillLayerId,
+        FillLayerProperties(
+          fillColor: _regionHighlightColor,
+          fillOpacity: 0.28,
+          fillOutlineColor: _regionHighlightColor,
+        ),
+        belowLayerId: _routePathLayerId,
+      );
+      await controller.addLineLayer(
+        _selectedRegionSourceId,
+        _selectedRegionLineLayerId,
+        LineLayerProperties(
+          lineColor: _regionHighlightColor,
+          lineOpacity: 0.9,
+          lineWidth: 2.3,
+        ),
+        belowLayerId: _routePathLayerId,
+      );
+      await _focusOnSelectedRegion(controller, selectedRegion);
+    } on PlatformException catch (error) {
+      if (isStaleStylePlatformException(error)) {
+        _logger.log('Skipping stale style selected-region sync: $error');
+        return;
+      }
+      _logger.error('Failed to sync selected region overlay: $error');
+    }
+  }
+
+  Future<void> _focusOnSelectedRegion(
+    MapLibreMapController controller,
+    RouteRegion selectedRegion,
+  ) async {
+    if (_lastFocusedGeoRegionId == selectedRegion.qid) {
+      return;
+    }
+    final routePoints = _routePoints();
+    if (routePoints.length < 2) return;
+    final routeDistanceKm = _routeLengthKm(routePoints);
+    if (routeDistanceKm <= 0) return;
+
+    final lengthInsideKm = selectedRegion.pathLengthInsideKm.isFinite
+        ? selectedRegion.pathLengthInsideKm
+        : 0.0;
+    final pathCenterKm =
+        (selectedRegion.pathFirstEncounterKm + (lengthInsideKm / 2)).clamp(
+          0.0,
+          routeDistanceKm,
+        );
+    final targetPoint = _pointAtDistanceKm(routePoints, pathCenterKm);
+    if (targetPoint == null) return;
+
+    try {
+      await controller.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(targetPoint.latitude, targetPoint.longitude),
+          _zoomForPathLengthKm(lengthInsideKm),
+        ),
+      );
+      _lastFocusedGeoRegionId = selectedRegion.qid;
+    } on PlatformException catch (error) {
+      if (isStaleStylePlatformException(error)) {
+        _logger.log('Skipping stale style selected-region focus: $error');
+        return;
+      }
+      _logger.error('Failed to focus selected region: $error');
+    }
+  }
+
+  List<ll.LatLng> _routePoints() {
+    if (widget.flight.route.waypoints.length >= 2) {
+      return widget.flight.route.waypoints;
+    }
+    return [widget.flight.departure.latLon, widget.flight.arrival.latLon];
+  }
+
+  double _routeLengthKm(List<ll.LatLng> points) {
+    var total = 0.0;
+    for (var i = 0; i < points.length - 1; i++) {
+      total += MapUtils.distanceKm(
+        departure: points[i],
+        arrival: points[i + 1],
+      );
+    }
+    return total;
+  }
+
+  ll.LatLng? _pointAtDistanceKm(List<ll.LatLng> points, double targetKm) {
+    if (points.isEmpty) return null;
+    if (points.length == 1) return points.first;
+    if (targetKm <= 0) return points.first;
+
+    var traversedKm = 0.0;
+    for (var i = 0; i < points.length - 1; i++) {
+      final start = points[i];
+      final end = points[i + 1];
+      final segmentKm = MapUtils.distanceKm(departure: start, arrival: end);
+      if (segmentKm <= 0) continue;
+
+      final segmentEndKm = traversedKm + segmentKm;
+      if (targetKm <= segmentEndKm || i == points.length - 2) {
+        final localT = ((targetKm - traversedKm) / segmentKm).clamp(0.0, 1.0);
+        return ll.LatLng(
+          start.latitude + (end.latitude - start.latitude) * localT,
+          _interpolateLongitudeShortestPath(
+            start.longitude,
+            end.longitude,
+            localT,
+          ),
+        );
+      }
+      traversedKm = segmentEndKm;
+    }
+    return points.last;
+  }
+
+  double _interpolateLongitudeShortestPath(
+    double fromLon,
+    double toLon,
+    double t,
+  ) {
+    var delta = toLon - fromLon;
+    if (delta > 180.0) {
+      delta -= 360.0;
+    } else if (delta < -180.0) {
+      delta += 360.0;
+    }
+    final raw = fromLon + delta * t;
+    return _normalizeLongitude(raw);
+  }
+
+  double _normalizeLongitude(double longitude) {
+    var lon = longitude;
+    while (lon > 180.0) {
+      lon -= 360.0;
+    }
+    while (lon < -180.0) {
+      lon += 360.0;
+    }
+    return lon;
+  }
+
+  double _zoomForPathLengthKm(double pathLengthKm) {
+    if (!pathLengthKm.isFinite || pathLengthKm <= 0) return 5.8;
+    if (pathLengthKm > 3500) return 1;
+    if (pathLengthKm > 2200) return 1.4;
+    if (pathLengthKm > 1400) return 2.0;
+    if (pathLengthKm > 900) return 2.4;
+    if (pathLengthKm > 550) return 3;
+    if (pathLengthKm > 320) return 3.6;
+    if (pathLengthKm > 180) return 4;
+    if (pathLengthKm > 100) return 4.5;
+    if (pathLengthKm > 55) return 5;
+    if (pathLengthKm > 25) return 6;
+    return 6.8;
+  }
+
+  Map<String, dynamic> _toRegionFeature(RouteRegion region) {
+    return {
+      'type': 'Feature',
+      'properties': {'qid': region.qid, 'name': region.name},
+      'geometry': region.geometry.geoJson,
+    };
+  }
+
+  Future<void> _removeLayerIfExists(
+    MapLibreMapController controller,
+    String layerId,
+  ) async {
+    try {
+      await controller.removeLayer(layerId);
+    } catch (_) {}
+  }
+
+  Future<void> _removeSourceIfExists(
+    MapLibreMapController controller,
+    String sourceId,
+  ) async {
+    try {
+      await controller.removeSource(sourceId);
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_styleString == null) {
@@ -275,13 +525,15 @@ class _FlightMapState extends State<FlightMap> {
     }
 
     final initialZoom = _initialZoom();
-    final double controlsTopOffset =
-        2 * kToolbarHeight;
+    final double controlsTopOffset = 2 * kToolbarHeight;
 
     return BlocListener<FlightScreenCubit, FlightScreenState>(
       listener: (context, state) {
-        if (state is FlightScreenLoaded && state.gpsData != null) {
-          _updateUserLocation(state.gpsData!);
+        if (state is FlightScreenLoaded) {
+          _routeRegions = state.routeRegions;
+          if (state.gpsData != null) {
+            _updateUserLocation(state.gpsData!);
+          }
         }
       },
       child: Stack(
@@ -335,37 +587,20 @@ class _FlightMapState extends State<FlightMap> {
           ),
           // Map controls (3D / follow) — pushed below GPS badge
           FlightMapControls(
-            topOffset: controlsTopOffset  + 12,
+            topOffset: controlsTopOffset + 12,
             visible: _showControls || _followUser,
             is3D: _is3D,
             followUser: _followUser,
             onToggle3D: _toggle3D,
             onToggleFollowUser: _toggleUserFollow,
           ),
-          // Geo-awareness chips — bottom-left
+          // Geo-awareness cards — bottom-left
           Positioned(
             bottom: 16,
-            child: BlocBuilder<FlightScreenCubit, FlightScreenState>(
-              buildWhen: (previous, current) {
-                if (previous is FlightScreenLoaded &&
-                    current is FlightScreenLoaded) {
-                  return previous.currentRegionQids !=
-                          current.currentRegionQids ||
-                      previous.nextRegionQid != current.nextRegionQid;
-                }
-                return previous.runtimeType != current.runtimeType;
-              },
-              builder: (context, state) {
-                if (state is! FlightScreenLoaded) {
-                  return const SizedBox.shrink();
-                }
-                return GeoAwarenessChips(
-                  currentRegionQids: state.currentRegionQids,
-                  nextRegionQid: state.nextRegionQid,
-                  allRegions: state.flight.info.routeRegions,
-                  articles: state.flight.info.articles,
-                );
-              },
+            left: 0,
+            right: 0,
+            child: GeoAwarenessCard(
+              onSelectedRegionChanged: _onGeoRegionSelectionChanged,
             ),
           ),
           if (!_mapSession.isMapInitialized) const MapInitializingOverlay(),

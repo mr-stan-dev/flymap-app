@@ -13,8 +13,8 @@ class RouteTimelineWidget extends StatelessWidget {
     required this.regions,
     required this.cruiseSpeedKmh,
     required this.totalRouteMinutes,
-    this.currentRegionQid,
-    this.lastVisitedRegionQid,
+    this.currentRegionId,
+    this.lastVisitedRegionId,
     this.onOpenRegion,
     super.key,
   });
@@ -23,8 +23,8 @@ class RouteTimelineWidget extends StatelessWidget {
   final List<RouteRegion> regions;
   final int cruiseSpeedKmh;
   final int totalRouteMinutes;
-  final String? currentRegionQid;
-  final String? lastVisitedRegionQid;
+  final String? currentRegionId;
+  final String? lastVisitedRegionId;
   final ValueChanged<RouteRegion>? onOpenRegion;
 
   @override
@@ -34,13 +34,13 @@ class RouteTimelineWidget extends StatelessWidget {
       cruiseSpeedKmh: cruiseSpeedKmh,
     );
     final entries = _buildEntries(groups);
-    final currentEntryIndex = _findEntryIndexByRegionQid(
+    final currentEntryIndex = _findEntryIndexByRegionId(
       entries,
-      regionQid: currentRegionQid,
+      regionId: currentRegionId,
     );
     final visitedEntryIndex =
         currentEntryIndex ??
-        _findEntryIndexByRegionQid(entries, regionQid: lastVisitedRegionQid);
+        _findEntryIndexByRegionId(entries, regionId: lastVisitedRegionId);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -91,17 +91,17 @@ class RouteTimelineWidget extends StatelessWidget {
     ];
   }
 
-  int? _findEntryIndexByRegionQid(
+  int? _findEntryIndexByRegionId(
     List<_RouteTimelineEntry> entries, {
-    required String? regionQid,
+    required String? regionId,
   }) {
-    if (regionQid == null || regionQid.isEmpty) return null;
+    if (regionId == null || regionId.isEmpty) return null;
     for (var i = 0; i < entries.length; i++) {
       final entry = entries[i];
       if (entry.kind != _RouteTimelineEntryKind.group) continue;
       final group = entry.regionGroup;
       if (group == null) continue;
-      final found = group.regions.any((region) => region.qid == regionQid);
+      final found = group.regions.any((region) => region.qid == regionId);
       if (found) return i;
     }
     return null;

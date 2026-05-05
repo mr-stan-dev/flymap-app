@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/entity/flight_article.dart';
 import 'package:flymap/entity/route_region.dart';
-import 'package:flymap/utils/wikipedia_article_utils.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/common/route/route_places_by_type.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/region_info_screen.dart';
-import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_highlights_section.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/route_progress_card.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/route/widgets/info_content.dart';
@@ -14,6 +12,7 @@ import 'package:flymap/ui/screens/flight/widgets/tabs/shared/tab_state_placehold
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_widget.dart';
+import 'package:flymap/utils/wikipedia_article_utils.dart';
 
 class FlightRouteTabView extends StatelessWidget {
   const FlightRouteTabView({
@@ -38,7 +37,10 @@ class FlightRouteTabView extends StatelessWidget {
       final error = state as FlightScreenError;
       if (error.flight != null) {
         return _LoadedRouteTab(
-          state: FlightScreenLoaded(flight: error.flight!),
+          state: FlightScreenLoaded(
+            flight: error.flight!,
+            routeRegions: error.flight!.info.routeRegions,
+          ),
           topPadding: topPadding,
         );
       }
@@ -65,8 +67,9 @@ class _LoadedRouteTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final info = state.flight.info;
+    final routeRegions = state.routeRegions;
     final route = state.flight.route;
-    final hasRegionTimeline = info.routeRegions.isNotEmpty;
+    final hasRegionTimeline = routeRegions.isNotEmpty;
     final hasOverview = info.overview.trim().isNotEmpty;
 
     if (!hasRegionTimeline && hasOverview) {
@@ -78,7 +81,7 @@ class _LoadedRouteTab extends StatelessWidget {
     }
 
     final groups = RouteTimelineGrouping.groupByTimeline(
-      info.routeRegions,
+      routeRegions,
       cruiseSpeedKmh: info.routeCruiseSpeedKmh,
     );
 
@@ -105,10 +108,10 @@ class _LoadedRouteTab extends StatelessWidget {
               ),
             RouteTimelineWidget(
               route: route,
-              regions: info.routeRegions,
+              regions: routeRegions,
               cruiseSpeedKmh: info.routeCruiseSpeedKmh,
               totalRouteMinutes: info.routeTotalMinutes,
-              lastVisitedRegionQid: state.lastVisitedRegionQid,
+              lastVisitedRegionId: state.lastVisitedRegionId,
               onOpenRegion: (region) =>
                   _openRegionInfo(context, region, state.flight.info.articles),
             ),
@@ -126,7 +129,10 @@ class _LoadedRouteTab extends StatelessWidget {
     List<FlightArticle> articles,
   ) async {
     final typeLabel = _typeMapper.mapLabel(context, region.regionType);
-    final offlineArticle = WikipediaArticleUtils.matchRegionArticle(region, articles);
+    final offlineArticle = WikipediaArticleUtils.matchRegionArticle(
+      region,
+      articles,
+    );
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => RegionInfoScreen(
@@ -138,5 +144,4 @@ class _LoadedRouteTab extends StatelessWidget {
       ),
     );
   }
-
 }

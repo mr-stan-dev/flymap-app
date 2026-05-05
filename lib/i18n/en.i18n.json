@@ -514,7 +514,13 @@
       "loadingRouteTimeline": "Loading route timeline...",
       "noSavedOfflineRegions": "No saved offline regions for this flight.",
       "currentProgress": "Current progress: $percentage% (around $minute from takeoff)",
-      "nowLabel": "Now"
+      "nowLabel": "Now",
+      "currentRegionLabel": "Current",
+      "nextRegionLabel": "Next",
+      "etaLabel": "ETA: $time",
+      "flyingOverLabel": "You are flying over:",
+      "nextHintLabel": "Next: $region ($eta)",
+      "etaUnknownLabel": "estimating..."
     }
   },
   "shareFlight": {
