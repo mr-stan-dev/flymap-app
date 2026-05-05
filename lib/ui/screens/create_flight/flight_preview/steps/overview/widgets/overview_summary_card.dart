@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
+import 'package:flymap/ui/theme/app_colours.dart';
 
 class OverviewSummaryCard extends StatelessWidget {
   const OverviewSummaryCard({
     required this.title,
-    required this.chipLabels,
+    required this.subtitle,
     required this.fullSummaryLabel,
     required this.onFullSummary,
     required this.continueLabel,
@@ -13,7 +14,7 @@ class OverviewSummaryCard extends StatelessWidget {
   });
 
   final String title;
-  final List<String> chipLabels;
+  final String subtitle;
   final String fullSummaryLabel;
   final VoidCallback onFullSummary;
   final String continueLabel;
@@ -21,62 +22,81 @@ class OverviewSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: SizedBox.expand(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
           child: Column(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: chipLabels
-                    .map((label) => _TypeCountChip(label: label))
-                    .toList(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: AppColoursCommon.success.withValues(alpha: 0.45),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.check_rounded,
+                      color: AppColoursCommon.brandWhite,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                            height: 1.25,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const Spacer(),
-              TertiaryButton(
-                label: fullSummaryLabel,
-                onPressed: onFullSummary,
-                expand: true,
-              ),
-              const SizedBox(height: 8),
               PrimaryButton(
                 label: continueLabel,
                 onPressed: onContinue,
                 expand: true,
+                trailingIcon: Icons.arrow_forward_rounded,
+              ),
+              const SizedBox(height: 4),
+              TertiaryButton(
+                label: fullSummaryLabel,
+                onPressed: onFullSummary,
+                compact: true,
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-class _TypeCountChip extends StatelessWidget {
-  const _TypeCountChip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(label, style: Theme.of(context).textTheme.bodySmall),
     );
   }
 }

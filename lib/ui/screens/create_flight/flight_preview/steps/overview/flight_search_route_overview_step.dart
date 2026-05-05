@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/entity/map_detail_level.dart';
 import 'package:flymap/i18n/strings.g.dart';
-import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview_page_entry.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_summary_screen.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_map_widget.dart';
@@ -10,7 +9,6 @@ import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/wi
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_progress_timeline.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
-import 'package:flymap/ui/theme/app_colours.dart';
 
 class FlightSearchRouteOverviewStep extends StatefulWidget {
   const FlightSearchRouteOverviewStep({
@@ -71,112 +69,109 @@ class _FlightSearchRouteOverviewStepState
 
     final entries = _buildEntries(route, widget.state);
     return Column(
-        children: [
-          Expanded(
-            flex: 5,
-            child: ValueListenableBuilder<int>(
-              valueListenable: _selectedIndexNotifier,
-              builder: (context, selectedIndex, _) {
-                final selectedEntry =
-                    entries[selectedIndex.clamp(0, entries.length - 1)];
-                final selectedRegion = selectedEntry.region;
-                final selectedAirport =
-                    selectedEntry.kind == RouteOverviewPageKind.departure ||
-                        selectedEntry.kind == RouteOverviewPageKind.arrival
-                    ? selectedEntry.airport
-                    : null;
-                final showWholeRoute =
-                    selectedEntry.kind == RouteOverviewPageKind.summary ||
-                    selectedEntry.kind == RouteOverviewPageKind.summaryEnd;
-                return Stack(
-                  children: [
-                    Positioned.fill(
-                      child: RouteOverviewMapWidget(
-                        route: route,
-                        flightInfo: widget.state.flightInfo,
-                        selectedRegion: selectedRegion,
-                        selectedAirport: selectedAirport,
-                        showWholeRoute: showWholeRoute,
-                      ),
-                    ),
-                    if (widget.state.isOverviewLoading)
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                context.t.flight.info.overviewLoading,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ),
-          ValueListenableBuilder<int>(
+      children: [
+        Expanded(
+          flex: 5,
+          child: ValueListenableBuilder<int>(
             valueListenable: _selectedIndexNotifier,
             builder: (context, selectedIndex, _) {
-              final safeIndex = selectedIndex.clamp(0, entries.length - 1);
-              final activeKind = entries[safeIndex].kind;
-              final timelineCount = (entries.length - 2).clamp(2, 9999);
-              final timelineIndex = _timelineSelectedIndexForPage(
-                pageIndex: safeIndex,
-                timelineCount: timelineCount,
-                maxPageIndex: entries.length - 1,
-              );
-              return RouteOverviewProgressTimeline(
-                itemCount: timelineCount,
-                selectedIndex: timelineIndex,
-                isTitleActive: activeKind == RouteOverviewPageKind.summary,
-                isSummaryActive: activeKind == RouteOverviewPageKind.summaryEnd,
+              final selectedEntry =
+                  entries[selectedIndex.clamp(0, entries.length - 1)];
+              final selectedRegion = selectedEntry.region;
+              final selectedAirport =
+                  selectedEntry.kind == RouteOverviewPageKind.departure ||
+                      selectedEntry.kind == RouteOverviewPageKind.arrival
+                  ? selectedEntry.airport
+                  : null;
+              final showWholeRoute =
+                  selectedEntry.kind == RouteOverviewPageKind.summary ||
+                  selectedEntry.kind == RouteOverviewPageKind.summaryEnd;
+              return Stack(
+                children: [
+                  Positioned.fill(
+                    child: RouteOverviewMapWidget(
+                      route: route,
+                      flightInfo: widget.state.flightInfo,
+                      selectedRegion: selectedRegion,
+                      selectedAirport: selectedAirport,
+                      showWholeRoute: showWholeRoute,
+                    ),
+                  ),
+                  if (widget.state.isOverviewLoading)
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              context.t.flight.info.overviewLoading,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
               );
             },
           ),
-          Expanded(
-            flex: 4,
-            child: RouteOverviewPager(
-              key: const PageStorageKey<String>('route-overview-pager'),
-              entries: entries,
+        ),
+        ValueListenableBuilder<int>(
+          valueListenable: _selectedIndexNotifier,
+          builder: (context, selectedIndex, _) {
+            final safeIndex = selectedIndex.clamp(0, entries.length - 1);
+            final activeKind = entries[safeIndex].kind;
+            final timelineCount = (entries.length - 2).clamp(2, 9999);
+            final timelineIndex = _timelineSelectedIndexForPage(
+              pageIndex: safeIndex,
+              timelineCount: timelineCount,
+              maxPageIndex: entries.length - 1,
+            );
+            return RouteOverviewProgressTimeline(
+              itemCount: timelineCount,
+              selectedIndex: timelineIndex,
+              isTitleActive: activeKind == RouteOverviewPageKind.summary,
+              isSummaryActive: activeKind == RouteOverviewPageKind.summaryEnd,
+            );
+          },
+        ),
+        Expanded(
+          flex: 4,
+          child: RouteOverviewPager(
+            key: const PageStorageKey<String>('route-overview-pager'),
+            entries: entries,
+            route: route,
+            totalRouteMinutes: entries[entries.length - 2].minuteFromDeparture,
+            initialPage: 0,
+            onPageChanged: (next) => _selectedIndexNotifier.value = next,
+            onRouteSummaryRequested: () => _openRouteSummary(
+              context,
               route: route,
+              state: widget.state,
               totalRouteMinutes:
                   entries[entries.length - 2].minuteFromDeparture,
-              initialPage: 0,
-              onPageChanged: (next) => _selectedIndexNotifier.value = next,
-              onRouteSummaryRequested: () => _openRouteSummary(
-                context,
-                route: route,
-                state: widget.state,
-                totalRouteMinutes:
-                    entries[entries.length - 2].minuteFromDeparture,
-              ),
-              onSkipReview: widget.onContinue,
             ),
+            onSkipReview: widget.onContinue,
           ),
-        ],
-      );
+        ),
+      ],
+    );
   }
 
   List<RouteOverviewPageEntry> _buildEntries(
@@ -255,60 +250,6 @@ class _FlightSearchRouteOverviewStepState
           totalRouteMinutes: totalRouteMinutes,
           pois: state.flightInfo.poi,
           cruiseSpeedKmh: state.routeCruiseSpeedKmh,
-        ),
-      ),
-    );
-  }
-}
-
-class _MapDetailSwitcher extends StatelessWidget {
-  const _MapDetailSwitcher({
-    required this.isProUser,
-    required this.selected,
-    required this.onSelect,
-  });
-
-  final bool isProUser;
-  final MapDetailLevel selected;
-  final ValueChanged<MapDetailLevel> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    final isProSelected = selected == MapDetailLevel.pro;
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.28),
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              context.t.createFlight.mapPreview.pro,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: AppColoursCommon.brandWhite,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Transform.scale(
-              scale: 0.72,
-              child: Switch(
-                value: isProSelected,
-                onChanged: isProUser
-                    ? null
-                    : (value) => onSelect(
-                        value ? MapDetailLevel.pro : MapDetailLevel.basic,
-                      ),
-                activeTrackColor: AppColoursCommon.brandBlue,
-                activeThumbColor: Colors.white,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-            ),
-          ],
         ),
       ),
     );

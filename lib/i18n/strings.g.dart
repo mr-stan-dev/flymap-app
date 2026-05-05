@@ -6,7 +6,7 @@
 /// Locales: 1
 /// Strings: 550
 ///
-/// Built on 2026-05-05 at 20:45 UTC
+/// Built on 2026-05-05 at 22:39 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint, unused_import
@@ -16,7 +16,6 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:slang/generated.dart';
 import 'package:slang_flutter/slang_flutter.dart';
-
 export 'package:slang_flutter/slang_flutter.dart';
 
 part 'strings_en.g.dart';

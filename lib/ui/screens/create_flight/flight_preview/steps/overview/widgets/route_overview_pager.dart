@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/entity/route_region.dart';
-import 'package:flymap/entity/route_region_type.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview_page_entry.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/region_info_screen.dart';
@@ -83,17 +82,26 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
     switch (entry.kind) {
       case RouteOverviewPageKind.summary:
         final route = widget.route;
+        final distance = MapUtils.distanceFormatted(
+          departure: route.departure,
+          arrival: route.arrival,
+        );
+        final duration = _formatMinutesCompact(
+          context,
+          widget.totalRouteMinutes,
+        );
         return OverviewTitleCard(
-          routeTitleLabel: t.createFlight.overview.routeTitleLabel,
           routeCodeLine:
               '${route.departure.displayCode} → ${route.arrival.displayCode}',
           routeCitiesLine:
               '${RouteUtils.cityLabel(route.departure.city)} → ${RouteUtils.cityLabel(route.arrival.city)}',
-          routeMetaLine:
-              '${MapUtils.distanceFormatted(departure: route.departure, arrival: route.arrival)} • ${_formatMinutesCompact(context, widget.totalRouteMinutes)}',
-          reviewRouteLabel: 'Review route',
+          distanceLabel: t.createFlight.overview.routeSummaryDistanceLabel,
+          distanceValue: distance,
+          durationLabel: t.createFlight.overview.routeSummaryDurationLabel,
+          durationValue: duration,
+          reviewRouteLabel: t.createFlight.overview.startReview,
           onReviewRoute: _animateToNextCard,
-          skipReviewLabel: 'Skip review',
+          skipReviewLabel: t.createFlight.overview.skipReview,
           onSkipReview: widget.onSkipReview,
         );
       case RouteOverviewPageKind.departure:
@@ -133,14 +141,16 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
           regionType: region.regionType,
         );
       case RouteOverviewPageKind.summaryEnd:
-        final typeCounts = _collectRegionTypeCounts();
+        final route = widget.route;
+        final regionCount = _countDistinctRegions();
         return OverviewSummaryCard(
-          title: t.createFlight.overview.allRegionsYouFlyOver,
-          chipLabels: typeCounts.map((item) {
-            final label = _typeMapper.mapLabel(context, item.type);
-            return _formatTypeCount(item.count, label);
-          }).toList(),
-          fullSummaryLabel: 'Full summary',
+          title: t.createFlight.overview.routeReviewedTitle,
+          subtitle: t.createFlight.overview.routeReviewedSubtitle(
+            regions: _formatRegionCountLabel(context, regionCount),
+            departure: RouteUtils.cityLabel(route.departure.city),
+            arrival: RouteUtils.cityLabel(route.arrival.city),
+          ),
+          fullSummaryLabel: t.createFlight.overview.fullSummary,
           onFullSummary: widget.onRouteSummaryRequested,
           continueLabel: t.common.kContinue,
           onContinue: widget.onSkipReview,
@@ -174,48 +184,24 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
     );
   }
 
-  List<_RegionTypeCount> _collectRegionTypeCounts() {
-    final counts = <RouteRegionType, int>{};
+  int _countDistinctRegions() {
     final seenRegionIds = <String>{};
     for (final entry in widget.entries) {
       if (entry.kind != RouteOverviewPageKind.region || entry.region == null) {
         continue;
       }
-      final region = entry.region!;
-      if (!seenRegionIds.add(region.qid)) continue;
-      counts.update(
-        region.regionType,
-        (value) => value + 1,
-        ifAbsent: () => 1,
-      );
+      seenRegionIds.add(entry.region!.qid);
     }
-    final out = counts.entries
-        .map((entry) => _RegionTypeCount(type: entry.key, count: entry.value))
-        .toList();
-    out.sort((a, b) {
-      if (a.count != b.count) {
-        return b.count.compareTo(a.count);
-      }
-      return a.type.apiValue.compareTo(b.type.apiValue);
-    });
-    return out;
+    return seenRegionIds.length;
   }
 
-  String _formatTypeCount(int count, String typeLabel) {
-    final base = typeLabel.toLowerCase();
+  String _formatRegionCountLabel(BuildContext context, int count) {
+    final label = context.t.createFlight.overview.routeSummaryRegionsLabel
+        .toLowerCase();
     if (count == 1) {
-      return '$count $base';
+      return '1 ${label.endsWith('s') ? label.substring(0, label.length - 1) : label}';
     }
-    if (base == 'country') {
-      return '$count countries';
-    }
-    if (base.endsWith('y')) {
-      return '$count ${base.substring(0, base.length - 1)}ies';
-    }
-    if (base.endsWith('s')) {
-      return '$count ${base}es';
-    }
-    return '$count ${base}s';
+    return '$count $label';
   }
 
   Future<void> _openRegionInfo(
@@ -229,11 +215,4 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
       ),
     );
   }
-}
-
-class _RegionTypeCount {
-  const _RegionTypeCount({required this.type, required this.count});
-
-  final RouteRegionType type;
-  final int count;
 }

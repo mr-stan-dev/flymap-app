@@ -1202,17 +1202,17 @@ class TranslationsCreateFlightOverviewEn {
 	/// en: 'Route is approximate — actual path may vary, especially on long-haul flights.'
 	String get routeNoteBody => 'Route is approximate — actual path may vary, especially on long-haul flights.';
 
-	/// en: 'Route'
-	String get routeTitleLabel => 'Route';
+	/// en: 'Start review'
+	String get startReview => 'Start review';
 
-	/// en: 'Start'
-	String get start => 'Start';
+	/// en: 'Skip review'
+	String get skipReview => 'Skip review';
 
-	/// en: 'Route summary'
-	String get routeSummaryButton => 'Route summary';
+	/// en: 'Route reviewed'
+	String get routeReviewedTitle => 'Route reviewed';
 
-	/// en: 'All regions you'd fly over'
-	String get allRegionsYouFlyOver => 'All regions you\'d fly over';
+	/// en: 'You will fly over $regions from $departure to $arrival.'
+	String routeReviewedSubtitle({required Object regions, required Object departure, required Object arrival}) => 'You will fly over ${regions} from ${departure} to ${arrival}.';
 
 	/// en: 'Full summary'
 	String get fullSummary => 'Full summary';
@@ -2211,10 +2211,10 @@ extension on Translations {
 			'createFlight.overview.routeNoteTooltip' => 'Route note',
 			'createFlight.overview.routeNoteTitle' => 'Approximate route',
 			'createFlight.overview.routeNoteBody' => 'Route is approximate — actual path may vary, especially on long-haul flights.',
-			'createFlight.overview.routeTitleLabel' => 'Route',
-			'createFlight.overview.start' => 'Start',
-			'createFlight.overview.routeSummaryButton' => 'Route summary',
-			'createFlight.overview.allRegionsYouFlyOver' => 'All regions you\'d fly over',
+			'createFlight.overview.startReview' => 'Start review',
+			'createFlight.overview.skipReview' => 'Skip review',
+			'createFlight.overview.routeReviewedTitle' => 'Route reviewed',
+			'createFlight.overview.routeReviewedSubtitle' => ({required Object regions, required Object departure, required Object arrival}) => 'You will fly over ${regions} from ${departure} to ${arrival}.',
 			'createFlight.overview.fullSummary' => 'Full summary',
 			'createFlight.overview.routeSummaryTitle' => 'Route Summary',
 			'createFlight.overview.routeSummaryDistanceLabel' => 'Distance',

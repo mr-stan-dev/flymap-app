@@ -48,7 +48,7 @@ class RouteRegion extends Equatable {
       wikidataQid: clearWikidataQid ? null : wikidataQid ?? this.wikidataQid,
       description: clearFromAboveDescription
           ? null
-          : fromAboveDescription ?? this.description,
+          : fromAboveDescription ?? description,
       wikipediaUrl: clearWikipediaUrl
           ? null
           : wikipediaUrl ?? this.wikipediaUrl,
