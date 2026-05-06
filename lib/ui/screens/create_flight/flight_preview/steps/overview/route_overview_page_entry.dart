@@ -1,10 +1,13 @@
 import 'package:flymap/entity/airport.dart';
 import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
 
 enum RouteOverviewPageKind {
   summary,
   departure,
   region,
+  regionGroup,
+  premiumGate,
   arrival,
   summaryEnd,
 }
@@ -15,12 +18,14 @@ class RouteOverviewPageEntry {
     required this.minuteFromDeparture,
     this.airport,
     this.region,
+    this.regionGroup,
   });
 
   final RouteOverviewPageKind kind;
   final int minuteFromDeparture;
   final Airport? airport;
   final RouteRegion? region;
+  final RouteTimelineRegionGroup? regionGroup;
 
   factory RouteOverviewPageEntry.summary() {
     return const RouteOverviewPageEntry._(
@@ -59,11 +64,29 @@ class RouteOverviewPageEntry {
     );
   }
 
+  factory RouteOverviewPageEntry.regionGroup(RouteTimelineRegionGroup group) {
+    return RouteOverviewPageEntry._(
+      kind: RouteOverviewPageKind.regionGroup,
+      minuteFromDeparture: group.minuteFromDeparture,
+      region: group.topRegion,
+      regionGroup: group,
+    );
+  }
+
   factory RouteOverviewPageEntry.summaryEnd({
     required int minuteFromDeparture,
   }) {
     return RouteOverviewPageEntry._(
       kind: RouteOverviewPageKind.summaryEnd,
+      minuteFromDeparture: minuteFromDeparture,
+    );
+  }
+
+  factory RouteOverviewPageEntry.premiumGate({
+    required int minuteFromDeparture,
+  }) {
+    return RouteOverviewPageEntry._(
+      kind: RouteOverviewPageKind.premiumGate,
       minuteFromDeparture: minuteFromDeparture,
     );
   }

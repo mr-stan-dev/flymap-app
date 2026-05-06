@@ -247,6 +247,9 @@
       "routeNoteBody": "Route is approximate — actual path may vary, especially on long-haul flights.",
       "startReview": "Start review",
       "skipReview": "Skip review",
+      "premiumGateTitle": "Unlock full route overview",
+      "premiumGateBody": "Free plan includes a limited route preview. Upgrade to Pro to view every region on this route.",
+      "premiumGateCta": "Upgrade to Pro",
       "routeReviewedTitle": "Route reviewed",
       "routeReviewedSubtitle": "You will fly over $regions from $departure to $arrival.",
       "fullSummary": "Full summary",
@@ -519,6 +522,12 @@
       "nextRegionLabel": "Next",
       "etaLabel": "ETA: $time",
       "flyingOverLabel": "You are flying over:",
+      "premiumLockedChipLabel": "Pro region",
+      "premiumGateTitle": "Unlock full route timeline",
+      "premiumGateBody": "Upgrade to Pro to see all regions along your route and timeline details.",
+      "premiumGateCta": "Subscribe to Premium",
+      "premiumOfflineTitle": "Internet needed to upgrade",
+      "premiumOfflineBody": "You are offline right now. Connect to the internet to upgrade and unlock the full route view.",
       "nextHintLabel": "Next: $region ($eta)",
       "etaUnknownLabel": "estimating..."
     }

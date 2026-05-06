@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/entity/map_detail_level.dart';
+import 'package:flymap/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview_page_entry.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_summary_screen.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_map_widget.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_pager.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_progress_timeline.dart';
+import 'package:flymap/ui/screens/shared/premium/route_region_premium_gate_policy.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
 
@@ -16,7 +18,7 @@ class FlightSearchRouteOverviewStep extends StatefulWidget {
     required this.isProUser,
     required this.onContinue,
     required this.onSelectMapDetailLevel,
-    required this.onUpgradeToPro,
+    required this.onPremiumGateTap,
     super.key,
   });
 
@@ -24,7 +26,7 @@ class FlightSearchRouteOverviewStep extends StatefulWidget {
   final bool isProUser;
   final VoidCallback onContinue;
   final ValueChanged<MapDetailLevel> onSelectMapDetailLevel;
-  final VoidCallback onUpgradeToPro;
+  final VoidCallback onPremiumGateTap;
 
   @override
   State<FlightSearchRouteOverviewStep> createState() =>
@@ -42,7 +44,21 @@ class _FlightSearchRouteOverviewStepState
     if (route == null) {
       return;
     }
-    final maxIndex = _buildEntries(route, widget.state).length - 1;
+    final orderedRegions = RouteRegionPremiumGatePolicy.orderByDistance(
+      widget.state.routeRegions,
+    );
+    final gateDecision = RouteRegionPremiumGatePolicy.evaluate(
+      orderedRegions: orderedRegions,
+      isProUser: widget.isProUser,
+    );
+    final maxIndex =
+        _buildEntries(
+          route,
+          widget.state,
+          orderedRegions: orderedRegions,
+          gateDecision: gateDecision,
+        ).length -
+        1;
     if (_selectedIndexNotifier.value > maxIndex) {
       _selectedIndexNotifier.value = maxIndex;
     }
@@ -67,7 +83,19 @@ class _FlightSearchRouteOverviewStepState
       });
     }
 
-    final entries = _buildEntries(route, widget.state);
+    final orderedRegions = RouteRegionPremiumGatePolicy.orderByDistance(
+      widget.state.routeRegions,
+    );
+    final gateDecision = RouteRegionPremiumGatePolicy.evaluate(
+      orderedRegions: orderedRegions,
+      isProUser: widget.isProUser,
+    );
+    final entries = _buildEntries(
+      route,
+      widget.state,
+      orderedRegions: orderedRegions,
+      gateDecision: gateDecision,
+    );
     return Column(
       children: [
         Expanded(
@@ -85,6 +113,7 @@ class _FlightSearchRouteOverviewStepState
                   : null;
               final showWholeRoute =
                   selectedEntry.kind == RouteOverviewPageKind.summary ||
+                  selectedEntry.kind == RouteOverviewPageKind.premiumGate ||
                   selectedEntry.kind == RouteOverviewPageKind.summaryEnd;
               return Stack(
                 children: [
@@ -137,17 +166,22 @@ class _FlightSearchRouteOverviewStepState
           builder: (context, selectedIndex, _) {
             final safeIndex = selectedIndex.clamp(0, entries.length - 1);
             final activeKind = entries[safeIndex].kind;
-            final timelineCount = (entries.length - 2).clamp(2, 9999);
-            final timelineIndex = _timelineSelectedIndexForPage(
+            final progress = _buildProgressState(
+              selectedPageEntry: entries[safeIndex],
               pageIndex: safeIndex,
-              timelineCount: timelineCount,
+              orderedRegions: orderedRegions,
+              gateDecision: gateDecision,
               maxPageIndex: entries.length - 1,
             );
+            final timelineCount = progress.itemCount;
             return RouteOverviewProgressTimeline(
               itemCount: timelineCount,
-              selectedIndex: timelineIndex,
+              selectedIndex: progress.selectedIndex,
               isTitleActive: activeKind == RouteOverviewPageKind.summary,
               isSummaryActive: activeKind == RouteOverviewPageKind.summaryEnd,
+              isPremiumRangeActive: progress.isPremiumRangeActive,
+              premiumRangeStartIndex: progress.premiumRangeStartIndex,
+              premiumRangeEndIndex: progress.premiumRangeEndIndex,
             );
           },
         ),
@@ -158,6 +192,7 @@ class _FlightSearchRouteOverviewStepState
             entries: entries,
             route: route,
             totalRouteMinutes: entries[entries.length - 2].minuteFromDeparture,
+            totalRegionCount: orderedRegions.length,
             initialPage: 0,
             onPageChanged: (next) => _selectedIndexNotifier.value = next,
             onRouteSummaryRequested: () => _openRouteSummary(
@@ -167,6 +202,7 @@ class _FlightSearchRouteOverviewStepState
               totalRouteMinutes:
                   entries[entries.length - 2].minuteFromDeparture,
             ),
+            onPremiumGateTap: widget.onPremiumGateTap,
             onSkipReview: widget.onContinue,
           ),
         ),
@@ -176,15 +212,22 @@ class _FlightSearchRouteOverviewStepState
 
   List<RouteOverviewPageEntry> _buildEntries(
     FlightRoute route,
-    FlightPreviewState state,
-  ) {
-    final regionGroups = RouteTimelineGrouping.groupByTimeline(
-      state.routeRegions,
+    FlightPreviewState state, {
+    required List<RouteRegion> orderedRegions,
+    required RouteRegionPremiumGateDecision gateDecision,
+  }) {
+    final visibleRegions = gateDecision.freeRegions;
+    final hiddenRegions = gateDecision.premiumRegions;
+    final groupedVisibleRegions = RouteTimelineGrouping.groupByTimeline(
+      visibleRegions,
       cruiseSpeedKmh: state.routeCruiseSpeedKmh,
     );
-    final lastRegionMinute = regionGroups.isEmpty
+    final regionEntries = groupedVisibleRegions
+        .map(RouteOverviewPageEntry.regionGroup)
+        .toList(growable: false);
+    final lastRegionMinute = groupedVisibleRegions.isEmpty
         ? 0
-        : regionGroups.last.minuteFromDeparture;
+        : groupedVisibleRegions.last.minuteFromDeparture;
     final arrivalMinutes = [
       state.routeTotalMinutes,
       _kmToMinutes(
@@ -194,25 +237,93 @@ class _FlightSearchRouteOverviewStepState
       lastRegionMinute,
     ].reduce((a, b) => a > b ? a : b);
 
-    final regionEntries = regionGroups
-        .map(
-          (group) => RouteOverviewPageEntry.region(
-            group.topRegion!,
-            minuteFromDeparture: group.minuteFromDeparture,
-          ),
-        )
-        .toList(growable: false);
-
-    return [
+    final entries = <RouteOverviewPageEntry>[
       RouteOverviewPageEntry.summary(),
       RouteOverviewPageEntry.departure(route.departure),
       ...regionEntries,
+      if (gateDecision.isGated && hiddenRegions.isNotEmpty)
+        RouteOverviewPageEntry.premiumGate(
+          minuteFromDeparture: _regionMinute(
+            hiddenRegions.first,
+            cruiseSpeedKmh: state.routeCruiseSpeedKmh,
+          ),
+        ),
       RouteOverviewPageEntry.arrival(
         route.arrival,
         minuteFromDeparture: arrivalMinutes,
       ),
       RouteOverviewPageEntry.summaryEnd(minuteFromDeparture: arrivalMinutes),
     ];
+    return entries;
+  }
+
+  _RouteOverviewProgressState _buildProgressState({
+    required RouteOverviewPageEntry selectedPageEntry,
+    required int pageIndex,
+    required List<RouteRegion> orderedRegions,
+    required RouteRegionPremiumGateDecision gateDecision,
+    required int maxPageIndex,
+  }) {
+    final stopCount = (orderedRegions.length + 2).clamp(2, 9999);
+    final entryKind = selectedPageEntry.kind;
+    if (entryKind == RouteOverviewPageKind.summary) {
+      return _RouteOverviewProgressState(
+        itemCount: stopCount,
+        selectedIndex: 0,
+      );
+    }
+    if (entryKind == RouteOverviewPageKind.summaryEnd) {
+      return _RouteOverviewProgressState(
+        itemCount: stopCount,
+        selectedIndex: stopCount - 1,
+      );
+    }
+    if (entryKind == RouteOverviewPageKind.departure) {
+      return _RouteOverviewProgressState(
+        itemCount: stopCount,
+        selectedIndex: 0,
+      );
+    }
+    if (entryKind == RouteOverviewPageKind.arrival ||
+        pageIndex >= maxPageIndex) {
+      return _RouteOverviewProgressState(
+        itemCount: stopCount,
+        selectedIndex: stopCount - 1,
+      );
+    }
+    if (entryKind == RouteOverviewPageKind.region) {
+      final region = selectedPageEntry.region;
+      final regionIndex = region == null ? -1 : orderedRegions.indexOf(region);
+      final selectedStopIndex = regionIndex < 0 ? 0 : regionIndex + 1;
+      return _RouteOverviewProgressState(
+        itemCount: stopCount,
+        selectedIndex: selectedStopIndex.clamp(0, stopCount - 1),
+      );
+    }
+    if (entryKind == RouteOverviewPageKind.regionGroup) {
+      final groupTopRegion = selectedPageEntry.regionGroup?.topRegion;
+      final regionIndex = groupTopRegion == null
+          ? -1
+          : orderedRegions.indexOf(groupTopRegion);
+      final selectedStopIndex = regionIndex < 0 ? 0 : regionIndex + 1;
+      return _RouteOverviewProgressState(
+        itemCount: stopCount,
+        selectedIndex: selectedStopIndex.clamp(0, stopCount - 1),
+      );
+    }
+    if (entryKind == RouteOverviewPageKind.premiumGate &&
+        gateDecision.isGated) {
+      final premiumStart = gateDecision.freeRegions.length + 1;
+      final premiumEnd = orderedRegions.length;
+      return _RouteOverviewProgressState(
+        itemCount: stopCount,
+        selectedIndex: premiumStart.clamp(0, stopCount - 1),
+        isPremiumRangeActive: true,
+        premiumRangeStartIndex: premiumStart.clamp(0, stopCount - 1),
+        premiumRangeEndIndex: premiumEnd.clamp(0, stopCount - 1),
+      );
+    }
+    return _RouteOverviewProgressState(itemCount: stopCount, selectedIndex: 0);
   }
 
   int _kmToMinutes(double distanceKm, {required int cruiseSpeedKmh}) {
@@ -222,18 +333,11 @@ class _FlightSearchRouteOverviewStepState
     return (((distanceKm * 60) / cruiseSpeedKmh) / 5).round() * 5;
   }
 
-  int _timelineSelectedIndexForPage({
-    required int pageIndex,
-    required int timelineCount,
-    required int maxPageIndex,
-  }) {
-    if (pageIndex <= 0) {
-      return 0;
-    }
-    if (pageIndex >= maxPageIndex) {
-      return timelineCount - 1;
-    }
-    return (pageIndex - 1).clamp(0, timelineCount - 1);
+  int _regionMinute(RouteRegion region, {required int cruiseSpeedKmh}) {
+    return RouteTimelineGrouping.toTimelineMinute(
+      region.pathFirstEncounterKm,
+      cruiseSpeedKmh: cruiseSpeedKmh,
+    );
   }
 
   void _openRouteSummary(
@@ -246,7 +350,7 @@ class _FlightSearchRouteOverviewStepState
       MaterialPageRoute<void>(
         builder: (_) => RouteSummaryScreen(
           route: route,
-          regions: RouteTimelineGrouping.rankAndLimit(state.routeRegions),
+          regions: state.routeRegions,
           totalRouteMinutes: totalRouteMinutes,
           pois: state.flightInfo.poi,
           cruiseSpeedKmh: state.routeCruiseSpeedKmh,
@@ -254,4 +358,20 @@ class _FlightSearchRouteOverviewStepState
       ),
     );
   }
+}
+
+class _RouteOverviewProgressState {
+  const _RouteOverviewProgressState({
+    required this.itemCount,
+    required this.selectedIndex,
+    this.isPremiumRangeActive = false,
+    this.premiumRangeStartIndex,
+    this.premiumRangeEndIndex,
+  });
+
+  final int itemCount;
+  final int selectedIndex;
+  final bool isPremiumRangeActive;
+  final int? premiumRangeStartIndex;
+  final int? premiumRangeEndIndex;
 }

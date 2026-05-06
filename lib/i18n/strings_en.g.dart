@@ -1208,6 +1208,15 @@ class TranslationsCreateFlightOverviewEn {
 	/// en: 'Skip review'
 	String get skipReview => 'Skip review';
 
+	/// en: 'Unlock full route overview'
+	String get premiumGateTitle => 'Unlock full route overview';
+
+	/// en: 'Free plan includes a limited route preview. Upgrade to Pro to view every region on this route.'
+	String get premiumGateBody => 'Free plan includes a limited route preview. Upgrade to Pro to view every region on this route.';
+
+	/// en: 'Upgrade to Pro'
+	String get premiumGateCta => 'Upgrade to Pro';
+
 	/// en: 'Route reviewed'
 	String get routeReviewedTitle => 'Route reviewed';
 
@@ -1803,6 +1812,24 @@ class TranslationsFlightRouteEn {
 	/// en: 'You are flying over:'
 	String get flyingOverLabel => 'You are flying over:';
 
+	/// en: 'Pro region'
+	String get premiumLockedChipLabel => 'Pro region';
+
+	/// en: 'Unlock full route timeline'
+	String get premiumGateTitle => 'Unlock full route timeline';
+
+	/// en: 'Upgrade to Pro to see all regions along your route and timeline details.'
+	String get premiumGateBody => 'Upgrade to Pro to see all regions along your route and timeline details.';
+
+	/// en: 'Subscribe to Premium'
+	String get premiumGateCta => 'Subscribe to Premium';
+
+	/// en: 'Internet needed to upgrade'
+	String get premiumOfflineTitle => 'Internet needed to upgrade';
+
+	/// en: 'You are offline right now. Connect to the internet to upgrade and unlock the full route view.'
+	String get premiumOfflineBody => 'You are offline right now. Connect to the internet to upgrade and unlock the full route view.';
+
 	/// en: 'Next: $region ($eta)'
 	String nextHintLabel({required Object region, required Object eta}) => 'Next: ${region} (${eta})';
 
@@ -2213,6 +2240,9 @@ extension on Translations {
 			'createFlight.overview.routeNoteBody' => 'Route is approximate — actual path may vary, especially on long-haul flights.',
 			'createFlight.overview.startReview' => 'Start review',
 			'createFlight.overview.skipReview' => 'Skip review',
+			'createFlight.overview.premiumGateTitle' => 'Unlock full route overview',
+			'createFlight.overview.premiumGateBody' => 'Free plan includes a limited route preview. Upgrade to Pro to view every region on this route.',
+			'createFlight.overview.premiumGateCta' => 'Upgrade to Pro',
 			'createFlight.overview.routeReviewedTitle' => 'Route reviewed',
 			'createFlight.overview.routeReviewedSubtitle' => ({required Object regions, required Object departure, required Object arrival}) => 'You will fly over ${regions} from ${departure} to ${arrival}.',
 			'createFlight.overview.fullSummary' => 'Full summary',
@@ -2457,6 +2487,12 @@ extension on Translations {
 			'flight.route.nextRegionLabel' => 'Next',
 			'flight.route.etaLabel' => ({required Object time}) => 'ETA: ${time}',
 			'flight.route.flyingOverLabel' => 'You are flying over:',
+			'flight.route.premiumLockedChipLabel' => 'Pro region',
+			'flight.route.premiumGateTitle' => 'Unlock full route timeline',
+			'flight.route.premiumGateBody' => 'Upgrade to Pro to see all regions along your route and timeline details.',
+			'flight.route.premiumGateCta' => 'Subscribe to Premium',
+			'flight.route.premiumOfflineTitle' => 'Internet needed to upgrade',
+			'flight.route.premiumOfflineBody' => 'You are offline right now. Connect to the internet to upgrade and unlock the full route view.',
 			'flight.route.nextHintLabel' => ({required Object region, required Object eta}) => 'Next: ${region} (${eta})',
 			'flight.route.etaUnknownLabel' => 'estimating...',
 			'shareFlight.title' => 'Share flight',
@@ -2488,6 +2524,8 @@ extension on Translations {
 			'about.featureShareTitle' => 'Share your journey',
 			'about.featureShareText' => 'Generate and share a flight map screenshot with route highlights.',
 			'about.quickStart' => 'Quick Start',
+			_ => null,
+		} ?? switch (path) {
 			'about.step1' => 'Tap New flight on Home.',
 			'about.step2' => 'Choose departure and arrival airports.',
 			'about.step3' => 'Open Map preview and download the map before the flight.',
@@ -2497,8 +2535,6 @@ extension on Translations {
 			'about.tip2' => 'Signal can drop in the middle of the aircraft. Flymap keeps the last known route view while searching.',
 			'onboarding.skip' => 'Skip',
 			'onboarding.letsStart' => 'Let\'s start',
-			_ => null,
-		} ?? switch (path) {
 			'onboarding.welcomeTitle' => 'Discover what’s below',
 			'onboarding.welcomeSubtitle' => 'shows you offline maps and interesting places along your flight',
 			'onboarding.nameTitle' => 'Pick a username',

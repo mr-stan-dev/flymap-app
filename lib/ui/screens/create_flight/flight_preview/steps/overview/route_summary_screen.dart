@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/entity/route_poi_summary.dart';
 import 'package:flymap/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/subscription/paywall_source.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/ui/screens/common/route/route_places_by_type.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/region_info_screen.dart';
+import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
+import 'package:flymap/ui/screens/shared/premium/route_premium_gate_interactions.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_widget.dart';
 import 'package:flymap/utils/route_utils.dart';
@@ -31,6 +35,9 @@ class RouteSummaryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.t;
+    final isProUser = context.select(
+      (SubscriptionCubit cubit) => cubit.state.isPro,
+    );
     final distance = MapUtils.distanceFormatted(
       departure: route.departure,
       arrival: route.arrival,
@@ -103,8 +110,14 @@ class RouteSummaryScreen extends StatelessWidget {
             RouteTimelineWidget(
               route: route,
               regions: regions,
+              isProUser: isProUser,
               cruiseSpeedKmh: cruiseSpeedKmh,
               totalRouteMinutes: totalRouteMinutes,
+              onPremiumGateTap: () => RoutePremiumGateInteractions.onGateTap(
+                context: context,
+                source: PaywallSource.routeTimelineGate,
+                useOfflineInfoSheet: true,
+              ),
               onOpenRegion: (region) => _openRegionInfo(context, region),
             ),
             const SizedBox(height: 12),

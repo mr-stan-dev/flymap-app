@@ -5,9 +5,11 @@ import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview_page_entry.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/region_info_screen.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/overview_airport_card.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/overview_premium_gate_card.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/overview_region_card.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/overview_summary_card.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/overview_title_card.dart';
+import 'package:flymap/ui/screens/shared/route_timeline/widgets/region_group_timeline_card.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/utils/route_utils.dart';
@@ -17,9 +19,11 @@ class RouteOverviewPager extends StatefulWidget {
     required this.entries,
     required this.route,
     required this.totalRouteMinutes,
+    required this.totalRegionCount,
     required this.onRouteSummaryRequested,
     this.initialPage = 0,
     required this.onPageChanged,
+    required this.onPremiumGateTap,
     required this.onSkipReview,
     super.key,
   });
@@ -27,9 +31,11 @@ class RouteOverviewPager extends StatefulWidget {
   final List<RouteOverviewPageEntry> entries;
   final FlightRoute route;
   final int totalRouteMinutes;
+  final int totalRegionCount;
   final VoidCallback onRouteSummaryRequested;
   final int initialPage;
   final ValueChanged<int> onPageChanged;
+  final VoidCallback onPremiumGateTap;
   final VoidCallback onSkipReview;
 
   @override
@@ -138,9 +144,28 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
               _openRegionInfo(context, region: region, typeLabel: typeLabel),
           regionType: region.regionType,
         );
+      case RouteOverviewPageKind.regionGroup:
+        final group = entry.regionGroup;
+        if (group == null) {
+          return const SizedBox.shrink();
+        }
+        return RegionGroupTimelineCard(
+          group: group,
+          onOpenRegion: (region) {
+            final typeLabel = _typeMapper.mapLabel(context, region.regionType);
+            _openRegionInfo(context, region: region, typeLabel: typeLabel);
+          },
+        );
+      case RouteOverviewPageKind.premiumGate:
+        return OverviewPremiumGateCard(
+          title: t.createFlight.overview.premiumGateTitle,
+          description: t.createFlight.overview.premiumGateBody,
+          ctaLabel: t.createFlight.overview.premiumGateCta,
+          onTap: widget.onPremiumGateTap,
+        );
       case RouteOverviewPageKind.summaryEnd:
         final route = widget.route;
-        final regionCount = _countDistinctRegions();
+        final regionCount = widget.totalRegionCount;
         return OverviewSummaryCard(
           title: t.createFlight.overview.routeReviewedTitle,
           subtitle: t.createFlight.overview.routeReviewedSubtitle(
@@ -180,17 +205,6 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
       duration: const Duration(milliseconds: 320),
       curve: Curves.easeOutCubic,
     );
-  }
-
-  int _countDistinctRegions() {
-    final seenRegionIds = <String>{};
-    for (final entry in widget.entries) {
-      if (entry.kind != RouteOverviewPageKind.region || entry.region == null) {
-        continue;
-      }
-      seenRegionIds.add(entry.region!.qid);
-    }
-    return seenRegionIds.length;
   }
 
   String _formatRegionCountLabel(BuildContext context, int count) {

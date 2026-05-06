@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/subscription/paywall_source.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
+import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
+import 'package:flymap/ui/screens/shared/premium/route_premium_gate_interactions.dart';
+import 'package:flymap/ui/screens/shared/premium/route_region_premium_gate_policy.dart';
 import 'package:flymap/ui/screens/shared/region_artwork.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
 
@@ -139,12 +143,23 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
         if (state is! FlightScreenLoaded) {
           return const SizedBox.shrink();
         }
+        final isProUser = context.select(
+          (SubscriptionCubit cubit) => cubit.state.isPro,
+        );
         if (state.currentRegionIds.isEmpty &&
             (state.nextRegionId == null || state.nextRegionId!.isEmpty)) {
           return const SizedBox.shrink();
         }
 
         final allRegions = state.routeRegions;
+        final orderedByDistance = RouteRegionPremiumGatePolicy.orderByDistance(
+          allRegions,
+        );
+        final gateDecision = RouteRegionPremiumGatePolicy.evaluate(
+          orderedRegions: orderedByDistance,
+          isProUser: isProUser,
+        );
+        final premiumRegionIds = gateDecision.premiumRegionIds;
         final currentRegions = _regionsFromIds(
           state.currentRegionIds,
           allRegions,
@@ -191,7 +206,11 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
                       for (final region in currentRegions)
                         _RegionInlineChip(
                           region: region,
-                          onTap: () => _openRegionDetailsSheet(region),
+                          isLocked: premiumRegionIds.contains(region.qid),
+                          onTap: () => _onRegionChipTap(
+                            region,
+                            isLocked: premiumRegionIds.contains(region.qid),
+                          ),
                         ),
                       if (nextPrimary != null)
                         _InlineLabelChip(
@@ -200,7 +219,13 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
                       if (nextPrimary != null)
                         _RegionInlineChip(
                           region: nextPrimary,
-                          onTap: () => _openRegionDetailsSheet(nextPrimary),
+                          isLocked: premiumRegionIds.contains(nextPrimary.qid),
+                          onTap: () => _onRegionChipTap(
+                            nextPrimary,
+                            isLocked: premiumRegionIds.contains(
+                              nextPrimary.qid,
+                            ),
+                          ),
                         ),
                     ],
                   ),
@@ -210,6 +235,21 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
           ),
         );
       },
+    );
+  }
+
+  Future<void> _onRegionChipTap(
+    RouteRegion region, {
+    required bool isLocked,
+  }) async {
+    if (!isLocked) {
+      await _openRegionDetailsSheet(region);
+      return;
+    }
+    await RoutePremiumGateInteractions.onGateTap(
+      context: context,
+      source: PaywallSource.geoAwarenessGate,
+      useOfflineInfoSheet: true,
     );
   }
 }
@@ -234,9 +274,14 @@ class _InlineLabelChip extends StatelessWidget {
 }
 
 class _RegionInlineChip extends StatelessWidget {
-  const _RegionInlineChip({required this.region, required this.onTap});
+  const _RegionInlineChip({
+    required this.region,
+    required this.isLocked,
+    required this.onTap,
+  });
 
   final RouteRegion region;
+  final bool isLocked;
   final VoidCallback onTap;
 
   @override
@@ -252,15 +297,27 @@ class _RegionInlineChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RegionArtwork(
-                regionName: region.name,
-                regionType: region.regionType,
-                size: 18,
-                borderRadius: 4,
-                isCircle: true,
-              ),
+              if (isLocked)
+                Icon(
+                  Icons.lock_rounded,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                )
+              else
+                RegionArtwork(
+                  regionName: region.name,
+                  regionType: region.regionType,
+                  size: 18,
+                  borderRadius: 4,
+                  isCircle: true,
+                ),
               const SizedBox(width: 6),
-              Text(region.name, style: Theme.of(context).textTheme.labelSmall),
+              Text(
+                isLocked
+                    ? context.t.flight.route.premiumLockedChipLabel
+                    : region.name,
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
             ],
           ),
         ),

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flymap/entity/flight_article.dart';

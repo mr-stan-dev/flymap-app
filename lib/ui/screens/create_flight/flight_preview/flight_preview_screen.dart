@@ -235,10 +235,9 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
           isProUser: isProUser,
           onContinue: cubit.continueFromOverview,
           onSelectMapDetailLevel: cubit.selectMapDetailLevel,
-          onUpgradeToPro: () => unawaited(
+          onPremiumGateTap: () => unawaited(
             _handleUpgradeToProFromOverview(
               context: context,
-              state: state,
               subscriptionCubit: subscriptionCubit,
             ),
           ),
@@ -281,17 +280,13 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
 
   Future<void> _handleUpgradeToProFromOverview({
     required BuildContext context,
-    required FlightPreviewState state,
     required SubscriptionCubit subscriptionCubit,
   }) async {
-    if (subscriptionCubit.state.isPro ||
-        state.selectedMapDetailLevel != MapDetailLevel.pro) {
+    if (subscriptionCubit.state.isPro) {
       return;
     }
-    final result = await subscriptionCubit.presentPaywallForCreateFlight(
-      shouldUpgradeForArticles: false,
-      shouldUpgradeForMapConfig: true,
-    );
+    final result = await subscriptionCubit
+        .presentPaywallFromRouteOverviewGate();
     if (!context.mounted) return;
 
     switch (result) {

@@ -22,6 +22,15 @@ enum PaywallSource {
 
   /// User opened paywall from onboarding soft Pro step.
   onboarding,
+
+  /// User opened paywall from route overview premium gate.
+  routeOverviewGate,
+
+  /// User opened paywall from route timeline premium gate.
+  routeTimelineGate,
+
+  /// User opened paywall from geo awareness premium gate.
+  geoAwarenessGate,
 }
 
 extension PaywallSourceAnalyticsValue on PaywallSource {
@@ -35,6 +44,9 @@ extension PaywallSourceAnalyticsValue on PaywallSource {
       PaywallSource.subscriptionManagement => 'subscription_management',
       PaywallSource.learnLockedContent => 'learn_locked_content',
       PaywallSource.onboarding => 'onboarding',
+      PaywallSource.routeOverviewGate => 'route_overview_gate',
+      PaywallSource.routeTimelineGate => 'route_timeline_gate',
+      PaywallSource.geoAwarenessGate => 'geo_awareness_gate',
     };
   }
 }

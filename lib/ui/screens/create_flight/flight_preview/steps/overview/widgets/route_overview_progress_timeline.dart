@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flymap/ui/design_system/tokens/ds_brand_colors.dart';
 import 'package:flymap/ui/theme/app_colours.dart';
 
 class RouteOverviewProgressTimeline extends StatelessWidget {
@@ -7,6 +8,9 @@ class RouteOverviewProgressTimeline extends StatelessWidget {
     required this.selectedIndex,
     required this.isTitleActive,
     required this.isSummaryActive,
+    this.isPremiumRangeActive = false,
+    this.premiumRangeStartIndex,
+    this.premiumRangeEndIndex,
     super.key,
   });
 
@@ -14,12 +18,16 @@ class RouteOverviewProgressTimeline extends StatelessWidget {
   final int selectedIndex;
   final bool isTitleActive;
   final bool isSummaryActive;
+  final bool isPremiumRangeActive;
+  final int? premiumRangeStartIndex;
+  final int? premiumRangeEndIndex;
 
   @override
   Widget build(BuildContext context) {
     final safeCount = itemCount < 2 ? 2 : itemCount;
     final safeSelected = selectedIndex.clamp(0, safeCount - 1);
     final timelineBlue = AppColoursCommon.brandBlue;
+    final premiumGold = DsBrandColors.proAmber;
     final currentGreen = AppColoursCommon.success;
     final futureColor = Theme.of(
       context,
@@ -37,6 +45,19 @@ class RouteOverviewProgressTimeline extends StatelessWidget {
           final titleMode = isTitleActive;
           final summaryMode = isSummaryActive;
           final showBlueLine = !titleMode;
+          final hasPremiumRange =
+              isPremiumRangeActive &&
+              premiumRangeStartIndex != null &&
+              premiumRangeEndIndex != null &&
+              premiumRangeStartIndex! <= premiumRangeEndIndex! &&
+              premiumRangeStartIndex! >= 0 &&
+              premiumRangeEndIndex! < safeCount;
+          final premiumStartCenter = hasPremiumRange
+              ? firstCenter + slot * premiumRangeStartIndex!
+              : 0.0;
+          final premiumEndCenter = hasPremiumRange
+              ? firstCenter + slot * premiumRangeEndIndex!
+              : 0.0;
           final blueLineRight = summaryMode
               ? (width - lastCenter)
               : (width - currentCenter);
@@ -52,12 +73,27 @@ class RouteOverviewProgressTimeline extends StatelessWidget {
                   child: Container(height: 2, color: futureColor),
                 ),
                 if (showBlueLine)
-                  Positioned(
-                    left: firstCenter,
-                    right: blueLineRight,
-                    top: 12,
-                    child: Container(height: 2, color: timelineBlue),
-                  ),
+                  if (hasPremiumRange) ...[
+                    if (premiumRangeStartIndex! > 0)
+                      Positioned(
+                        left: firstCenter,
+                        right: width - premiumStartCenter,
+                        top: 12,
+                        child: Container(height: 2, color: timelineBlue),
+                      ),
+                    Positioned(
+                      left: premiumStartCenter,
+                      right: width - premiumEndCenter,
+                      top: 12,
+                      child: Container(height: 2, color: premiumGold),
+                    ),
+                  ] else
+                    Positioned(
+                      left: firstCenter,
+                      right: blueLineRight,
+                      top: 12,
+                      child: Container(height: 2, color: timelineBlue),
+                    ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: List.generate(safeCount, (index) {
@@ -67,6 +103,10 @@ class RouteOverviewProgressTimeline extends StatelessWidget {
                         ? timelineBlue
                         : titleMode
                         ? futureColor
+                        : hasPremiumRange &&
+                              index >= premiumRangeStartIndex! &&
+                              index <= premiumRangeEndIndex!
+                        ? premiumGold
                         : isCurrent
                         ? currentGreen
                         : isCompleted

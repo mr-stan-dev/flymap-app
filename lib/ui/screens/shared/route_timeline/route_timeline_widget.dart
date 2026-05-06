@@ -3,16 +3,21 @@ import 'package:flymap/entity/airport.dart';
 import 'package:flymap/entity/flight_route.dart';
 import 'package:flymap/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/ui/design_system/tokens/ds_brand_colors.dart';
+import 'package:flymap/ui/screens/shared/premium/route_region_premium_gate_policy.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/widgets/airport_timeline_card.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/widgets/region_group_timeline_card.dart';
+import 'package:flymap/ui/screens/shared/route_timeline/widgets/timeline_premium_gate_card.dart';
 
 class RouteTimelineWidget extends StatelessWidget {
   const RouteTimelineWidget({
     required this.route,
     required this.regions,
+    required this.isProUser,
     required this.cruiseSpeedKmh,
     required this.totalRouteMinutes,
+    required this.onPremiumGateTap,
     this.currentRegionId,
     this.lastVisitedRegionId,
     this.onOpenRegion,
@@ -21,26 +26,43 @@ class RouteTimelineWidget extends StatelessWidget {
 
   final FlightRoute route;
   final List<RouteRegion> regions;
+  final bool isProUser;
   final int cruiseSpeedKmh;
   final int totalRouteMinutes;
+  final VoidCallback onPremiumGateTap;
   final String? currentRegionId;
   final String? lastVisitedRegionId;
   final ValueChanged<RouteRegion>? onOpenRegion;
 
   @override
   Widget build(BuildContext context) {
+    final orderedByDistance = RouteRegionPremiumGatePolicy.orderByDistance(
+      regions,
+    );
+    final gateDecision = RouteRegionPremiumGatePolicy.evaluate(
+      orderedRegions: orderedByDistance,
+      isProUser: isProUser,
+    );
     final groups = RouteTimelineGrouping.groupByTimeline(
       regions,
       cruiseSpeedKmh: cruiseSpeedKmh,
     );
-    final entries = _buildEntries(groups);
+    final entriesBuild = _buildEntries(groups, gateDecision: gateDecision);
+    final entries = entriesBuild.entries;
     final currentEntryIndex = _findEntryIndexByRegionId(
       entries,
       regionId: currentRegionId,
+      premiumRegionIds: entriesBuild.premiumRegionIds,
+      premiumGateIndex: entriesBuild.premiumGateIndex,
     );
     final visitedEntryIndex =
         currentEntryIndex ??
-        _findEntryIndexByRegionId(entries, regionId: lastVisitedRegionId);
+        _findEntryIndexByRegionId(
+          entries,
+          regionId: lastVisitedRegionId,
+          premiumRegionIds: entriesBuild.premiumRegionIds,
+          premiumGateIndex: entriesBuild.premiumGateIndex,
+        );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -48,6 +70,8 @@ class RouteTimelineWidget extends StatelessWidget {
         for (var index = 0; index < entries.length; index++)
           _RouteTimelineRow(
             timingLabel: _buildMinuteLabel(context, entries[index]),
+            isPremiumGateRow:
+                entries[index].kind == _RouteTimelineEntryKind.premiumGate,
             isFirst: index == 0,
             isLast: index == entries.length - 1,
             pointState: _pointState(
@@ -65,15 +89,16 @@ class RouteTimelineWidget extends StatelessWidget {
               currentEntryIndex: currentEntryIndex,
               visitedEntryIndex: visitedEntryIndex,
             ),
-            card: _buildCard(entries[index]),
+            card: _buildCard(context, entries[index]),
           ),
       ],
     );
   }
 
-  List<_RouteTimelineEntry> _buildEntries(
-    List<RouteTimelineRegionGroup> groups,
-  ) {
+  _TimelineEntriesBuildResult _buildEntries(
+    List<RouteTimelineRegionGroup> groups, {
+    required RouteRegionPremiumGateDecision gateDecision,
+  }) {
     final arrivalMinutes = RouteTimelineGrouping.arrivalMinutes(
       routeDistanceKm: route.distanceInKm,
       totalRouteMinutes: totalRouteMinutes,
@@ -81,21 +106,82 @@ class RouteTimelineWidget extends StatelessWidget {
       groups: groups,
     );
 
-    return [
+    if (!gateDecision.isGated) {
+      return _TimelineEntriesBuildResult(
+        entries: [
+          _RouteTimelineEntry.departure(route.departure),
+          ...groups.map(_RouteTimelineEntry.group),
+          _RouteTimelineEntry.arrival(
+            route.arrival,
+            minuteFromDeparture: arrivalMinutes,
+          ),
+        ],
+        premiumRegionIds: gateDecision.premiumRegionIds,
+      );
+    }
+
+    final hiddenRegionIds = gateDecision.premiumRegionIds;
+    var premiumGateInserted = false;
+    final entries = <_RouteTimelineEntry>[
       _RouteTimelineEntry.departure(route.departure),
-      ...groups.map(_RouteTimelineEntry.group),
+    ];
+    for (final group in groups) {
+      final visibleRegions = group.regions
+          .where((region) => !hiddenRegionIds.contains(region.qid))
+          .toList(growable: false);
+      final hasHiddenRegions = group.regions.length != visibleRegions.length;
+      if (visibleRegions.isNotEmpty) {
+        entries.add(
+          _RouteTimelineEntry.group(
+            RouteTimelineRegionGroup(
+              distanceFromDepartureKm: group.distanceFromDepartureKm,
+              minuteFromDeparture: group.minuteFromDeparture,
+              regions: visibleRegions,
+            ),
+          ),
+        );
+      }
+      if (!premiumGateInserted && hasHiddenRegions) {
+        premiumGateInserted = true;
+        entries.add(
+          _RouteTimelineEntry.premiumGate(
+            minuteFromDeparture: group.minuteFromDeparture,
+          ),
+        );
+      }
+    }
+    if (!premiumGateInserted && hiddenRegionIds.isNotEmpty) {
+      premiumGateInserted = true;
+      entries.add(_RouteTimelineEntry.premiumGate(minuteFromDeparture: 0));
+    }
+    entries.add(
       _RouteTimelineEntry.arrival(
         route.arrival,
         minuteFromDeparture: arrivalMinutes,
       ),
-    ];
+    );
+    final premiumGateIndex = entries.indexWhere(
+      (entry) => entry.kind == _RouteTimelineEntryKind.premiumGate,
+    );
+    return _TimelineEntriesBuildResult(
+      entries: entries,
+      premiumRegionIds: hiddenRegionIds,
+      premiumGateIndex: premiumGateInserted && premiumGateIndex >= 0
+          ? premiumGateIndex
+          : null,
+    );
   }
 
   int? _findEntryIndexByRegionId(
     List<_RouteTimelineEntry> entries, {
     required String? regionId,
+    required Set<String> premiumRegionIds,
+    required int? premiumGateIndex,
   }) {
     if (regionId == null || regionId.isEmpty) return null;
+    if (premiumRegionIds.contains(regionId) && premiumGateIndex != null) {
+      return premiumGateIndex;
+    }
     for (var i = 0; i < entries.length; i++) {
       final entry = entries[i];
       if (entry.kind != _RouteTimelineEntryKind.group) continue;
@@ -161,7 +247,7 @@ class RouteTimelineWidget extends StatelessWidget {
     return _RouteTimelinePointState.future;
   }
 
-  Widget _buildCard(_RouteTimelineEntry entry) {
+  Widget _buildCard(BuildContext context, _RouteTimelineEntry entry) {
     switch (entry.kind) {
       case _RouteTimelineEntryKind.departure:
         return AirportTimelineCard(airport: entry.airport!);
@@ -172,6 +258,14 @@ class RouteTimelineWidget extends StatelessWidget {
         return RegionGroupTimelineCard(
           group: entry.regionGroup!,
           onOpenRegion: onOpenRegion,
+        );
+      case _RouteTimelineEntryKind.premiumGate:
+        final t = context.t;
+        return TimelinePremiumGateCard(
+          title: t.flight.route.premiumGateTitle,
+          description: t.flight.route.premiumGateBody,
+          ctaLabel: t.flight.route.premiumGateCta,
+          onTap: onPremiumGateTap,
         );
     }
   }
@@ -205,7 +299,7 @@ class RouteTimelineWidget extends StatelessWidget {
   }
 }
 
-enum _RouteTimelineEntryKind { departure, group, arrival }
+enum _RouteTimelineEntryKind { departure, group, premiumGate, arrival }
 
 class _RouteTimelineEntry {
   const _RouteTimelineEntry._({
@@ -246,6 +340,25 @@ class _RouteTimelineEntry {
       airport: airport,
     );
   }
+
+  factory _RouteTimelineEntry.premiumGate({required int minuteFromDeparture}) {
+    return _RouteTimelineEntry._(
+      kind: _RouteTimelineEntryKind.premiumGate,
+      minuteFromDeparture: minuteFromDeparture,
+    );
+  }
+}
+
+class _TimelineEntriesBuildResult {
+  const _TimelineEntriesBuildResult({
+    required this.entries,
+    required this.premiumRegionIds,
+    this.premiumGateIndex,
+  });
+
+  final List<_RouteTimelineEntry> entries;
+  final Set<String> premiumRegionIds;
+  final int? premiumGateIndex;
 }
 
 enum _RouteTimelinePointState { past, current, future }
@@ -253,6 +366,7 @@ enum _RouteTimelinePointState { past, current, future }
 class _RouteTimelineRow extends StatelessWidget {
   const _RouteTimelineRow({
     required this.timingLabel,
+    required this.isPremiumGateRow,
     required this.isFirst,
     required this.isLast,
     required this.pointState,
@@ -265,6 +379,7 @@ class _RouteTimelineRow extends StatelessWidget {
   static const double _railWidth = 20.0;
 
   final _TimingLabel timingLabel;
+  final bool isPremiumGateRow;
   final bool isFirst;
   final bool isLast;
   final _RouteTimelinePointState pointState;
@@ -311,7 +426,9 @@ class _RouteTimelineRow extends StatelessWidget {
       unitStyle: unitStyle,
     );
 
-    final dot = pointState == _RouteTimelinePointState.current
+    final dot = isPremiumGateRow
+        ? _TimelinePremiumGateMarker(borderColor: DsBrandColors.proAmber)
+        : pointState == _RouteTimelinePointState.current
         ? _PulsingTimelineDot(color: pointColor)
         : Container(
             width: _dotSize,
@@ -333,26 +450,30 @@ class _RouteTimelineRow extends StatelessWidget {
         children: [
           SizedBox(
             width: timingMaxWidth,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: _TimingLabelText(
-                label: timingLabel,
-                digitStyle: digitStyle,
-                unitStyle: unitStyle,
-              ),
-            ),
+            child: isPremiumGateRow
+                ? const SizedBox.shrink()
+                : Align(
+                    alignment: Alignment.centerRight,
+                    child: _TimingLabelText(
+                      label: timingLabel,
+                      digitStyle: digitStyle,
+                      unitStyle: unitStyle,
+                    ),
+                  ),
           ),
           const SizedBox(width: 8),
           SizedBox(
             width: _railWidth,
             child: Center(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  shape: BoxShape.circle,
-                ),
-                child: dot,
-              ),
+              child: isPremiumGateRow
+                  ? dot
+                  : DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        shape: BoxShape.circle,
+                      ),
+                      child: dot,
+                    ),
             ),
           ),
           const SizedBox(width: 8),
@@ -542,6 +663,42 @@ class _PulsingTimelineDotState extends State<_PulsingTimelineDot>
           ),
         );
       },
+    );
+  }
+}
+
+class _TimelinePremiumGateMarker extends StatelessWidget {
+  const _TimelinePremiumGateMarker({required this.borderColor});
+
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: _RouteTimelineRow._dotSize,
+      height: (_RouteTimelineRow._dotSize * 3) + 4,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _dot(),
+          const SizedBox(height: 2),
+          _dot(),
+          const SizedBox(height: 2),
+          _dot(),
+        ],
+      ),
+    );
+  }
+
+  Widget _dot() {
+    return Container(
+      width: _RouteTimelineRow._dotSize,
+      height: _RouteTimelineRow._dotSize,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        border: Border.all(color: borderColor, width: 2),
+      ),
     );
   }
 }
