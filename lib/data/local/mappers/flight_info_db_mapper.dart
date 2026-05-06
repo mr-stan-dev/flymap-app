@@ -53,7 +53,7 @@ class FlightInfoDbMapper {
       articles,
       routeRegions,
       map.getInt(FlightInfoDBKeys.routeTotalMinutes),
-      map.getInt(FlightInfoDBKeys.routeCruiseSpeedKmh),
+      map.getInt(FlightInfoDBKeys.routeCruiseSpeedKmh, defVal: 850),
     );
   }
 

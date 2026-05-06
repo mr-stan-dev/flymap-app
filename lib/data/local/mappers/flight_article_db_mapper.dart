@@ -3,6 +3,7 @@ import 'package:flymap/domain/entity/flight_article.dart';
 import 'mapper_utils.dart';
 
 class FlightArticleDBKeys {
+  static const qid = 'qid';
   static const sourceUrl = 'sourceUrl';
   static const title = 'title';
   static const summary = 'summary';
@@ -28,6 +29,9 @@ class FlightArticleDbMapper {
     }
 
     return FlightArticle(
+      qid: map.getString(FlightArticleDBKeys.qid).trim().isEmpty
+          ? null
+          : map.getString(FlightArticleDBKeys.qid).trim(),
       sourceUrl: sourceUrl,
       title: title,
       summary: map.getString(FlightArticleDBKeys.summary),
@@ -50,6 +54,7 @@ class FlightArticleDbMapper {
   }
 
   Map<String, dynamic> toDb(FlightArticle article) => <String, dynamic>{
+    FlightArticleDBKeys.qid: article.qid ?? '',
     FlightArticleDBKeys.sourceUrl: article.sourceUrl,
     FlightArticleDBKeys.title: article.title,
     FlightArticleDBKeys.summary: article.summary,

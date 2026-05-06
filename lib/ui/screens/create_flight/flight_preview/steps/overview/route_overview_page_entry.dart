@@ -5,7 +5,6 @@ import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.
 enum RouteOverviewPageKind {
   summary,
   departure,
-  region,
   regionGroup,
   premiumGate,
   arrival,
@@ -39,17 +38,6 @@ class RouteOverviewPageEntry {
       kind: RouteOverviewPageKind.departure,
       minuteFromDeparture: 0,
       airport: airport,
-    );
-  }
-
-  factory RouteOverviewPageEntry.region(
-    RouteRegion region, {
-    required int minuteFromDeparture,
-  }) {
-    return RouteOverviewPageEntry._(
-      kind: RouteOverviewPageKind.region,
-      minuteFromDeparture: minuteFromDeparture,
-      region: region,
     );
   }
 

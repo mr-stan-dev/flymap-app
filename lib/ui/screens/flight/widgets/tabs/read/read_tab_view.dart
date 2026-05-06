@@ -127,24 +127,14 @@ class _LoadedReadTab extends StatelessWidget {
     required List<RouteRegion> regions,
   }) {
     if (articles.isEmpty || regions.isEmpty) return articles;
-    final regionWikiUrls = regions
-        .map((r) => r.wikipediaUrl?.trim() ?? '')
-        .where((url) => url.isNotEmpty)
-        .map(WikipediaArticleUtils.normalizeUrl)
-        .toSet();
-    final regionNames = regions
-        .map((r) => r.name.trim().toLowerCase())
-        .where((name) => name.isNotEmpty)
-        .toSet();
+    final regionQids = regions.map((r) => r.qid).toSet();
 
     return articles
         .where((article) {
-          final normalizedArticleUrl = WikipediaArticleUtils.normalizeUrl(
-            article.sourceUrl,
-          );
-          if (regionWikiUrls.contains(normalizedArticleUrl)) return false;
-          final articleTitle = article.title.trim().toLowerCase();
-          if (regionNames.contains(articleTitle)) return false;
+          final articleQid = article.qid;
+          if (articleQid != null && regionQids.contains(articleQid)) {
+            return false;
+          }
           return true;
         })
         .toList(growable: false);

@@ -131,20 +131,6 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
           ),
           countryCode: airport.countryCode,
         );
-      case RouteOverviewPageKind.region:
-        final region = entry.region!;
-        final typeLabel = _typeMapper.mapLabel(context, region.regionType);
-        return OverviewRegionCard(
-          title: region.name,
-          subtitle: typeLabel,
-          description: region.description?.trim().isNotEmpty == true
-              ? region.description!.trim()
-              : t.createFlight.overview.regionInfo.descriptionUnavailable,
-          readMoreLabel: t.common.readMore,
-          onReadMore: () =>
-              _openRegionInfo(context, region: region, typeLabel: typeLabel),
-          regionType: region.regionType,
-        );
       case RouteOverviewPageKind.regionGroup:
         final primaryRegion = entry.regionGroup?.topRegion;
         if (primaryRegion == null) {

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class FlightArticle extends Equatable {
   const FlightArticle({
+    this.qid,
     required this.sourceUrl,
     required this.title,
     required this.summary,
@@ -16,6 +17,7 @@ class FlightArticle extends Equatable {
     required this.sizeBytes,
   });
 
+  final String? qid;
   final String sourceUrl;
   final String title;
   final String summary;
@@ -31,6 +33,7 @@ class FlightArticle extends Equatable {
 
   @override
   List<Object?> get props => [
+    qid,
     sourceUrl,
     title,
     summary,

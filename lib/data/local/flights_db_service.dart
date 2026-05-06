@@ -137,17 +137,16 @@ class FlightsDBService {
     final rawArticles = infoRaw[FlightInfoDBKeys.articles];
     if (rawArticles is! List) return;
 
-    final lightArticles = rawArticles
-        .whereType<Map<String, dynamic>>()
-        .map((article) {
-          final light = Map<String, dynamic>.from(article);
-          light.remove(FlightArticleDBKeys.contentPlainText);
-          light.remove(FlightArticleDBKeys.contentHtml);
-          light.remove(FlightArticleDBKeys.leadImageRelativePath);
-          light.remove(FlightArticleDBKeys.inlineImageRelativePaths);
-          return light;
-        })
-        .toList();
+    final lightArticles = rawArticles.whereType<Map<String, dynamic>>().map((
+      article,
+    ) {
+      final light = Map<String, dynamic>.from(article);
+      light.remove(FlightArticleDBKeys.contentPlainText);
+      light.remove(FlightArticleDBKeys.contentHtml);
+      light.remove(FlightArticleDBKeys.leadImageRelativePath);
+      light.remove(FlightArticleDBKeys.inlineImageRelativePaths);
+      return light;
+    }).toList();
     infoRaw[FlightInfoDBKeys.articles] = lightArticles;
   }
 
@@ -168,27 +167,36 @@ class FlightsDBService {
     final keepIds = <String>{};
 
     for (final article in articles) {
-      final assetId = _articleAssetId(flightId: flightId, sourceUrl: article.sourceUrl);
+      final assetId = _articleAssetId(
+        flightId: flightId,
+        sourceUrl: article.sourceUrl,
+      );
       keepIds.add(assetId);
       final payload = <String, dynamic>{
         FlightArticleDBKeys.contentPlainText: article.contentPlainText,
         FlightArticleDBKeys.contentHtml: article.contentHtml,
-        FlightArticleDBKeys.leadImageRelativePath: article.leadImageRelativePath,
-        FlightArticleDBKeys.inlineImageRelativePaths: article.inlineImageRelativePaths,
+        FlightArticleDBKeys.leadImageRelativePath:
+            article.leadImageRelativePath,
+        FlightArticleDBKeys.inlineImageRelativePaths:
+            article.inlineImageRelativePaths,
       };
-      await _database.flightAssetsStore.record(assetId).put(_database.database, {
-        'id': assetId,
-        _assetKeyFlightId: flightId,
-        _assetKeyType: _assetTypeWikiArticle,
-        FlightArticleDBKeys.sourceUrl: article.sourceUrl,
-        _assetKeyPayload: payload,
-        _assetKeyUpdatedAt: nowIso,
-      });
+      await _database.flightAssetsStore
+          .record(assetId)
+          .put(_database.database, {
+            'id': assetId,
+            _assetKeyFlightId: flightId,
+            _assetKeyType: _assetTypeWikiArticle,
+            FlightArticleDBKeys.sourceUrl: article.sourceUrl,
+            _assetKeyPayload: payload,
+            _assetKeyUpdatedAt: nowIso,
+          });
     }
 
     for (final record in existingAssets) {
       if (keepIds.contains(record.key)) continue;
-      await _database.flightAssetsStore.record(record.key).delete(_database.database);
+      await _database.flightAssetsStore
+          .record(record.key)
+          .delete(_database.database);
     }
   }
 
@@ -203,7 +211,9 @@ class FlightsDBService {
       ),
     );
     for (final asset in assets) {
-      await _database.flightAssetsStore.record(asset.key).delete(_database.database);
+      await _database.flightAssetsStore
+          .record(asset.key)
+          .delete(_database.database);
     }
   }
 
@@ -221,7 +231,8 @@ class FlightsDBService {
     );
     final byUrl = <String, Map<String, dynamic>>{};
     for (final asset in assets) {
-      final sourceUrl = (asset.value[FlightArticleDBKeys.sourceUrl] ?? '').toString();
+      final sourceUrl = (asset.value[FlightArticleDBKeys.sourceUrl] ?? '')
+          .toString();
       if (sourceUrl.isEmpty) continue;
       byUrl[sourceUrl] = asset.value;
     }
@@ -232,17 +243,22 @@ class FlightsDBService {
       final payload = asset[_assetKeyPayload];
       if (payload is! Map<String, dynamic>) return lightArticle;
       return FlightArticle(
+        qid: lightArticle.qid,
         sourceUrl: lightArticle.sourceUrl,
         title: lightArticle.title,
         summary: lightArticle.summary,
-        contentPlainText:
-            (payload[FlightArticleDBKeys.contentPlainText] ?? '').toString(),
-        contentHtml: (payload[FlightArticleDBKeys.contentHtml] ?? '').toString(),
+        contentPlainText: (payload[FlightArticleDBKeys.contentPlainText] ?? '')
+            .toString(),
+        contentHtml: (payload[FlightArticleDBKeys.contentHtml] ?? '')
+            .toString(),
         languageCode: lightArticle.languageCode,
         leadImageRelativePath:
-            (payload[FlightArticleDBKeys.leadImageRelativePath] ?? '').toString(),
+            (payload[FlightArticleDBKeys.leadImageRelativePath] ?? '')
+                .toString(),
         inlineImageRelativePaths:
-            (payload[FlightArticleDBKeys.inlineImageRelativePaths] as List<dynamic>? ?? const [])
+            (payload[FlightArticleDBKeys.inlineImageRelativePaths]
+                        as List<dynamic>? ??
+                    const [])
                 .whereType<String>()
                 .toList(),
         attributionText: lightArticle.attributionText,
@@ -263,7 +279,10 @@ class FlightsDBService {
     );
   }
 
-  String _articleAssetId({required String flightId, required String sourceUrl}) {
+  String _articleAssetId({
+    required String flightId,
+    required String sourceUrl,
+  }) {
     return '$flightId::wiki_article::${Uri.encodeComponent(sourceUrl)}';
   }
 }

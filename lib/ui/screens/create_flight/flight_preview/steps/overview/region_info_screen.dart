@@ -252,6 +252,7 @@ class _RegionInfoScreenState extends State<RegionInfoScreen> {
         .join('\n');
 
     final fallbackArticle = FlightArticle(
+      qid: article.qid,
       sourceUrl: article.sourceUrl,
       title: article.title,
       summary: article.summary,

@@ -159,9 +159,7 @@ class _FlightSearchRouteOverviewStepState
             final activeKind = entries[safeIndex].kind;
             final visibleRegionCardCount = entries
                 .where(
-                  (entry) =>
-                      entry.kind == RouteOverviewPageKind.region ||
-                      entry.kind == RouteOverviewPageKind.regionGroup,
+                  (entry) => entry.kind == RouteOverviewPageKind.regionGroup,
                 )
                 .length;
             final progress = _buildProgressState(
@@ -279,11 +277,7 @@ class _FlightSearchRouteOverviewStepState
         .clamp(2, 9999);
     final entryKind = selectedPageEntry.kind;
     final visibleEntries = entries
-        .where(
-          (entry) =>
-              entry.kind == RouteOverviewPageKind.region ||
-              entry.kind == RouteOverviewPageKind.regionGroup,
-        )
+        .where((entry) => entry.kind == RouteOverviewPageKind.regionGroup)
         .toList(growable: false);
     int clampedSelectedStopIndex;
     if (entryKind == RouteOverviewPageKind.summary ||

@@ -95,6 +95,52 @@ class DownloadFlowDelegate {
         .toList(growable: false);
   }
 
+  List<FlightArticle> _assignRegionQidsToArticles({
+    required List<FlightArticle> articles,
+    required List<RouteRegion> regions,
+  }) {
+    if (articles.isEmpty || regions.isEmpty) return articles;
+    final regionQidByWikiUrl = <String, String>{};
+    for (final region in regions) {
+      final wikiUrl = _normalizeWikiUrl(region.wikipediaUrl);
+      if (wikiUrl == null || regionQidByWikiUrl.containsKey(wikiUrl)) continue;
+      regionQidByWikiUrl[wikiUrl] = region.qid;
+    }
+    if (regionQidByWikiUrl.isEmpty) return articles;
+    return articles
+        .map((article) {
+          final normalizedSourceUrl = _normalizeWikiUrl(article.sourceUrl);
+          final regionQid = normalizedSourceUrl == null
+              ? null
+              : regionQidByWikiUrl[normalizedSourceUrl];
+          if (regionQid == null) return article;
+          return FlightArticle(
+            sourceUrl: article.sourceUrl,
+            title: article.title,
+            summary: article.summary,
+            contentPlainText: article.contentPlainText,
+            contentHtml: article.contentHtml,
+            languageCode: article.languageCode,
+            leadImageRelativePath: article.leadImageRelativePath,
+            inlineImageRelativePaths: article.inlineImageRelativePaths,
+            attributionText: article.attributionText,
+            licenseText: article.licenseText,
+            downloadedAt: article.downloadedAt,
+            sizeBytes: article.sizeBytes,
+            qid: regionQid,
+          );
+        })
+        .toList(growable: false);
+  }
+
+  String? _normalizeWikiUrl(String? raw) {
+    final value = raw?.trim() ?? '';
+    if (value.isEmpty) return null;
+    final parsed = Uri.tryParse(value);
+    if (parsed == null) return value.toLowerCase();
+    return '${parsed.host.toLowerCase()}${parsed.path.toLowerCase()}';
+  }
+
   Future<void> startDownload() async {
     if (_cubit.state.isDownloading) return;
     final route = _cubit.state.flightRoute;
@@ -332,7 +378,10 @@ class DownloadFlowDelegate {
               regionArticlesResult.cancelled) {
             return;
           }
-          regionDownloadedArticles = regionArticlesResult.articles;
+          regionDownloadedArticles = _assignRegionQidsToArticles(
+            articles: regionArticlesResult.articles,
+            regions: enrichedInfo.routeRegions,
+          );
           regionArticleCompleted = regionArticleTotal;
           regionArticleFailed = regionArticlesResult.failedCount;
           enrichedInfo = enrichedInfo.copyWith(

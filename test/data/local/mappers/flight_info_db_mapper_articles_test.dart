@@ -29,6 +29,7 @@ void main() {
         ],
         [
           FlightArticle(
+            qid: 'Q786',
             sourceUrl: 'https://en.wikipedia.org/wiki/Alps',
             title: 'Alps',
             summary: 'summary',
@@ -53,6 +54,7 @@ void main() {
 
       expect(restored, info);
       expect(restored.articles.single.title, 'Alps');
+      expect(restored.articles.single.qid, 'Q786');
     });
 
     test('reads old records that do not contain articles key', () {
@@ -98,6 +100,7 @@ void main() {
 
       expect(article.contentHtml, isEmpty);
       expect(article.inlineImageRelativePaths, isEmpty);
+      expect(article.qid, isNull);
     });
   });
 }
