@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
-import 'package:flymap/domain/entity/map_detail_level.dart';
 import 'package:flymap/domain/entity/route_region.dart';
+import 'package:flymap/domain/policy/route_region_premium_gate_policy.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview_page_entry.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_summary_screen.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_map_widget.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_pager.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_progress_timeline.dart';
-import 'package:flymap/ui/screens/shared/premium/route_region_premium_gate_policy.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
 
@@ -17,7 +16,6 @@ class FlightSearchRouteOverviewStep extends StatefulWidget {
     required this.state,
     required this.isProUser,
     required this.onContinue,
-    required this.onSelectMapDetailLevel,
     required this.onPremiumGateTap,
     super.key,
   });
@@ -25,7 +23,6 @@ class FlightSearchRouteOverviewStep extends StatefulWidget {
   final FlightPreviewState state;
   final bool isProUser;
   final VoidCallback onContinue;
-  final ValueChanged<MapDetailLevel> onSelectMapDetailLevel;
   final VoidCallback onPremiumGateTap;
 
   @override
@@ -75,12 +72,6 @@ class _FlightSearchRouteOverviewStepState
     final route = widget.state.flightRoute;
     if (route == null) {
       return Center(child: Text(context.t.createFlight.overview.routeNotReady));
-    }
-    if (widget.isProUser &&
-        widget.state.selectedMapDetailLevel != MapDetailLevel.pro) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        widget.onSelectMapDetailLevel(MapDetailLevel.pro);
-      });
     }
 
     final orderedRegions = RouteRegionPremiumGatePolicy.orderByDistance(

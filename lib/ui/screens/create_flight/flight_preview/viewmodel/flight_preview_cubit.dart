@@ -10,8 +10,11 @@ import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/domain/entity/map_detail_level.dart';
+import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/entity/user_flight_prefs.dart';
 import 'package:flymap/domain/entity/wiki_article_candidate.dart';
+import 'package:flymap/domain/policy/poi_limits_policy.dart';
+import 'package:flymap/domain/policy/route_region_premium_gate_policy.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/map_download_config.dart';
@@ -22,12 +25,10 @@ import 'package:flymap/subscription/pro_limits.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
 import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
 import 'package:flymap/domain/usecase/download_map_use_case.dart';
-import 'package:flymap/domain/usecase/download_poi_summaries_use_case.dart';
 import 'package:flymap/domain/usecase/download_region_wiki_articles_use_case.dart';
 import 'package:flymap/domain/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/domain/usecase/get_route_overview_use_case.dart';
 import 'package:flymap/domain/usecase/get_wiki_articles_use_case.dart';
-import 'package:flymap/domain/usecase/poi_selection_config.dart';
 
 part 'delegates/preview_preparation_delegate.dart';
 part 'delegates/map_and_step_navigation_delegate.dart';
@@ -41,7 +42,6 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     required ConnectivityChecker connectivityChecker,
     required GetRouteOverviewUseCase getRouteOverviewUseCase,
     required DownloadMapUseCase downloadMapUseCase,
-    required DownloadPoiSummariesUseCase downloadPoiSummariesUseCase,
     required DownloadRegionWikiArticlesUseCase
     downloadRegionWikiArticlesUseCase,
     required DownloadWikipediaArticlesUseCase downloadWikipediaArticlesUseCase,
@@ -74,7 +74,6 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     _downloadFlowDelegate = DownloadFlowDelegate(
       this,
       downloadMapUseCase: downloadMapUseCase,
-      downloadPoiSummariesUseCase: downloadPoiSummariesUseCase,
       downloadRegionWikiArticlesUseCase: downloadRegionWikiArticlesUseCase,
       downloadWikipediaArticlesUseCase: downloadWikipediaArticlesUseCase,
       flightRepository: flightRepository,
@@ -115,14 +114,15 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
 
   Future<bool> handleBackAction() => _navigationDelegate.handleBackAction();
 
-  void _applyPoisForDetail(
+  void _applyPoisForSubscriptionTier(
     List<RoutePoiSummary> allPois, {
-    required MapDetailLevel mapDetail,
+    required bool isProUser,
   }) {
-    final maxPois = PoiSelectionConfig.maxPois(mapDetail);
+    final maxPois = PoiLimitsPolicy.maxPoisForTier(isProUser: isProUser);
     final selected = allPois.take(maxPois).toList(growable: false);
-    final proMax = PoiSelectionConfig.maxPois(MapDetailLevel.pro);
-    final proCount = allPois.length < proMax ? allPois.length : proMax;
+    final proCount = allPois.length < PoiLimitsPolicy.proMaxPois
+        ? allPois.length
+        : PoiLimitsPolicy.proMaxPois;
     _emitState(
       state.copyWith(
         flightInfo: state.flightInfo.copyWith(poi: selected),
@@ -131,8 +131,13 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     );
   }
 
+  void _syncPoisForCurrentTier() {
+    final isProUser = _downloadFlowDelegate.currentSubscriptionIsPro;
+    _applyPoisForSubscriptionTier(state.allRoutePois, isProUser: isProUser);
+  }
+
   Future<void> refreshPoisForPro() async {
-    _applyPoisForDetail(state.allRoutePois, mapDetail: MapDetailLevel.pro);
+    _applyPoisForSubscriptionTier(state.allRoutePois, isProUser: true);
   }
 
   void _emitState(FlightPreviewState nextState) {

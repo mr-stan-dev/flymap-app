@@ -4,7 +4,7 @@ import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/tokens/ds_brand_colors.dart';
-import 'package:flymap/ui/screens/shared/premium/route_region_premium_gate_policy.dart';
+import 'package:flymap/domain/policy/route_region_premium_gate_policy.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/widgets/airport_timeline_card.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/widgets/region_group_timeline_card.dart';

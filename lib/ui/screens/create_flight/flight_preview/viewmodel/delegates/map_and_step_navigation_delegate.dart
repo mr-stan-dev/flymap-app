@@ -14,10 +14,7 @@ class MapAndStepNavigationDelegate {
         clearErrorMessage: true,
       ),
     );
-    _cubit._applyPoisForDetail(
-      _cubit.state.allRoutePois,
-      mapDetail: detailLevel,
-    );
+    _cubit._syncPoisForCurrentTier();
   }
 
   void continueFromOverview() {

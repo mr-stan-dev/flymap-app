@@ -9,7 +9,6 @@ import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/wi
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/overview_region_card.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/overview_summary_card.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/overview_title_card.dart';
-import 'package:flymap/ui/screens/shared/route_timeline/widgets/region_group_timeline_card.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/utils/route_utils.dart';
@@ -145,16 +144,27 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
           regionType: region.regionType,
         );
       case RouteOverviewPageKind.regionGroup:
-        final group = entry.regionGroup;
-        if (group == null) {
+        final primaryRegion = entry.regionGroup?.topRegion;
+        if (primaryRegion == null) {
           return const SizedBox.shrink();
         }
-        return RegionGroupTimelineCard(
-          group: group,
-          onOpenRegion: (region) {
-            final typeLabel = _typeMapper.mapLabel(context, region.regionType);
-            _openRegionInfo(context, region: region, typeLabel: typeLabel);
-          },
+        final typeLabel = _typeMapper.mapLabel(
+          context,
+          primaryRegion.regionType,
+        );
+        return OverviewRegionCard(
+          title: primaryRegion.name,
+          subtitle: typeLabel,
+          description: primaryRegion.description?.trim().isNotEmpty == true
+              ? primaryRegion.description!.trim()
+              : t.createFlight.overview.regionInfo.descriptionUnavailable,
+          readMoreLabel: t.common.readMore,
+          onReadMore: () => _openRegionInfo(
+            context,
+            region: primaryRegion,
+            typeLabel: typeLabel,
+          ),
+          regionType: primaryRegion.regionType,
         );
       case RouteOverviewPageKind.premiumGate:
         return OverviewPremiumGateCard(

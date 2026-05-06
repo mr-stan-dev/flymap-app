@@ -28,7 +28,6 @@ import 'package:flymap/ui/screens/home/tabs/home/home_tab.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 import 'package:flymap/ui/widgets/rate_app_dialog.dart';
 import 'package:flymap/domain/usecase/download_map_use_case.dart';
-import 'package:flymap/domain/usecase/download_poi_summaries_use_case.dart';
 import 'package:flymap/domain/usecase/download_region_wiki_articles_use_case.dart';
 import 'package:flymap/domain/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/domain/usecase/get_route_overview_use_case.dart';
@@ -50,7 +49,6 @@ class FlightPreviewScreen extends StatelessWidget {
         connectivityChecker: GetIt.I.get<ConnectivityChecker>(),
         getRouteOverviewUseCase: GetIt.I.get<GetRouteOverviewUseCase>(),
         downloadMapUseCase: GetIt.I.get<DownloadMapUseCase>(),
-        downloadPoiSummariesUseCase: GetIt.I.get<DownloadPoiSummariesUseCase>(),
         downloadRegionWikiArticlesUseCase: GetIt.I
             .get<DownloadRegionWikiArticlesUseCase>(),
         downloadWikipediaArticlesUseCase: GetIt.I
@@ -234,7 +232,6 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
           state: state,
           isProUser: isProUser,
           onContinue: cubit.continueFromOverview,
-          onSelectMapDetailLevel: cubit.selectMapDetailLevel,
           onPremiumGateTap: () => unawaited(
             _handleUpgradeToProFromOverview(
               context: context,

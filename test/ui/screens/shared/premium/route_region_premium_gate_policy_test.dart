@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/entity/route_region_type.dart';
-import 'package:flymap/ui/screens/shared/premium/route_region_premium_gate_policy.dart';
+import 'package:flymap/domain/policy/route_region_premium_gate_policy.dart';
 
 void main() {
   group('RouteRegionPremiumGatePolicy.evaluate', () {

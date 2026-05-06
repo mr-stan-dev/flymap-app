@@ -104,8 +104,9 @@ class PreviewPreparationDelegate {
           flightInfo: FlightInfo.empty.copyWith(
             poi: overview.topPois
                 .take(
-                  PoiSelectionConfig.maxPois(
-                    _cubit.state.selectedMapDetailLevel,
+                  PoiLimitsPolicy.maxPoisForTier(
+                    isProUser:
+                        _cubit._downloadFlowDelegate.currentSubscriptionIsPro,
                   ),
                 )
                 .toList(growable: false),
@@ -113,9 +114,9 @@ class PreviewPreparationDelegate {
             routeTotalMinutes: timeline.totalRouteMinutes,
             routeCruiseSpeedKmh: timeline.cruiseSpeedKmh,
           ),
-          proPoiCount: overview.topPois.length < PoiSelectionConfig.proMaxPois
+          proPoiCount: overview.topPois.length < PoiLimitsPolicy.proMaxPois
               ? overview.topPois.length
-              : PoiSelectionConfig.proMaxPois,
+              : PoiLimitsPolicy.proMaxPois,
           articleCandidates: const [],
           clearSelectedArticleUrls: true,
           isWikiSuggestionsLoading: true,

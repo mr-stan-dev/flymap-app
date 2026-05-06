@@ -50,7 +50,6 @@ import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
 import 'package:flymap/domain/usecase/complete_flight_use_case.dart';
 import 'package:flymap/domain/usecase/can_open_learn_article_use_case.dart';
 import 'package:flymap/domain/usecase/download_map_use_case.dart';
-import 'package:flymap/domain/usecase/download_poi_summaries_use_case.dart';
 import 'package:flymap/domain/usecase/download_region_wiki_articles_use_case.dart';
 import 'package:flymap/domain/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/domain/usecase/get_flight_info_use_case.dart';
@@ -209,9 +208,6 @@ class DiModule {
     );
     i.registerLazySingleton<GetPlaceInfoUseCase>(
       () => GetPlaceInfoUseCase(repository: i.get()),
-    );
-    i.registerLazySingleton<DownloadPoiSummariesUseCase>(
-      () => DownloadPoiSummariesUseCase(repository: i.get()),
     );
     i.registerLazySingleton<DownloadRegionWikiArticlesUseCase>(
       () => DownloadRegionWikiArticlesUseCase(repository: i.get()),

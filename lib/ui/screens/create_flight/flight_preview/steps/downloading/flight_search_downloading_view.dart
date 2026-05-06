@@ -136,27 +136,28 @@ class FlightSearchDownloadingView extends StatelessWidget {
   }
 
   String _poiSubtitle(BuildContext context, DownloadSectionState section) {
-    final custom = section.message?.trim() ?? '';
-    if (custom.isNotEmpty) {
-      return custom;
-    }
-    if (section.total > 0) {
-      if (section.failed > 0) {
-        return context.t.createFlight.downloading.poiProgressWithFailed(
-          completed: section.completed,
-          total: section.total,
-          failed: section.failed,
-        );
-      }
-      return context.t.createFlight.downloading.poiProgress(
-        completed: section.completed,
-        total: section.total,
-      );
-    }
-    return section.message ?? t.createFlight.downloading.noPoiSelected;
+    return _articlesLikeSubtitle(
+      context,
+      section,
+      emptyFallback: t.createFlight.downloading.noArticlesSelected,
+    );
   }
 
   String _articlesSubtitle(BuildContext context, DownloadSectionState section) {
+    return _articlesLikeSubtitle(
+      context,
+      section,
+      emptyFallback: t.createFlight.downloading.noArticlesSelected,
+    );
+  }
+
+  String _articlesLikeSubtitle(
+    BuildContext context,
+    DownloadSectionState section, {
+    required String emptyFallback,
+  }) {
+    final custom = section.message?.trim() ?? '';
+    if (custom.isNotEmpty) return custom;
     if (section.total > 0) {
       if (section.failed > 0) {
         return context.t.createFlight.downloading.articlesProgressWithFailed(
@@ -170,7 +171,7 @@ class FlightSearchDownloadingView extends StatelessWidget {
         total: section.total,
       );
     }
-    return section.message ?? t.createFlight.downloading.noArticlesSelected;
+    return emptyFallback;
   }
 }
 

@@ -6,7 +6,6 @@ class DownloadFlowDelegate {
   DownloadFlowDelegate(
     this._cubit, {
     required DownloadMapUseCase downloadMapUseCase,
-    required DownloadPoiSummariesUseCase downloadPoiSummariesUseCase,
     required DownloadRegionWikiArticlesUseCase
     downloadRegionWikiArticlesUseCase,
     required DownloadWikipediaArticlesUseCase downloadWikipediaArticlesUseCase,
@@ -14,7 +13,6 @@ class DownloadFlowDelegate {
     required SubscriptionRepository subscriptionRepository,
     required DeleteFlightUseCase deleteFlightUseCase,
   }) : _downloadMapUseCase = downloadMapUseCase,
-       _downloadPoiSummariesUseCase = downloadPoiSummariesUseCase,
        _downloadRegionWikiArticlesUseCase = downloadRegionWikiArticlesUseCase,
        _downloadWikipediaArticlesUseCase = downloadWikipediaArticlesUseCase,
        _flightRepository = flightRepository,
@@ -23,7 +21,6 @@ class DownloadFlowDelegate {
 
   final FlightPreviewCubit _cubit;
   final DownloadMapUseCase _downloadMapUseCase;
-  final DownloadPoiSummariesUseCase _downloadPoiSummariesUseCase;
   final DownloadRegionWikiArticlesUseCase _downloadRegionWikiArticlesUseCase;
   final DownloadWikipediaArticlesUseCase _downloadWikipediaArticlesUseCase;
   final FlightRepository _flightRepository;
@@ -35,31 +32,67 @@ class DownloadFlowDelegate {
   String? _savedFlightIdDuringDownload;
   String? _activeArticleBundleId;
 
+  bool get currentSubscriptionIsPro =>
+      _subscriptionRepository.currentStatus.isPro;
+
   int get _freeWikiArticlesSelectionLimit =>
       ProLimits.freeWikiArticlesSelectionLimit;
 
   String _articleBundleId(FlightRoute route) =>
       '${route.routeCode}_${route.departure.displayCode}_${route.arrival.displayCode}';
 
-  int _poiDownloadTargetCount(List<RoutePoiSummary> pois) =>
-      pois.where((poi) => poi.qid.trim().isNotEmpty).length;
-
-  String _poiAndRegionsProgressMessage({
-    required int poiCompleted,
-    required int poiTotal,
-    required int poiFailed,
-    required int regionsCompleted,
-    required int regionsTotal,
-    required int regionsFailed,
+  String _articlesProgressMessage({
+    required int completed,
+    required int total,
+    required int failed,
   }) {
-    final placesLabel = t.createFlight.downloading.poiSectionTitle;
-    final regionsLabel = t.createFlight.overview.routeSummaryRegionsLabel;
-    final placesFailed = poiFailed > 0 ? ' ($poiFailed failed)' : '';
-    final regionsFailedLabel = regionsFailed > 0
-        ? ' ($regionsFailed failed)'
-        : '';
-    return '$placesLabel: $poiCompleted/$poiTotal$placesFailed · '
-        '$regionsLabel: $regionsCompleted/$regionsTotal$regionsFailedLabel';
+    if (failed > 0) {
+      return t.createFlight.downloading.articlesProgressWithFailed(
+        completed: completed,
+        total: total,
+        failed: failed,
+      );
+    }
+    return t.createFlight.downloading.articlesProgress(
+      completed: completed,
+      total: total,
+    );
+  }
+
+  List<RouteRegion> _downloadableRegions({required bool isProUser}) {
+    final routeRegions = _cubit.state.flightInfo.routeRegions;
+    if (isProUser || routeRegions.isEmpty) {
+      return routeRegions;
+    }
+    final orderedByDistance = RouteRegionPremiumGatePolicy.orderByDistance(
+      routeRegions,
+    );
+    final gateDecision = RouteRegionPremiumGatePolicy.evaluate(
+      orderedRegions: orderedByDistance,
+      isProUser: false,
+    );
+    if (!gateDecision.isGated) {
+      return routeRegions;
+    }
+    final freeRegionIds = gateDecision.freeRegionIds;
+    return routeRegions
+        .where((region) => freeRegionIds.contains(region.qid))
+        .toList(growable: false);
+  }
+
+  List<RouteRegion> _mergeResolvedRegions({
+    required List<RouteRegion> allRegions,
+    required List<RouteRegion> resolvedSubset,
+  }) {
+    if (resolvedSubset.isEmpty) {
+      return allRegions;
+    }
+    final resolvedByQid = <String, RouteRegion>{
+      for (final region in resolvedSubset) region.qid: region,
+    };
+    return allRegions
+        .map((region) => resolvedByQid[region.qid] ?? region)
+        .toList(growable: false);
   }
 
   Future<void> startDownload() async {
@@ -92,13 +125,9 @@ class DownloadFlowDelegate {
         _cubit.state.copyWith(selectedArticleUrls: selectedUrls),
       );
     }
-    final poiToDownloadCount = _poiDownloadTargetCount(
-      _cubit.state.flightInfo.poi,
-    );
+    final regionsToDownload = _downloadableRegions(isProUser: isPro);
     final regionsToDownloadCount = _downloadRegionWikiArticlesUseCase
-        .downloadTargetCount(_cubit.state.flightInfo.routeRegions);
-    final poiAndRegionsToDownloadCount =
-        poiToDownloadCount + regionsToDownloadCount;
+        .downloadTargetCount(regionsToDownload);
     final flightId = DownloadMapUseCase.newFlightId();
     final articleBundleId = _articleBundleId(route);
     _activeArticleBundleId = articleBundleId;
@@ -108,20 +137,19 @@ class DownloadFlowDelegate {
         status: DownloadSectionStatus.active,
         message: t.createFlight.downloading.preparingMap,
       ),
-      poi: poiAndRegionsToDownloadCount <= 0
+      poi: regionsToDownloadCount <= 0
           ? DownloadSectionState.initial().copyWith(
               status: DownloadSectionStatus.skipped,
             )
           : DownloadSectionState.initial().copyWith(
               status: DownloadSectionStatus.pending,
-              total: poiAndRegionsToDownloadCount,
-              message: _poiAndRegionsProgressMessage(
-                poiCompleted: 0,
-                poiTotal: poiToDownloadCount,
-                poiFailed: 0,
-                regionsCompleted: 0,
-                regionsTotal: regionsToDownloadCount,
-                regionsFailed: 0,
+              completed: 0,
+              total: regionsToDownloadCount,
+              failed: 0,
+              message: _articlesProgressMessage(
+                completed: 0,
+                total: regionsToDownloadCount,
+                failed: 0,
               ),
             ),
       articles: !initialHasArticlePhase
@@ -150,7 +178,7 @@ class DownloadFlowDelegate {
         downloadedBytes: 0,
         downloadStage: DownloadStage.initializing,
         poiDownloadCompleted: 0,
-        poiDownloadTotal: poiAndRegionsToDownloadCount,
+        poiDownloadTotal: 0,
         poiDownloadFailed: 0,
         articleDownloadCompleted: 0,
         articleDownloadTotal: selectedUrls.length,
@@ -194,11 +222,11 @@ class DownloadFlowDelegate {
     }
 
     _savedFlightIdDuringDownload = flightId;
-    var poiHadIssues = false;
+    var regionHadIssues = false;
     var articleHadIssues = false;
     var regionDownloadedArticles = <FlightArticle>[];
 
-    if (poiAndRegionsToDownloadCount > 0) {
+    if (regionsToDownloadCount > 0) {
       _cubit._emitState(
         _cubit.state.copyWith(
           isDownloading: true,
@@ -206,296 +234,203 @@ class DownloadFlowDelegate {
           downloadSections: _cubit.state.downloadSections.copyWith(
             poi: _cubit.state.downloadSections.poi.copyWith(
               status: DownloadSectionStatus.active,
-              message: _poiAndRegionsProgressMessage(
-                poiCompleted: 0,
-                poiTotal: poiToDownloadCount,
-                poiFailed: 0,
-                regionsCompleted: 0,
-                regionsTotal: regionsToDownloadCount,
-                regionsFailed: 0,
+              total: regionsToDownloadCount,
+              completed: 0,
+              failed: 0,
+              message: _articlesProgressMessage(
+                completed: 0,
+                total: regionsToDownloadCount,
+                failed: 0,
               ),
             ),
           ),
         ),
       );
-      var poiCompleted = 0;
-      var poiFailed = 0;
-      var regionCompleted = 0;
-      var regionFailed = 0;
+      var regionMetadataFailed = 0;
+      var regionArticleCompleted = 0;
+      var regionArticleFailed = 0;
+      var regionArticleTotal = 0;
       try {
-        if (poiToDownloadCount > 0) {
-          final poiResult = await _downloadPoiSummariesUseCase.call(
-            pois: enrichedInfo.poi,
-            preferredLanguageCode: LocaleSettings.currentLocale.languageCode,
-            onProgress: (progress) {
-              if (_downloadCancelled || _cubit.isClosed) return;
-              poiCompleted = progress.completed;
-              poiFailed = progress.failed;
-              final combinedCompleted = poiCompleted + regionCompleted;
-              final combinedFailed = poiFailed + regionFailed;
-              _cubit._emitState(
-                _cubit.state.copyWith(
-                  isDownloading: true,
-                  downloadStage: DownloadStage.downloadingPoi,
-                  poiDownloadCompleted: combinedCompleted,
-                  poiDownloadTotal: poiAndRegionsToDownloadCount,
-                  poiDownloadFailed: combinedFailed,
-                  downloadProgress: 0.0,
-                  downloadDone: false,
-                  downloadSections: _cubit.state.downloadSections.copyWith(
-                    poi: _cubit.state.downloadSections.poi.copyWith(
-                      status: DownloadSectionStatus.active,
-                      completed: combinedCompleted,
-                      total: poiAndRegionsToDownloadCount,
-                      failed: combinedFailed,
-                      message: _poiAndRegionsProgressMessage(
-                        poiCompleted: poiCompleted,
-                        poiTotal: poiToDownloadCount,
-                        poiFailed: poiFailed,
-                        regionsCompleted: regionCompleted,
-                        regionsTotal: regionsToDownloadCount,
-                        regionsFailed: regionFailed,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-          if (_downloadCancelled || _cubit.isClosed || poiResult.cancelled) {
-            return;
-          }
-          poiCompleted = poiToDownloadCount;
-          poiFailed = poiResult.failedCount;
-          enrichedInfo = enrichedInfo.copyWith(poi: poiResult.pois);
+        final regionResult = await _downloadRegionWikiArticlesUseCase.call(
+          regions: regionsToDownload,
+          preferredLanguageCode: _regionArticleLanguageCode,
+          onProgress: (_) {},
+        );
+        if (_downloadCancelled || _cubit.isClosed || regionResult.cancelled) {
+          return;
         }
+        regionMetadataFailed = regionResult.failedCount;
+        enrichedInfo = enrichedInfo.copyWith(
+          routeRegions: _mergeResolvedRegions(
+            allRegions: enrichedInfo.routeRegions,
+            resolvedSubset: regionResult.regions,
+          ),
+        );
 
-        if (regionsToDownloadCount > 0) {
-          final regionResult = await _downloadRegionWikiArticlesUseCase.call(
-            regions: enrichedInfo.routeRegions,
-            preferredLanguageCode: _regionArticleLanguageCode,
-            onProgress: (progress) {
-              if (_downloadCancelled || _cubit.isClosed) return;
-              regionCompleted = progress.completed;
-              regionFailed = progress.failed;
-              final combinedCompleted = poiCompleted + regionCompleted;
-              final combinedFailed = poiFailed + regionFailed;
-              _cubit._emitState(
-                _cubit.state.copyWith(
-                  isDownloading: true,
-                  downloadStage: DownloadStage.downloadingPoi,
-                  poiDownloadCompleted: combinedCompleted,
-                  poiDownloadTotal: poiAndRegionsToDownloadCount,
-                  poiDownloadFailed: combinedFailed,
-                  downloadProgress: 0.0,
-                  downloadDone: false,
-                  downloadSections: _cubit.state.downloadSections.copyWith(
-                    poi: _cubit.state.downloadSections.poi.copyWith(
-                      status: DownloadSectionStatus.active,
-                      completed: combinedCompleted,
-                      total: poiAndRegionsToDownloadCount,
-                      failed: combinedFailed,
-                      message: _poiAndRegionsProgressMessage(
-                        poiCompleted: poiCompleted,
-                        poiTotal: poiToDownloadCount,
-                        poiFailed: poiFailed,
-                        regionsCompleted: regionCompleted,
-                        regionsTotal: regionsToDownloadCount,
-                        regionsFailed: regionFailed,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-          if (_downloadCancelled || _cubit.isClosed || regionResult.cancelled) {
-            return;
-          }
-          final regionArticleUrls = regionResult.articleUrls;
-          final regionArticlesTotal = regionArticleUrls.length;
-          final regionsTotalWithArticles =
-              regionsToDownloadCount + regionArticlesTotal;
-          final combinedTotalWithArticles =
-              poiToDownloadCount + regionsTotalWithArticles;
-          regionCompleted = regionsToDownloadCount;
-          regionFailed = regionResult.failedCount;
-          enrichedInfo = enrichedInfo.copyWith(
-            routeRegions: regionResult.regions,
-          );
+        final regionArticleUrls = regionResult.articleUrls;
+        regionArticleTotal = regionArticleUrls.length;
+        if (regionArticleTotal > 0) {
           _cubit._emitState(
             _cubit.state.copyWith(
               isDownloading: true,
               downloadStage: DownloadStage.downloadingPoi,
-              poiDownloadCompleted: poiCompleted + regionCompleted,
-              poiDownloadTotal: combinedTotalWithArticles,
-              poiDownloadFailed: poiFailed + regionFailed,
+              poiDownloadCompleted: 0,
+              poiDownloadTotal: regionArticleTotal,
+              poiDownloadFailed: 0,
               downloadSections: _cubit.state.downloadSections.copyWith(
                 poi: _cubit.state.downloadSections.poi.copyWith(
-                  total: combinedTotalWithArticles,
-                  completed: poiCompleted + regionCompleted,
-                  failed: poiFailed + regionFailed,
-                  message: _poiAndRegionsProgressMessage(
-                    poiCompleted: poiCompleted,
-                    poiTotal: poiToDownloadCount,
-                    poiFailed: poiFailed,
-                    regionsCompleted: regionCompleted,
-                    regionsTotal: regionsTotalWithArticles,
-                    regionsFailed: regionFailed,
+                  status: DownloadSectionStatus.active,
+                  completed: 0,
+                  total: regionArticleTotal,
+                  failed: 0,
+                  message: _articlesProgressMessage(
+                    completed: 0,
+                    total: regionArticleTotal,
+                    failed: 0,
                   ),
                 ),
               ),
             ),
           );
 
-          if (regionArticleUrls.isNotEmpty) {
-            final regionArticlesResult = await _downloadWikipediaArticlesUseCase
-                .call(
-                  bundleId: articleBundleId,
-                  articleUrls: regionArticleUrls,
-                  onProgress: (progress) {
-                    if (_downloadCancelled || _cubit.isClosed) return;
-                    regionCompleted =
-                        regionsToDownloadCount + progress.completed;
-                    regionFailed = regionResult.failedCount + progress.failed;
-                    final combinedCompleted = poiCompleted + regionCompleted;
-                    final combinedFailed = poiFailed + regionFailed;
-                    _cubit._emitState(
-                      _cubit.state.copyWith(
-                        isDownloading: true,
-                        downloadStage: DownloadStage.downloadingPoi,
-                        poiDownloadCompleted: combinedCompleted,
-                        poiDownloadTotal: combinedTotalWithArticles,
-                        poiDownloadFailed: combinedFailed,
-                        downloadProgress: 0.0,
-                        downloadDone: false,
-                        downloadSections: _cubit.state.downloadSections
-                            .copyWith(
-                              poi: _cubit.state.downloadSections.poi.copyWith(
-                                status: DownloadSectionStatus.active,
-                                completed: combinedCompleted,
-                                total: combinedTotalWithArticles,
-                                failed: combinedFailed,
-                                message: _poiAndRegionsProgressMessage(
-                                  poiCompleted: poiCompleted,
-                                  poiTotal: poiToDownloadCount,
-                                  poiFailed: poiFailed,
-                                  regionsCompleted: regionCompleted,
-                                  regionsTotal: regionsTotalWithArticles,
-                                  regionsFailed: regionFailed,
-                                ),
-                              ),
-                            ),
+          final regionArticlesResult = await _downloadWikipediaArticlesUseCase
+              .call(
+                bundleId: articleBundleId,
+                articleUrls: regionArticleUrls,
+                onProgress: (progress) {
+                  if (_downloadCancelled || _cubit.isClosed) return;
+                  regionArticleCompleted = progress.completed;
+                  regionArticleFailed = progress.failed;
+                  _cubit._emitState(
+                    _cubit.state.copyWith(
+                      isDownloading: true,
+                      downloadStage: DownloadStage.downloadingPoi,
+                      poiDownloadCompleted: regionArticleCompleted,
+                      poiDownloadTotal: regionArticleTotal,
+                      poiDownloadFailed: regionArticleFailed,
+                      downloadProgress: 0.0,
+                      downloadDone: false,
+                      downloadSections: _cubit.state.downloadSections.copyWith(
+                        poi: _cubit.state.downloadSections.poi.copyWith(
+                          status: DownloadSectionStatus.active,
+                          completed: regionArticleCompleted,
+                          total: regionArticleTotal,
+                          failed: regionArticleFailed,
+                          message: _articlesProgressMessage(
+                            completed: regionArticleCompleted,
+                            total: regionArticleTotal,
+                            failed: regionArticleFailed,
+                          ),
+                        ),
                       ),
-                    );
-                  },
-                );
-            if (_downloadCancelled ||
-                _cubit.isClosed ||
-                regionArticlesResult.cancelled) {
-              return;
-            }
-            regionDownloadedArticles = regionArticlesResult.articles;
-            regionCompleted = regionsTotalWithArticles;
-            regionFailed =
-                regionResult.failedCount + regionArticlesResult.failedCount;
-            enrichedInfo = enrichedInfo.copyWith(
-              articles: regionDownloadedArticles,
-            );
+                    ),
+                  );
+                },
+              );
+          if (_downloadCancelled ||
+              _cubit.isClosed ||
+              regionArticlesResult.cancelled) {
+            return;
           }
+          regionDownloadedArticles = regionArticlesResult.articles;
+          regionArticleCompleted = regionArticleTotal;
+          regionArticleFailed = regionArticlesResult.failedCount;
+          enrichedInfo = enrichedInfo.copyWith(
+            articles: regionDownloadedArticles,
+          );
         }
 
         final persisted = await _flightRepository.updateFlightInfo(
           flightId: flightId,
           info: enrichedInfo,
         );
-        final effectivePoiAndRegionsTotal =
-            poiCompleted + regionCompleted > poiAndRegionsToDownloadCount
-            ? poiCompleted + regionCompleted
-            : poiAndRegionsToDownloadCount;
-        final combinedFailedCount =
-            (poiFailed + regionFailed + (!persisted ? 1 : 0))
-                .clamp(0, effectivePoiAndRegionsTotal)
-                .toInt();
-        final combinedSucceededCount =
-            effectivePoiAndRegionsTotal - combinedFailedCount;
-        unawaited(
-          _cubit._analytics.log(
-            PoiDownloadCompletedEvent(
-              routeLengthKm: routeLengthKm,
-              totalCount: effectivePoiAndRegionsTotal,
-              succeededCount: combinedSucceededCount,
-              failedCount: combinedFailedCount,
-              isProUser: isPro,
-            ),
-          ),
-        );
-        poiHadIssues = combinedFailedCount > 0 || !persisted;
-        _cubit._emitState(
-          _cubit.state.copyWith(
-            isDownloading: true,
-            downloadStage: hasArticlePhase
-                ? DownloadStage.downloadingArticles
-                : DownloadStage.completed,
-            poiDownloadCompleted: effectivePoiAndRegionsTotal,
-            poiDownloadTotal: effectivePoiAndRegionsTotal,
-            poiDownloadFailed: combinedFailedCount,
-            downloadProgress: 0.0,
-            downloadSections: _cubit.state.downloadSections.copyWith(
-              poi: _cubit.state.downloadSections.poi.copyWith(
-                status: poiHadIssues
-                    ? DownloadSectionStatus.completedWithIssues
-                    : DownloadSectionStatus.completed,
-                completed: effectivePoiAndRegionsTotal,
-                total: effectivePoiAndRegionsTotal,
-                failed: combinedFailedCount,
-                message: poiHadIssues
-                    ? t.createFlight.downloading.completedWithIssues
-                    : t.createFlight.downloading.completed,
+        if (regionArticleTotal <= 0) {
+          _cubit._emitState(
+            _cubit.state.copyWith(
+              isDownloading: true,
+              downloadStage: hasArticlePhase
+                  ? DownloadStage.downloadingArticles
+                  : DownloadStage.completed,
+              poiDownloadCompleted: 0,
+              poiDownloadTotal: 0,
+              poiDownloadFailed: 0,
+              downloadProgress: 0.0,
+              downloadSections: _cubit.state.downloadSections.copyWith(
+                poi: _cubit.state.downloadSections.poi.copyWith(
+                  status: DownloadSectionStatus.skipped,
+                  completed: 0,
+                  total: 0,
+                  failed: 0,
+                  message: t.createFlight.downloading.noArticlesSelected,
+                ),
               ),
             ),
-          ),
-        );
+          );
+        } else {
+          final regionTotalForSection = regionArticleTotal;
+          final regionFailedForSection =
+              regionArticleFailed + regionMetadataFailed + (!persisted ? 1 : 0);
+          final regionCompletedForSection = regionTotalForSection;
+          final clampedRegionFailed = regionFailedForSection
+              .clamp(0, regionTotalForSection)
+              .toInt();
+
+          regionHadIssues = clampedRegionFailed > 0;
+          _cubit._emitState(
+            _cubit.state.copyWith(
+              isDownloading: true,
+              downloadStage: hasArticlePhase
+                  ? DownloadStage.downloadingArticles
+                  : DownloadStage.completed,
+              poiDownloadCompleted: regionCompletedForSection,
+              poiDownloadTotal: regionTotalForSection,
+              poiDownloadFailed: clampedRegionFailed,
+              downloadProgress: 0.0,
+              downloadSections: _cubit.state.downloadSections.copyWith(
+                poi: _cubit.state.downloadSections.poi.copyWith(
+                  status: regionHadIssues
+                      ? DownloadSectionStatus.completedWithIssues
+                      : DownloadSectionStatus.completed,
+                  completed: regionCompletedForSection,
+                  total: regionTotalForSection,
+                  failed: clampedRegionFailed,
+                  message: regionHadIssues
+                      ? t.createFlight.downloading.completedWithIssues
+                      : t.createFlight.downloading.completed,
+                ),
+              ),
+            ),
+          );
+        }
       } catch (e, stackTrace) {
         _cubit._logger.error(
-          'POI summary download failed; continuing with map/article download: $e',
+          'Region article download failed; continuing with map/article download: $e',
         );
         unawaited(
           _cubit._crashlytics.recordError(
             e,
             stackTrace,
-            reason: 'poi_summary_download_failed',
+            reason: 'region_article_download_failed',
           ),
         );
         if (_downloadCancelled || _cubit.isClosed) return;
-        poiHadIssues = true;
-        unawaited(
-          _cubit._analytics.log(
-            PoiDownloadCompletedEvent(
-              routeLengthKm: routeLengthKm,
-              totalCount: poiAndRegionsToDownloadCount,
-              succeededCount: 0,
-              failedCount: poiAndRegionsToDownloadCount,
-              isProUser: isPro,
-            ),
-          ),
-        );
+        regionHadIssues = true;
         _cubit._emitState(
           _cubit.state.copyWith(
             isDownloading: true,
             downloadStage: hasArticlePhase
                 ? DownloadStage.downloadingArticles
                 : DownloadStage.completed,
-            poiDownloadCompleted: poiAndRegionsToDownloadCount,
-            poiDownloadTotal: poiAndRegionsToDownloadCount,
-            poiDownloadFailed: poiAndRegionsToDownloadCount,
+            poiDownloadCompleted: regionsToDownloadCount,
+            poiDownloadTotal: regionsToDownloadCount,
+            poiDownloadFailed: regionsToDownloadCount,
             downloadProgress: 0.0,
             downloadSections: _cubit.state.downloadSections.copyWith(
               poi: _cubit.state.downloadSections.poi.copyWith(
                 status: DownloadSectionStatus.failed,
-                completed: poiAndRegionsToDownloadCount,
-                total: poiAndRegionsToDownloadCount,
-                failed: poiAndRegionsToDownloadCount,
+                completed: regionsToDownloadCount,
+                total: regionsToDownloadCount,
+                failed: regionsToDownloadCount,
                 message: t.createFlight.downloading.failed,
               ),
             ),
@@ -665,7 +600,6 @@ class DownloadFlowDelegate {
     _downloadCancelled = true;
     final rollbackFlightId = _savedFlightIdDuringDownload;
     final bundleId = _activeArticleBundleId;
-    _downloadPoiSummariesUseCase.cancel();
     _downloadRegionWikiArticlesUseCase.cancel();
     _downloadWikipediaArticlesUseCase.cancel();
     _downloadMapUseCase.cancel();
@@ -706,7 +640,6 @@ class DownloadFlowDelegate {
     _downloadCancelled = true;
     _savedFlightIdDuringDownload = null;
     _activeArticleBundleId = null;
-    _downloadPoiSummariesUseCase.cancel();
     _downloadRegionWikiArticlesUseCase.cancel();
     _downloadWikipediaArticlesUseCase.cancel();
     _downloadMapUseCase.cancel();

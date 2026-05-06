@@ -7,7 +7,7 @@ import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 import 'package:flymap/ui/screens/shared/premium/route_premium_gate_interactions.dart';
-import 'package:flymap/ui/screens/shared/premium/route_region_premium_gate_policy.dart';
+import 'package:flymap/domain/policy/route_region_premium_gate_policy.dart';
 import 'package:flymap/ui/screens/shared/region_artwork.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
 

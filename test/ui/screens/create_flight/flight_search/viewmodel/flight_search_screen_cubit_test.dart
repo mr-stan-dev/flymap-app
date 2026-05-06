@@ -18,6 +18,7 @@ import 'package:flymap/domain/entity/route_region_type.dart';
 import 'package:flymap/domain/entity/route_timeline.dart';
 import 'package:flymap/domain/entity/user_flight_prefs.dart';
 import 'package:flymap/domain/entity/wiki_article_candidate.dart';
+import 'package:flymap/domain/policy/poi_limits_policy.dart';
 import 'package:flymap/repository/flight_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_repository.dart';
@@ -27,7 +28,6 @@ import 'package:flymap/subscription/subscription_status.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_cubit.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
 import 'package:flymap/domain/usecase/download_map_use_case.dart';
-import 'package:flymap/domain/usecase/download_poi_summaries_use_case.dart';
 import 'package:flymap/domain/usecase/download_region_wiki_articles_use_case.dart';
 import 'package:flymap/domain/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/domain/usecase/get_wiki_articles_use_case.dart';
@@ -38,7 +38,6 @@ import 'package:latlong2/latlong.dart';
 void main() {
   group('FlightPreviewCubit wiki selection', () {
     late _FakeDownloadWikipediaArticlesUseCase wikiDownloadUseCase;
-    late _FakeDownloadPoiSummariesUseCase poiDownloadUseCase;
     late _FakeDownloadRegionWikiArticlesUseCase regionWikiDownloadUseCase;
     late _FakeDownloadMapUseCase mapUseCase;
     late _FakeConnectivityChecker connectivityChecker;
@@ -47,7 +46,6 @@ void main() {
 
     setUp(() {
       wikiDownloadUseCase = _FakeDownloadWikipediaArticlesUseCase();
-      poiDownloadUseCase = _FakeDownloadPoiSummariesUseCase();
       regionWikiDownloadUseCase = _FakeDownloadRegionWikiArticlesUseCase();
       mapUseCase = _FakeDownloadMapUseCase();
       connectivityChecker = _FakeConnectivityChecker();
@@ -59,7 +57,6 @@ void main() {
         connectivityChecker: connectivityChecker,
         getRouteOverviewUseCase: _FakeGetRouteOverviewUseCase(),
         downloadMapUseCase: mapUseCase,
-        downloadPoiSummariesUseCase: poiDownloadUseCase,
         downloadRegionWikiArticlesUseCase: regionWikiDownloadUseCase,
         downloadWikipediaArticlesUseCase: wikiDownloadUseCase,
         getWikiArticlesUseCase: _FakeGetWikiArticlesUseCase(),
@@ -169,7 +166,6 @@ void main() {
         connectivityChecker: _FakeConnectivityChecker(),
         getRouteOverviewUseCase: _FakeGetRouteOverviewUseCase(),
         downloadMapUseCase: _FakeDownloadMapUseCase(),
-        downloadPoiSummariesUseCase: _FakeDownloadPoiSummariesUseCase(),
         downloadRegionWikiArticlesUseCase:
             _FakeDownloadRegionWikiArticlesUseCase(),
         downloadWikipediaArticlesUseCase:
@@ -284,7 +280,41 @@ void main() {
 
       await cubit.refreshPoisForPro();
 
-      expect(cubit.state.flightInfo.poi.length, 60);
+      expect(cubit.state.flightInfo.poi.length, 80);
+    });
+
+    test('free tier POI cap is applied independent of selected map detail', () {
+      subscriptionRepository.isPro = false;
+      final pois = _routePoiSummaries(60);
+      cubit.setStateForTest(
+        cubit.state.copyWith(
+          step: CreateFlightStep.overview,
+          allRoutePois: pois,
+          selectedMapDetailLevel: MapDetailLevel.basic,
+          flightInfo: cubit.state.flightInfo.copyWith(poi: pois),
+        ),
+      );
+
+      cubit.selectMapDetailLevel(MapDetailLevel.pro);
+
+      expect(cubit.state.flightInfo.poi.length, PoiLimitsPolicy.freeMaxPois);
+    });
+
+    test('pro tier POI cap uses policy max', () async {
+      subscriptionRepository.isPro = true;
+      final pois = _routePoiSummaries(260);
+      cubit.setStateForTest(
+        cubit.state.copyWith(
+          allRoutePois: pois,
+          flightInfo: cubit.state.flightInfo.copyWith(
+            poi: pois.take(10).toList(growable: false),
+          ),
+        ),
+      );
+
+      await cubit.refreshPoisForPro();
+
+      expect(cubit.state.flightInfo.poi.length, PoiLimitsPolicy.proMaxPois);
     });
 
     test('region wiki resolution uses english language for download', () async {
@@ -311,6 +341,63 @@ void main() {
       await cubit.startDownload();
 
       expect(regionWikiDownloadUseCase.lastPreferredLanguageCode, 'en');
+    });
+
+    test('free user downloads only ungated regions', () async {
+      subscriptionRepository.isPro = false;
+      const regions = [
+        RouteRegion(
+          qid: 'Q3',
+          name: 'Region 3',
+          regionType: RouteRegionType.region,
+          pathFirstEncounterKm: 300,
+          pathLengthInsideKm: 12,
+          geometry: RouteRegionGeometry(type: 'Polygon', geoJson: {}),
+        ),
+        RouteRegion(
+          qid: 'Q1',
+          name: 'Region 1',
+          regionType: RouteRegionType.region,
+          pathFirstEncounterKm: 100,
+          pathLengthInsideKm: 12,
+          geometry: RouteRegionGeometry(type: 'Polygon', geoJson: {}),
+        ),
+        RouteRegion(
+          qid: 'Q5',
+          name: 'Region 5',
+          regionType: RouteRegionType.region,
+          pathFirstEncounterKm: 500,
+          pathLengthInsideKm: 12,
+          geometry: RouteRegionGeometry(type: 'Polygon', geoJson: {}),
+        ),
+        RouteRegion(
+          qid: 'Q2',
+          name: 'Region 2',
+          regionType: RouteRegionType.region,
+          pathFirstEncounterKm: 200,
+          pathLengthInsideKm: 12,
+          geometry: RouteRegionGeometry(type: 'Polygon', geoJson: {}),
+        ),
+        RouteRegion(
+          qid: 'Q4',
+          name: 'Region 4',
+          regionType: RouteRegionType.region,
+          pathFirstEncounterKm: 400,
+          pathLengthInsideKm: 12,
+          geometry: RouteRegionGeometry(type: 'Polygon', geoJson: {}),
+        ),
+      ];
+      cubit.setStateForTest(
+        cubit.state.copyWith(
+          selectedArticleUrls: const [],
+          flightRoute: _route(),
+          flightInfo: cubit.state.flightInfo.copyWith(routeRegions: regions),
+        ),
+      );
+
+      await cubit.startDownload();
+
+      expect(regionWikiDownloadUseCase.lastRequestedRegionQids, {'Q1', 'Q2'});
     });
   });
 }
@@ -405,7 +492,6 @@ class _TestFlightPreviewCubit extends FlightPreviewCubit {
     required super.connectivityChecker,
     required super.getRouteOverviewUseCase,
     required super.downloadMapUseCase,
-    required super.downloadPoiSummariesUseCase,
     required super.downloadRegionWikiArticlesUseCase,
     required super.downloadWikipediaArticlesUseCase,
     required super.getWikiArticlesUseCase,
@@ -538,27 +624,10 @@ class _FakeDownloadWikipediaArticlesUseCase
   }
 }
 
-class _FakeDownloadPoiSummariesUseCase implements DownloadPoiSummariesUseCase {
-  @override
-  void cancel() {}
-
-  @override
-  Future<PoiSummariesDownloadResult> call({
-    required List<RoutePoiSummary> pois,
-    required String preferredLanguageCode,
-    required void Function(PoiSummariesDownloadProgress progress) onProgress,
-  }) async {
-    return PoiSummariesDownloadResult(
-      pois: List<RoutePoiSummary>.from(pois),
-      failedCount: 0,
-      cancelled: false,
-    );
-  }
-}
-
 class _FakeDownloadRegionWikiArticlesUseCase
     implements DownloadRegionWikiArticlesUseCase {
   String? lastPreferredLanguageCode;
+  Set<String> lastRequestedRegionQids = const {};
 
   @override
   void cancel() {}
@@ -574,6 +643,7 @@ class _FakeDownloadRegionWikiArticlesUseCase
     onProgress,
   }) async {
     lastPreferredLanguageCode = preferredLanguageCode;
+    lastRequestedRegionQids = {for (final region in regions) region.qid};
     onProgress(
       RegionWikiArticlesDownloadProgress(
         completed: regions.length,
