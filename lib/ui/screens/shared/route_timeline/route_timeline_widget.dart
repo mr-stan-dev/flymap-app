@@ -164,15 +164,9 @@ class RouteTimelineWidget extends StatelessWidget {
   Widget _buildCard(_RouteTimelineEntry entry) {
     switch (entry.kind) {
       case _RouteTimelineEntryKind.departure:
-        return AirportTimelineCard(
-          airport: entry.airport!,
-          icon: Icons.flight_takeoff_rounded,
-        );
+        return AirportTimelineCard(airport: entry.airport!);
       case _RouteTimelineEntryKind.arrival:
-        return AirportTimelineCard(
-          airport: entry.airport!,
-          icon: Icons.flight_land_rounded,
-        );
+        return AirportTimelineCard(airport: entry.airport!);
       case _RouteTimelineEntryKind.group:
         final onOpenRegion = this.onOpenRegion;
         return RegionGroupTimelineCard(

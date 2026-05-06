@@ -119,6 +119,7 @@ class CountryNameUtils {
     'MU': 'Mauritius',
     'MV': 'Maldives',
     'MW': 'Malawi',
+    'MT': 'Malta',
     'MX': 'Mexico',
     'MY': 'Malaysia',
     'MZ': 'Mozambique',

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/entity/route_region_type.dart';
 import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/ui/screens/shared/region_artwork.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
 
@@ -32,7 +34,6 @@ class _RegionGroupTimelineCardState extends State<RegionGroupTimelineCard> {
     }
     final title = top.name;
     final subtitle = _typeMapper.mapLabel(context, top.regionType);
-    final leadingIcon = _typeMapper.mapIcon(top.regionType);
     final hasChildren = group.regions.length > 1;
 
     if (!hasChildren) {
@@ -47,7 +48,8 @@ class _RegionGroupTimelineCardState extends State<RegionGroupTimelineCard> {
             child: _TitleSubtitle(
               title: title,
               subtitle: subtitle,
-              leadingIcon: leadingIcon,
+              regionName: top.name,
+              regionType: top.regionType,
             ),
           ),
         ),
@@ -72,7 +74,8 @@ class _RegionGroupTimelineCardState extends State<RegionGroupTimelineCard> {
                     child: _TitleSubtitle(
                       title: title,
                       subtitle: subtitle,
-                      leadingIcon: leadingIcon,
+                      regionName: top.name,
+                      regionType: top.regionType,
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -131,9 +134,11 @@ class _RegionGroupTimelineCardState extends State<RegionGroupTimelineCard> {
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(
-                                      _typeMapper.mapIcon(region.regionType),
-                                      size: 18,
+                                    RegionArtwork(
+                                      regionName: region.name,
+                                      regionType: region.regionType,
+                                      size: 22,
+                                      borderRadius: 6,
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
@@ -160,9 +165,9 @@ class _RegionGroupTimelineCardState extends State<RegionGroupTimelineCard> {
                                             ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.bodySmall,
                                           ),
                                         ],
                                       ),
@@ -186,19 +191,26 @@ class _TitleSubtitle extends StatelessWidget {
   const _TitleSubtitle({
     required this.title,
     required this.subtitle,
-    required this.leadingIcon,
+    required this.regionName,
+    required this.regionType,
   });
 
   final String title;
   final String subtitle;
-  final IconData leadingIcon;
+  final String regionName;
+  final RouteRegionType regionType;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(leadingIcon, size: 20),
+        RegionArtwork(
+          regionName: regionName,
+          regionType: regionType,
+          size: 40,
+          borderRadius: 10,
+        ),
         const SizedBox(width: 10),
         Expanded(
           child: Column(

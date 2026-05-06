@@ -22,14 +22,8 @@ class RegionArtwork extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final assetPath = regionType.assetImagePath;
-    final content = Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: isCircle ? null : BorderRadius.circular(borderRadius),
-        shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
-      ),
+    final content = SizedBox.square(
+      dimension: size,
       child: _buildArtwork(context, assetPath),
     );
     if (isCircle) {

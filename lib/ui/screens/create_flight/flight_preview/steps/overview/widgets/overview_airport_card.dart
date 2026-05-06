@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flymap/ui/screens/shared/airport_artwork.dart';
 
 class OverviewAirportCard extends StatelessWidget {
   const OverviewAirportCard({
-    required this.icon,
     required this.title,
     required this.subtitle,
     required this.description,
     super.key,
   });
 
-  final IconData icon;
   final String title;
   final String subtitle;
   final String description;
@@ -26,7 +25,7 @@ class OverviewAirportCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _AirportArtworkPlaceholder(icon: icon),
+                  const AirportArtwork(),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -62,27 +61,6 @@ class OverviewAirportCard extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AirportArtworkPlaceholder extends StatelessWidget {
-  const _AirportArtworkPlaceholder({required this.icon});
-
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        width: 64,
-        height: 64,
-        child: Image.asset(
-          'assets/images/airport.webp',
-          fit: BoxFit.cover,
         ),
       ),
     );

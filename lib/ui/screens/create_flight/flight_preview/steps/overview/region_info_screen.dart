@@ -1,7 +1,8 @@
 import 'dart:convert';
 
-import 'package:flymap/data/network/connectivity_checker.dart';
+import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
+import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flymap/entity/flight_article.dart';
 import 'package:flymap/entity/poi_wiki_preview.dart';
 import 'package:flymap/entity/route_region.dart';
@@ -12,9 +13,9 @@ import 'package:flymap/ui/screens/common/html_content_page.dart';
 import 'package:flymap/ui/screens/common/live_wikipedia_page.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/read/articles/article_html_composer.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/read/articles/offline_article_html_view.dart';
-import 'package:flymap/utils/country_name_utils.dart';
+import 'package:flymap/ui/screens/shared/region_artwork.dart';
 import 'package:flymap/usecase/get_place_info_use_case.dart';
-import 'package:country_flags/country_flags.dart';
+import 'package:flymap/utils/country_name_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -63,8 +64,7 @@ class _RegionInfoScreenState extends State<RegionInfoScreen> {
   @override
   Widget build(BuildContext context) {
     final t = context.t;
-    final description =
-        widget.region.description?.trim().isNotEmpty == true
+    final description = widget.region.description?.trim().isNotEmpty == true
         ? widget.region.description!.trim()
         : t.createFlight.overview.regionInfo.descriptionUnavailable;
     final offlineArticle = widget.offlineArticle;
@@ -542,7 +542,7 @@ class _RegionHeader extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _RegionArtworkPlaceholder(regionName: title, regionType: regionType),
+            RegionArtwork(regionName: title, regionType: regionType, size: 72),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -572,64 +572,6 @@ class _RegionHeader extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _RegionArtworkPlaceholder extends StatelessWidget {
-  const _RegionArtworkPlaceholder({
-    required this.regionName,
-    required this.regionType,
-  });
-
-  final String regionName;
-  final RouteRegionType regionType;
-
-  @override
-  Widget build(BuildContext context) {
-    final assetPath = regionType.assetImagePath;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 72,
-        height: 72,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        ),
-        child: _buildArtwork(context, assetPath),
-      ),
-    );
-  }
-
-  Widget _buildArtwork(BuildContext context, String? assetPath) {
-    if (regionType == RouteRegionType.country) {
-      final countryCode = CountryNameUtils.toCode(regionName);
-      if (countryCode != null) {
-        return Center(
-          child: CountryFlag.fromCountryCode(
-            countryCode,
-            width: 48,
-            height: 48,
-            shape: Rectangle(),
-          ),
-        );
-      }
-    }
-    if (assetPath != null) {
-      return Image.asset(
-        assetPath,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildFallbackIcon(context),
-      );
-    }
-    return _buildFallbackIcon(context);
-  }
-
-  Widget _buildFallbackIcon(BuildContext context) {
-    return Icon(
-      Icons.image_outlined,
-      size: 28,
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
   }
 }

@@ -107,7 +107,6 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
       case RouteOverviewPageKind.departure:
         final airport = entry.airport!;
         return OverviewAirportCard(
-          icon: Icons.flight_takeoff_rounded,
           title: airport.name,
           subtitle:
               '${t.flight.info.departure} • ${airport.displayCode} • ${RouteUtils.cityLabel(airport.city)}',
@@ -118,7 +117,6 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
       case RouteOverviewPageKind.arrival:
         final airport = entry.airport!;
         return OverviewAirportCard(
-          icon: Icons.flight_land_rounded,
           title: airport.name,
           subtitle:
               '${t.flight.info.arrival} • ${airport.displayCode} • ${RouteUtils.cityLabel(airport.city)}',
