@@ -22,7 +22,10 @@ class WikipediaArticleClient {
 
   final _logger = const Logger('WikipediaArticleClient');
   final WikimediaApiClient _apiClient;
-  DateTime? _lastRequestStartedAt;
+
+  /// Serialises request starts so that no two fire closer together than
+  /// [_minRequestInterval], even under concurrent callers.
+  Future<void> _nextSlot = Future<void>.value();
 
   static const _blockedTags = <String>{
     'script',
@@ -167,7 +170,7 @@ class WikipediaArticleClient {
       '${ref.languageCode}.wikipedia.org',
       '/api/rest_v1/page/summary/${ref.encodedTitle}',
     );
-    await _throttleRequests();
+    await _acquireSlot();
     final response = await _apiClient.get(uri, timeout: _requestTimeout);
     if (response.statusCode != 200) return null;
     final dynamic body = jsonDecode(response.body);
@@ -187,7 +190,7 @@ class WikipediaArticleClient {
       'formatversion': '2',
     });
 
-    await _throttleRequests();
+    await _acquireSlot();
     final response = await _apiClient.get(uri, timeout: _requestTimeout);
 
     if (response.statusCode != 200) return null;
@@ -212,7 +215,7 @@ class WikipediaArticleClient {
       'formatversion': '2',
     });
 
-    await _throttleRequests();
+    await _acquireSlot();
     final response = await _apiClient.get(uri, timeout: _requestTimeout);
     if (response.statusCode != 200) return null;
     final dynamic body = jsonDecode(response.body);
@@ -579,7 +582,7 @@ class WikipediaArticleClient {
     final uri = Uri.tryParse(imageUrl);
     if (uri == null) return null;
 
-    await _throttleRequests();
+    await _acquireSlot();
     final response = await _apiClient.get(uri, timeout: _requestTimeout);
 
     if (response.statusCode != 200) {
@@ -706,15 +709,12 @@ class WikipediaArticleClient {
     }
   }
 
-  Future<void> _throttleRequests() async {
-    final last = _lastRequestStartedAt;
-    if (last != null) {
-      final elapsed = DateTime.now().difference(last);
-      if (elapsed < _minRequestInterval) {
-        await Future.delayed(_minRequestInterval - elapsed);
-      }
-    }
-    _lastRequestStartedAt = DateTime.now();
+  Future<void> _acquireSlot() {
+    final myTurn = _nextSlot;
+    _nextSlot = myTurn.then(
+      (_) => Future<void>.delayed(_minRequestInterval),
+    );
+    return myTurn;
   }
 
   String _wrapAsOfflineHtmlDocument(String contentBody) {

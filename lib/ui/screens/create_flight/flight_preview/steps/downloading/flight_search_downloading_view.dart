@@ -187,7 +187,7 @@ class FlightSearchDownloadingView extends StatelessWidget {
   }
 }
 
-class _DownloadSectionCard extends StatelessWidget {
+class _DownloadSectionCard extends StatefulWidget {
   const _DownloadSectionCard({
     required this.title,
     required this.subtitle,
@@ -207,32 +207,86 @@ class _DownloadSectionCard extends StatelessWidget {
   final Widget? child;
 
   @override
+  State<_DownloadSectionCard> createState() => _DownloadSectionCardState();
+}
+
+class _DownloadSectionCardState extends State<_DownloadSectionCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController;
+  late final Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+    _pulseAnimation = Tween<double>(begin: 0.55, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+    if (widget.isCurrentStep) {
+      _pulseController.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _DownloadSectionCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isCurrentStep && !_pulseController.isAnimating) {
+      _pulseController.repeat(reverse: true);
+    } else if (!widget.isCurrentStep && _pulseController.isAnimating) {
+      _pulseController.stop();
+      _pulseController.value = 1.0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final statusColor = _statusColor(context, status);
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOut,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(DsRadii.md),
-        border: Border.all(
-          color: _showColoredBorder(status)
-              ? statusColor
-              : Theme.of(context).dividerColor.withValues(alpha: 0.3),
-          width: isCurrentStep ? 1.4 : 1,
-        ),
-      ),
+    final statusColor = _statusColor(context, widget.status);
+    final showPulse = widget.isCurrentStep;
+
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        final borderColor = _showColoredBorder(widget.status)
+            ? statusColor.withValues(alpha: showPulse ? _pulseAnimation.value : 1.0)
+            : Theme.of(context).dividerColor.withValues(alpha: 0.3);
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(DsRadii.md),
+            border: Border.all(
+              color: borderColor,
+              width: widget.isCurrentStep ? 1.4 : 1,
+            ),
+          ),
+          child: child,
+        );
+      },
       child: SectionCard(
-        title: title,
-        trailing: trailing,
+        title: widget.title,
+        trailing: widget.trailing,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(_statusIcon(status), size: 16, color: statusColor),
+                _AnimatedStatusIcon(
+                  icon: _statusIcon(widget.status),
+                  color: statusColor,
+                  isActive: widget.isCurrentStep,
+                ),
                 const SizedBox(width: DsSpacing.xs),
                 Text(
-                  statusLabel,
+                  widget.statusLabel,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: statusColor,
@@ -241,8 +295,24 @@ class _DownloadSectionCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: DsSpacing.xs),
-            Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
-            if (child != null) child!,
+            Text(
+              widget.subtitle,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            if (widget.child != null)
+              widget.child!
+            else if (widget.isCurrentStep)
+              Padding(
+                padding: const EdgeInsets.only(top: DsSpacing.sm),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    minHeight: 3,
+                    backgroundColor: statusColor.withValues(alpha: 0.12),
+                    color: statusColor,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -281,5 +351,66 @@ class _DownloadSectionCard extends StatelessWidget {
       DownloadSectionStatus.failed => Icons.error_rounded,
       DownloadSectionStatus.skipped => Icons.remove_circle_outline_rounded,
     };
+  }
+}
+
+/// A status icon that gently rotates when active (downloading).
+class _AnimatedStatusIcon extends StatefulWidget {
+  const _AnimatedStatusIcon({
+    required this.icon,
+    required this.color,
+    required this.isActive,
+  });
+
+  final IconData icon;
+  final Color color;
+  final bool isActive;
+
+  @override
+  State<_AnimatedStatusIcon> createState() => _AnimatedStatusIconState();
+}
+
+class _AnimatedStatusIconState extends State<_AnimatedStatusIcon>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+    if (widget.isActive) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _AnimatedStatusIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !_controller.isAnimating) {
+      _controller.repeat();
+    } else if (!widget.isActive && _controller.isAnimating) {
+      _controller.stop();
+      _controller.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.isActive) {
+      return Icon(widget.icon, size: 16, color: widget.color);
+    }
+    return RotationTransition(
+      turns: _controller,
+      child: Icon(widget.icon, size: 16, color: widget.color),
+    );
   }
 }

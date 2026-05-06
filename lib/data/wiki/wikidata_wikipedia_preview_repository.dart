@@ -18,10 +18,15 @@ class WikidataWikipediaPreviewRepository implements PoiWikiPreviewRepository {
   static const _requestTimeout = Duration(seconds: 12);
   static const _maxBatchSize = 50;
   static const _minRequestInterval = Duration(milliseconds: 180);
+  static const _htmlFetchConcurrency = 4;
 
   final Logger _logger = const Logger('WikidataWikipediaPreviewRepository');
   final WikimediaApiClient _apiClient;
-  DateTime? _lastRequestStartedAt;
+
+  /// Serialises request starts so that no two fire closer together than
+  /// [_minRequestInterval], regardless of how many concurrent workers
+  /// are calling [_getWithThrottle].
+  Future<void> _nextSlot = Future<void>.value();
 
   static const _blockedTags = <String>{
     'script',
@@ -395,18 +400,34 @@ class WikidataWikipediaPreviewRepository implements PoiWikiPreviewRepository {
   Future<Map<String, _HtmlPreview>> _batchFetchHtml({
     required Map<String, _ResolvedWikiTitle> resolvedByQid,
   }) async {
+    if (resolvedByQid.isEmpty) return const {};
+
+    final entries = resolvedByQid.entries.toList(growable: false);
+    final workerCount = min(_htmlFetchConcurrency, entries.length);
     final result = <String, _HtmlPreview>{};
-    for (final entry in resolvedByQid.entries) {
-      final qid = entry.key;
-      final resolved = entry.value;
-      final html = await _fetchAndSanitizeHtml(
-        title: resolved.title,
-        languageCode: resolved.languageCode,
-      );
-      if (html != null && html.html.isNotEmpty) {
-        result[qid] = html;
+    var nextIndex = 0;
+
+    Future<void> worker() async {
+      while (true) {
+        if (nextIndex >= entries.length) return;
+        final currentIndex = nextIndex;
+        nextIndex++;
+        final entry = entries[currentIndex];
+        final qid = entry.key;
+        final resolved = entry.value;
+        final html = await _fetchAndSanitizeHtml(
+          title: resolved.title,
+          languageCode: resolved.languageCode,
+        );
+        if (html != null && html.html.isNotEmpty) {
+          result[qid] = html;
+        }
       }
     }
+
+    await Future.wait(
+      List<Future<void>>.generate(workerCount, (_) => worker()),
+    );
     return result;
   }
 
@@ -823,20 +844,27 @@ $contentBody
 ''';
   }
 
+  /// Acquires a rate-limited slot, then fires the HTTP GET.
+  ///
+  /// Slots are spaced by [_minRequestInterval]. Multiple concurrent
+  /// callers chain onto [_nextSlot] so each one waits for the previous
+  /// slot + interval before starting its own request. The actual HTTP
+  /// call runs concurrently once the slot is acquired.
   Future<http.Response> _getWithThrottle(Uri uri) async {
-    await _throttleRequests();
+    await _acquireSlot();
     return _apiClient.get(uri, timeout: _requestTimeout);
   }
 
-  Future<void> _throttleRequests() async {
-    final last = _lastRequestStartedAt;
-    if (last != null) {
-      final elapsed = DateTime.now().difference(last);
-      if (elapsed < _minRequestInterval) {
-        await Future.delayed(_minRequestInterval - elapsed);
-      }
-    }
-    _lastRequestStartedAt = DateTime.now();
+  Future<void> _acquireSlot() {
+    // Capture the current tail of the chain and extend it by one interval.
+    // The caller awaits the *previous* tail (so it fires as soon as the
+    // previous request started), while future callers will await the
+    // newly appended delay.
+    final myTurn = _nextSlot;
+    _nextSlot = myTurn.then(
+      (_) => Future<void>.delayed(_minRequestInterval),
+    );
+    return myTurn;
   }
 
   String? _extractSitelinkTitle(Map<dynamic, dynamic> sitelinks, String key) {
@@ -875,10 +903,7 @@ class _ResolvedWikiTitle {
 }
 
 class _HtmlPreview {
-  const _HtmlPreview({
-    required this.html,
-    required this.plainText,
-  });
+  const _HtmlPreview({required this.html, required this.plainText});
 
   final String html;
   final String plainText;

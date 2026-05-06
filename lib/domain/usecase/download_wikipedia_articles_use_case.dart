@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flymap/data/wiki/wikipedia_article_client.dart';
 import 'package:flymap/domain/entity/flight_article.dart';
 
@@ -30,6 +32,8 @@ class DownloadWikipediaArticlesUseCase {
     required WikipediaArticleClient articleClient,
   }) : _articleClient = articleClient;
 
+  static const _downloadConcurrency = 3;
+
   final WikipediaArticleClient _articleClient;
   bool _cancelled = false;
 
@@ -61,44 +65,50 @@ class DownloadWikipediaArticlesUseCase {
     final downloadedArticles = <FlightArticle>[];
     var completed = 0;
     var failed = 0;
+    var nextIndex = 0;
+    final workerCount = min(_downloadConcurrency, urls.length);
 
-    for (final url in urls) {
-      if (_cancelled) {
-        return WikipediaArticlesDownloadResult(
-          articles: downloadedArticles,
-          failedCount: failed,
-          cancelled: true,
-        );
-      }
+    Future<void> worker() async {
+      while (true) {
+        if (_cancelled || nextIndex >= urls.length) return;
+        final currentIndex = nextIndex;
+        nextIndex++;
+        final url = urls[currentIndex];
 
-      try {
-        final article = await _articleClient.downloadArticle(
-          sourceUrl: url,
-          bundleId: bundleId,
-        );
-        if (article != null) {
-          downloadedArticles.add(article);
-        } else {
+        try {
+          final article = await _articleClient.downloadArticle(
+            sourceUrl: url,
+            bundleId: bundleId,
+          );
+          if (article != null) {
+            downloadedArticles.add(article);
+          } else {
+            failed++;
+          }
+        } catch (_) {
           failed++;
         }
-      } catch (_) {
-        failed++;
-      }
 
-      completed++;
-      onProgress(
-        WikipediaArticlesDownloadProgress(
-          completed: completed,
-          total: urls.length,
-          failed: failed,
-        ),
-      );
+        completed++;
+        onProgress(
+          WikipediaArticlesDownloadProgress(
+            completed: completed,
+            total: urls.length,
+            failed: failed,
+          ),
+        );
+      }
     }
+
+    await Future.wait(
+      List<Future<void>>.generate(workerCount, (_) => worker()),
+    );
 
     return WikipediaArticlesDownloadResult(
       articles: downloadedArticles,
       failedCount: failed,
-      cancelled: false,
+      cancelled: _cancelled,
     );
   }
 }
+

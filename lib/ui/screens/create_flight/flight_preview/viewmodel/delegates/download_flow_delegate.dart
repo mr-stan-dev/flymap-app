@@ -300,7 +300,26 @@ class DownloadFlowDelegate {
         final regionResult = await _downloadRegionWikiArticlesUseCase.call(
           regions: regionsToDownload,
           preferredLanguageCode: _regionArticleLanguageCode,
-          onProgress: (_) {},
+          onProgress: (progress) {
+            if (_downloadCancelled || _cubit.isClosed) return;
+            _cubit._emitState(
+              _cubit.state.copyWith(
+                downloadSections: _cubit.state.downloadSections.copyWith(
+                  poi: _cubit.state.downloadSections.poi.copyWith(
+                    status: DownloadSectionStatus.active,
+                    completed: progress.completed,
+                    total: progress.total,
+                    failed: progress.failed,
+                    message: _articlesProgressMessage(
+                      completed: progress.completed,
+                      total: progress.total,
+                      failed: progress.failed,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         );
         if (_downloadCancelled || _cubit.isClosed || regionResult.cancelled) {
           return;

@@ -35,7 +35,9 @@ class DownloadRegionWikiArticlesUseCase {
     required PoiWikiPreviewRepository repository,
   }) : _repository = repository;
 
-  static const _progressChunkSize = 10;
+  // Keep QID preview resolution in larger chunks to avoid repeated
+  // resolve/fetch phases for medium routes (e.g. 15-30 regions).
+  static const _progressChunkSize = 50;
 
   final PoiWikiPreviewRepository _repository;
   bool _cancelled = false;
@@ -108,16 +110,14 @@ class DownloadRegionWikiArticlesUseCase {
         if (!chunkPreviews.containsKey(qid)) {
           failed++;
         }
-        onProgress(
-          RegionWikiArticlesDownloadProgress(
-            completed: completed,
-            total: qids.length,
-            failed: failed,
-          ),
-        );
-        // Yield between item updates so UI can render incremental counters.
-        await Future<void>.delayed(const Duration(milliseconds: 12));
       }
+      onProgress(
+        RegionWikiArticlesDownloadProgress(
+          completed: completed,
+          total: qids.length,
+          failed: failed,
+        ),
+      );
     }
 
     final updated = regions
