@@ -1,7 +1,7 @@
-import 'package:flymap/entity/flight_info.dart';
-import 'package:flymap/entity/route_poi_summary.dart';
-import 'package:flymap/entity/flight_article.dart';
-import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/route_poi_summary.dart';
+import 'package:flymap/domain/entity/flight_article.dart';
+import 'package:flymap/domain/entity/route_region.dart';
 
 import 'flight_article_db_mapper.dart';
 import 'route_poi_summary_db_mapper.dart';

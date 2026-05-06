@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flymap/entity/flight_poi_type.dart';
+import 'package:flymap/domain/entity/flight_poi_type.dart';
 
 void main() {
   group('FlightPoiType', () {

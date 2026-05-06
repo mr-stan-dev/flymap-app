@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/airport.dart';
+import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/ui/screens/onboarding/widgets/onboarding_step_scaffold.dart';
 import 'package:flymap/ui/screens/onboarding/widgets/profile/home_airport_selector.dart';
 

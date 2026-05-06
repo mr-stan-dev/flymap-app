@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:flymap/entity/flight.dart';
-import 'package:flymap/entity/units.dart';
+import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/units.dart';
 import 'package:flymap/utils/unit_format_utils.dart';
 
 enum HistorySort { name, distance, date }

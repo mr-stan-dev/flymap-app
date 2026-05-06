@@ -1,4 +1,4 @@
-import 'package:flymap/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/utils/country_name_utils.dart';
 
 class RouteUtils {

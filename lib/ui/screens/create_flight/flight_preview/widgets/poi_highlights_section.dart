@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/route_poi_rank.dart';
-import 'package:flymap/entity/route_poi_summary.dart';
+import 'package:flymap/domain/entity/route_poi_rank.dart';
+import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/map/layers/poi_style_config.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_preview_bottom_sheet.dart';

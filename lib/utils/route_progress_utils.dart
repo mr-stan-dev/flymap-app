@@ -1,5 +1,5 @@
-import 'package:flymap/entity/flight_route.dart';
-import 'package:flymap/entity/gps_data.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:latlong2/latlong.dart';
 

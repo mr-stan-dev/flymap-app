@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flymap/entity/feedback_category.dart';
+import 'package:flymap/domain/entity/feedback_category.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/feedback/feedback_screen.dart';
 import 'package:flymap/ui/screens/feedback/feedback_screen_args.dart';
 import 'package:flymap/ui/theme/app_theme.dart';
-import 'package:flymap/usecase/submit_feedback_use_case.dart';
+import 'package:flymap/domain/usecase/submit_feedback_use_case.dart';
 
 void main() {
   setUpAll(() {

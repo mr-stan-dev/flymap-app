@@ -1,4 +1,4 @@
-import 'package:flymap/entity/units.dart';
+import 'package:flymap/domain/entity/units.dart';
 
 class UnitFormatUtils {
   const UnitFormatUtils._();

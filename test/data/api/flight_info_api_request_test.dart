@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flymap/data/api/flight_info_api.dart';
-import 'package:flymap/entity/user_profile.dart';
+import 'package:flymap/domain/entity/user_profile.dart';
 import 'package:latlong2/latlong.dart';
 
 void main() {

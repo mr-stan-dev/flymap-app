@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/airport.dart';
+import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/i18n/strings.g.dart';
 
 class SelectedDepartureRow extends StatelessWidget {

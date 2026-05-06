@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flymap/entity/flight.dart';
+import 'package:flymap/domain/entity/flight.dart';
 
 enum ShareFlightStatus { loading, ready, sharing }
 

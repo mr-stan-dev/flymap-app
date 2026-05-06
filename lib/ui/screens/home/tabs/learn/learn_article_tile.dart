@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/learn_article_meta.dart';
+import 'package:flymap/domain/entity/learn_article_meta.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/widgets/pro_widgets.dart';
 

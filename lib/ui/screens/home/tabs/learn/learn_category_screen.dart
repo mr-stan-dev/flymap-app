@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flymap/entity/learn_article_meta.dart';
-import 'package:flymap/entity/learn_article_progress.dart';
-import 'package:flymap/entity/learn_category.dart';
+import 'package:flymap/domain/entity/learn_article_meta.dart';
+import 'package:flymap/domain/entity/learn_article_progress.dart';
+import 'package:flymap/domain/entity/learn_category.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/ui/design_system/design_system.dart';

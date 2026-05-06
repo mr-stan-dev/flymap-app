@@ -1,7 +1,7 @@
 import 'package:flymap/data/api/route_overview_api.dart';
 import 'package:flymap/data/mappers/route_overview_api_mapper.dart';
-import 'package:flymap/entity/airport.dart';
-import 'package:flymap/entity/route_overview.dart';
+import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/route_overview.dart';
 
 abstract interface class RouteOverviewRepository {
   Future<RouteOverview> getRouteOverview({

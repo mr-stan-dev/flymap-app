@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/route_region_type.dart';
+import 'package:flymap/domain/entity/route_region_type.dart';
 import 'package:flymap/ui/screens/shared/region_artwork.dart';
 
 class OverviewRegionCard extends StatefulWidget {

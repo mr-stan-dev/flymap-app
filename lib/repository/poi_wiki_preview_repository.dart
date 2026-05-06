@@ -1,4 +1,4 @@
-import 'package:flymap/entity/poi_wiki_preview.dart';
+import 'package:flymap/domain/entity/poi_wiki_preview.dart';
 
 abstract interface class PoiWikiPreviewRepository {
   /// Fetches a single POI preview (dialog tap, live/online use).

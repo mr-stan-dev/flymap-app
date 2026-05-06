@@ -1,7 +1,7 @@
 import 'package:flymap/data/mappers/flight_info_overview_api_mapper.dart';
 import 'package:flymap/data/mappers/wiki_article_candidates_api_mapper.dart';
-import 'package:flymap/entity/flight_info.dart';
-import 'package:flymap/entity/wiki_article_candidate.dart';
+import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/wiki_article_candidate.dart';
 
 class FlightInfoApiMapper {
   FlightInfoApiMapper({

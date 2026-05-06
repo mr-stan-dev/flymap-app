@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/route_region_type.dart';
+import 'package:flymap/domain/entity/route_region_type.dart';
 import 'package:flymap/i18n/strings.g.dart';
 
 class RouteTimelineRegionTypeMapper {

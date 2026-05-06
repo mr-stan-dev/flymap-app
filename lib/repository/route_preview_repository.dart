@@ -1,7 +1,7 @@
 import 'package:flymap/data/api/route_places_api.dart';
 import 'package:flymap/data/mappers/route_places_api_mapper.dart';
-import 'package:flymap/entity/airport.dart';
-import 'package:flymap/entity/route_preview.dart';
+import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/route_preview.dart';
 import 'package:flymap/logger.dart';
 
 abstract interface class RoutePreviewRepository {

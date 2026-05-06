@@ -1,5 +1,5 @@
 import 'package:flymap/data/wiki/wikipedia_url_utils.dart';
-import 'package:flymap/entity/wiki_article_candidate.dart';
+import 'package:flymap/domain/entity/wiki_article_candidate.dart';
 import 'package:flymap/logger.dart';
 
 class WikiArticleCandidatesApiMapper {

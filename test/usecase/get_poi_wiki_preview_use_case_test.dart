@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flymap/entity/poi_wiki_preview.dart';
+import 'package:flymap/domain/entity/poi_wiki_preview.dart';
 import 'package:flymap/repository/poi_wiki_preview_repository.dart';
-import 'package:flymap/usecase/get_place_info_use_case.dart';
+import 'package:flymap/domain/usecase/get_place_info_use_case.dart';
 
 void main() {
   group('GetPoiWikiPreviewUseCase', () {

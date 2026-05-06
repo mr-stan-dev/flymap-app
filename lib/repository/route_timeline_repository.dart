@@ -1,7 +1,7 @@
 import 'package:flymap/data/api/route_regions_api.dart';
 import 'package:flymap/data/mappers/route_regions_api_mapper.dart';
-import 'package:flymap/entity/airport.dart';
-import 'package:flymap/entity/route_timeline.dart';
+import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/route_timeline.dart';
 
 abstract interface class RouteTimelineRepository {
   Future<RouteTimeline> getRouteTimeline({

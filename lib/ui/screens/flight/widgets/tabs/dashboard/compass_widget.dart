@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/gps_data.dart';
+import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/compass_rose_painter.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/metric_row.dart';

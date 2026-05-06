@@ -4,12 +4,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
-import 'package:flymap/entity/flight.dart';
-import 'package:flymap/entity/poi_wiki_preview.dart';
+import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/poi_wiki_preview.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/layers/poi_layer.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_preview_bottom_sheet.dart';
-import 'package:flymap/usecase/get_place_info_use_case.dart';
+import 'package:flymap/domain/usecase/get_place_info_use_case.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 class FlightMapPoiController {

@@ -1,5 +1,5 @@
-import 'package:flymap/entity/flight_article.dart';
-import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/domain/entity/flight_article.dart';
+import 'package:flymap/domain/entity/route_region.dart';
 
 class WikipediaArticleUtils {
   WikipediaArticleUtils._();

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/airport.dart';
+import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/ui/map/layers/map_layer.dart';
 import 'package:flymap/ui/theme/app_colours.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';

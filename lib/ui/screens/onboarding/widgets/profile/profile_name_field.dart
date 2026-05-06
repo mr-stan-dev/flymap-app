@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flymap/entity/user_profile.dart';
+import 'package:flymap/domain/entity/user_profile.dart';
 
 class ProfileNameField extends StatefulWidget {
   const ProfileNameField({

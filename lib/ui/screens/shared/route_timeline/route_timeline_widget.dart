@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/airport.dart';
-import 'package:flymap/entity/flight_route.dart';
-import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/tokens/ds_brand_colors.dart';
 import 'package:flymap/ui/screens/shared/premium/route_region_premium_gate_policy.dart';

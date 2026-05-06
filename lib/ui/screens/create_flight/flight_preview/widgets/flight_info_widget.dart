@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/flight_info.dart';
-import 'package:flymap/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_highlights_section.dart';

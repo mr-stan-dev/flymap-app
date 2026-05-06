@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flymap/entity/feedback_category.dart';
+import 'package:flymap/domain/entity/feedback_category.dart';
 import 'package:flymap/ui/screens/feedback/viewmodel/feedback_state.dart';
-import 'package:flymap/usecase/submit_feedback_use_case.dart';
+import 'package:flymap/domain/usecase/submit_feedback_use_case.dart';
 
 class FeedbackCubit extends Cubit<FeedbackState> {
   FeedbackCubit({

@@ -1,5 +1,5 @@
-import 'package:flymap/entity/airport.dart';
-import 'package:flymap/entity/flight_route.dart';
+import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/utils/route_utils.dart';
 

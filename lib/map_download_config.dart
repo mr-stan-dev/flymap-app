@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flymap/entity/map_detail_level.dart';
+import 'package:flymap/domain/entity/map_detail_level.dart';
 
 /// Route length buckets used by map download zoom and sizing logic.
 ///

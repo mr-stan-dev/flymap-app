@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
-import 'package:flymap/entity/flight_route.dart';
-import 'package:flymap/entity/gps_data.dart';
-import 'package:flymap/entity/route_region.dart';
-import 'package:flymap/entity/route_region_geo_contains.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/gps_data.dart';
+import 'package:flymap/domain/entity/route_region.dart';
+import 'package:flymap/domain/entity/route_region_geo_contains.dart';
 import 'package:flymap/utils/route_progress_utils.dart';
 
 class GeoAwarenessSnapshot extends Equatable {

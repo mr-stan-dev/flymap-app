@@ -1,15 +1,15 @@
 import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flymap/entity/flight.dart';
-import 'package:flymap/entity/units.dart';
+import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/units.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/repository/flight_repository.dart';
 import 'package:flymap/repository/metric_units_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_state.dart';
-import 'package:flymap/usecase/complete_flight_use_case.dart';
-import 'package:flymap/usecase/delete_flight_use_case.dart';
+import 'package:flymap/domain/usecase/complete_flight_use_case.dart';
+import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
 
 /// Cubit for managing home tab state
 class HomeTabCubit extends Cubit<HomeTabState> {

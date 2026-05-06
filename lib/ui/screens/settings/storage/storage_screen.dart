@@ -6,7 +6,7 @@ import 'package:flymap/router/app_router.dart';
 import 'package:flymap/size_utils.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dialog.dart';
-import 'package:flymap/usecase/delete_flight_use_case.dart';
+import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
 import 'package:flymap/utils/route_utils.dart';
 import 'package:get_it/get_it.dart';
 

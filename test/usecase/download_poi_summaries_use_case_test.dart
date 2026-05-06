@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flymap/entity/flight_poi_type.dart';
-import 'package:flymap/entity/poi_wiki_preview.dart';
-import 'package:flymap/entity/route_poi.dart';
-import 'package:flymap/entity/route_poi_summary.dart';
+import 'package:flymap/domain/entity/flight_poi_type.dart';
+import 'package:flymap/domain/entity/poi_wiki_preview.dart';
+import 'package:flymap/domain/entity/route_poi.dart';
+import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/repository/poi_wiki_preview_repository.dart';
-import 'package:flymap/usecase/download_poi_summaries_use_case.dart';
+import 'package:flymap/domain/usecase/download_poi_summaries_use_case.dart';
 import 'package:latlong2/latlong.dart';
 
 void main() {

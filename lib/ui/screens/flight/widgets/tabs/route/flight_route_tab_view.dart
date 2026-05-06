@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flymap/entity/flight_article.dart';
-import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/domain/entity/flight_article.dart';
+import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/subscription/paywall_source.dart';
 import 'package:flymap/ui/design_system/design_system.dart';

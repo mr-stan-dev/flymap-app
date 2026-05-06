@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flymap/entity/airport.dart';
-import 'package:flymap/entity/flight_route.dart';
-import 'package:flymap/entity/map_detail_level.dart';
+import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/map_detail_level.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:latlong2/latlong.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flymap/data/local/airports_database.dart';
-import 'package:flymap/entity/airport.dart';
+import 'package:flymap/domain/entity/airport.dart';
 
 Future<List<Airport>> loadPopularAirports({
   AirportsDatabase? airportsDatabase,

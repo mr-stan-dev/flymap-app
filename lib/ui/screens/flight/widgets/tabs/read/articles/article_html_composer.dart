@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/flight_article.dart';
+import 'package:flymap/domain/entity/flight_article.dart';
 
 String composeScrollableHtml({
   required FlightArticle article,

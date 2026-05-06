@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:flymap/entity/learn_article_content.dart';
+import 'package:flymap/domain/entity/learn_article_content.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:url_launcher/url_launcher.dart';
 

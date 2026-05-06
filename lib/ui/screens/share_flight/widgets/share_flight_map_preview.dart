@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flymap/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/ui/map/layers/flight_route_map_layers.dart';
 import 'package:flymap/ui/map/layers/latlon_utils.dart';
 import 'package:flymap/ui/map/map_style_safety.dart';

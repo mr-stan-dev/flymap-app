@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flymap/entity/flight.dart';
-import 'package:flymap/entity/flight_poi_type.dart';
-import 'package:flymap/entity/route_poi_rank.dart';
-import 'package:flymap/entity/route_poi_summary.dart';
-import 'package:flymap/entity/units.dart';
+import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/flight_poi_type.dart';
+import 'package:flymap/domain/entity/route_poi_rank.dart';
+import 'package:flymap/domain/entity/route_poi_summary.dart';
+import 'package:flymap/domain/entity/units.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/router/app_router.dart';
 import 'package:flymap/size_utils.dart';

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:flymap/entity/flight.dart';
-import 'package:flymap/entity/gps_data.dart';
-import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/gps_data.dart';
+import 'package:flymap/domain/entity/route_region.dart';
 
 /// Sealed class for flight screen states
 sealed class FlightScreenState extends Equatable {

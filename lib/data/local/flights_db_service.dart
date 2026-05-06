@@ -1,7 +1,7 @@
-import 'package:flymap/entity/flight.dart';
-import 'package:flymap/entity/flight_article.dart';
-import 'package:flymap/entity/flight_info.dart';
-import 'package:flymap/entity/flight_map.dart';
+import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/flight_article.dart';
+import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_map.dart';
 import 'package:flymap/logger.dart';
 import 'package:sembast/sembast_io.dart';
 

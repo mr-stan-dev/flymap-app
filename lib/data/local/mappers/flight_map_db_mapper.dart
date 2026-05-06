@@ -1,4 +1,4 @@
-import 'package:flymap/entity/flight_map.dart';
+import 'package:flymap/domain/entity/flight_map.dart';
 
 class FlightMapDBKeys {
   static const layer = 'layer';

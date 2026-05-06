@@ -1,4 +1,4 @@
-import 'package:flymap/entity/user_flight_prefs.dart';
+import 'package:flymap/domain/entity/user_flight_prefs.dart';
 import 'package:flymap/repository/user_flight_prefs_storage.dart';
 
 class UserFlightPrefsRepository {

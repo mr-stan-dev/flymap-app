@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flymap/data/local/learn_pack_local_db.dart';
 import 'package:flymap/data/local/learn_repository_impl.dart';
-import 'package:flymap/entity/learn_access.dart';
+import 'package:flymap/domain/entity/learn_access.dart';
 
 void main() {
   late LocalLearnRepository repository;

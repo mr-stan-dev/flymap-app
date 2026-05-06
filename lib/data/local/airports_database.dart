@@ -1,6 +1,6 @@
 import 'package:csv/csv.dart';
 import 'package:flutter/services.dart';
-import 'package:flymap/entity/airport.dart';
+import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/logger.dart';
 import 'package:latlong2/latlong.dart';
 

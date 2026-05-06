@@ -1,6 +1,6 @@
 import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/route_region_type.dart';
+import 'package:flymap/domain/entity/route_region_type.dart';
 import 'package:flymap/utils/country_name_utils.dart';
 
 class RegionArtwork extends StatelessWidget {

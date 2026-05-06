@@ -1,6 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flymap/entity/feedback_category.dart';
+import 'package:flymap/domain/entity/feedback_category.dart';
 import 'package:flymap/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 

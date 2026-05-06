@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/data/gps_data_provider.dart';
-import 'package:flymap/entity/flight.dart';
-import 'package:flymap/entity/gps_data.dart';
+import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/geo_awareness_engine.dart';
-import 'package:flymap/usecase/complete_flight_use_case.dart';
-import 'package:flymap/usecase/delete_flight_use_case.dart';
+import 'package:flymap/domain/usecase/complete_flight_use_case.dart';
+import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
 

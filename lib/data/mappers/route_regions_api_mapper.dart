@@ -1,6 +1,6 @@
-import 'package:flymap/entity/route_region.dart';
-import 'package:flymap/entity/route_timeline.dart';
-import 'package:flymap/entity/route_region_type.dart';
+import 'package:flymap/domain/entity/route_region.dart';
+import 'package:flymap/domain/entity/route_timeline.dart';
+import 'package:flymap/domain/entity/route_region_type.dart';
 
 class RouteRegionsApiMapper {
   RouteTimeline toRouteTimeline(Map<String, dynamic> payload) {

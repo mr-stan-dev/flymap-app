@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flymap/entity/gps_data.dart';
+import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/layers/user_layer.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';

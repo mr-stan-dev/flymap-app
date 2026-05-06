@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flymap/entity/airport.dart';
+import 'package:flymap/domain/entity/airport.dart';
 
 enum AirportSelectionStep { departure, arrival }
 

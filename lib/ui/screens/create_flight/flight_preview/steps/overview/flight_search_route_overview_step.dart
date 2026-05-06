@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/flight_route.dart';
-import 'package:flymap/entity/map_detail_level.dart';
-import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/map_detail_level.dart';
+import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_overview_page_entry.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/route_summary_screen.dart';

@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/poi_wiki_preview.dart';
+import 'package:flymap/domain/entity/poi_wiki_preview.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/common/html_content_page.dart';
-import 'package:flymap/usecase/get_place_info_use_case.dart';
+import 'package:flymap/domain/usecase/get_place_info_use_case.dart';
 import 'package:flymap/utils/wiki_text_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:url_launcher/url_launcher.dart';

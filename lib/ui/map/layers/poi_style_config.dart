@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/flight_poi_type.dart';
+import 'package:flymap/domain/entity/flight_poi_type.dart';
 
 class PoiStyleConfig {
   PoiStyleConfig._();

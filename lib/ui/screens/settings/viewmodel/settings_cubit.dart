@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/data/local/airports_database.dart';
-import 'package:flymap/entity/user_profile.dart';
-import 'package:flymap/entity/units.dart';
+import 'package:flymap/domain/entity/user_profile.dart';
+import 'package:flymap/domain/entity/units.dart';
 import 'package:flymap/repository/metric_units_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/repository/settings_repository.dart';

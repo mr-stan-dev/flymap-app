@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:flymap/entity/flight.dart';
+import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/layers/flight_route_map_layers.dart';
 import 'package:flymap/ui/map/layers/poi_layer.dart';

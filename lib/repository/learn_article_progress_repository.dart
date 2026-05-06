@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flymap/entity/learn_article_progress.dart';
+import 'package:flymap/domain/entity/learn_article_progress.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class LearnArticleProgressRepository {

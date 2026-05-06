@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flymap/data/api/flight_info_api_mapper.dart';
-import 'package:flymap/entity/flight_info.dart';
-import 'package:flymap/entity/user_profile.dart';
-import 'package:flymap/entity/user_interests_payload.dart';
-import 'package:flymap/entity/wiki_article_candidate.dart';
+import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/user_profile.dart';
+import 'package:flymap/domain/entity/user_interests_payload.dart';
+import 'package:flymap/domain/entity/wiki_article_candidate.dart';
 import 'package:flymap/logger.dart';
 import 'package:latlong2/latlong.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flymap/entity/user_profile.dart';
+import 'package:flymap/domain/entity/user_profile.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';

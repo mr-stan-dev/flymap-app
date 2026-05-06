@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/flight_poi_type.dart';
-import 'package:flymap/entity/user_profile.dart';
+import 'package:flymap/domain/entity/flight_poi_type.dart';
+import 'package:flymap/domain/entity/user_profile.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/shared/poi_type_marker_asset.dart';
 

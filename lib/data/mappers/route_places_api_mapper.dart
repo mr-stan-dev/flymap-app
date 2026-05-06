@@ -1,9 +1,9 @@
-import 'package:flymap/entity/airport.dart';
-import 'package:flymap/entity/flight_poi_type.dart';
-import 'package:flymap/entity/flight_route.dart';
-import 'package:flymap/entity/route_poi.dart';
-import 'package:flymap/entity/route_poi_summary.dart';
-import 'package:flymap/entity/route_preview.dart';
+import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/flight_poi_type.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/route_poi.dart';
+import 'package:flymap/domain/entity/route_poi_summary.dart';
+import 'package:flymap/domain/entity/route_preview.dart';
 import 'package:latlong2/latlong.dart';
 
 class RoutePlacesApiMapper {

@@ -1,4 +1,4 @@
-import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/domain/entity/route_region.dart';
 
 class RouteRegionPremiumGatePolicy {
   static const int maxFreeWithoutGate = 4;

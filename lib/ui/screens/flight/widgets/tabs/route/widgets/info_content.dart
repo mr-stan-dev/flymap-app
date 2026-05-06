@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/flight_info.dart';
-import 'package:flymap/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/route/widgets/airports_section.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/route/widgets/overview_section.dart';

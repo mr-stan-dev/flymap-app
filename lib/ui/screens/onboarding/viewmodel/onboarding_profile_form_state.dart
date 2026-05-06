@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:flymap/entity/airport.dart';
-import 'package:flymap/entity/user_profile.dart';
+import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/user_profile.dart';
 
 class OnboardingProfileFormState extends Equatable {
   const OnboardingProfileFormState({

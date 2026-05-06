@@ -1,5 +1,5 @@
 import 'package:flymap/analytics/events/analytics_event.dart';
-import 'package:flymap/entity/map_detail_level.dart';
+import 'package:flymap/domain/entity/map_detail_level.dart';
 
 class DownloadStartedEvent extends AnalyticsEvent {
   const DownloadStartedEvent({

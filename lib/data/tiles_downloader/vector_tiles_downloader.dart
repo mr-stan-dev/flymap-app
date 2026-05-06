@@ -11,7 +11,7 @@ import 'package:flymap/data/tiles_downloader/vector_tiles_db.dart';
 import 'package:flymap/data/tiles_downloader/vector_tiles_worker.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/map_download_config.dart';
-import 'package:flymap/usecase/download_map_use_case.dart';
+import 'package:flymap/domain/usecase/download_map_use_case.dart';
 import 'package:latlong2/latlong.dart' show LatLng;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';

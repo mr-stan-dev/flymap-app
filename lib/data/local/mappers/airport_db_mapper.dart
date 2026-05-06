@@ -1,5 +1,5 @@
 import 'package:flymap/data/local/mappers/mapper_utils.dart';
-import 'package:flymap/entity/airport.dart';
+import 'package:flymap/domain/entity/airport.dart';
 import 'package:latlong2/latlong.dart';
 
 class AirportDBKeys {

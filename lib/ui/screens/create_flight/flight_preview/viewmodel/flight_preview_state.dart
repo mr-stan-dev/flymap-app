@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
-import 'package:flymap/entity/flight_info.dart';
-import 'package:flymap/entity/flight_route.dart';
-import 'package:flymap/entity/map_detail_level.dart';
-import 'package:flymap/entity/route_region.dart';
-import 'package:flymap/entity/route_poi_summary.dart';
-import 'package:flymap/entity/wiki_article_candidate.dart';
+import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/map_detail_level.dart';
+import 'package:flymap/domain/entity/route_region.dart';
+import 'package:flymap/domain/entity/route_poi_summary.dart';
+import 'package:flymap/domain/entity/wiki_article_candidate.dart';
 
 enum CreateFlightStep { routeNotSupported, overview, wikipediaArticles }
 

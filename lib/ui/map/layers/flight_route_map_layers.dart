@@ -1,4 +1,4 @@
-import 'package:flymap/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/ui/map/layers/airports_layer.dart';
 import 'package:flymap/ui/map/layers/corridor_layer.dart';
 import 'package:flymap/ui/map/layers/dimming_layer.dart';

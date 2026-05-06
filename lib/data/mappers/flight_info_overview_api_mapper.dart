@@ -1,4 +1,4 @@
-import 'package:flymap/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/logger.dart';
 
 class FlightInfoOverviewApiMapper {

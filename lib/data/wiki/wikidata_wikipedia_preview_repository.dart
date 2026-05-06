@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flymap/data/wiki/poi_preview_content_config.dart';
 import 'package:flymap/data/wiki/wikimedia_api_client.dart';
-import 'package:flymap/entity/poi_wiki_preview.dart';
+import 'package:flymap/domain/entity/poi_wiki_preview.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/repository/poi_wiki_preview_repository.dart';
 import 'package:flymap/utils/wiki_text_utils.dart';

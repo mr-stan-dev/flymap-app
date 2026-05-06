@@ -1,16 +1,16 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
-import 'package:flymap/entity/learn_article_meta.dart';
-import 'package:flymap/entity/learn_article_progress.dart';
+import 'package:flymap/domain/entity/learn_article_meta.dart';
+import 'package:flymap/domain/entity/learn_article_progress.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
-import 'package:flymap/usecase/can_open_learn_article_use_case.dart';
-import 'package:flymap/usecase/get_learn_article_progress_use_case.dart';
-import 'package:flymap/usecase/get_learn_article_content_use_case.dart';
-import 'package:flymap/usecase/get_learn_categories_use_case.dart';
-import 'package:flymap/usecase/get_learn_category_articles_use_case.dart';
-import 'package:flymap/usecase/mark_learn_article_seen_use_case.dart';
-import 'package:flymap/usecase/toggle_learn_article_favorite_use_case.dart';
+import 'package:flymap/domain/usecase/can_open_learn_article_use_case.dart';
+import 'package:flymap/domain/usecase/get_learn_article_progress_use_case.dart';
+import 'package:flymap/domain/usecase/get_learn_article_content_use_case.dart';
+import 'package:flymap/domain/usecase/get_learn_categories_use_case.dart';
+import 'package:flymap/domain/usecase/get_learn_category_articles_use_case.dart';
+import 'package:flymap/domain/usecase/mark_learn_article_seen_use_case.dart';
+import 'package:flymap/domain/usecase/toggle_learn_article_favorite_use_case.dart';
 import 'package:get_it/get_it.dart';
 
 import 'learn_state.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/learn_category.dart';
+import 'package:flymap/domain/entity/learn_category.dart';
 import 'package:flymap/i18n/strings.g.dart';
 
 class LearnCategoryCard extends StatelessWidget {

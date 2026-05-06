@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flymap/entity/feedback_category.dart';
+import 'package:flymap/domain/entity/feedback_category.dart';
 
 class FeedbackState extends Equatable {
   const FeedbackState({

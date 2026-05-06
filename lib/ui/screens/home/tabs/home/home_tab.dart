@@ -9,8 +9,8 @@ import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_cubit.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_state.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/home_tab_loaded.dart';
-import 'package:flymap/usecase/complete_flight_use_case.dart';
-import 'package:flymap/usecase/delete_flight_use_case.dart';
+import 'package:flymap/domain/usecase/complete_flight_use_case.dart';
+import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
 import 'package:get_it/get_it.dart';
 
 // Global refresh notifier that can be accessed from anywhere

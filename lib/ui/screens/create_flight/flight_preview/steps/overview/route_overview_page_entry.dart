@@ -1,5 +1,5 @@
-import 'package:flymap/entity/airport.dart';
-import 'package:flymap/entity/route_region.dart';
+import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
 
 enum RouteOverviewPageKind {

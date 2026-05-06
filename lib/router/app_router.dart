@@ -1,7 +1,7 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/airport.dart';
-import 'package:flymap/entity/flight.dart';
+import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/ui/screens/about/about_screen.dart';
 import 'package:flymap/ui/screens/create_flight/airport_selection/airport_selection_screen.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/flight_preview_args.dart';
@@ -16,7 +16,7 @@ import 'package:flymap/ui/screens/settings/profile/settings_profile_screen.dart'
 import 'package:flymap/ui/screens/settings/history/history_screen.dart';
 import 'package:flymap/ui/screens/settings/storage/storage_screen.dart';
 import 'package:flymap/ui/screens/subscription/subscription_management_screen.dart';
-import 'package:flymap/usecase/submit_feedback_use_case.dart';
+import 'package:flymap/domain/usecase/submit_feedback_use_case.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 

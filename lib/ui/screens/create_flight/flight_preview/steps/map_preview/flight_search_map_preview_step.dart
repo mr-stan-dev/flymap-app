@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/map_detail_level.dart';
+import 'package:flymap/domain/entity/map_detail_level.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/map_download_config.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/map_preview/flight_map_preview_widget.dart';

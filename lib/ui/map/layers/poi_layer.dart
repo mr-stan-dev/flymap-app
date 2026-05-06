@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flymap/entity/flight_poi_type.dart';
-import 'package:flymap/entity/route_poi_summary.dart';
+import 'package:flymap/domain/entity/flight_poi_type.dart';
+import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/layers/map_layer.dart';
 import 'package:flymap/ui/map/layers/poi_style_config.dart';

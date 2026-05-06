@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/flight.dart';
-import 'package:flymap/entity/units.dart';
+import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/units.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_flight_card.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_flights_empty_state.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_flights_section_header.dart';

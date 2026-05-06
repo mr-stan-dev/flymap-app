@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/flight_article.dart';
+import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/read/articles/article_details_page.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/read/articles/article_tile.dart';

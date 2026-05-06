@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flymap/entity/city.dart';
+import 'package:flymap/domain/entity/city.dart';
 import 'package:flymap/logger.dart';
 import 'package:latlong2/latlong.dart';
 

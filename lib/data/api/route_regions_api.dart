@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flymap/data/api/api_config.dart';
-import 'package:flymap/entity/airport.dart';
+import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/logger.dart';
 import 'package:http/http.dart' as http;
 

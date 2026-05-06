@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/flight_poi_type.dart';
-import 'package:flymap/entity/route_poi_summary.dart';
+import 'package:flymap/domain/entity/flight_poi_type.dart';
+import 'package:flymap/domain/entity/route_poi_summary.dart';
 
 class HomeRoutePreviewStrip extends StatelessWidget {
   const HomeRoutePreviewStrip({

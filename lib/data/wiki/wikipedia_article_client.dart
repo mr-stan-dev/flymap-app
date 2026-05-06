@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flymap/data/wiki/wikimedia_api_client.dart';
 import 'package:flymap/data/wiki/wikipedia_url_utils.dart';
-import 'package:flymap/entity/flight_article.dart';
+import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/logger.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;

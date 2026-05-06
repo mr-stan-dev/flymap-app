@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/entity/user_profile.dart';
+import 'package:flymap/domain/entity/user_profile.dart';
 import 'package:flymap/ui/screens/onboarding/widgets/onboarding_step_scaffold.dart';
 import 'package:flymap/ui/screens/onboarding/widgets/profile/interests_selector.dart';
 

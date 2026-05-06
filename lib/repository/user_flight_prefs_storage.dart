@@ -1,6 +1,6 @@
-import 'package:flymap/entity/user_profile.dart';
-import 'package:flymap/entity/user_flight_prefs.dart';
-import 'package:flymap/entity/user_interests_payload.dart';
+import 'package:flymap/domain/entity/user_profile.dart';
+import 'package:flymap/domain/entity/user_flight_prefs.dart';
+import 'package:flymap/domain/entity/user_interests_payload.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserFlightPrefsStorage {

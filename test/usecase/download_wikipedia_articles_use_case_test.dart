@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flymap/data/wiki/wikimedia_api_client.dart';
 import 'package:flymap/data/wiki/wikipedia_article_client.dart';
-import 'package:flymap/entity/flight_article.dart';
-import 'package:flymap/usecase/download_wikipedia_articles_use_case.dart';
+import 'package:flymap/domain/entity/flight_article.dart';
+import 'package:flymap/domain/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
