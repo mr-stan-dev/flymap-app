@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/policy/route_region_premium_gate_policy.dart';
@@ -8,7 +9,9 @@ import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/ro
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_map_widget.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_pager.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/route_overview_progress_timeline.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_cubit.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
+import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
 
 class FlightSearchRouteOverviewStep extends StatefulWidget {
@@ -352,13 +355,17 @@ class _FlightSearchRouteOverviewStepState
   }) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => RouteSummaryScreen(
-          route: route,
-          regions: state.routeRegions,
-          totalRouteMinutes: totalRouteMinutes,
-          pois: state.flightInfo.poi,
-          cruiseSpeedKmh: state.routeCruiseSpeedKmh,
-          onContinue: widget.onContinue,
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.read<FlightPreviewCubit>()),
+            BlocProvider.value(value: context.read<SubscriptionCubit>()),
+          ],
+          child: RouteSummaryScreen(
+            route: route,
+            totalRouteMinutes: totalRouteMinutes,
+            cruiseSpeedKmh: state.routeCruiseSpeedKmh,
+            onContinue: widget.onContinue,
+          ),
         ),
       ),
     );

@@ -13,6 +13,7 @@ class RoutePremiumGateInteractions {
     required BuildContext context,
     required PaywallSource source,
     required bool useOfflineInfoSheet,
+    Future<void> Function()? onActivated,
   }) async {
     final subscriptionCubit = context.read<SubscriptionCubit>();
     if (subscriptionCubit.state.isPro) return;
@@ -31,6 +32,12 @@ class RoutePremiumGateInteractions {
       source: source,
     );
     if (!context.mounted) return;
+    if ((result == SubscriptionPaywallResult.purchased ||
+            result == SubscriptionPaywallResult.restored) &&
+        onActivated != null) {
+      await onActivated();
+      if (!context.mounted) return;
+    }
     _showPaywallResultSnackbar(context, result);
   }
 

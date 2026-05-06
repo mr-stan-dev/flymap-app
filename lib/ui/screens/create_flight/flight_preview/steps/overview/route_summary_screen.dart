@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
-import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/subscription/paywall_source.dart';
@@ -9,6 +8,7 @@ import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/ui/screens/common/route/route_places_by_type.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/region_info_screen.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_cubit.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 import 'package:flymap/ui/screens/shared/premium/route_premium_gate_interactions.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
@@ -18,18 +18,14 @@ import 'package:flymap/utils/route_utils.dart';
 class RouteSummaryScreen extends StatelessWidget {
   const RouteSummaryScreen({
     required this.route,
-    required this.regions,
     required this.totalRouteMinutes,
-    required this.pois,
     required this.cruiseSpeedKmh,
     required this.onContinue,
     super.key,
   });
 
   final FlightRoute route;
-  final List<RouteRegion> regions;
   final int totalRouteMinutes;
-  final List<RoutePoiSummary> pois;
   final int cruiseSpeedKmh;
   final VoidCallback onContinue;
   static const _typeMapper = RouteTimelineRegionTypeMapper();
@@ -37,6 +33,9 @@ class RouteSummaryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.t;
+    final previewState = context.watch<FlightPreviewCubit>().state;
+    final liveRegions = previewState.routeRegions;
+    final livePois = previewState.flightInfo.poi;
     final isProUser = context.select(
       (SubscriptionCubit cubit) => cubit.state.isPro,
     );
@@ -89,12 +88,12 @@ class RouteSummaryScreen extends StatelessWidget {
                       _MetaChip(
                         icon: Icons.public_rounded,
                         label:
-                            '${t.createFlight.overview.routeSummaryRegionsLabel}: ${regions.length}',
+                            '${t.createFlight.overview.routeSummaryRegionsLabel}: ${liveRegions.length}',
                       ),
                       _MetaChip(
                         icon: Icons.place_rounded,
                         label:
-                            '${t.createFlight.overview.routeSummaryPlacesLabel}: ${pois.length}',
+                            '${t.createFlight.overview.routeSummaryPlacesLabel}: ${livePois.length}',
                       ),
                     ],
                   ),
@@ -111,7 +110,7 @@ class RouteSummaryScreen extends StatelessWidget {
             const SizedBox(height: 8),
             RouteTimelineWidget(
               route: route,
-              regions: regions,
+              regions: liveRegions,
               isProUser: isProUser,
               cruiseSpeedKmh: cruiseSpeedKmh,
               totalRouteMinutes: totalRouteMinutes,
@@ -119,11 +118,13 @@ class RouteSummaryScreen extends StatelessWidget {
                 context: context,
                 source: PaywallSource.routeTimelineGate,
                 useOfflineInfoSheet: true,
+                onActivated: () =>
+                    context.read<FlightPreviewCubit>().refreshPoisForPro(),
               ),
               onOpenRegion: (region) => _openRegionInfo(context, region),
             ),
             const SizedBox(height: 12),
-            RoutePlacesByTypeSection(places: pois),
+            RoutePlacesByTypeSection(places: livePois),
             const SizedBox(height: 16),
             PrimaryButton(
               label: t.common.kContinue,

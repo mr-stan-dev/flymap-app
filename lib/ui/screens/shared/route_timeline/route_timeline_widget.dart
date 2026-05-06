@@ -429,7 +429,10 @@ class _RouteTimelineRow extends StatelessWidget {
     );
 
     final dot = isPremiumGateRow
-        ? _TimelinePremiumGateMarker(borderColor: DsBrandColors.proAmber)
+        ? _TimelinePremiumGateMarker(
+            borderColor: DsBrandColors.proAmber,
+            fillColor: Theme.of(context).colorScheme.surface,
+          )
         : pointState == _RouteTimelinePointState.current
         ? _PulsingTimelineDot(color: pointColor)
         : Container(
@@ -670,9 +673,13 @@ class _PulsingTimelineDotState extends State<_PulsingTimelineDot>
 }
 
 class _TimelinePremiumGateMarker extends StatelessWidget {
-  const _TimelinePremiumGateMarker({required this.borderColor});
+  const _TimelinePremiumGateMarker({
+    required this.borderColor,
+    required this.fillColor,
+  });
 
   final Color borderColor;
+  final Color fillColor;
 
   @override
   Widget build(BuildContext context) {
@@ -697,7 +704,7 @@ class _TimelinePremiumGateMarker extends StatelessWidget {
       width: _RouteTimelineRow._dotSize,
       height: _RouteTimelineRow._dotSize,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: fillColor,
         shape: BoxShape.circle,
         border: Border.all(color: borderColor, width: 2),
       ),
