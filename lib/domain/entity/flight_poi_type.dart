@@ -18,7 +18,7 @@ enum FlightPoiType {
   static FlightPoiType fromRaw(String raw) {
     final normalized = _normalize(raw);
     return switch (normalized) {
-      'city' => FlightPoiType.city,
+      'city' || 'town' => FlightPoiType.city,
       'river' => FlightPoiType.river,
       'island' => FlightPoiType.island,
       'airport' => FlightPoiType.airport,

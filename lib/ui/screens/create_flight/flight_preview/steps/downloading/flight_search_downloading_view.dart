@@ -42,6 +42,7 @@ class FlightSearchDownloadingView extends StatelessWidget {
                     padding: const EdgeInsets.only(top: DsSpacing.sm),
                     child: LinearProgressIndicator(
                       value: sections.map.progress,
+                      color: _mapProgressColor(context, sections.map.status),
                     ),
                   ),
                 ),
@@ -132,6 +133,17 @@ class FlightSearchDownloadingView extends StatelessWidget {
       DownloadSectionStatus.failed => context.t.createFlight.downloading.failed,
       DownloadSectionStatus.skipped =>
         context.t.createFlight.downloading.skipped,
+    };
+  }
+
+  Color _mapProgressColor(BuildContext context, DownloadSectionStatus status) {
+    return switch (status) {
+      DownloadSectionStatus.completed => DsSemanticColors.success(context),
+      DownloadSectionStatus.completedWithIssues => DsSemanticColors.warning(
+        context,
+      ),
+      DownloadSectionStatus.failed => DsSemanticColors.error(context),
+      _ => Theme.of(context).colorScheme.primary,
     };
   }
 

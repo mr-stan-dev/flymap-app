@@ -263,7 +263,9 @@ class RouteTimelineWidget extends StatelessWidget {
         final t = context.t;
         return TimelinePremiumGateCard(
           title: t.flight.route.premiumGateTitle,
-          description: t.flight.route.premiumGateBody,
+          description: t.flight.route.premiumGateBodyWithCount(
+            count: regions.length,
+          ),
           ctaLabel: t.flight.route.premiumGateCta,
           onTap: onPremiumGateTap,
         );

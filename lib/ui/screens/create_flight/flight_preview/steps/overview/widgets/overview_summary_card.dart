@@ -85,7 +85,6 @@ class OverviewSummaryCard extends StatelessWidget {
                 label: continueLabel,
                 onPressed: onContinue,
                 expand: true,
-                trailingIcon: Icons.arrow_forward_rounded,
               ),
               const SizedBox(height: 4),
               TertiaryButton(

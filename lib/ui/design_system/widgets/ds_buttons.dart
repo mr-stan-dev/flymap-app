@@ -102,6 +102,11 @@ class TertiaryButton extends StatelessWidget {
       width: expand ? double.infinity : null,
       height: compact ? 40 : 52,
       child: TextButton(
+        style: TextButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
         onPressed: isLoading ? null : onPressed,
         child: _ButtonContent(
           label: label,

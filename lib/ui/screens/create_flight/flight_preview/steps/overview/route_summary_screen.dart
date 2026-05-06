@@ -22,6 +22,7 @@ class RouteSummaryScreen extends StatelessWidget {
     required this.totalRouteMinutes,
     required this.pois,
     required this.cruiseSpeedKmh,
+    required this.onContinue,
     super.key,
   });
 
@@ -30,6 +31,7 @@ class RouteSummaryScreen extends StatelessWidget {
   final int totalRouteMinutes;
   final List<RoutePoiSummary> pois;
   final int cruiseSpeedKmh;
+  final VoidCallback onContinue;
   static const _typeMapper = RouteTimelineRegionTypeMapper();
 
   @override
@@ -122,6 +124,14 @@ class RouteSummaryScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             RoutePlacesByTypeSection(places: pois),
+            const SizedBox(height: 16),
+            PrimaryButton(
+              label: t.common.kContinue,
+              onPressed: () {
+                Navigator.of(context).pop();
+                onContinue();
+              },
+            ),
           ],
         ),
       ),

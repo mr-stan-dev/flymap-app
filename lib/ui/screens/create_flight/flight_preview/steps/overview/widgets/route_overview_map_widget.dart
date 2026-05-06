@@ -175,7 +175,10 @@ class _RouteOverviewMapWidgetState extends State<RouteOverviewMapWidget> {
     }
 
     final nextSignature = Object.hashAll(
-      widget.flightInfo.poi.map((poi) => poi.name),
+      widget.flightInfo.poi.map(
+        (poi) =>
+            Object.hash(poi.qid, poi.latLon.latitude, poi.latLon.longitude),
+      ),
     );
     if (_poiSignature == nextSignature) {
       return;
@@ -184,6 +187,8 @@ class _RouteOverviewMapWidgetState extends State<RouteOverviewMapWidget> {
 
     try {
       await PoiLayer(poi: widget.flightInfo.poi).add(controller);
+      // Re-apply plane after POI layer rebuild to keep plane above POI symbols.
+      await _syncPlaneLayer(expectedStyleGeneration: expectedStyleGeneration);
     } on PlatformException catch (error) {
       if (isStaleStylePlatformException(error)) {
         _logger.log('Skipping stale style POI sync: $error');
@@ -469,9 +474,10 @@ class _RouteOverviewMapWidgetState extends State<RouteOverviewMapWidget> {
       0.0,
       routeDistanceKm,
     );
-    final regionEndKm = (selectedRegion.pathFirstEncounterKm +
-            selectedRegion.pathLengthInsideKm)
-        .clamp(0.0, routeDistanceKm);
+    final regionEndKm =
+        (selectedRegion.pathFirstEncounterKm +
+                selectedRegion.pathLengthInsideKm)
+            .clamp(0.0, routeDistanceKm);
     final targetKm = (regionStartKm + _regionPlaneEntryOffsetKm).clamp(
       regionStartKm,
       regionEndKm >= regionStartKm ? regionEndKm : regionStartKm,

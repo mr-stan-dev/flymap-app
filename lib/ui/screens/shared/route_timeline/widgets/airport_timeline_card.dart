@@ -14,7 +14,11 @@ class AirportTimelineCard extends StatelessWidget {
     return SectionCard(
       child: Row(
         children: [
-          const AirportArtwork(size: 40, borderRadius: 10),
+          AirportArtwork(
+            size: 40,
+            borderRadius: 10,
+            countryCode: airport.countryCode,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(

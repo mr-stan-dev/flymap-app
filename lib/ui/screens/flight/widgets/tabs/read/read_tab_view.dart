@@ -86,12 +86,15 @@ class _LoadedReadTab extends StatelessWidget {
               const SizedBox(height: DsSpacing.sm),
               ArticlesSection(
                 articles: regionArticles,
-                title: 'Region articles',
+                title: context.t.flight.info.regionArticlesTitle,
               ),
             ],
             if (otherArticles.isNotEmpty) ...[
               const SizedBox(height: DsSpacing.sm),
-              ArticlesSection(articles: otherArticles, title: 'Other articles'),
+              ArticlesSection(
+                articles: otherArticles,
+                title: context.t.flight.info.otherArticlesTitle,
+              ),
             ],
           ],
         ),

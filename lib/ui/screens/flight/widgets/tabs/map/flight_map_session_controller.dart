@@ -134,7 +134,11 @@ class FlightMapSessionController {
     final controller = _controller;
     if (!_routeLayersAdded || controller == null) return;
     final pois = _flight.info.poi;
-    final nextSignature = Object.hashAll(pois.map((p) => p.qid));
+    final nextSignature = Object.hashAll(
+      pois.map(
+        (p) => Object.hash(p.qid, p.latLon.latitude, p.latLon.longitude),
+      ),
+    );
     if (_poiSignature == nextSignature) return;
     _poiSignature = nextSignature;
     _logger.log('Syncing POI layer count=${pois.length}');

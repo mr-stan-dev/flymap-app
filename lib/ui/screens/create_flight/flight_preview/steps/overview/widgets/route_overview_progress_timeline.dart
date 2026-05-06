@@ -8,6 +8,8 @@ class RouteOverviewProgressTimeline extends StatelessWidget {
     required this.selectedIndex,
     required this.isTitleActive,
     required this.isSummaryActive,
+    this.enlargeSelectedDot = true,
+    this.enlargePremiumRange = false,
     this.isPremiumRangeActive = false,
     this.premiumRangeStartIndex,
     this.premiumRangeEndIndex,
@@ -18,6 +20,8 @@ class RouteOverviewProgressTimeline extends StatelessWidget {
   final int selectedIndex;
   final bool isTitleActive;
   final bool isSummaryActive;
+  final bool enlargeSelectedDot;
+  final bool enlargePremiumRange;
   final bool isPremiumRangeActive;
   final int? premiumRangeStartIndex;
   final int? premiumRangeEndIndex;
@@ -99,31 +103,43 @@ class RouteOverviewProgressTimeline extends StatelessWidget {
                   children: List.generate(safeCount, (index) {
                     final isCurrent = index == safeSelected;
                     final isCompleted = index < safeSelected;
-                    final color = summaryMode
-                        ? timelineBlue
-                        : titleMode
+                    final isInPremiumRange =
+                        hasPremiumRange &&
+                        index >= premiumRangeStartIndex! &&
+                        index <= premiumRangeEndIndex!;
+                    final color = titleMode
                         ? futureColor
-                        : hasPremiumRange &&
-                              index >= premiumRangeStartIndex! &&
-                              index <= premiumRangeEndIndex!
+                        : isInPremiumRange
                         ? premiumGold
+                        : summaryMode
+                        ? timelineBlue
                         : isCurrent
                         ? currentGreen
                         : isCompleted
                         ? timelineBlue
                         : futureColor;
+                    final isPremiumEnlarged =
+                        enlargePremiumRange && isInPremiumRange;
+                    final dotSize =
+                        (isCurrent && enlargeSelectedDot) || isPremiumEnlarged
+                        ? 12.0
+                        : 10.0;
+                    final strokeWidth =
+                        (isCurrent && enlargeSelectedDot) || isPremiumEnlarged
+                        ? 2.4
+                        : 2.0;
                     return Expanded(
                       child: Align(
                         alignment: Alignment.center,
                         child: Container(
-                          width: isCurrent ? 12 : 10,
-                          height: isCurrent ? 12 : 10,
+                          width: dotSize,
+                          height: dotSize,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Theme.of(context).colorScheme.surface,
                             border: Border.all(
                               color: color,
-                              width: isCurrent ? 2.4 : 2,
+                              width: strokeWidth,
                             ),
                           ),
                         ),

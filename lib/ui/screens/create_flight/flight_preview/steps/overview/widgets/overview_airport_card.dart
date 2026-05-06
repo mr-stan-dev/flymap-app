@@ -6,12 +6,14 @@ class OverviewAirportCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.description,
+    required this.countryCode,
     super.key,
   });
 
   final String title;
   final String subtitle;
   final String description;
+  final String countryCode;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class OverviewAirportCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const AirportArtwork(),
+                  AirportArtwork(countryCode: countryCode),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(

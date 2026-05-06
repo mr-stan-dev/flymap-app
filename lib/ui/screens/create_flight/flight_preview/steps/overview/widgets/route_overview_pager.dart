@@ -118,6 +118,7 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
           description: t.createFlight.overview.airportCard.departureDescription(
             airport: airport.name,
           ),
+          countryCode: airport.countryCode,
         );
       case RouteOverviewPageKind.arrival:
         final airport = entry.airport!;
@@ -128,6 +129,7 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
           description: t.createFlight.overview.airportCard.arrivalDescription(
             airport: airport.name,
           ),
+          countryCode: airport.countryCode,
         );
       case RouteOverviewPageKind.region:
         final region = entry.region!;
@@ -169,7 +171,9 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
       case RouteOverviewPageKind.premiumGate:
         return OverviewPremiumGateCard(
           title: t.createFlight.overview.premiumGateTitle,
-          description: t.createFlight.overview.premiumGateBody,
+          description: t.createFlight.overview.premiumGateBodyWithCount(
+            count: widget.totalRegionCount,
+          ),
           ctaLabel: t.createFlight.overview.premiumGateCta,
           onTap: widget.onPremiumGateTap,
         );

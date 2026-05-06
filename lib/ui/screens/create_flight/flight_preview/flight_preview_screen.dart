@@ -214,7 +214,20 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
         );
       case CreateFlightStep.overview:
         if (state.isPreviewLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(height: 12),
+                Text(
+                  context.t.flight.info.overviewLoading,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
         }
         if (!state.hasInternetForMapPreview) {
           return Center(
@@ -289,6 +302,8 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
     switch (result) {
       case SubscriptionPaywallResult.purchased:
       case SubscriptionPaywallResult.restored:
+        await context.read<FlightPreviewCubit>().refreshPoisForPro();
+        if (!context.mounted) return;
         _showSnackBar(context, context.t.settings.flymapProActivated);
         return;
       case SubscriptionPaywallResult.cancelled:

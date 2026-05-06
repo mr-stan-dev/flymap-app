@@ -14,6 +14,8 @@ class PoiLayer extends MapLayer {
   PoiLayer({required this.poi});
 
   static const String sourceId = 'poi-source';
+  static const String clusterCirclesLayerId = 'poi-cluster-circles-layer';
+  static const String clusterCountsLayerId = 'poi-cluster-counts-layer';
   static const String circlesLayerId = 'poi-circles-layer';
   static const String iconsLayerId = 'poi-icons-layer';
   static const String labelsLayerId = 'poi-labels-layer';
@@ -65,7 +67,13 @@ class PoiLayer extends MapLayer {
     _logger.log('GeoJSON features=${features.length}');
 
     // Clean up existing
-    for (final id in [labelsLayerId, iconsLayerId, circlesLayerId]) {
+    for (final id in [
+      labelsLayerId,
+      iconsLayerId,
+      circlesLayerId,
+      clusterCountsLayerId,
+      clusterCirclesLayerId,
+    ]) {
       try {
         await controller.removeLayer(id);
       } catch (_) {}
@@ -77,10 +85,10 @@ class PoiLayer extends MapLayer {
     // Add source
     await controller.addSource(
       sourceId,
-      GeojsonSourceProperties(data: geojson),
+      GeojsonSourceProperties(data: geojson, cluster: false),
     );
 
-    // Add circle layer with type-based colors for lower zoom levels.
+    // Add circles with type-based colors for lower zoom levels.
     await controller.addLayer(
       sourceId,
       circlesLayerId,
@@ -88,9 +96,9 @@ class PoiLayer extends MapLayer {
         circleRadius: [
           'step',
           ['zoom'],
-          3.5,
+          2.8,
           6,
-          4.5,
+          3.6,
           9,
           5.5,
         ],
@@ -129,9 +137,9 @@ class PoiLayer extends MapLayer {
           ['zoom'],
           0.0,
           7,
-          0.26,
+          0.208,
           9,
-          0.34,
+          0.272,
           12,
           0.42,
         ],
@@ -145,7 +153,7 @@ class PoiLayer extends MapLayer {
       ],
     );
 
-    // Add labels layer (visible from zoom 8+ via opacity expression)
+    // Add labels layer (visible from zoom 8+ via size expression).
     await controller.addLayer(
       sourceId,
       labelsLayerId,

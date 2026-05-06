@@ -25,7 +25,7 @@ Future<void> showPoiPreviewDialog({
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    useSafeArea: true,
+    useSafeArea: false,
     showDragHandle: false,
     builder: (_) => PoiPreviewBottomSheet(
       name: name,
@@ -123,76 +123,78 @@ class _PoiPreviewBottomSheetState extends State<PoiPreviewBottomSheet> {
     final rawBodyText = summary.isNotEmpty ? summary : fallbackTitle;
     final previewText = WikiTextUtils.stripSectionMarkers(rawBodyText);
     final hasHtml = htmlContent.isNotEmpty;
-    final hasOpenWikipediaAction = widget.actionMode != PoiPreviewActionMode.none;
+    final hasOpenWikipediaAction =
+        widget.actionMode != PoiPreviewActionMode.none;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        16,
-        16,
-        16 + MediaQuery.paddingOf(context).bottom,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(widget.name, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 4),
-          Text(context.t.flight.info.poiType(type: typeLabel)),
-          if (_isLoading) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                const SizedBox(width: 8),
-                Expanded(child: Text(context.t.common.loading)),
-              ],
-            ),
-          ],
-          const SizedBox(height: 10),
-          if (previewText.isNotEmpty)
-            Text(
-              previewText,
-              maxLines: 5,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                height: 1.35,
-              ),
-            )
-          else if (!_isLoading && _error != null)
-            Text(
-              context.t.createFlight.errors.overviewUnavailableContinue,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-          if (hasHtml || hasOpenWikipediaAction) ...[
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                if (hasHtml)
-                  TextButton(
-                    onPressed: () => _openReadMore(
-                      context: context,
-                      htmlContent: htmlContent,
-                      sourceUrl: sourceUrl,
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.name, style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 4),
+              Text(context.t.flight.info.poiType(type: typeLabel)),
+              if (_isLoading) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    child: Text(context.t.common.readMore),
-                  ),
-                if (hasHtml && hasOpenWikipediaAction) const Spacer(),
-                if (hasOpenWikipediaAction)
-                  TextButton(
-                    onPressed: sourceUrl.isEmpty
-                        ? null
-                        : () => _openSourceUrl(context, sourceUrl),
-                    child: Text('${context.t.home.open} Wikipedia'),
-                  ),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(context.t.common.loading)),
+                  ],
+                ),
               ],
-            ),
-          ],
-        ],
+              const SizedBox(height: 10),
+              if (previewText.isNotEmpty)
+                Text(
+                  previewText,
+                  maxLines: 5,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(height: 1.35),
+                )
+              else if (!_isLoading && _error != null)
+                Text(
+                  context.t.createFlight.errors.overviewUnavailableContinue,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              if (hasHtml || hasOpenWikipediaAction) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    if (hasHtml)
+                      TextButton(
+                        onPressed: () => _openReadMore(
+                          context: context,
+                          htmlContent: htmlContent,
+                          sourceUrl: sourceUrl,
+                        ),
+                        child: Text(context.t.common.readMore),
+                      ),
+                    if (hasHtml && hasOpenWikipediaAction) const Spacer(),
+                    if (hasOpenWikipediaAction)
+                      TextButton(
+                        onPressed: sourceUrl.isEmpty
+                            ? null
+                            : () => _openSourceUrl(context, sourceUrl),
+                        child: Text('${context.t.home.open} Wikipedia'),
+                      ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

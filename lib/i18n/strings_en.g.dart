@@ -1214,6 +1214,9 @@ class TranslationsCreateFlightOverviewEn {
 	/// en: 'Free plan includes a limited route preview. Upgrade to Pro to view every region on this route.'
 	String get premiumGateBody => 'Free plan includes a limited route preview. Upgrade to Pro to view every region on this route.';
 
+	/// en: 'Unlock all $count regions on this route with Pro.'
+	String premiumGateBodyWithCount({required Object count}) => 'Unlock all ${count} regions on this route with Pro.';
+
 	/// en: 'Upgrade to Pro'
 	String get premiumGateCta => 'Upgrade to Pro';
 
@@ -1737,6 +1740,12 @@ class TranslationsFlightInfoEn {
 	/// en: 'Offline Articles'
 	String get offlineArticlesTitle => 'Offline Articles';
 
+	/// en: 'Region articles'
+	String get regionArticlesTitle => 'Region articles';
+
+	/// en: 'Other articles'
+	String get otherArticlesTitle => 'Other articles';
+
 	/// en: 'No offline articles downloaded.'
 	String get noOfflineArticles => 'No offline articles downloaded.';
 
@@ -1820,6 +1829,9 @@ class TranslationsFlightRouteEn {
 
 	/// en: 'Upgrade to Pro to see all regions along your route and timeline details.'
 	String get premiumGateBody => 'Upgrade to Pro to see all regions along your route and timeline details.';
+
+	/// en: 'Unlock all $count regions on this route with Premium.'
+	String premiumGateBodyWithCount({required Object count}) => 'Unlock all ${count} regions on this route with Premium.';
 
 	/// en: 'Subscribe to Premium'
 	String get premiumGateCta => 'Subscribe to Premium';
@@ -2242,6 +2254,7 @@ extension on Translations {
 			'createFlight.overview.skipReview' => 'Skip review',
 			'createFlight.overview.premiumGateTitle' => 'Unlock full route overview',
 			'createFlight.overview.premiumGateBody' => 'Free plan includes a limited route preview. Upgrade to Pro to view every region on this route.',
+			'createFlight.overview.premiumGateBodyWithCount' => ({required Object count}) => 'Unlock all ${count} regions on this route with Pro.',
 			'createFlight.overview.premiumGateCta' => 'Upgrade to Pro',
 			'createFlight.overview.routeReviewedTitle' => 'Route reviewed',
 			'createFlight.overview.routeReviewedSubtitle' => ({required Object regions, required Object departure, required Object arrival}) => 'You will fly over ${regions} from ${departure} to ${arrival}.',
@@ -2465,6 +2478,8 @@ extension on Translations {
 			'flight.info.poiType' => ({required Object type}) => 'Type: ${type}',
 			'flight.info.poiFlyOver' => ({required Object view}) => 'Fly-over: ${view}',
 			'flight.info.offlineArticlesTitle' => 'Offline Articles',
+			'flight.info.regionArticlesTitle' => 'Region articles',
+			'flight.info.otherArticlesTitle' => 'Other articles',
 			'flight.info.noOfflineArticles' => 'No offline articles downloaded.',
 			'flight.info.openSource' => 'Open Source',
 			'flight.info.openSourcePageTooltip' => 'Open source page',
@@ -2490,6 +2505,7 @@ extension on Translations {
 			'flight.route.premiumLockedChipLabel' => 'Pro region',
 			'flight.route.premiumGateTitle' => 'Unlock full route timeline',
 			'flight.route.premiumGateBody' => 'Upgrade to Pro to see all regions along your route and timeline details.',
+			'flight.route.premiumGateBodyWithCount' => ({required Object count}) => 'Unlock all ${count} regions on this route with Premium.',
 			'flight.route.premiumGateCta' => 'Subscribe to Premium',
 			'flight.route.premiumOfflineTitle' => 'Internet needed to upgrade',
 			'flight.route.premiumOfflineBody' => 'You are offline right now. Connect to the internet to upgrade and unlock the full route view.',
@@ -2520,12 +2536,12 @@ extension on Translations {
 			'about.featureTrackTitle' => 'Track flight data',
 			'about.featureTrackText' => 'Use Dashboard to monitor heading, speed, altitude, and route progress.',
 			'about.featureDetailsTitle' => 'Check route details',
+			_ => null,
+		} ?? switch (path) {
 			'about.featureDetailsText' => 'Open the Info tab for airport details and a clean route overview.',
 			'about.featureShareTitle' => 'Share your journey',
 			'about.featureShareText' => 'Generate and share a flight map screenshot with route highlights.',
 			'about.quickStart' => 'Quick Start',
-			_ => null,
-		} ?? switch (path) {
 			'about.step1' => 'Tap New flight on Home.',
 			'about.step2' => 'Choose departure and arrival airports.',
 			'about.step3' => 'Open Map preview and download the map before the flight.',

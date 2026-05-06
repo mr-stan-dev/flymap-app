@@ -39,7 +39,8 @@ class FlightMapPreviewWidget extends StatefulWidget {
 class _FlightMapPreviewWidgetState extends State<FlightMapPreviewWidget> {
   static const String _primaryStyleUrl =
       '${UrlUtils.flymapTilesUrl}/styles/liberty';
-  static const String _fallbackStyleUrl = '${UrlUtils.ofmTilesUrl}/styles/liberty';
+  static const String _fallbackStyleUrl =
+      '${UrlUtils.ofmTilesUrl}/styles/liberty';
   static const Duration _styleLoadTimeout = Duration(seconds: 8);
 
   final Logger _logger = const Logger('FlightMapPreviewWidget');
@@ -168,7 +169,10 @@ class _FlightMapPreviewWidgetState extends State<FlightMapPreviewWidget> {
     }
 
     final nextSignature = Object.hashAll(
-      widget.flightInfo.poi.map((poi) => poi.name),
+      widget.flightInfo.poi.map(
+        (poi) =>
+            Object.hash(poi.qid, poi.latLon.latitude, poi.latLon.longitude),
+      ),
     );
     if (_poiSignature == nextSignature) {
       _logger.log(
