@@ -9,7 +9,6 @@ import 'package:flymap/domain/entity/poi_wiki_preview.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/layers/poi_layer.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_preview_bottom_sheet.dart';
-import 'package:flymap/domain/usecase/get_place_info_use_case.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 class FlightMapPoiController {
@@ -17,18 +16,15 @@ class FlightMapPoiController {
     required Logger logger,
     required Flight flight,
     required AppAnalytics analytics,
-    required GetPlaceInfoUseCase wikiPreviewUseCase,
     required ConnectivityChecker connectivityChecker,
   }) : _logger = logger,
        _flight = flight,
        _analytics = analytics,
-       _wikiPreviewUseCase = wikiPreviewUseCase,
        _connectivityChecker = connectivityChecker;
 
   final Logger _logger;
   final Flight _flight;
   final AppAnalytics _analytics;
-  final GetPlaceInfoUseCase _wikiPreviewUseCase;
   final ConnectivityChecker _connectivityChecker;
 
   bool _isPoiDialogVisible = false;
@@ -97,7 +93,11 @@ class FlightMapPoiController {
     final storedPoi = qid.isNotEmpty
         ? _flight.info.poi.where((p) => p.qid == qid).firstOrNull
         : null;
-    final preloaded = (storedPoi != null && storedPoi.description.isNotEmpty)
+    final preloaded =
+        (storedPoi != null &&
+            (storedPoi.description.isNotEmpty ||
+                storedPoi.descriptionHtml.isNotEmpty ||
+                storedPoi.wiki.isNotEmpty))
         ? PoiWikiPreview(
             qid: qid,
             title: storedPoi.name,
@@ -119,8 +119,10 @@ class FlightMapPoiController {
       actionMode: hasInternet
           ? PoiPreviewActionMode.openOnly
           : PoiPreviewActionMode.none,
-      wikiPreviewUseCase: _wikiPreviewUseCase,
       preloadedPreview: preloaded,
+      // For downloaded flights, keep POI preview fully local:
+      // - new flights: show API description only (no loading/fetch),
+      // - legacy flights: still show stored article/html when present.
     );
   }
 }

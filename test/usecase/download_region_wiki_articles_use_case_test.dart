@@ -28,7 +28,8 @@ void main() {
 
       expect(result.cancelled, isFalse);
       expect(result.failedCount, 0);
-      expect(progress.map((p) => p.completed), [0, 1, 2]);
+      // Progress is emitted per batch chunk (plus initial 0), not per item.
+      expect(progress.map((p) => p.completed), [0, 2]);
       expect(result.regions[0].description, 'Backend description 1');
       expect(result.regions[1].description, 'Backend description 2');
       expect(result.articleUrls.toSet(), {

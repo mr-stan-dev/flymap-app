@@ -53,7 +53,12 @@ class FlightSearchDownloadingView extends StatelessWidget {
                       '${context.t.createFlight.overview.routeSummaryRegionsLabel}',
                   subtitle: _poiSubtitle(context, sections.poi),
                   status: sections.poi.status,
-                  statusLabel: _statusLabel(context, sections.poi.status),
+                  forceCompletedStyleForIssues: true,
+                  statusLabel: _statusLabel(
+                    context,
+                    sections.poi.status,
+                    hideCompletedWithIssuesCopy: true,
+                  ),
                   isCurrentStep:
                       sections.poi.status == DownloadSectionStatus.active,
                   trailing: _currentStepBadge(
@@ -120,7 +125,11 @@ class FlightSearchDownloadingView extends StatelessWidget {
     );
   }
 
-  String _statusLabel(BuildContext context, DownloadSectionStatus status) {
+  String _statusLabel(
+    BuildContext context,
+    DownloadSectionStatus status, {
+    bool hideCompletedWithIssuesCopy = false,
+  }) {
     return switch (status) {
       DownloadSectionStatus.pending =>
         context.t.createFlight.downloading.pending,
@@ -129,7 +138,9 @@ class FlightSearchDownloadingView extends StatelessWidget {
       DownloadSectionStatus.completed =>
         context.t.createFlight.downloading.completed,
       DownloadSectionStatus.completedWithIssues =>
-        context.t.createFlight.downloading.completedWithIssues,
+        hideCompletedWithIssuesCopy
+            ? context.t.createFlight.downloading.completed
+            : context.t.createFlight.downloading.completedWithIssues,
       DownloadSectionStatus.failed => context.t.createFlight.downloading.failed,
       DownloadSectionStatus.skipped =>
         context.t.createFlight.downloading.skipped,
@@ -194,6 +205,7 @@ class _DownloadSectionCard extends StatefulWidget {
     required this.status,
     required this.statusLabel,
     required this.isCurrentStep,
+    this.forceCompletedStyleForIssues = false,
     this.trailing,
     this.child,
   });
@@ -203,6 +215,7 @@ class _DownloadSectionCard extends StatefulWidget {
   final DownloadSectionStatus status;
   final String statusLabel;
   final bool isCurrentStep;
+  final bool forceCompletedStyleForIssues;
   final Widget? trailing;
   final Widget? child;
 
@@ -249,14 +262,20 @@ class _DownloadSectionCardState extends State<_DownloadSectionCard>
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _statusColor(context, widget.status);
+    final effectiveStatus = _effectiveStatus(
+      widget.status,
+      forceCompletedStyleForIssues: widget.forceCompletedStyleForIssues,
+    );
+    final statusColor = _statusColor(context, effectiveStatus);
     final showPulse = widget.isCurrentStep;
 
     return AnimatedBuilder(
       animation: _pulseAnimation,
       builder: (context, child) {
-        final borderColor = _showColoredBorder(widget.status)
-            ? statusColor.withValues(alpha: showPulse ? _pulseAnimation.value : 1.0)
+        final borderColor = _showColoredBorder(effectiveStatus)
+            ? statusColor.withValues(
+                alpha: showPulse ? _pulseAnimation.value : 1.0,
+              )
             : Theme.of(context).dividerColor.withValues(alpha: 0.3);
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -280,7 +299,7 @@ class _DownloadSectionCardState extends State<_DownloadSectionCard>
             Row(
               children: [
                 _AnimatedStatusIcon(
-                  icon: _statusIcon(widget.status),
+                  icon: _statusIcon(effectiveStatus),
                   color: statusColor,
                   isActive: widget.isCurrentStep,
                 ),
@@ -317,6 +336,17 @@ class _DownloadSectionCardState extends State<_DownloadSectionCard>
         ),
       ),
     );
+  }
+
+  DownloadSectionStatus _effectiveStatus(
+    DownloadSectionStatus status, {
+    required bool forceCompletedStyleForIssues,
+  }) {
+    if (forceCompletedStyleForIssues &&
+        status == DownloadSectionStatus.completedWithIssues) {
+      return DownloadSectionStatus.completed;
+    }
+    return status;
   }
 
   bool _showColoredBorder(DownloadSectionStatus status) => switch (status) {

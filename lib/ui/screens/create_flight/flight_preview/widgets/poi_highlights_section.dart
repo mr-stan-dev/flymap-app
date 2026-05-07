@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flymap/domain/entity/poi_wiki_preview.dart';
 import 'package:flymap/domain/entity/route_poi_rank.dart';
 import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/i18n/strings.g.dart';
@@ -110,11 +111,20 @@ class _PoiChip extends StatelessWidget {
         ],
       ),
       onPressed: () async {
+        final preloadedPreview = PoiWikiPreview(
+          qid: item.qid,
+          title: item.name,
+          summary: item.description,
+          htmlContent: item.descriptionHtml,
+          sourceUrl: item.wiki,
+          languageCode: '',
+        );
         await showPoiPreviewDialog(
           context: context,
           name: item.name,
           typeRaw: item.type.rawValue,
           qid: item.qid,
+          preloadedPreview: preloadedPreview,
         );
       },
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

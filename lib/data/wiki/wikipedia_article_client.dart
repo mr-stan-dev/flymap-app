@@ -73,10 +73,19 @@ class WikipediaArticleClient {
     required String bundleId,
   }) async {
     final ref = WikipediaUrlUtils.parseArticle(sourceUrl);
-    if (ref == null) return null;
+    if (ref == null) {
+      _logger.error('parseArticle failed for sourceUrl="$sourceUrl"');
+      return null;
+    }
 
     final summaryData = await _fetchSummary(ref);
-    if (summaryData == null) return null;
+    if (summaryData == null) {
+      _logger.error(
+        'summary fetch failed for sourceUrl="$sourceUrl" '
+        'language="${ref.languageCode}" title="${ref.title}"',
+      );
+      return null;
+    }
 
     final source = _extractSourceUrl(summaryData) ?? ref.canonicalUrl;
     final summary = (summaryData['extract'] ?? '').toString().trim();
@@ -102,6 +111,12 @@ class WikipediaArticleClient {
       }
 
       final rawHtml = await _fetchParsedHtml(ref);
+      if (rawHtml == null) {
+        _logger.error(
+          'parse html failed for sourceUrl="$sourceUrl" '
+          'language="${ref.languageCode}" title="${ref.title}"',
+        );
+      }
       final htmlResult = rawHtml == null
           ? null
           : await _sanitizeAndStoreHtml(
@@ -113,10 +128,20 @@ class WikipediaArticleClient {
       final plainText = htmlResult?.plainText.trim().isNotEmpty == true
           ? htmlResult!.plainText.trim()
           : await _fetchPlainTextContent(ref) ?? '';
+      if (htmlResult == null && plainText.isEmpty) {
+        _logger.error(
+          'both html and plain text empty for sourceUrl="$sourceUrl" '
+          'language="${ref.languageCode}" title="${ref.title}"',
+        );
+      }
       final contentHtml = htmlResult?.html.trim() ?? '';
 
       if (plainText.isEmpty && contentHtml.isEmpty) {
         await _deleteRelativeDir(articleDirectoryRelativePath);
+        _logger.error(
+          'article dropped due to empty content for sourceUrl="$sourceUrl" '
+          'language="${ref.languageCode}" title="${ref.title}"',
+        );
         return null;
       }
 
@@ -166,9 +191,10 @@ class WikipediaArticleClient {
   }
 
   Future<Map<String, dynamic>?> _fetchSummary(WikipediaArticleRef ref) async {
+    final summaryTitlePath = ref.title.trim().replaceAll(' ', '_');
     final uri = Uri.https(
       '${ref.languageCode}.wikipedia.org',
-      '/api/rest_v1/page/summary/${ref.encodedTitle}',
+      '/api/rest_v1/page/summary/$summaryTitlePath',
     );
     await _acquireSlot();
     final response = await _apiClient.get(uri, timeout: _requestTimeout);
@@ -711,9 +737,7 @@ class WikipediaArticleClient {
 
   Future<void> _acquireSlot() {
     final myTurn = _nextSlot;
-    _nextSlot = myTurn.then(
-      (_) => Future<void>.delayed(_minRequestInterval),
-    );
+    _nextSlot = myTurn.then((_) => Future<void>.delayed(_minRequestInterval));
     return myTurn;
   }
 

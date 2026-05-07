@@ -6,7 +6,7 @@ import 'package:flymap/rating/rate_prompt_trigger.dart';
 void main() {
   group('DefaultRatePromptPolicyService', () {
     test(
-      'does not show on first trigger and shows on second trigger',
+      'does not show before fifth trigger and shows on fifth trigger',
       () async {
         final repository = _InMemoryRatePromptRepository();
         final service = DefaultRatePromptPolicyService(
@@ -14,15 +14,17 @@ void main() {
           nowProvider: () => DateTime.utc(2026, 4, 9),
         );
 
-        final first = await service.registerTriggerAndShouldShow(
-          RatePromptTrigger.flightMapDownloadSuccess,
-        );
-        final second = await service.registerTriggerAndShouldShow(
-          RatePromptTrigger.flightMapDownloadSuccess,
-        );
+        final results = <bool>[];
+        for (var i = 0; i < 5; i++) {
+          results.add(
+            await service.registerTriggerAndShouldShow(
+              RatePromptTrigger.flightMapDownloadSuccess,
+            ),
+          );
+        }
 
-        expect(first, isFalse);
-        expect(second, isTrue);
+        expect(results.sublist(0, 4), everyElement(isFalse));
+        expect(results.last, isTrue);
       },
     );
 
@@ -34,12 +36,11 @@ void main() {
         nowProvider: () => now,
       );
 
-      await service.registerTriggerAndShouldShow(
-        RatePromptTrigger.flightMapDownloadSuccess,
-      );
-      await service.registerTriggerAndShouldShow(
-        RatePromptTrigger.flightMapDownloadSuccess,
-      );
+      for (var i = 0; i < 5; i++) {
+        await service.registerTriggerAndShouldShow(
+          RatePromptTrigger.flightMapDownloadSuccess,
+        );
+      }
       await service.recordDeclined();
 
       final whileSnoozed = await service.registerTriggerAndShouldShow(
@@ -61,12 +62,11 @@ void main() {
         nowProvider: () => DateTime.utc(2026, 4, 9),
       );
 
-      await service.registerTriggerAndShouldShow(
-        RatePromptTrigger.flightMapDownloadSuccess,
-      );
-      await service.registerTriggerAndShouldShow(
-        RatePromptTrigger.flightMapDownloadSuccess,
-      );
+      for (var i = 0; i < 5; i++) {
+        await service.registerTriggerAndShouldShow(
+          RatePromptTrigger.flightMapDownloadSuccess,
+        );
+      }
       await service.recordAccepted();
 
       final third = await service.registerTriggerAndShouldShow(

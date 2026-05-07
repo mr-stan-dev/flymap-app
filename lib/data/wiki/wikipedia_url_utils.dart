@@ -32,7 +32,8 @@ class WikipediaUrlUtils {
     final rawTitleSegment = uri.pathSegments[1].trim();
     if (rawTitleSegment.isEmpty) return null;
 
-    final title = rawTitleSegment.replaceAll('_', ' ').trim();
+    final decodedTitleSegment = _decodeTitleSegment(rawTitleSegment);
+    final title = decodedTitleSegment.replaceAll('_', ' ').trim();
     if (title.isEmpty) return null;
     if (title.contains(':')) return null;
 
@@ -46,5 +47,16 @@ class WikipediaUrlUtils {
       encodedTitle: canonicalEncoded,
       canonicalUrl: canonicalUrl,
     );
+  }
+
+  static String _decodeTitleSegment(String value) {
+    try {
+      // If input is already percent-encoded (e.g. M%C3%A4laren), normalize to
+      // a decoded title first, then encode exactly once for canonical URL usage.
+      return Uri.decodeComponent(value);
+    } catch (_) {
+      // Keep existing value if it isn't valid percent-encoding.
+      return value;
+    }
   }
 }

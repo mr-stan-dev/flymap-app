@@ -6,6 +6,7 @@ import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/domain/entity/poi_wiki_preview.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/entity/route_region_type.dart';
+import 'package:flymap/domain/usecase/get_place_info_use_case.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/common/html_content_page.dart';
@@ -13,8 +14,6 @@ import 'package:flymap/ui/screens/common/live_wikipedia_page.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/read/articles/article_html_composer.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/read/articles/offline_article_html_view.dart';
 import 'package:flymap/ui/screens/shared/region_artwork.dart';
-import 'package:flymap/domain/usecase/get_place_info_use_case.dart';
-import 'package:flymap/utils/country_name_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -128,18 +127,6 @@ class _RegionInfoScreenState extends State<RegionInfoScreen> {
             dividerColor: colorScheme.outlineVariant,
             isDarkMode: isDarkMode,
           );
-    final regionPageHtml = _injectRegionHeaderIntoArticleHtml(
-      html: articleHtml,
-      title: widget.region.name,
-      subtitle: widget.typeLabel,
-      regionType: widget.region.regionType,
-      description: description,
-      isDarkMode: isDarkMode,
-      surfaceColor: colorScheme.surfaceContainerHigh,
-      borderColor: colorScheme.outlineVariant,
-      textColor: colorScheme.onSurface,
-      mutedTextColor: colorScheme.onSurfaceVariant,
-    );
 
     return Scaffold(
       backgroundColor: pageBackground,
@@ -155,83 +142,31 @@ class _RegionInfoScreenState extends State<RegionInfoScreen> {
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: OfflineArticleHtmlView(
-            htmlContent: regionPageHtml,
-            articleTitle: article.title,
-            backgroundColor: pageBackground,
-          ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: _RegionHeader(
+                title: widget.region.name,
+                subtitle: widget.typeLabel,
+                regionType: widget.region.regionType,
+                description: description,
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: OfflineArticleHtmlView(
+                  htmlContent: articleHtml,
+                  articleTitle: article.title,
+                  backgroundColor: pageBackground,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
-  }
-
-  String _injectRegionHeaderIntoArticleHtml({
-    required String html,
-    required String title,
-    required String subtitle,
-    required String description,
-    required bool isDarkMode,
-    required Color surfaceColor,
-    required Color borderColor,
-    required Color textColor,
-    required Color mutedTextColor,
-    required RouteRegionType regionType,
-  }) {
-    final surfaceHex = _cssHex(surfaceColor);
-    final borderHex = _cssHex(borderColor);
-    final textHex = _cssHex(textColor);
-    final mutedHex = _cssHex(mutedTextColor);
-    final cardHtml =
-        '''
-<div style="margin: 0 0 14px; padding: 14px; border-radius: 14px; border: 1px solid $borderHex; background: $surfaceHex;">
-  <div style="display:flex; gap:12px; align-items:flex-start;">
-    ${_generateArtworkHtml(title: title, regionType: regionType, isDarkMode: isDarkMode, mutedHex: mutedHex)}
-    <div style="flex:1; min-width:0;">
-      <div style="font-size:20px; line-height:1.25; font-weight:700; color:$textHex;">${_escapeHtml(title)}</div>
-      <div style="margin-top:4px; font-size:14px; color:$mutedHex;">${_escapeHtml(subtitle)}</div>
-      <div style="margin-top:8px; font-size:15px; line-height:1.45; color:$textHex;">${_escapeHtml(description)}</div>
-    </div>
-  </div>
-</div>
-''';
-    const marker = '<div class="offline-shell">';
-    if (html.contains(marker)) {
-      return html.replaceFirst(marker, '$marker\n$cardHtml');
-    }
-    final bodyOpen = RegExp(r'<body[^>]*>', caseSensitive: false);
-    if (bodyOpen.hasMatch(html)) {
-      return html.replaceFirstMapped(
-        bodyOpen,
-        (m) => '${m.group(0)}\n$cardHtml',
-      );
-    }
-    return '$cardHtml\n$html';
-  }
-
-  String _generateArtworkHtml({
-    required String title,
-    required RouteRegionType regionType,
-    required bool isDarkMode,
-    required String mutedHex,
-  }) {
-    if (regionType == RouteRegionType.country) {
-      final code = CountryNameUtils.toCode(title);
-      if (code != null) {
-        // We use an emoji as a simple placeholder in HTML for now if we don't want to deal with asset URLs in webview
-        // Or we could try to use a flag CDN
-        return '<div style="width:72px; height:72px; border-radius:12px; background:${isDarkMode ? '#2a2a2a' : '#e9edf2'}; display:flex; align-items:center; justify-content:center; font-size:42px;">${_countryCodeToEmoji(code)}</div>';
-      }
-    }
-    return '<div style="width:72px; height:72px; border-radius:12px; background:${isDarkMode ? '#2a2a2a' : '#e9edf2'}; display:flex; align-items:center; justify-content:center; color:$mutedHex; font-size:24px;">🗺</div>';
-  }
-
-  String _countryCodeToEmoji(String code) {
-    if (code.length != 2) return '🏳';
-    final int first = code.codeUnitAt(0) + 127397;
-    final int second = code.codeUnitAt(1) + 127397;
-    return String.fromCharCode(first) + String.fromCharCode(second);
   }
 
   String _wrapPlainTextArticleAsHtml({
@@ -276,11 +211,6 @@ class _RegionInfoScreenState extends State<RegionInfoScreen> {
       dividerColor: dividerColor,
       isDarkMode: isDarkMode,
     );
-  }
-
-  String _cssHex(Color color) {
-    final rgb = color.toARGB32() & 0x00FFFFFF;
-    return '#${rgb.toRadixString(16).padLeft(6, '0')}';
   }
 
   String _escapeHtml(String value) {

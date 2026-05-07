@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flymap/data/wiki/wikipedia_article_client.dart';
 import 'package:flymap/domain/entity/flight_article.dart';
+import 'package:flymap/logger.dart';
 
 class WikipediaArticlesDownloadProgress {
   const WikipediaArticlesDownloadProgress({
@@ -35,6 +36,7 @@ class DownloadWikipediaArticlesUseCase {
   static const _downloadConcurrency = 3;
 
   final WikipediaArticleClient _articleClient;
+  final _logger = const Logger('DownloadWikipediaArticlesUseCase');
   bool _cancelled = false;
 
   void cancel() {
@@ -84,9 +86,15 @@ class DownloadWikipediaArticlesUseCase {
             downloadedArticles.add(article);
           } else {
             failed++;
+            _logger.error(
+              'Article download returned null for url="$url" bundle="$bundleId"',
+            );
           }
-        } catch (_) {
+        } catch (e) {
           failed++;
+          _logger.error(
+            'Article download threw for url="$url" bundle="$bundleId": $e',
+          );
         }
 
         completed++;
@@ -111,4 +119,3 @@ class DownloadWikipediaArticlesUseCase {
     );
   }
 }
-

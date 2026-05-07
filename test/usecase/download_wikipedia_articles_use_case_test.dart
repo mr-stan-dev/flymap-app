@@ -62,8 +62,9 @@ void main() {
       );
 
       expect(result.cancelled, isTrue);
-      expect(result.articles.length, 1);
-      expect(client.calls, 1);
+      // Cancellation is cooperative; in-flight worker requests may still finish.
+      expect(result.articles.length, inInclusiveRange(1, 2));
+      expect(client.calls, inInclusiveRange(1, 2));
     });
   });
 }

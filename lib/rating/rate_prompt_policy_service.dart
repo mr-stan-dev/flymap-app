@@ -18,7 +18,7 @@ class DefaultRatePromptPolicyService implements RatePromptPolicyService {
        _nowProvider = nowProvider ?? DateTime.now,
        _declineSnooze = declineSnooze;
 
-  static const _minTriggerCountToPrompt = 2;
+  static const _minTriggerCountToPrompt = 5;
 
   final RatePromptRepository _repository;
   final DateTime Function() _nowProvider;

@@ -353,6 +353,7 @@ class _GeoAwarenessLoadingState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
+      alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,

@@ -7,6 +7,7 @@ import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/poi_wiki_preview.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/layers/flight_route_map_layers.dart';
@@ -15,7 +16,6 @@ import 'package:flymap/ui/map/layers/poi_layer.dart';
 import 'package:flymap/ui/map/map_style_safety.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_preview_bottom_sheet.dart';
-import 'package:flymap/domain/usecase/get_place_info_use_case.dart';
 import 'package:flymap/utils/url_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart' as ll;
@@ -80,8 +80,6 @@ class _RouteOverviewMapWidgetState extends State<RouteOverviewMapWidget> {
   static final Map<String, Uint8List> _assetBytesCache = {};
 
   late final AppAnalytics _analytics = GetIt.I.get<AppAnalytics>();
-  late final GetPlaceInfoUseCase _wikiPreviewUseCase = GetIt.I
-      .get<GetPlaceInfoUseCase>();
 
   late final _center = MapUtils.routeCenter(widget.route).toMapLatLon();
 
@@ -263,13 +261,26 @@ class _RouteOverviewMapWidgetState extends State<RouteOverviewMapWidget> {
     );
 
     _isPoiDialogVisible = true;
+    final storedPoi = qid.isNotEmpty
+        ? widget.flightInfo.poi.where((p) => p.qid == qid).firstOrNull
+        : null;
+    final preloadedPreview = storedPoi == null
+        ? null
+        : PoiWikiPreview(
+            qid: qid,
+            title: storedPoi.name,
+            summary: storedPoi.description,
+            htmlContent: storedPoi.descriptionHtml,
+            sourceUrl: storedPoi.wiki,
+            languageCode: '',
+          );
     await showPoiPreviewDialog(
       context: context,
       name: name,
       typeRaw: typeRaw,
       qid: qid,
       actionMode: PoiPreviewActionMode.openOnly,
-      wikiPreviewUseCase: _wikiPreviewUseCase,
+      preloadedPreview: preloadedPreview,
     );
   }
 

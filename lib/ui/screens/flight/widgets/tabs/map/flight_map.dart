@@ -63,7 +63,6 @@ class _FlightMapState extends State<FlightMap> {
     logger: _logger,
     flight: widget.flight,
     analytics: GetIt.I.get(),
-    wikiPreviewUseCase: GetIt.I.get(),
     connectivityChecker: GetIt.I.get(),
   );
   late final FlightMapUserLocationController _userLocationController =

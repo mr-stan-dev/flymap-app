@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flymap/domain/entity/poi_wiki_preview.dart';
 import 'package:flymap/domain/entity/route_region.dart';
+import 'package:flymap/logger.dart';
 import 'package:flymap/repository/poi_wiki_preview_repository.dart';
 
 class RegionWikiArticlesDownloadProgress {
@@ -40,6 +41,7 @@ class DownloadRegionWikiArticlesUseCase {
   static const _progressChunkSize = 50;
 
   final PoiWikiPreviewRepository _repository;
+  final _logger = const Logger('DownloadRegionWikiArticlesUseCase');
   bool _cancelled = false;
 
   int downloadTargetCount(List<RouteRegion> regions) =>
@@ -117,6 +119,16 @@ class DownloadRegionWikiArticlesUseCase {
           total: qids.length,
           failed: failed,
         ),
+      );
+    }
+
+    if (failed > 0) {
+      final unresolved = qids
+          .where((qid) => !previews.containsKey(qid))
+          .toList(growable: false);
+      _logger.error(
+        'Failed to resolve ${unresolved.length}/${qids.length} region QIDs '
+        'to wiki previews. Sample=${unresolved.take(5).toList()}',
       );
     }
 
