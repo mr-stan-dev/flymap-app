@@ -1821,8 +1821,8 @@ class TranslationsFlightRouteEn {
 	/// en: 'You are flying over:'
 	String get flyingOverLabel => 'You are flying over:';
 
-	/// en: 'Pro region'
-	String get premiumLockedChipLabel => 'Pro region';
+	/// en: 'Unlock'
+	String get premiumLockedChipLabel => 'Unlock';
 
 	/// en: 'Unlock full route timeline'
 	String get premiumGateTitle => 'Unlock full route timeline';
@@ -2502,7 +2502,7 @@ extension on Translations {
 			'flight.route.nextRegionLabel' => 'Next',
 			'flight.route.etaLabel' => ({required Object time}) => 'ETA: ${time}',
 			'flight.route.flyingOverLabel' => 'You are flying over:',
-			'flight.route.premiumLockedChipLabel' => 'Pro region',
+			'flight.route.premiumLockedChipLabel' => 'Unlock',
 			'flight.route.premiumGateTitle' => 'Unlock full route timeline',
 			'flight.route.premiumGateBody' => 'Upgrade to Pro to see all regions along your route and timeline details.',
 			'flight.route.premiumGateBodyWithCount' => ({required Object count}) => 'Unlock all ${count} regions on this route with Premium.',

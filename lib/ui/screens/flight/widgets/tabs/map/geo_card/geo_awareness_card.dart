@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/subscription/paywall_source.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/telemetry_searching_overlay.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 import 'package:flymap/ui/screens/shared/premium/route_premium_gate_interactions.dart';
 import 'package:flymap/domain/policy/route_region_premium_gate_policy.dart';
@@ -135,6 +137,7 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
           return previous.currentRegionIds != current.currentRegionIds ||
               previous.nextRegionId != current.nextRegionId ||
               previous.nextRegionEtaMinutes != current.nextRegionEtaMinutes ||
+              previous.gpsStatus != current.gpsStatus ||
               previous.routeRegions != current.routeRegions;
         }
         return previous.runtimeType != current.runtimeType;
@@ -146,12 +149,10 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
         final isProUser = context.select(
           (SubscriptionCubit cubit) => cubit.state.isPro,
         );
-        if (state.currentRegionIds.isEmpty &&
-            (state.nextRegionId == null || state.nextRegionId!.isEmpty)) {
+        final allRegions = state.routeRegions;
+        if (allRegions.isEmpty) {
           return const SizedBox.shrink();
         }
-
-        final allRegions = state.routeRegions;
         final orderedByDistance = RouteRegionPremiumGatePolicy.orderByDistance(
           allRegions,
         );
@@ -167,10 +168,10 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
         final nextPrimary = state.nextRegionId == null
             ? null
             : _findRegion(allRegions, state.nextRegionId!);
-
-        if (currentRegions.isEmpty && nextPrimary == null) {
-          return const SizedBox.shrink();
-        }
+        final hasRegionContent =
+            currentRegions.isNotEmpty || nextPrimary != null;
+        final isGpsSearching = state.gpsStatus == GpsStatus.searching;
+        final showLoadingState = !hasRegionContent;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -194,41 +195,51 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      if (currentRegions.isNotEmpty)
-                        _InlineLabelChip(
-                          text: '${context.t.flight.route.nowLabel}:',
-                        ),
-                      for (final region in currentRegions)
-                        _RegionInlineChip(
-                          region: region,
-                          isLocked: premiumRegionIds.contains(region.qid),
-                          onTap: () => _onRegionChipTap(
-                            region,
-                            isLocked: premiumRegionIds.contains(region.qid),
-                          ),
-                        ),
-                      if (nextPrimary != null)
-                        _InlineLabelChip(
-                          text: '${context.t.flight.route.nextRegionLabel}:',
-                        ),
-                      if (nextPrimary != null)
-                        _RegionInlineChip(
-                          region: nextPrimary,
-                          isLocked: premiumRegionIds.contains(nextPrimary.qid),
-                          onTap: () => _onRegionChipTap(
-                            nextPrimary,
-                            isLocked: premiumRegionIds.contains(
-                              nextPrimary.qid,
+                  if (showLoadingState)
+                    const _GeoAwarenessLoadingState()
+                  else
+                    TelemetrySearchingOverlay(
+                      enabled: isGpsSearching,
+                      child: Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          if (currentRegions.isNotEmpty)
+                            _InlineLabelChip(
+                              text: '${context.t.flight.route.nowLabel}:',
                             ),
-                          ),
-                        ),
-                    ],
-                  ),
+                          for (final region in currentRegions)
+                            _RegionInlineChip(
+                              region: region,
+                              isLocked: premiumRegionIds.contains(region.qid),
+                              onTap: () => _onRegionChipTap(
+                                region,
+                                isLocked: premiumRegionIds.contains(region.qid),
+                              ),
+                            ),
+                          if (nextPrimary != null)
+                            _InlineLabelChip(
+                              text:
+                                  '${context.t.flight.route.nextRegionLabel}:',
+                            ),
+                          if (nextPrimary != null)
+                            _RegionInlineChip(
+                              region: nextPrimary,
+                              isNext: true,
+                              isLocked: premiumRegionIds.contains(
+                                nextPrimary.qid,
+                              ),
+                              onTap: () => _onRegionChipTap(
+                                nextPrimary,
+                                isLocked: premiumRegionIds.contains(
+                                  nextPrimary.qid,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -278,16 +289,22 @@ class _RegionInlineChip extends StatelessWidget {
     required this.region,
     required this.isLocked,
     required this.onTap,
+    this.isNext = false,
   });
 
   final RouteRegion region;
   final bool isLocked;
   final VoidCallback onTap;
+  final bool isNext;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final bgAlpha = isNext ? 0.82 : 1.0;
+    final textAlpha = isNext ? 0.9 : 1.0;
+
     return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      color: colorScheme.surfaceContainerLow.withValues(alpha: bgAlpha),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -316,11 +333,46 @@ class _RegionInlineChip extends StatelessWidget {
                 isLocked
                     ? context.t.flight.route.premiumLockedChipLabel
                     : region.name,
-                style: Theme.of(context).textTheme.labelSmall,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: textAlpha),
+                ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _GeoAwarenessLoadingState extends StatelessWidget {
+  const _GeoAwarenessLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2.2),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            context.t.flight.dashboard.gpsSearching,
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ],
       ),
     );
   }

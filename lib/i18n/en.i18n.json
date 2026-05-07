@@ -525,7 +525,7 @@
       "nextRegionLabel": "Next",
       "etaLabel": "ETA: $time",
       "flyingOverLabel": "You are flying over:",
-      "premiumLockedChipLabel": "Pro region",
+      "premiumLockedChipLabel": "Unlock",
       "premiumGateTitle": "Unlock full route timeline",
       "premiumGateBody": "Upgrade to Pro to see all regions along your route and timeline details.",
       "premiumGateBodyWithCount": "Unlock all $count regions on this route with Premium.",

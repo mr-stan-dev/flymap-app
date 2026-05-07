@@ -48,6 +48,10 @@ class _FlightScreenViewState extends State<_FlightScreenView> {
           context,
         ).colorScheme.onSurface.withValues(alpha: 0.72),
         showUnselectedLabels: true,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
+        selectedIconTheme: const IconThemeData(size: 26),
+        unselectedIconTheme: const IconThemeData(size: 24),
         currentIndex: _tabIndex,
         onTap: (index) => setState(() => _tabIndex = index),
         items: [
