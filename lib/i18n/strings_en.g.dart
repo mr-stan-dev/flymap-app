@@ -1007,14 +1007,17 @@ class TranslationsOnboardingEn {
 	/// en: 'Unlock detailed maps, places and articles — even offline.'
 	String get proStepSubtitle => 'Unlock detailed maps, places and articles — even offline.';
 
-	/// en: 'Detailed maps of your flight'
-	String get proFeatureMaps => 'Detailed maps of your flight';
+	/// en: 'Detailed maps for your flight'
+	String get proFeatureMaps => 'Detailed maps for your flight';
 
-	/// en: 'Interesting places you may spot'
-	String get proFeaturePlaces => 'Interesting places you may spot';
+	/// en: '10x more places along the route'
+	String get proFeaturePlaces => '10x more places along the route';
 
-	/// en: 'Full pack of offline articles'
-	String get proFeatureArticles => 'Full pack of offline articles';
+	/// en: 'A detailed timeline of your entire flight'
+	String get proFeatureTimeline => 'A detailed timeline of your entire flight';
+
+	/// en: 'Complete pack of offline articles'
+	String get proFeatureArticles => 'Complete pack of offline articles';
 
 	/// en: 'Unlock Pro'
 	String get unlockPro => 'Unlock Pro';
@@ -2579,9 +2582,10 @@ extension on Translations {
 			'onboarding.interestRivers' => 'Rivers & lakes',
 			'onboarding.proTitle' => 'Get more from every flight',
 			'onboarding.proStepSubtitle' => 'Unlock detailed maps, places and articles — even offline.',
-			'onboarding.proFeatureMaps' => 'Detailed maps of your flight',
-			'onboarding.proFeaturePlaces' => 'Interesting places you may spot',
-			'onboarding.proFeatureArticles' => 'Full pack of offline articles',
+			'onboarding.proFeatureMaps' => 'Detailed maps for your flight',
+			'onboarding.proFeaturePlaces' => '10x more places along the route',
+			'onboarding.proFeatureTimeline' => 'A detailed timeline of your entire flight',
+			'onboarding.proFeatureArticles' => 'Complete pack of offline articles',
 			'onboarding.unlockPro' => 'Unlock Pro',
 			'onboarding.continueFree' => 'Continue Free',
 			'onboarding.proActiveTitle' => 'Congratulations!',

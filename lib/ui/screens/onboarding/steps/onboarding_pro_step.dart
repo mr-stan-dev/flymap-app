@@ -40,6 +40,11 @@ class OnboardingProStep extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _ProFeatureItem(
+            icon: Icons.timeline,
+            text: context.t.onboarding.proFeatureTimeline,
+          ),
+          const SizedBox(height: 12),
+          _ProFeatureItem(
             icon: Icons.place_rounded,
             text: context.t.onboarding.proFeaturePlaces,
           ),
