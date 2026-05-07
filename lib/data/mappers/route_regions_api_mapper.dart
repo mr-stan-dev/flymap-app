@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:flymap/domain/policy/flight_duration_estimate_policy.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/entity/route_timeline.dart';
 import 'package:flymap/domain/entity/route_region_type.dart';
@@ -18,11 +21,15 @@ class RouteRegionsApiMapper {
       }
     }
 
+    final estimatedRouteDistanceKm = _estimateRouteDistanceKm(regions);
     final totalRouteMinutes =
-        _toInt(metaRaw is Map ? metaRaw['totalRouteMinutes'] : null) ??
-        _kmToMinutesFromRegionPath(
-          regions.isEmpty ? 0 : regions.last.pathFirstEncounterKm,
+        FlightDurationEstimatePolicy.normalizeTotalMinutes(
+          apiTotalMinutes: _toInt(
+            metaRaw is Map ? metaRaw['totalRouteMinutes'] : null,
+          ),
+          distanceKm: estimatedRouteDistanceKm,
           cruiseSpeedKmh: cruiseSpeedKmh,
+          roundToMinutes: 5,
         );
 
     return RouteTimeline(
@@ -86,14 +93,14 @@ class RouteRegionsApiMapper {
     return RouteRegionGeometry(type: type, geoJson: geo);
   }
 
-  int _kmToMinutesFromRegionPath(
-    double distanceKm, {
-    required int cruiseSpeedKmh,
-  }) {
-    if (!distanceKm.isFinite || distanceKm <= 0 || cruiseSpeedKmh <= 0) {
-      return 0;
+  double _estimateRouteDistanceKm(List<RouteRegion> regions) {
+    if (regions.isEmpty) return 0;
+    var maxEncounter = 0.0;
+    for (final region in regions) {
+      final regionEnd = region.pathFirstEncounterKm + region.pathLengthInsideKm;
+      maxEncounter = math.max(maxEncounter, regionEnd);
     }
-    return ((distanceKm * 60) / cruiseSpeedKmh).round();
+    return maxEncounter;
   }
 
   double? _toFiniteDouble(dynamic raw) {

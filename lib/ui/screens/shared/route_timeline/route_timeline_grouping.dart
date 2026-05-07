@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:equatable/equatable.dart';
+import 'package:flymap/domain/policy/flight_duration_estimate_policy.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/entity/route_region_type.dart';
 
@@ -104,12 +105,11 @@ class RouteTimelineGrouping {
     required int cruiseSpeedKmh,
     int minuteStep = timelineMinuteStep,
   }) {
-    if (!distanceKm.isFinite || distanceKm <= 0 || cruiseSpeedKmh <= 0) {
-      return 0;
-    }
-    final rawMinutes = (distanceKm * 60) / cruiseSpeedKmh;
-    if (minuteStep <= 1) return rawMinutes.round();
-    return ((rawMinutes / minuteStep).round()) * minuteStep;
+    return FlightDurationEstimatePolicy.estimateCruiseMinutes(
+      distanceKm: distanceKm,
+      cruiseSpeedKmh: cruiseSpeedKmh,
+      roundToMinutes: minuteStep <= 1 ? 1 : minuteStep,
+    );
   }
 
   static int _compareByRank(RouteRegion a, RouteRegion b) {
@@ -210,10 +210,10 @@ class RouteTimelineGrouping {
   }
 
   static int _kmToMinutes(double distanceKm, {required int cruiseSpeedKmh}) {
-    if (!distanceKm.isFinite || distanceKm <= 0 || cruiseSpeedKmh <= 0) {
-      return 0;
-    }
-    return (((distanceKm * 60) / cruiseSpeedKmh) / timelineMinuteStep).round() *
-        timelineMinuteStep;
+    return FlightDurationEstimatePolicy.estimateTotalMinutes(
+      distanceKm: distanceKm,
+      cruiseSpeedKmh: cruiseSpeedKmh,
+      roundToMinutes: timelineMinuteStep,
+    );
   }
 }

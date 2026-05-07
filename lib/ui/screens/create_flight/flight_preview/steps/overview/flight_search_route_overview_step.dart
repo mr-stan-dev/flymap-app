@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/policy/flight_duration_estimate_policy.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/policy/route_region_premium_gate_policy.dart';
 import 'package:flymap/i18n/strings.g.dart';
@@ -334,10 +335,11 @@ class _FlightSearchRouteOverviewStepState
   }
 
   int _kmToMinutes(double distanceKm, {required int cruiseSpeedKmh}) {
-    if (!distanceKm.isFinite || distanceKm <= 0 || cruiseSpeedKmh <= 0) {
-      return 0;
-    }
-    return (((distanceKm * 60) / cruiseSpeedKmh) / 5).round() * 5;
+    return FlightDurationEstimatePolicy.estimateTotalMinutes(
+      distanceKm: distanceKm,
+      cruiseSpeedKmh: cruiseSpeedKmh,
+      roundToMinutes: 5,
+    );
   }
 
   int _regionMinute(RouteRegion region, {required int cruiseSpeedKmh}) {
