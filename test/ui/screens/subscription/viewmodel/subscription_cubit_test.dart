@@ -103,42 +103,13 @@ void main() {
       expect(cubit.state.products.first.packageId, 'weekly');
     });
 
-    test('maps create-flight source for wiki-only gate', () async {
+    test('maps create-flight source for gate', () async {
       repository.paywallResult = SubscriptionPaywallResult.cancelled;
 
-      await cubit.presentPaywallForCreateFlight(
-        shouldUpgradeForArticles: true,
-        shouldUpgradeForMapConfig: false,
-      );
+      await cubit.presentPaywallForCreateFlight();
 
       final event = analytics.events.single as PaywallResultEvent;
       expect(event.source, PaywallSource.wikiLimit);
-      expect(event.result, SubscriptionPaywallResult.cancelled);
-    });
-
-    test('maps create-flight source for map-only gate', () async {
-      repository.paywallResult = SubscriptionPaywallResult.cancelled;
-
-      await cubit.presentPaywallForCreateFlight(
-        shouldUpgradeForArticles: false,
-        shouldUpgradeForMapConfig: true,
-      );
-
-      final event = analytics.events.single as PaywallResultEvent;
-      expect(event.source, PaywallSource.mapPro);
-      expect(event.result, SubscriptionPaywallResult.cancelled);
-    });
-
-    test('maps create-flight source for combined gate', () async {
-      repository.paywallResult = SubscriptionPaywallResult.cancelled;
-
-      await cubit.presentPaywallForCreateFlight(
-        shouldUpgradeForArticles: true,
-        shouldUpgradeForMapConfig: true,
-      );
-
-      final event = analytics.events.single as PaywallResultEvent;
-      expect(event.source, PaywallSource.wikiAndMapPro);
       expect(event.result, SubscriptionPaywallResult.cancelled);
     });
 

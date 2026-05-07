@@ -33,12 +33,16 @@ class HomeFlightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final showProStyling = flight.hasProAccess;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final route = flight.route;
     final departure = route.departure;
     final arrival = route.arrival;
-    final distance = UnitFormatUtils.formatDistance(route.distanceInKm, distanceUnit);
+    final distance = UnitFormatUtils.formatDistance(
+      route.distanceInKm,
+      distanceUnit,
+    );
     final offlineSize = _formatOfflineSize(flight);
     final poiCount = flight.info.poi.length;
     final articleCount = flight.info.articles.length;
@@ -115,7 +119,11 @@ class HomeFlightCard extends StatelessWidget {
             _SavedFlightCardBody(
               distance: distance,
               offlineSize: offlineSize,
-              createdLabel: _createdLabel(flight.createdAt, format: dateDisplayFormat),
+              createdLabel: _createdLabel(
+                flight.createdAt,
+                format: dateDisplayFormat,
+              ),
+              hasProAccess: showProStyling,
               poiCount: poiCount,
               articleCount: articleCount,
               departureCode: departure.displayCode,
@@ -249,6 +257,7 @@ class _SavedFlightCardBody extends StatelessWidget {
     required this.distance,
     required this.offlineSize,
     required this.createdLabel,
+    required this.hasProAccess,
     required this.poiCount,
     required this.articleCount,
     required this.departureCode,
@@ -259,6 +268,7 @@ class _SavedFlightCardBody extends StatelessWidget {
   final String distance;
   final String offlineSize;
   final String createdLabel;
+  final bool hasProAccess;
   final int poiCount;
   final int articleCount;
   final String departureCode;
@@ -277,10 +287,7 @@ class _SavedFlightCardBody extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
-            MetaPill(
-              icon: Icons.route,
-              text: distance,
-            ),
+            MetaPill(icon: Icons.route, text: distance),
             MetaPill(
               icon: Icons.place_outlined,
               text: context.t.home.placesCount(count: poiCount),
@@ -293,11 +300,29 @@ class _SavedFlightCardBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Text(
-          '$offlineSize • $createdLabel',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
+        Row(
+          children: [
+            if (hasProAccess) ...[
+              const Icon(
+                Icons.workspace_premium_rounded,
+                size: 12,
+                color: DsBrandColors.proAmber,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '• ',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            Text(
+              '$offlineSize • $createdLabel',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 14),
         HomeRoutePreviewStrip(

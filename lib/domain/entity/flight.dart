@@ -24,6 +24,9 @@ enum FlightStatus {
 }
 
 class Flight extends Equatable {
+  static const String accessTierBasic = 'basic';
+  static const String accessTierPro = 'pro';
+
   final String id;
   final FlightRoute route;
   final List<FlightMap> maps;
@@ -31,6 +34,7 @@ class Flight extends Equatable {
   final DateTime createdAt;
   final DateTime? completedAt;
   final FlightStatus status;
+  final String flightAccessTier;
 
   const Flight({
     required this.id,
@@ -40,7 +44,10 @@ class Flight extends Equatable {
     required this.createdAt,
     this.completedAt,
     this.status = FlightStatus.upcoming,
+    this.flightAccessTier = accessTierBasic,
   });
+
+  bool get hasProAccess => flightAccessTier == accessTierPro;
 
   FlightMap? get flightMap => maps.isNotEmpty ? maps[0] : null;
 
@@ -56,5 +63,14 @@ class Flight extends Equatable {
   String get routeName => '${departure.nameShort} -> ${arrival.nameShort}';
 
   @override
-  List<Object?> get props => [id, route, maps, info, createdAt, completedAt, status];
+  List<Object?> get props => [
+    id,
+    route,
+    maps,
+    info,
+    createdAt,
+    completedAt,
+    status,
+    flightAccessTier,
+  ];
 }

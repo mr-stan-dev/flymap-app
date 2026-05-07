@@ -52,6 +52,7 @@ class FlightsDBService {
       createdAt: existing.createdAt,
       completedAt: existing.completedAt,
       status: existing.status,
+      flightAccessTier: existing.flightAccessTier,
     );
     await saveOrUpdateFlight(updated);
     return true;
@@ -68,6 +69,7 @@ class FlightsDBService {
       createdAt: existing.createdAt,
       completedAt: existing.completedAt,
       status: existing.status,
+      flightAccessTier: existing.flightAccessTier,
     );
     await saveOrUpdateFlight(updated);
     return true;
@@ -88,6 +90,7 @@ class FlightsDBService {
       createdAt: existing.createdAt,
       completedAt: completedAt ?? existing.completedAt,
       status: status,
+      flightAccessTier: existing.flightAccessTier,
     );
     await saveOrUpdateFlight(updated);
     return true;
@@ -276,6 +279,7 @@ class FlightsDBService {
       createdAt: baseFlight.createdAt,
       completedAt: baseFlight.completedAt,
       status: baseFlight.status,
+      flightAccessTier: baseFlight.flightAccessTier,
     );
   }
 

@@ -8,7 +8,6 @@ import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/widgets/complete_flight_confirmation_dialog.dart';
 import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dialog.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/shared/route_copy_builder.dart';
-import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 import 'package:flymap/ui/theme/app_theme_ext.dart';
 import 'package:flymap/ui/widgets/pro_widgets.dart';
 import 'package:flymap/utils/route_utils.dart';
@@ -36,117 +35,113 @@ class FlightAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isProUser = context.select(
-      (SubscriptionCubit cubit) => cubit.state.isPro,
-    );
+    final showProStyling = flight.hasProAccess;
     return SafeArea(
       bottom: false,
       child: Padding(
-          padding: const EdgeInsets.all(_outerPadding),
-          child: Container(
-            decoration: BoxDecoration(
-              color: context.colorTheme.backgroundPrimary.withValues(
-                alpha: 0.7,
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Stack(
-                children: [
-                  if (isProUser)
-                    const Positioned(
-                      left: 0,
-                      top: 0,
-                      right: 0,
-                      child: ProGradientStrip(height: 3),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.all(_innerPadding),
-                    child: Row(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: context.colorTheme.backgroundPrimary,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: IconButton(
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      RouteUtils.routeCities(flight.route),
-                                      style: context.textTheme.button18Bold,
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                RouteUtils.routeCountries(flight.route),
-                                style: context.textTheme.caption14Regular
-                                    .copyWith(
-                                      color: context.colorTheme.textSecondary,
-                                    ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: context.colorTheme.backgroundPrimary,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: PopupMenuButton<String>(
-                            icon: const Icon(Icons.more_vert),
-                            onSelected: (value) async {
-                              await _handleMenuAction(context, value);
-                            },
-                            itemBuilder: (context) => [
-                              if (_shareRouteMenuEnabled)
-                                PopupMenuItem(
-                                  value: 'share_route',
-                                  child: Text(context.t.flight.shareRoute),
-                                ),
-                              PopupMenuItem(
-                                value: 'copy_route',
-                                child: Text(context.t.flight.copyRoute),
-                              ),
-                              PopupMenuDivider(),
-                              PopupMenuItem(
-                                value: 'complete_flight',
-                                child: Text(context.t.home.completeFlight),
-                              ),
-                              PopupMenuItem(
-                                value: 'delete_flight',
-                                child: Text(context.t.flight.deleteFlight),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+        padding: const EdgeInsets.all(_outerPadding),
+        child: Container(
+          decoration: BoxDecoration(
+            color: context.colorTheme.backgroundPrimary.withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Stack(
+              children: [
+                if (showProStyling)
+                  const Positioned(
+                    left: 0,
+                    top: 0,
+                    right: 0,
+                    child: ProGradientStrip(height: 3),
                   ),
-                ],
-              ),
+                Padding(
+                  padding: const EdgeInsets.all(_innerPadding),
+                  child: Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: context.colorTheme.backgroundPrimary,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    RouteUtils.routeCities(flight.route),
+                                    style: context.textTheme.button18Bold,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              RouteUtils.routeCountries(flight.route),
+                              style: context.textTheme.caption14Regular
+                                  .copyWith(
+                                    color: context.colorTheme.textSecondary,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: context.colorTheme.backgroundPrimary,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: PopupMenuButton<String>(
+                          icon: const Icon(Icons.more_vert),
+                          onSelected: (value) async {
+                            await _handleMenuAction(context, value);
+                          },
+                          itemBuilder: (context) => [
+                            if (_shareRouteMenuEnabled)
+                              PopupMenuItem(
+                                value: 'share_route',
+                                child: Text(context.t.flight.shareRoute),
+                              ),
+                            PopupMenuItem(
+                              value: 'copy_route',
+                              child: Text(context.t.flight.copyRoute),
+                            ),
+                            PopupMenuDivider(),
+                            PopupMenuItem(
+                              value: 'complete_flight',
+                              child: Text(context.t.home.completeFlight),
+                            ),
+                            PopupMenuItem(
+                              value: 'delete_flight',
+                              child: Text(context.t.flight.deleteFlight),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
+      ),
     );
   }
 
@@ -175,9 +170,9 @@ class FlightAppBar extends StatelessWidget {
       case 'complete_flight':
         final result = await CompleteFlightConfirmationDialog.show(context);
         if (result == null || !context.mounted) return;
-        final completed = await context.read<FlightScreenCubit>().completeFlight(
-          deleteOfflineData: result.deleteOfflineData,
-        );
+        final completed = await context
+            .read<FlightScreenCubit>()
+            .completeFlight(deleteOfflineData: result.deleteOfflineData);
         if (!completed || !context.mounted) return;
         AppRouter.goHome(context);
         break;

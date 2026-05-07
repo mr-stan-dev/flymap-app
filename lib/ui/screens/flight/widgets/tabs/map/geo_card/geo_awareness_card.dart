@@ -146,9 +146,10 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
         if (state is! FlightScreenLoaded) {
           return const SizedBox.shrink();
         }
-        final isProUser = context.select(
+        final isCurrentUserPro = context.select(
           (SubscriptionCubit cubit) => cubit.state.isPro,
         );
+        final isProUser = isCurrentUserPro || state.flight.hasProAccess;
         final allRegions = state.routeRegions;
         if (allRegions.isEmpty) {
           return const SizedBox.shrink();

@@ -71,9 +71,10 @@ class _LoadedRouteTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final info = state.flight.info;
-    final isProUser = context.select(
+    final isCurrentUserPro = context.select(
       (SubscriptionCubit cubit) => cubit.state.isPro,
     );
+    final isProUser = isCurrentUserPro || state.flight.hasProAccess;
     final routeRegions = state.routeRegions;
     final route = state.flight.route;
     final hasRegionTimeline = routeRegions.isNotEmpty;

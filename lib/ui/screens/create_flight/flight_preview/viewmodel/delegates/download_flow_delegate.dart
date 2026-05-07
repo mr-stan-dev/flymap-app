@@ -209,9 +209,10 @@ class DownloadFlowDelegate {
     );
     final hasArticlePhase = initialHasArticlePhase;
     var enrichedInfo = _cubit.state.flightInfo.copyWith(articles: const []);
+    final mapDetailLevel = isPro ? MapDetailLevel.pro : MapDetailLevel.basic;
     final effectiveMaxZoom = MapDownloadConfig.resolveMaxZoom(
       distanceKm: route.distanceInKm,
-      detailLevel: _cubit.state.selectedMapDetailLevel,
+      detailLevel: mapDetailLevel,
     );
     final routeLengthKm = route.distanceInKm;
 
@@ -240,7 +241,7 @@ class DownloadFlowDelegate {
       _cubit._analytics.log(
         DownloadStartedEvent(
           routeLengthKm: routeLengthKm,
-          mapDetail: _cubit.state.selectedMapDetailLevel,
+          mapDetail: mapDetailLevel,
           articlesSelectedCount: selectedUrls.length,
           isProUser: isPro,
         ),
@@ -250,7 +251,7 @@ class DownloadFlowDelegate {
       _cubit._crashlytics.setContext(
         screen: 'create_flight_download',
         routeLengthKm: routeLengthKm.round(),
-        mapDetail: _cubit.state.selectedMapDetailLevel.name,
+        mapDetail: mapDetailLevel.name,
         articlesSelectedCount: selectedUrls.length,
         downloadStage: 'initializing',
       ),
@@ -260,6 +261,7 @@ class DownloadFlowDelegate {
       flightId: flightId,
       route: route,
       infoForSave: enrichedInfo,
+      flightAccessTier: isPro ? Flight.accessTierPro : Flight.accessTierBasic,
       effectiveMaxZoom: effectiveMaxZoom,
       routeLengthKm: routeLengthKm,
     );
@@ -718,6 +720,7 @@ class DownloadFlowDelegate {
     required String flightId,
     required FlightRoute route,
     required FlightInfo infoForSave,
+    required String flightAccessTier,
     required int effectiveMaxZoom,
     required double routeLengthKm,
   }) async {
@@ -728,6 +731,7 @@ class DownloadFlowDelegate {
             flightId: flightId,
             flightRoute: route,
             flightInfo: infoForSave,
+            flightAccessTier: flightAccessTier,
             maxZoom: effectiveMaxZoom,
           )
           .listen(

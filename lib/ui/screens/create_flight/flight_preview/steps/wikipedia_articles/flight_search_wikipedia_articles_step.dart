@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flymap/domain/entity/map_detail_level.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/subscription/pro_limits.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
@@ -27,9 +28,12 @@ class FlightSearchWikipediaArticlesStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedCount = state.selectedArticleUrls.length;
+    final mapDetailLevel = isProUser
+        ? MapDetailLevel.pro
+        : MapDetailLevel.basic;
     final estimatedSizeRange = MapUtils.estimatedDownloadSizeRangeLabel(
       route: state.flightRoute,
-      mapDetailLevel: state.selectedMapDetailLevel,
+      mapDetailLevel: mapDetailLevel,
       selectedArticlesCount: selectedCount,
     );
     final candidates = state.articleCandidates;

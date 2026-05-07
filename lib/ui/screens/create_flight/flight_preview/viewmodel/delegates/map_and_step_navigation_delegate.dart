@@ -5,18 +5,6 @@ class MapAndStepNavigationDelegate {
 
   final FlightPreviewCubit _cubit;
 
-  void selectMapDetailLevel(MapDetailLevel detailLevel) {
-    if (_cubit.state.step != CreateFlightStep.overview) return;
-    if (_cubit.state.selectedMapDetailLevel == detailLevel) return;
-    _cubit._emitState(
-      _cubit.state.copyWith(
-        selectedMapDetailLevel: detailLevel,
-        clearErrorMessage: true,
-      ),
-    );
-    _cubit._syncPoisForCurrentTier();
-  }
-
   void continueFromOverview() {
     if (_cubit.state.flightRoute == null) return;
     _cubit._emitState(

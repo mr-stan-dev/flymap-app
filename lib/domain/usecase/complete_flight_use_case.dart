@@ -9,7 +9,8 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 class CompleteFlightUseCase {
-  CompleteFlightUseCase({required FlightsDBService service}) : _service = service;
+  CompleteFlightUseCase({required FlightsDBService service})
+    : _service = service;
 
   final FlightsDBService _service;
   final _logger = Logger('CompleteFlightUseCase');
@@ -39,6 +40,7 @@ class CompleteFlightUseCase {
       createdAt: flight.createdAt,
       completedAt: DateTime.now(),
       status: FlightStatus.completed,
+      flightAccessTier: flight.flightAccessTier,
     );
     await _service.saveOrUpdateFlight(updated);
     return true;

@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/crashlytics/app_crashlytics.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
-import 'package:flymap/domain/entity/map_detail_level.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/rating/rate_prompt_policy_service.dart';
 import 'package:flymap/rating/rate_prompt_trigger.dart';
@@ -328,25 +327,15 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
     required SubscriptionCubit subscriptionCubit,
   }) async {
     final isProUser = subscriptionCubit.state.isPro;
-    if (isProUser && state.selectedMapDetailLevel != MapDetailLevel.pro) {
-      cubit.selectMapDetailLevel(MapDetailLevel.pro);
-    }
     final selectedCount = state.selectedArticleUrls.length;
-    final shouldUpgradeForArticles =
+    final needsArticleTierUpgrade =
         !isProUser && selectedCount > ProLimits.freeWikiArticlesSelectionLimit;
-    final shouldUpgradeForMapConfig =
-        !isProUser && state.selectedMapDetailLevel == MapDetailLevel.pro;
-    final shouldUpgradeFirst =
-        shouldUpgradeForArticles || shouldUpgradeForMapConfig;
-    if (!shouldUpgradeFirst) {
+    if (!needsArticleTierUpgrade) {
       await cubit.startDownload();
       return;
     }
 
-    final result = await subscriptionCubit.presentPaywallForCreateFlight(
-      shouldUpgradeForArticles: shouldUpgradeForArticles,
-      shouldUpgradeForMapConfig: shouldUpgradeForMapConfig,
-    );
+    final result = await subscriptionCubit.presentPaywallForCreateFlight();
     if (!context.mounted) return;
 
     switch (result) {

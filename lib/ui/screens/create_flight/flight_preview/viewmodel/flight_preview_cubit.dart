@@ -5,11 +5,12 @@ import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/crashlytics/app_crashlytics.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
-import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/domain/entity/map_detail_level.dart';
+import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/entity/user_flight_prefs.dart';
 import 'package:flymap/domain/entity/wiki_article_candidate.dart';
@@ -55,13 +56,7 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     bool autoPrepare = true,
   }) : _analytics = analytics,
        _crashlytics = crashlytics,
-       super(
-         FlightPreviewState.initial(
-           selectedMapDetailLevel: _defaultMapDetailLevel(
-             subscriptionRepository,
-           ),
-         ),
-       ) {
+       super(FlightPreviewState.initial()) {
     _previewPreparationDelegate = PreviewPreparationDelegate(
       this,
       connectivityChecker: connectivityChecker,
@@ -97,9 +92,6 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
 
   Future<void> preparePreview() => _previewPreparationDelegate.preparePreview();
 
-  void selectMapDetailLevel(MapDetailLevel detailLevel) =>
-      _navigationDelegate.selectMapDetailLevel(detailLevel);
-
   void continueFromOverview() => _navigationDelegate.continueFromOverview();
 
   void toggleWikiArticleSelection(String url) =>
@@ -131,11 +123,6 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     );
   }
 
-  void _syncPoisForCurrentTier() {
-    final isProUser = _downloadFlowDelegate.currentSubscriptionIsPro;
-    _applyPoisForSubscriptionTier(state.allRoutePois, isProUser: isProUser);
-  }
-
   Future<void> refreshPoisForPro() async {
     _applyPoisForSubscriptionTier(state.allRoutePois, isProUser: true);
   }
@@ -144,14 +131,6 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     // Async delegate callbacks may complete after the cubit is disposed.
     if (isClosed) return;
     emit(nextState);
-  }
-
-  static MapDetailLevel _defaultMapDetailLevel(
-    SubscriptionRepository subscriptionRepository,
-  ) {
-    return subscriptionRepository.currentStatus.isPro
-        ? MapDetailLevel.pro
-        : MapDetailLevel.basic;
   }
 
   @override

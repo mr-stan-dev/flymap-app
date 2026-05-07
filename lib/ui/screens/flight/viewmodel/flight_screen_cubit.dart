@@ -136,6 +136,7 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
                 createdAt: current.flight.createdAt,
                 completedAt: DateTime.now(),
                 status: FlightStatus.completed,
+                flightAccessTier: current.flight.flightAccessTier,
               ),
             ),
           );

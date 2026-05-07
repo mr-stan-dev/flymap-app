@@ -20,6 +20,7 @@ class FlightDBKeys {
   static const corridor = 'corridor';
   static const latitude = 'latitude';
   static const longitude = 'longitude';
+  static const flightAccessTier = 'flightAccessTier';
 }
 
 class FlightDbMapper {
@@ -45,6 +46,7 @@ class FlightDbMapper {
       FlightDBKeys.createdAt: flight.createdAt.toIso8601String(),
       if (flight.completedAt != null)
         FlightDBKeys.completedAt: flight.completedAt!.toIso8601String(),
+      FlightDBKeys.flightAccessTier: flight.flightAccessTier,
       FlightDBKeys.updatedAt: nowIso,
     };
 
@@ -114,6 +116,15 @@ class FlightDbMapper {
         ? DateTime.tryParse(completedAtStr)
         : null;
 
+    final accessTierRaw = (map[FlightDBKeys.flightAccessTier] ?? '')
+        .toString()
+        .trim();
+    final flightAccessTier = switch (accessTierRaw) {
+      Flight.accessTierPro => Flight.accessTierPro,
+      Flight.accessTierBasic => Flight.accessTierBasic,
+      _ => Flight.accessTierBasic,
+    };
+
     return Flight(
       id: (map[FlightDBKeys.id] ?? '').toString(),
       route: route,
@@ -122,6 +133,7 @@ class FlightDbMapper {
       createdAt: createdAt,
       completedAt: completedAt,
       status: FlightStatus.fromRaw((map[FlightDBKeys.status] ?? '').toString()),
+      flightAccessTier: flightAccessTier,
     );
   }
 }

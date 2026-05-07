@@ -11,7 +11,6 @@ import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/domain/entity/route_poi.dart';
 import 'package:flymap/domain/entity/flight_poi_type.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
-import 'package:flymap/domain/entity/map_detail_level.dart';
 import 'package:flymap/domain/entity/route_overview.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/entity/route_region_type.dart';
@@ -152,53 +151,11 @@ void main() {
       },
     );
 
-    test('default selected map detail level is basic', () {
-      expect(cubit.state.selectedMapDetailLevel, MapDetailLevel.basic);
-    });
-
-    test('default selected map detail level is pro for pro users', () async {
-      final proSubscriptionRepository = _FakeSubscriptionRepository()
-        ..isPro = true;
-      final route = _route();
-      final proCubit = _TestFlightPreviewCubit(
-        departure: route.departure,
-        arrival: route.arrival,
-        connectivityChecker: _FakeConnectivityChecker(),
-        getRouteOverviewUseCase: _FakeGetRouteOverviewUseCase(),
-        downloadMapUseCase: _FakeDownloadMapUseCase(),
-        downloadRegionWikiArticlesUseCase:
-            _FakeDownloadRegionWikiArticlesUseCase(),
-        downloadWikipediaArticlesUseCase:
-            _FakeDownloadWikipediaArticlesUseCase(),
-        getWikiArticlesUseCase: _FakeGetWikiArticlesUseCase(),
-        userFlightPrefsRepository: _FakeUserFlightPrefsRepository(),
-        flightRepository: _FakeFlightRepository(),
-        subscriptionRepository: proSubscriptionRepository,
-        deleteFlightUseCase: _FakeDeleteFlightUseCase(),
-        analytics: _FakeAppAnalytics(),
-        crashlytics: _FakeAppCrashlytics(),
-      );
-      addTearDown(proCubit.close);
-
-      expect(proCubit.state.selectedMapDetailLevel, MapDetailLevel.pro);
-    });
-
-    test('selectMapDetailLevel updates state in overview step', () {
-      cubit.setStateForTest(
-        cubit.state.copyWith(step: CreateFlightStep.overview),
-      );
-
-      cubit.selectMapDetailLevel(MapDetailLevel.pro);
-
-      expect(cubit.state.selectedMapDetailLevel, MapDetailLevel.pro);
-    });
-
-    test('startDownload passes z10 for basic short route', () async {
-      subscriptionRepository.isPro = true;
+    test('startDownload passes z10 for free short route', () async {
+      subscriptionRepository.isPro = false;
       cubit.setStateForTest(
         cubit.state.copyWith(
           selectedArticleUrls: const [],
-          selectedMapDetailLevel: MapDetailLevel.basic,
           flightRoute: _route(),
         ),
       );
@@ -208,12 +165,11 @@ void main() {
       expect(mapUseCase.lastMaxZoom, 10);
     });
 
-    test('startDownload passes z9 for basic long route', () async {
-      subscriptionRepository.isPro = true;
+    test('startDownload passes z9 for free long route', () async {
+      subscriptionRepository.isPro = false;
       cubit.setStateForTest(
         cubit.state.copyWith(
           selectedArticleUrls: const [],
-          selectedMapDetailLevel: MapDetailLevel.basic,
           flightRoute: _longRoute(),
         ),
       );
@@ -228,7 +184,6 @@ void main() {
       cubit.setStateForTest(
         cubit.state.copyWith(
           selectedArticleUrls: const [],
-          selectedMapDetailLevel: MapDetailLevel.pro,
           flightRoute: _route(),
         ),
       );
@@ -243,7 +198,6 @@ void main() {
       cubit.setStateForTest(
         cubit.state.copyWith(
           selectedArticleUrls: const [],
-          selectedMapDetailLevel: MapDetailLevel.pro,
           flightRoute: _longRoute(),
         ),
       );
@@ -274,30 +228,12 @@ void main() {
             poi: pois.take(10).toList(),
           ),
           flightRoute: _route(),
-          selectedMapDetailLevel: MapDetailLevel.basic,
         ),
       );
 
       await cubit.refreshPoisForPro();
 
       expect(cubit.state.flightInfo.poi.length, 80);
-    });
-
-    test('free tier POI cap is applied independent of selected map detail', () {
-      subscriptionRepository.isPro = false;
-      final pois = _routePoiSummaries(60);
-      cubit.setStateForTest(
-        cubit.state.copyWith(
-          step: CreateFlightStep.overview,
-          allRoutePois: pois,
-          selectedMapDetailLevel: MapDetailLevel.basic,
-          flightInfo: cubit.state.flightInfo.copyWith(poi: pois),
-        ),
-      );
-
-      cubit.selectMapDetailLevel(MapDetailLevel.pro);
-
-      expect(cubit.state.flightInfo.poi.length, PoiLimitsPolicy.freeMaxPois);
     });
 
     test('pro tier POI cap uses policy max', () async {
@@ -588,6 +524,7 @@ class _FakeDownloadMapUseCase implements DownloadMapUseCase {
     required String flightId,
     required FlightRoute flightRoute,
     required FlightInfo flightInfo,
+    required String flightAccessTier,
     required int maxZoom,
   }) {
     lastMaxZoom = maxZoom;

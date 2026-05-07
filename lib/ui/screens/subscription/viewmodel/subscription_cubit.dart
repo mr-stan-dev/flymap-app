@@ -77,15 +77,8 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
     _emitStatus(status);
   }
 
-  Future<SubscriptionPaywallResult> presentPaywallForCreateFlight({
-    required bool shouldUpgradeForArticles,
-    required bool shouldUpgradeForMapConfig,
-  }) async {
-    final source = shouldUpgradeForArticles && shouldUpgradeForMapConfig
-        ? PaywallSource.wikiAndMapPro
-        : shouldUpgradeForArticles
-        ? PaywallSource.wikiLimit
-        : PaywallSource.mapPro;
+  Future<SubscriptionPaywallResult> presentPaywallForCreateFlight() async {
+    final source = PaywallSource.wikiLimit;
     return _presentPaywallIfNeeded(source: source);
   }
 

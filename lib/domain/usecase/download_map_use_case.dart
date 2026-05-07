@@ -113,6 +113,7 @@ class DownloadMapUseCase {
     required String flightId,
     required FlightRoute flightRoute,
     required FlightInfo flightInfo,
+    required String flightAccessTier,
     required int maxZoom,
   }) async* {
     try {
@@ -152,6 +153,7 @@ class DownloadMapUseCase {
             flightMap: mapData,
             flightRoute: flightRoute,
             flightInfo: flightInfo,
+            flightAccessTier: flightAccessTier,
           );
 
           if (result.isSuccess) {
@@ -174,6 +176,7 @@ class DownloadMapUseCase {
     required FlightMap flightMap,
     required FlightRoute flightRoute,
     required FlightInfo flightInfo,
+    required String flightAccessTier,
   }) async {
     _logger.log(
       "_saveFlightData start: id='$flightId', mapPath='${flightMap.filePath}', mapSize=${flightMap.sizeBytes}, route='${flightRoute.routeCode}', infoEmpty=${flightInfo.isEmpty}",
@@ -186,6 +189,7 @@ class DownloadMapUseCase {
         info: flightInfo,
         createdAt: DateTime.now(),
         completedAt: null,
+        flightAccessTier: flightAccessTier,
       );
       _logger.log('Inserting flight into DB: id=${flight.id}');
       await _flightsService.saveOrUpdateFlight(flight);
