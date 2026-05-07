@@ -9,6 +9,7 @@ class AirportsDatabase {
   final _logger = Logger('AirportsDatabase');
   final List<Airport> _airports = [];
   bool _isInitialized = false;
+  Future<void>? _initializing;
 
   AirportsDatabase._();
   AirportsDatabase.test({Iterable<Airport> seedAirports = const []}) {
@@ -27,7 +28,21 @@ class AirportsDatabase {
 
   Future<void> initialize() async {
     if (_isInitialized) return;
+    final inFlightInitialization = _initializing;
+    if (inFlightInitialization != null) {
+      await inFlightInitialization;
+      return;
+    }
 
+    _initializing = _initializeInternal();
+    try {
+      await _initializing;
+    } finally {
+      _initializing = null;
+    }
+  }
+
+  Future<void> _initializeInternal() async {
     try {
       _logger.log('Initializing airports database...');
 
@@ -43,9 +58,12 @@ class AirportsDatabase {
       ).convert(csvData);
       _logger.log('Found ${rows.length} rows in airports CSV');
       if (rows.isEmpty) {
+        _airports.clear();
         _isInitialized = true;
         return;
       }
+
+      final loadedAirports = <Airport>[];
 
       // OurAirports header columns reference
       // [0:id, 1:ident, 2:type, 3:name, 4:latitude_deg, 5:longitude_deg,
@@ -91,9 +109,12 @@ class AirportsDatabase {
           type: AirportTypeX.fromString(type),
         );
 
-        _airports.add(airport);
+        loadedAirports.add(airport);
       }
 
+      _airports
+        ..clear()
+        ..addAll(loadedAirports);
       _isInitialized = true;
       _logger.log('Successfully loaded ${_airports.length} airports');
     } catch (e) {
@@ -123,7 +144,7 @@ class AirportsDatabase {
       final aCity = a.city.toUpperCase();
       final aCode = a.displayCode.toUpperCase();
       final aIcao = a.icaoCode.toUpperCase();
-      
+
       final bName = b.name.toUpperCase();
       final bCity = b.city.toUpperCase();
       final bCode = b.displayCode.toUpperCase();
@@ -133,7 +154,9 @@ class AirportsDatabase {
         if (city.startsWith(upperQuery)) return 1;
         if (name.startsWith(upperQuery)) return 2;
         if (code == upperQuery || icao == upperQuery) return 3;
-        if (code.startsWith(upperQuery) || icao.startsWith(upperQuery)) return 4;
+        if (code.startsWith(upperQuery) || icao.startsWith(upperQuery)) {
+          return 4;
+        }
         if (city.contains(upperQuery)) return 5;
         if (name.contains(upperQuery)) return 6;
         return 7;

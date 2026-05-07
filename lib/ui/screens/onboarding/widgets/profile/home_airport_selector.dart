@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
+import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/airport_category_section.dart';
+import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/search_result_list.dart';
 
 class HomeAirportSelector extends StatefulWidget {
   const HomeAirportSelector({
@@ -55,7 +57,7 @@ class _HomeAirportSelectorState extends State<HomeAirportSelector> {
 
   @override
   Widget build(BuildContext context) {
-    final visiblePopular = widget.popular;
+    final hasQuery = _controller.text.trim().isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,113 +101,27 @@ class _HomeAirportSelectorState extends State<HomeAirportSelector> {
         ],
         if (widget.isSearchLoading)
           const Center(child: CircularProgressIndicator())
-        else if (_controller.text.trim().isNotEmpty)
+        else if (hasQuery)
           if (widget.results.isNotEmpty)
-            _SearchResultList(
+            SearchResultList(
               airports: widget.results,
+              searchQuery: _controller.text.trim(),
               onSelectAirport: widget.onSelectAirport,
             )
-          else ...[
-            if (visiblePopular.isNotEmpty) ...[
-              _AirportSectionTitle(context.t.onboarding.popularAirports),
-              _AirportChipWrap(
-                airports: visiblePopular,
-                onSelectAirport: widget.onSelectAirport,
+          else
+            Text(
+              context.t.onboarding.noHomeAirportFound,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-            ],
-          ]
-        else ...[
-          if (visiblePopular.isNotEmpty) ...[
-            _AirportSectionTitle(context.t.onboarding.popularAirports),
-            _AirportChipWrap(
-              airports: visiblePopular,
-                onSelectAirport: widget.onSelectAirport,
-              ),
-            ],
-          ],
+            )
+        else
+          AirportCategorySection(
+            title: context.t.createFlight.search.popularAirports,
+            airports: widget.popular,
+            onSelectAirport: widget.onSelectAirport,
+          ),
       ],
-    );
-  }
-}
-
-class _AirportSectionTitle extends StatelessWidget {
-  const _AirportSectionTitle(this.title);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        title,
-        style: Theme.of(
-          context,
-        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-      ),
-    );
-  }
-}
-
-class _AirportChipWrap extends StatelessWidget {
-  const _AirportChipWrap({
-    required this.airports,
-    required this.onSelectAirport,
-  });
-
-  final List<Airport> airports;
-  final Future<void> Function(Airport airport) onSelectAirport;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: airports.map((airport) {
-        return SelectionChip(
-          label: context.t.createFlight.search.airportNameCode(
-            name: airport.nameShort,
-            code: airport.displayCode,
-          ),
-          onPressed: () => onSelectAirport(airport),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _SearchResultList extends StatelessWidget {
-  const _SearchResultList({
-    required this.airports,
-    required this.onSelectAirport,
-  });
-
-  final List<Airport> airports;
-  final Future<void> Function(Airport airport) onSelectAirport;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: airports.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        final airport = airports[index];
-        return ListTile(
-          dense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-          onTap: () => onSelectAirport(airport),
-          title: Text(
-            context.t.createFlight.search.airportNameCode(
-              name: airport.name,
-              code: airport.displayCode,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        );
-      },
     );
   }
 }
