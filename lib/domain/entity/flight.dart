@@ -32,6 +32,7 @@ class Flight extends Equatable {
   final List<FlightMap> maps;
   final FlightInfo info;
   final DateTime createdAt;
+  final DateTime? inProgressAt;
   final DateTime? completedAt;
   final FlightStatus status;
   final String flightAccessTier;
@@ -42,6 +43,7 @@ class Flight extends Equatable {
     this.maps = const [],
     required this.info,
     required this.createdAt,
+    this.inProgressAt,
     this.completedAt,
     this.status = FlightStatus.upcoming,
     this.flightAccessTier = accessTierBasic,
@@ -69,6 +71,7 @@ class Flight extends Equatable {
     maps,
     info,
     createdAt,
+    inProgressAt,
     completedAt,
     status,
     flightAccessTier,

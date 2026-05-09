@@ -18,11 +18,11 @@ import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_poi_control
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_session_controller.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_style_loader.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_user_location_controller.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/geo_awareness_card.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_controls.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_gps_status_badge.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_initializing_overlay.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_style_loading_view.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/map/widgets/map_bottom_status_card.dart';
 import 'package:get_it/get_it.dart';
 import 'package:latlong2/latlong.dart' as ll;
 import 'package:maplibre_gl/maplibre_gl.dart';
@@ -598,8 +598,24 @@ class _FlightMapState extends State<FlightMap> {
             bottom: 16,
             left: 0,
             right: 0,
-            child: GeoAwarenessCard(
-              onSelectedRegionChanged: _onGeoRegionSelectionChanged,
+            child: BlocBuilder<FlightScreenCubit, FlightScreenState>(
+              buildWhen: (previous, current) {
+                if (previous is FlightScreenLoaded &&
+                    current is FlightScreenLoaded) {
+                  return previous.flight.status != current.flight.status;
+                }
+                return previous.runtimeType != current.runtimeType;
+              },
+              builder: (context, state) {
+                if (state is! FlightScreenLoaded) {
+                  return const SizedBox.shrink();
+                }
+                return MapBottomStatusCard(
+                  status: state.flight.status,
+                  onSelectedRegionChanged: _onGeoRegionSelectionChanged,
+                  onCheckInPressed: () => _checkInFlight(context),
+                );
+              },
             ),
           ),
           if (!_mapSession.isMapInitialized) const MapInitializingOverlay(),
@@ -619,5 +635,17 @@ class _FlightMapState extends State<FlightMap> {
     _userLocationController.dispose();
     _mapSession.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkInFlight(BuildContext context) async {
+    final ok = await context.read<FlightScreenCubit>().checkInFlight();
+    if (ok || !context.mounted) {
+      return;
+    }
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    messenger?.hideCurrentSnackBar();
+    messenger?.showSnackBar(
+      SnackBar(content: Text(context.t.flight.upcoming.checkInError)),
+    );
   }
 }

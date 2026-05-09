@@ -48,6 +48,7 @@ import 'package:flymap/subscription/revenuecat_env_config.dart';
 import 'package:flymap/subscription/subscription_status_cache.dart';
 import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
 import 'package:flymap/domain/usecase/complete_flight_use_case.dart';
+import 'package:flymap/domain/usecase/auto_complete_stale_in_progress_flights_use_case.dart';
 import 'package:flymap/domain/usecase/can_open_learn_article_use_case.dart';
 import 'package:flymap/domain/usecase/download_map_use_case.dart';
 import 'package:flymap/domain/usecase/download_region_wiki_articles_use_case.dart';
@@ -63,6 +64,7 @@ import 'package:flymap/domain/usecase/get_learn_article_content_use_case.dart';
 import 'package:flymap/domain/usecase/get_learn_categories_use_case.dart';
 import 'package:flymap/domain/usecase/get_learn_category_articles_use_case.dart';
 import 'package:flymap/domain/usecase/mark_learn_article_seen_use_case.dart';
+import 'package:flymap/domain/usecase/start_flight_use_case.dart';
 import 'package:flymap/domain/usecase/submit_feedback_use_case.dart';
 import 'package:flymap/domain/usecase/toggle_learn_article_favorite_use_case.dart';
 import 'package:get_it/get_it.dart';
@@ -191,6 +193,12 @@ class DiModule {
     );
     i.registerLazySingleton<CompleteFlightUseCase>(
       () => CompleteFlightUseCase(service: GetIt.I.get()),
+    );
+    i.registerLazySingleton<StartFlightUseCase>(
+      () => StartFlightUseCase(repository: i.get()),
+    );
+    i.registerLazySingleton<AutoCompleteStaleInProgressFlightsUseCase>(
+      () => AutoCompleteStaleInProgressFlightsUseCase(repository: i.get()),
     );
 
     i.registerLazySingleton<FavoriteAirportsRepository>(

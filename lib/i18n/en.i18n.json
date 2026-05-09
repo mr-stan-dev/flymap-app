@@ -34,6 +34,7 @@
     "storageUsed": "Storage used",
     "totalDistance": "Total distance",
     "upcomingFlightsCount": "Upcoming flights ($count)",
+    "flightInProgressTitle": "Flight in progress",
     "noFlightsTitle": "Ready to explore the world from above?",
     "noFlightsSubtitle": "Add your first flight and start discovering your next journey.",
     "noFlightsTitleNext": "Ready for your next trip?",
@@ -42,7 +43,7 @@
     "viewAll": "View all",
     "open": "Open",
     "shareRoute": "Share route",
-    "completeFlight": "Complete flight",
+    "completeFlight": "Archive flight",
     "deleteFlight": "Delete flight",
     "failedDeleteFlight": "Failed to delete flight",
     "noOfflineMap": "No offline map",
@@ -476,6 +477,14 @@
       "covered": "Covered",
       "remaining": "Remaining",
       "total": "Total"
+    },
+    "upcoming": {
+      "mapTitle": "Begin your flight journey",
+      "mapSubtitle": "Start live tracking once your flight begins",
+      "dashboardTitle": "Begin your flight journey",
+      "dashboardSubtitle": "Start to see your live dashboard",
+      "checkInButton": "Start",
+      "checkInError": "Could not start now. Please try again"
     },
     "info": {
       "overviewTitle": "Overview",

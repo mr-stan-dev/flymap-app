@@ -50,6 +50,7 @@ class FlightsDBService {
       maps: existing.maps,
       info: info,
       createdAt: existing.createdAt,
+      inProgressAt: existing.inProgressAt,
       completedAt: existing.completedAt,
       status: existing.status,
       flightAccessTier: existing.flightAccessTier,
@@ -67,6 +68,7 @@ class FlightsDBService {
       maps: maps,
       info: existing.info,
       createdAt: existing.createdAt,
+      inProgressAt: existing.inProgressAt,
       completedAt: existing.completedAt,
       status: existing.status,
       flightAccessTier: existing.flightAccessTier,
@@ -82,13 +84,32 @@ class FlightsDBService {
   }) async {
     final existing = await getFlightById(flightId);
     if (existing == null) return false;
+    DateTime? nextInProgressAt = existing.inProgressAt;
+    DateTime? nextCompletedAt = existing.completedAt;
+    switch (status) {
+      case FlightStatus.upcoming:
+        nextInProgressAt = null;
+        nextCompletedAt = null;
+        break;
+      case FlightStatus.inProgress:
+        nextInProgressAt = existing.status == FlightStatus.inProgress
+            ? (existing.inProgressAt ?? DateTime.now())
+            : DateTime.now();
+        nextCompletedAt = null;
+        break;
+      case FlightStatus.completed:
+        nextInProgressAt = null;
+        nextCompletedAt = completedAt ?? existing.completedAt ?? DateTime.now();
+        break;
+    }
     final updated = Flight(
       id: existing.id,
       route: existing.route,
       maps: existing.maps,
       info: existing.info,
       createdAt: existing.createdAt,
-      completedAt: completedAt ?? existing.completedAt,
+      inProgressAt: nextInProgressAt,
+      completedAt: nextCompletedAt,
       status: status,
       flightAccessTier: existing.flightAccessTier,
     );
@@ -277,6 +298,7 @@ class FlightsDBService {
       maps: baseFlight.maps,
       info: baseFlight.info.copyWith(articles: hydratedArticles),
       createdAt: baseFlight.createdAt,
+      inProgressAt: baseFlight.inProgressAt,
       completedAt: baseFlight.completedAt,
       status: baseFlight.status,
       flightAccessTier: baseFlight.flightAccessTier,

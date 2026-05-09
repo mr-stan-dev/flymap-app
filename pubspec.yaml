@@ -48,6 +48,7 @@ dependencies:
   slang: ^4.8.0
   slang_flutter: ^4.8.0
   country_flags: ^3.0.1
+  zo_animated_border: ^1.0.7
 
 dev_dependencies:
   flutter_test:

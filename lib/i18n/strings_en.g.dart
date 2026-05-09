@@ -167,6 +167,9 @@ class TranslationsHomeEn {
 	/// en: 'Upcoming flights ($count)'
 	String upcomingFlightsCount({required Object count}) => 'Upcoming flights (${count})';
 
+	/// en: 'Flight in progress'
+	String get flightInProgressTitle => 'Flight in progress';
+
 	/// en: 'Ready to explore the world from above?'
 	String get noFlightsTitle => 'Ready to explore the world from above?';
 
@@ -191,8 +194,8 @@ class TranslationsHomeEn {
 	/// en: 'Share route'
 	String get shareRoute => 'Share route';
 
-	/// en: 'Complete flight'
-	String get completeFlight => 'Complete flight';
+	/// en: 'Archive flight'
+	String get completeFlight => 'Archive flight';
 
 	/// en: 'Delete flight'
 	String get deleteFlight => 'Delete flight';
@@ -779,6 +782,7 @@ class TranslationsFlightEn {
 
 	late final TranslationsFlightMapEn map = TranslationsFlightMapEn.internal(_root);
 	late final TranslationsFlightDashboardEn dashboard = TranslationsFlightDashboardEn.internal(_root);
+	late final TranslationsFlightUpcomingEn upcoming = TranslationsFlightUpcomingEn.internal(_root);
 	late final TranslationsFlightInfoEn info = TranslationsFlightInfoEn.internal(_root);
 	late final TranslationsFlightRouteEn route = TranslationsFlightRouteEn.internal(_root);
 }
@@ -1672,6 +1676,33 @@ class TranslationsFlightDashboardEn {
 	String get total => 'Total';
 }
 
+// Path: flight.upcoming
+class TranslationsFlightUpcomingEn {
+	TranslationsFlightUpcomingEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Begin your flight journey'
+	String get mapTitle => 'Begin your flight journey';
+
+	/// en: 'Start live tracking once your flight begins'
+	String get mapSubtitle => 'Start live tracking once your flight begins';
+
+	/// en: 'Begin your flight journey'
+	String get dashboardTitle => 'Begin your flight journey';
+
+	/// en: 'Start to see your live dashboard'
+	String get dashboardSubtitle => 'Start to see your live dashboard';
+
+	/// en: 'Start'
+	String get checkInButton => 'Start';
+
+	/// en: 'Could not start now. Please try again'
+	String get checkInError => 'Could not start now. Please try again';
+}
+
 // Path: flight.info
 class TranslationsFlightInfoEn {
 	TranslationsFlightInfoEn.internal(this._root);
@@ -2059,6 +2090,7 @@ extension on Translations {
 			'home.storageUsed' => 'Storage used',
 			'home.totalDistance' => 'Total distance',
 			'home.upcomingFlightsCount' => ({required Object count}) => 'Upcoming flights (${count})',
+			'home.flightInProgressTitle' => 'Flight in progress',
 			'home.noFlightsTitle' => 'Ready to explore the world from above?',
 			'home.noFlightsSubtitle' => 'Add your first flight and start discovering your next journey.',
 			'home.noFlightsTitleNext' => 'Ready for your next trip?',
@@ -2067,7 +2099,7 @@ extension on Translations {
 			'home.viewAll' => 'View all',
 			'home.open' => 'Open',
 			'home.shareRoute' => 'Share route',
-			'home.completeFlight' => 'Complete flight',
+			'home.completeFlight' => 'Archive flight',
 			'home.deleteFlight' => 'Delete flight',
 			'home.failedDeleteFlight' => 'Failed to delete flight',
 			'home.noOfflineMap' => 'No offline map',
@@ -2460,6 +2492,12 @@ extension on Translations {
 			'flight.dashboard.covered' => 'Covered',
 			'flight.dashboard.remaining' => 'Remaining',
 			'flight.dashboard.total' => 'Total',
+			'flight.upcoming.mapTitle' => 'Begin your flight journey',
+			'flight.upcoming.mapSubtitle' => 'Start live tracking once your flight begins',
+			'flight.upcoming.dashboardTitle' => 'Begin your flight journey',
+			'flight.upcoming.dashboardSubtitle' => 'Start to see your live dashboard',
+			'flight.upcoming.checkInButton' => 'Start',
+			'flight.upcoming.checkInError' => 'Could not start now. Please try again',
 			'flight.info.overviewTitle' => 'Overview',
 			'flight.info.overviewLoading' => 'Building route overview...',
 			'flight.info.overviewEmpty' => 'Overview is not available yet for this route.',
@@ -2532,6 +2570,8 @@ extension on Translations {
 			'about.chipOffline' => 'Offline map',
 			'about.chipDashboard' => 'Live dashboard',
 			'about.chipSharing' => 'Route sharing',
+			_ => null,
+		} ?? switch (path) {
 			'about.infoBanner' => 'Before takeoff, download your route map. In flight mode, internet access may be limited or unavailable.',
 			'about.whatYouCanDo' => 'What You Can Do',
 			'about.featurePlanTitle' => 'Plan your route',
@@ -2539,8 +2579,6 @@ extension on Translations {
 			'about.featureTrackTitle' => 'Track flight data',
 			'about.featureTrackText' => 'Use Dashboard to monitor heading, speed, altitude, and route progress.',
 			'about.featureDetailsTitle' => 'Check route details',
-			_ => null,
-		} ?? switch (path) {
 			'about.featureDetailsText' => 'Open the Info tab for airport details and a clean route overview.',
 			'about.featureShareTitle' => 'Share your journey',
 			'about.featureShareText' => 'Generate and share a flight map screenshot with route highlights.',

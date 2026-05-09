@@ -10,6 +10,7 @@ import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/geo_awareness_engine.dart';
 import 'package:flymap/domain/usecase/complete_flight_use_case.dart';
 import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
+import 'package:flymap/domain/usecase/start_flight_use_case.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_it/get_it.dart';
 
@@ -17,15 +18,30 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
   final _logger = Logger('FlightScreenCubit');
   static const _gpsStaleThreshold = Duration(seconds: 20);
   final Flight flight;
-  final DeleteFlightUseCase _deleteFlightUseCase = GetIt.I.get();
-  final CompleteFlightUseCase _completeFlightUseCase = GetIt.I.get();
-  final GpsDataProvider _gpsProvider = GpsDataProvider();
-  final GeoAwarenessEngine _geoAwarenessEngine = const GeoAwarenessEngine();
+  Flight _currentFlight;
+  final DeleteFlightUseCase _deleteFlightUseCase;
+  final CompleteFlightUseCase _completeFlightUseCase;
+  final StartFlightUseCase _startFlightUseCase;
+  final GpsDataProvider _gpsProvider;
+  final GeoAwarenessEngine _geoAwarenessEngine;
   Timer? _gpsCheckTimer;
   int _gpsUpdateTick = 0;
   DateTime? _lastGpsEventAt;
 
-  FlightScreenCubit({required this.flight}) : super(FlightScreenLoading()) {
+  FlightScreenCubit({
+    required this.flight,
+    DeleteFlightUseCase? deleteFlightUseCase,
+    CompleteFlightUseCase? completeFlightUseCase,
+    StartFlightUseCase? startFlightUseCase,
+    GpsDataProvider? gpsProvider,
+    GeoAwarenessEngine? geoAwarenessEngine,
+  }) : _currentFlight = flight,
+       _deleteFlightUseCase = deleteFlightUseCase ?? GetIt.I.get(),
+       _completeFlightUseCase = completeFlightUseCase ?? GetIt.I.get(),
+       _startFlightUseCase = startFlightUseCase ?? GetIt.I.get(),
+       _gpsProvider = gpsProvider ?? GpsDataProvider(),
+       _geoAwarenessEngine = geoAwarenessEngine ?? const GeoAwarenessEngine(),
+       super(FlightScreenLoading()) {
     _logger.log('flight flightInfo: ${flight.info}');
     load();
   }
@@ -62,9 +78,9 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
                 nextRegionEtaMinutes: current.nextRegionEtaMinutes,
               );
         final geo = _geoAwarenessEngine.compute(
-          route: flight.route,
-          routeRegions: flight.info.routeRegions,
-          cruiseSpeedKmh: flight.info.routeCruiseSpeedKmh,
+          route: _currentFlight.route,
+          routeRegions: _currentFlight.info.routeRegions,
+          cruiseSpeedKmh: _currentFlight.info.routeCruiseSpeedKmh,
           gpsData: data,
           previous: previousGeo,
         );
@@ -76,11 +92,11 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
         _gpsUpdateTick++;
         emit(
           FlightScreenLoaded(
-            flight: flight,
             gpsStatus: status,
             gpsData: data,
             gpsUpdateTick: _gpsUpdateTick,
-            routeRegions: flight.info.routeRegions,
+            flight: _currentFlight,
+            routeRegions: _currentFlight.info.routeRegions,
             lastVisitedRegionId: lastVisitedRegionId,
             currentRegionIds: geo.currentRegionIds,
             nextRegionId: geo.nextRegionId,
@@ -98,9 +114,11 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
   Future<void> deleteFlight() async {
     emit(const FlightScreenLoading());
     try {
-      final ok = await _deleteFlightUseCase(flight.id);
+      final ok = await _deleteFlightUseCase(_currentFlight.id);
       if (!ok) {
-        emit(FlightScreenError(t.home.failedDeleteFlight, flight: flight));
+        emit(
+          FlightScreenError(t.home.failedDeleteFlight, flight: _currentFlight),
+        );
         return;
       }
 
@@ -109,16 +127,55 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
       emit(
         FlightScreenError(
           t.flight.deleteError(error: e.toString()),
-          flight: flight,
+          flight: _currentFlight,
         ),
       );
+    }
+  }
+
+  Future<bool> checkInFlight() async {
+    if (_currentFlight.status == FlightStatus.inProgress) {
+      return true;
+    }
+    try {
+      final ok = await _startFlightUseCase(flightId: _currentFlight.id);
+      if (!ok) {
+        return false;
+      }
+
+      _currentFlight = Flight(
+        id: _currentFlight.id,
+        route: _currentFlight.route,
+        maps: _currentFlight.maps,
+        info: _currentFlight.info,
+        createdAt: _currentFlight.createdAt,
+        inProgressAt: DateTime.now(),
+        completedAt: _currentFlight.completedAt,
+        status: FlightStatus.inProgress,
+        flightAccessTier: _currentFlight.flightAccessTier,
+      );
+
+      final currentState = state;
+      if (currentState is FlightScreenLoaded) {
+        emit(currentState.copyWith(flight: _currentFlight));
+      } else {
+        emit(
+          FlightScreenLoaded(
+            flight: _currentFlight,
+            routeRegions: _currentFlight.info.routeRegions,
+          ),
+        );
+      }
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 
   Future<bool> completeFlight({required bool deleteOfflineData}) async {
     try {
       final ok = await _completeFlightUseCase(
-        flightId: flight.id,
+        flightId: _currentFlight.id,
         deleteOfflineData: deleteOfflineData,
       );
       if (!ok) return false;
@@ -126,20 +183,18 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
       if (deleteOfflineData) {
         final current = state;
         if (current is FlightScreenLoaded) {
-          emit(
-            current.copyWith(
-              flight: Flight(
-                id: current.flight.id,
-                route: current.flight.route,
-                maps: const [],
-                info: current.flight.info.copyWith(articles: const []),
-                createdAt: current.flight.createdAt,
-                completedAt: DateTime.now(),
-                status: FlightStatus.completed,
-                flightAccessTier: current.flight.flightAccessTier,
-              ),
-            ),
+          _currentFlight = Flight(
+            id: current.flight.id,
+            route: current.flight.route,
+            maps: const [],
+            info: current.flight.info.copyWith(articles: const []),
+            createdAt: current.flight.createdAt,
+            inProgressAt: null,
+            completedAt: DateTime.now(),
+            status: FlightStatus.completed,
+            flightAccessTier: current.flight.flightAccessTier,
           );
+          emit(current.copyWith(flight: _currentFlight));
         }
       }
       return true;

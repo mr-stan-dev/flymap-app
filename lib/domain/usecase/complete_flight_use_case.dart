@@ -38,6 +38,7 @@ class CompleteFlightUseCase {
       maps: const [],
       info: flight.info.copyWith(articles: const []),
       createdAt: flight.createdAt,
+      inProgressAt: null,
       completedAt: DateTime.now(),
       status: FlightStatus.completed,
       flightAccessTier: flight.flightAccessTier,

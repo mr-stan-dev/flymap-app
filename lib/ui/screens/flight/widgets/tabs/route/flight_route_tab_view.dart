@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
@@ -10,6 +11,7 @@ import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/re
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/route_progress_card.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/route/widgets/info_content.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/route/widgets/upcoming_route_facts_strip.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/shared/tab_state_placeholder.dart';
 import 'package:flymap/ui/screens/shared/premium/route_premium_gate_interactions.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
@@ -93,6 +95,10 @@ class _LoadedRouteTab extends StatelessWidget {
       cruiseSpeedKmh: info.routeCruiseSpeedKmh,
     );
 
+    final isUpcoming = state.flight.status == FlightStatus.upcoming;
+    final hasGpsFix =
+        state.gpsData?.latitude != null && state.gpsData?.longitude != null;
+
     return SafeArea(
       top: false,
       child: SingleChildScrollView(
@@ -100,11 +106,14 @@ class _LoadedRouteTab extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (state.gpsData?.latitude != null &&
-                state.gpsData?.longitude != null)
+            if (isUpcoming)
+              UpcomingRouteFactsStrip(
+                route: route,
+                totalMinutes: info.routeTotalMinutes,
+              ),
+            if (!isUpcoming && hasGpsFix)
               RouteProgressCard(route: route, gpsData: state.gpsData),
-            if (state.gpsData?.latitude != null &&
-                state.gpsData?.longitude != null)
+            if (isUpcoming || (!isUpcoming && hasGpsFix))
               const SizedBox(height: DsSpacing.sm),
             if (groups.isEmpty)
               Padding(

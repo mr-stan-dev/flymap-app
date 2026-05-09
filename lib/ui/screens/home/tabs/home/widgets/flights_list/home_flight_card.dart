@@ -13,6 +13,7 @@ import 'package:flymap/ui/screens/flight/widgets/complete_flight_confirmation_di
 import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dialog.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_cubit.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_route_preview_strip.dart';
+import 'package:flymap/ui/theme/app_colours.dart';
 import 'package:flymap/utils/route_utils.dart';
 import 'package:flymap/utils/unit_format_utils.dart';
 
@@ -21,6 +22,7 @@ class HomeFlightCard extends StatelessWidget {
     required this.flight,
     required this.distanceUnit,
     required this.dateDisplayFormat,
+    this.highlightInProgress = false,
     super.key,
   });
 
@@ -30,6 +32,7 @@ class HomeFlightCard extends StatelessWidget {
   final Flight flight;
   final DistanceUnit distanceUnit;
   final DateDisplayFormat dateDisplayFormat;
+  final bool highlightInProgress;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +59,12 @@ class HomeFlightCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+          border: Border.all(
+            color: highlightInProgress
+                ? AppColoursCommon.brandBlue
+                : colorScheme.outline.withValues(alpha: 0.2),
+            width: highlightInProgress ? 1.5 : 1.0,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,6 +137,7 @@ class HomeFlightCard extends StatelessWidget {
               departureCode: departure.displayCode,
               arrivalCode: arrival.displayCode,
               routePreviewPoi: routePreviewPoi,
+              showInProgressStatusChip: highlightInProgress,
             ),
           ],
         ),
@@ -263,6 +272,7 @@ class _SavedFlightCardBody extends StatelessWidget {
     required this.departureCode,
     required this.arrivalCode,
     required this.routePreviewPoi,
+    required this.showInProgressStatusChip,
   });
 
   final String distance;
@@ -274,6 +284,7 @@ class _SavedFlightCardBody extends StatelessWidget {
   final String departureCode;
   final String arrivalCode;
   final List<RoutePoiSummary> routePreviewPoi;
+  final bool showInProgressStatusChip;
 
   @override
   Widget build(BuildContext context) {
@@ -300,30 +311,33 @@ class _SavedFlightCardBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            if (hasProAccess) ...[
-              const Icon(
-                Icons.workspace_premium_rounded,
-                size: 12,
-                color: DsBrandColors.proAmber,
-              ),
-              const SizedBox(width: 4),
+        if (showInProgressStatusChip)
+          _InProgressChip()
+        else
+          Row(
+            children: [
+              if (hasProAccess) ...[
+                const Icon(
+                  Icons.workspace_premium_rounded,
+                  size: 12,
+                  color: DsBrandColors.proAmber,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '• ',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
               Text(
-                '• ',
+                '$offlineSize • $createdLabel',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
-            Text(
-              '$offlineSize • $createdLabel',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
+          ),
         const SizedBox(height: 14),
         HomeRoutePreviewStrip(
           departureCode: departureCode,
@@ -336,3 +350,23 @@ class _SavedFlightCardBody extends StatelessWidget {
 }
 
 enum _FlightCardAction { open, share, completeFlight, deleteFlight }
+
+class _InProgressChip extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColoursCommon.brandBlue.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        context.t.settings.historyStatusInProgress,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: AppColoursCommon.brandBlue,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/router/app_router.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_cubit.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_state.dart';
+import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_flight_card.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/home_flights_list.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/home_summary_header.dart';
+import 'package:flymap/ui/theme/app_theme_ext.dart';
 import 'package:go_router/go_router.dart';
 
 class HomeTabLoaded extends StatelessWidget {
@@ -15,6 +18,14 @@ class HomeTabLoaded extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final inProgressFlights = state.flights
+        .where((flight) => flight.status == FlightStatus.inProgress)
+        .toList(growable: false);
+    final hasInProgressFlights = inProgressFlights.isNotEmpty;
+    final listFlights = state.flights
+        .where((flight) => flight.status != FlightStatus.inProgress)
+        .toList(growable: false);
+
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
@@ -32,19 +43,41 @@ class HomeTabLoaded extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  HomeSummaryHeader(
-                    statistics: state.statistics,
-                    displayName: state.displayName,
-                    hasInternet: state.hasInternet,
-                  ),
+                  if (hasInProgressFlights) ...[
+                    Text(
+                      context.t.home.flightInProgressTitle,
+                      style: context.textTheme.button18Bold,
+                    ),
+                    const SizedBox(height: 12),
+                    for (
+                      var index = 0;
+                      index < inProgressFlights.length;
+                      index++
+                    ) ...[
+                      HomeFlightCard(
+                        flight: inProgressFlights[index],
+                        distanceUnit: state.distanceUnit,
+                        dateDisplayFormat: state.dateDisplayFormat,
+                        highlightInProgress: true,
+                      ),
+                      if (index < inProgressFlights.length - 1)
+                        const SizedBox(height: 12),
+                    ],
+                  ] else ...[
+                    HomeSummaryHeader(
+                      statistics: state.statistics,
+                      displayName: state.displayName,
+                      hasInternet: state.hasInternet,
+                    ),
+                  ],
                   const SizedBox(height: 24),
                   HomeFlightsList(
-                    flights: state.flights,
+                    flights: listFlights,
                     distanceUnit: state.distanceUnit,
                     dateDisplayFormat: state.dateDisplayFormat,
                     hasCompletedFlights:
                         state.statistics.totalFlights > 0 &&
-                        state.flights.isEmpty,
+                        listFlights.isEmpty,
                     onViewAll: () => AppRouter.goToSettingsHistory(context),
                     onAddFirstFlight: () =>
                         context.push(AppRouter.flightSearchRoute),

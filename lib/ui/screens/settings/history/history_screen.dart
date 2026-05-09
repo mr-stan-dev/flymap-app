@@ -11,6 +11,7 @@ import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dial
 import 'package:flymap/domain/usecase/complete_flight_use_case.dart';
 import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
 import 'package:flymap/size_utils.dart';
+import 'package:flymap/ui/theme/app_colours.dart';
 import 'package:flymap/utils/route_utils.dart';
 import 'package:flymap/utils/unit_format_utils.dart';
 import 'package:get_it/get_it.dart';
@@ -112,7 +113,8 @@ class _HistoryContentState extends State<_HistoryContent> {
               ],
               _HistoryListHeader(
                 sort: success.sort,
-                onSortChanged: (sort) => context.read<HistoryCubit>().setSort(sort),
+                onSortChanged: (sort) =>
+                    context.read<HistoryCubit>().setSort(sort),
               ),
               if (visibleItems.isEmpty) ...[
                 const SizedBox(height: 24),
@@ -160,7 +162,10 @@ class _HistoryContentState extends State<_HistoryContent> {
           );
         }
       case _HistoryItemAction.deleteOfflineData:
-        final confirmed = await _showDeleteOfflineDataDialog(context, item.flight);
+        final confirmed = await _showDeleteOfflineDataDialog(
+          context,
+          item.flight,
+        );
         if (confirmed != true || !context.mounted) return;
         final ok = await context.read<HistoryCubit>().completeFlight(
           flightId: item.flight.id,
@@ -177,7 +182,9 @@ class _HistoryContentState extends State<_HistoryContent> {
           reclaimedBytes: _offlineBytes(item.flight),
         );
         if (confirmed != true || !context.mounted) return;
-        final ok = await context.read<HistoryCubit>().deleteFlight(item.flight.id);
+        final ok = await context.read<HistoryCubit>().deleteFlight(
+          item.flight.id,
+        );
         if (!ok && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(context.t.home.failedDeleteFlight)),
@@ -196,7 +203,9 @@ class _HistoryContentState extends State<_HistoryContent> {
       context: context,
       builder: (_) => AlertDialog(
         title: Text(context.t.settings.historyDeleteOfflineData),
-        content: Text('This removes offline map and saved articles.\n\nSpace to be regained: $size.'),
+        content: Text(
+          'This removes offline map and saved articles.\n\nSpace to be regained: $size.',
+        ),
         actions: [
           SecondaryButton(
             label: context.t.common.cancel,
@@ -214,7 +223,10 @@ class _HistoryContentState extends State<_HistoryContent> {
   }
 
   int _offlineBytes(Flight flight) {
-    final mapBytes = flight.maps.fold<int>(0, (sum, map) => sum + map.sizeBytes);
+    final mapBytes = flight.maps.fold<int>(
+      0,
+      (sum, map) => sum + map.sizeBytes,
+    );
     final articleBytes = flight.info.articles.fold<int>(
       0,
       (sum, article) => sum + article.sizeBytes,
@@ -298,7 +310,9 @@ class _SummaryValue extends StatelessWidget {
       children: [
         Text(
           label,
-          style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+          style: textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
@@ -311,10 +325,7 @@ class _SummaryValue extends StatelessWidget {
 }
 
 class _HistoryListHeader extends StatelessWidget {
-  const _HistoryListHeader({
-    required this.sort,
-    required this.onSortChanged,
-  });
+  const _HistoryListHeader({required this.sort, required this.onSortChanged});
 
   final HistorySort sort;
   final ValueChanged<HistorySort> onSortChanged;
@@ -326,9 +337,9 @@ class _HistoryListHeader extends StatelessWidget {
         Expanded(
           child: Text(
             context.t.settings.historyAllFlights,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
         PopupMenuButton<HistorySort>(
@@ -391,10 +402,9 @@ class _HistoryTile extends StatelessWidget {
       route.distanceInKm,
       distanceUnit,
     );
-    final dateSource =
-        item.flight.status == FlightStatus.completed
-            ? (item.flight.completedAt ?? item.flight.createdAt)
-            : item.flight.createdAt;
+    final dateSource = item.flight.status == FlightStatus.completed
+        ? (item.flight.completedAt ?? item.flight.createdAt)
+        : item.flight.createdAt;
     final dateLabel = UnitFormatUtils.formatDate(
       dateSource,
       format: dateDisplayFormat,
@@ -405,7 +415,9 @@ class _HistoryTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
       title: Text(
         RouteUtils.routeCities(route),
-        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -479,7 +491,6 @@ class _HistoryTile extends StatelessWidget {
       ),
     ];
   }
-
 }
 
 enum _HistoryItemAction { complete, deleteOfflineData, deleteFlight }
@@ -499,12 +510,14 @@ class _StatusChip extends StatelessWidget {
     };
     final bg = switch (status) {
       FlightStatus.upcoming => colorScheme.secondaryContainer,
-      FlightStatus.inProgress => colorScheme.tertiaryContainer,
+      FlightStatus.inProgress => AppColoursCommon.brandBlue.withValues(
+        alpha: 0.14,
+      ),
       FlightStatus.completed => colorScheme.primaryContainer,
     };
     final fg = switch (status) {
       FlightStatus.upcoming => colorScheme.onSecondaryContainer,
-      FlightStatus.inProgress => colorScheme.onTertiaryContainer,
+      FlightStatus.inProgress => AppColoursCommon.brandBlue,
       FlightStatus.completed => colorScheme.onPrimaryContainer,
     };
     return Container(
@@ -515,9 +528,10 @@ class _StatusChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: Theme.of(
-          context,
-        ).textTheme.labelSmall?.copyWith(color: fg, fontWeight: FontWeight.w700),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: fg,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -530,9 +544,14 @@ class _MapChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mapBytes = flight.maps.fold<int>(0, (sum, map) => sum + map.sizeBytes);
+    final mapBytes = flight.maps.fold<int>(
+      0,
+      (sum, map) => sum + map.sizeBytes,
+    );
     final label = mapBytes > 0
-        ? context.t.settings.historyMapChip(size: SizeUtils.formatBytes(mapBytes))
+        ? context.t.settings.historyMapChip(
+            size: SizeUtils.formatBytes(mapBytes),
+          )
         : context.t.settings.historyNoMapChip;
     final colorScheme = Theme.of(context).colorScheme;
     return Container(

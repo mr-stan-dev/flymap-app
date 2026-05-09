@@ -10,6 +10,7 @@ class FlightDBKeys {
   static const flightMaps = 'maps';
   static const id = 'id';
   static const status = 'status';
+  static const inProgressAt = 'inProgressAt';
   static const completedAt = 'completedAt';
   static const flightInfo = 'flightInfo';
   static const createdAt = 'createdAt';
@@ -44,6 +45,8 @@ class FlightDbMapper {
           .toList(),
       FlightDBKeys.flightInfo: _infoMapper.toFlightInfoMap(flight.info),
       FlightDBKeys.createdAt: flight.createdAt.toIso8601String(),
+      if (flight.inProgressAt != null)
+        FlightDBKeys.inProgressAt: flight.inProgressAt!.toIso8601String(),
       if (flight.completedAt != null)
         FlightDBKeys.completedAt: flight.completedAt!.toIso8601String(),
       FlightDBKeys.flightAccessTier: flight.flightAccessTier,
@@ -111,6 +114,10 @@ class FlightDbMapper {
     final createdAt = createdAtStr.isNotEmpty
         ? DateTime.tryParse(createdAtStr) ?? DateTime.now()
         : DateTime.now();
+    final inProgressAtStr = (map[FlightDBKeys.inProgressAt] ?? '').toString();
+    final inProgressAt = inProgressAtStr.isNotEmpty
+        ? DateTime.tryParse(inProgressAtStr)
+        : null;
     final completedAtStr = (map[FlightDBKeys.completedAt] ?? '').toString();
     final completedAt = completedAtStr.isNotEmpty
         ? DateTime.tryParse(completedAtStr)
@@ -131,6 +138,7 @@ class FlightDbMapper {
       maps: mapsList,
       info: info,
       createdAt: createdAt,
+      inProgressAt: inProgressAt,
       completedAt: completedAt,
       status: FlightStatus.fromRaw((map[FlightDBKeys.status] ?? '').toString()),
       flightAccessTier: flightAccessTier,
