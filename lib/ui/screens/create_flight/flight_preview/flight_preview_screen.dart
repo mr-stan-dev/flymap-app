@@ -243,7 +243,10 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
         return FlightSearchRouteOverviewStep(
           state: state,
           isProUser: isProUser,
-          onContinue: cubit.continueFromOverview,
+          onContinueFromOverview: (isSkipped) => cubit.continueFromOverview(
+            isSkipped: isSkipped,
+            isProUser: isProUser,
+          ),
           onPremiumGateTap: () => unawaited(
             _handleUpgradeToProFromOverview(
               context: context,

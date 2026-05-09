@@ -19,14 +19,14 @@ class FlightSearchRouteOverviewStep extends StatefulWidget {
   const FlightSearchRouteOverviewStep({
     required this.state,
     required this.isProUser,
-    required this.onContinue,
+    required this.onContinueFromOverview,
     required this.onPremiumGateTap,
     super.key,
   });
 
   final FlightPreviewState state;
   final bool isProUser;
-  final VoidCallback onContinue;
+  final ValueChanged<bool> onContinueFromOverview;
   final VoidCallback onPremiumGateTap;
 
   @override
@@ -208,7 +208,7 @@ class _FlightSearchRouteOverviewStepState
                   entries[entries.length - 2].minuteFromDeparture,
             ),
             onPremiumGateTap: widget.onPremiumGateTap,
-            onSkipReview: widget.onContinue,
+            onContinueFromOverview: widget.onContinueFromOverview,
           ),
         ),
       ],
@@ -366,7 +366,7 @@ class _FlightSearchRouteOverviewStepState
             route: route,
             totalRouteMinutes: totalRouteMinutes,
             cruiseSpeedKmh: state.routeCruiseSpeedKmh,
-            onContinue: widget.onContinue,
+            onContinue: () => widget.onContinueFromOverview(false),
           ),
         ),
       ),

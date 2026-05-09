@@ -13,6 +13,7 @@ export 'package:flymap/analytics/events/onboarding_step_viewed_event.dart';
 export 'package:flymap/analytics/events/paywall_result_event.dart';
 export 'package:flymap/analytics/events/poi_marker_tapped_event.dart';
 export 'package:flymap/analytics/events/rate_prompt_action_event.dart';
+export 'package:flymap/analytics/events/route_overview_completed_event.dart';
 export 'package:flymap/analytics/events/search_route_not_supported_event.dart';
 export 'package:flymap/analytics/events/search_route_prepared_event.dart';
 

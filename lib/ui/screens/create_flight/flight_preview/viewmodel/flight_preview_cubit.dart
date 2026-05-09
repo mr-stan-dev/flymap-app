@@ -92,7 +92,17 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
 
   Future<void> preparePreview() => _previewPreparationDelegate.preparePreview();
 
-  void continueFromOverview() => _navigationDelegate.continueFromOverview();
+  void continueFromOverview({
+    required bool isSkipped,
+    required bool isProUser,
+  }) {
+    unawaited(
+      _analytics.log(
+        RouteOverviewCompletedEvent(isSkipped: isSkipped, isProUser: isProUser),
+      ),
+    );
+    _navigationDelegate.continueFromOverview();
+  }
 
   void toggleWikiArticleSelection(String url) =>
       _wikiSelectionDelegate.toggleWikiArticleSelection(url);

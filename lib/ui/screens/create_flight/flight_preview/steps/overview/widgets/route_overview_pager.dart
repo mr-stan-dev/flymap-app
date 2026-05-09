@@ -23,7 +23,7 @@ class RouteOverviewPager extends StatefulWidget {
     this.initialPage = 0,
     required this.onPageChanged,
     required this.onPremiumGateTap,
-    required this.onSkipReview,
+    required this.onContinueFromOverview,
     super.key,
   });
 
@@ -35,7 +35,7 @@ class RouteOverviewPager extends StatefulWidget {
   final int initialPage;
   final ValueChanged<int> onPageChanged;
   final VoidCallback onPremiumGateTap;
-  final VoidCallback onSkipReview;
+  final ValueChanged<bool> onContinueFromOverview;
 
   @override
   State<RouteOverviewPager> createState() => _RouteOverviewPagerState();
@@ -107,7 +107,7 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
           reviewRouteLabel: t.createFlight.overview.startReview,
           onReviewRoute: _animateToNextCard,
           skipReviewLabel: t.createFlight.overview.skipReview,
-          onSkipReview: widget.onSkipReview,
+          onSkipReview: () => widget.onContinueFromOverview(true),
         );
       case RouteOverviewPageKind.departure:
         final airport = entry.airport!;
@@ -176,7 +176,7 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
           fullSummaryLabel: t.createFlight.overview.fullSummary,
           onFullSummary: widget.onRouteSummaryRequested,
           continueLabel: t.common.kContinue,
-          onContinue: widget.onSkipReview,
+          onContinue: () => widget.onContinueFromOverview(false),
         );
     }
   }
