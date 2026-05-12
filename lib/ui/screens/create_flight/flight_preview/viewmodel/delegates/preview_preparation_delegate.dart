@@ -1,9 +1,6 @@
 part of '../flight_preview_cubit.dart';
 
 class PreviewPreparationDelegate {
-  static const double _approximateRouteWarningDistanceKm = 7000;
-  static const double _approximateRouteUnsupportedDistanceKm = 10000;
-
   PreviewPreparationDelegate(
     this._cubit, {
     required ConnectivityChecker connectivityChecker,
@@ -128,8 +125,7 @@ class PreviewPreparationDelegate {
         return;
       }
 
-      if (!route.isHistoricalTrack &&
-          route.distanceInKm > _approximateRouteUnsupportedDistanceKm) {
+      if (!route.isHistoricalTrack && routeLength == RouteLength.superLong) {
         _cubit._emitState(
           _cubit.state.copyWith(
             step: CreateFlightStep.routeNotSupported,
@@ -154,7 +150,7 @@ class PreviewPreparationDelegate {
 
       final showApproximateRouteWarning =
           !route.isHistoricalTrack &&
-          route.distanceInKm > _approximateRouteWarningDistanceKm;
+          routeLength.minDistanceKm >= RouteLength.long.minDistanceKm;
 
       _cubit._emitState(
         _cubit.state.copyWith(

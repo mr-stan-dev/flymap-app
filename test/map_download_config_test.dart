@@ -3,6 +3,15 @@ import 'package:flymap/domain/entity/map_detail_level.dart';
 import 'package:flymap/map_download_config.dart';
 
 void main() {
+  group('RouteLength.minDistanceKm', () {
+    test('encodes the lower bound of each bucket', () {
+      expect(RouteLength.short.minDistanceKm, 0);
+      expect(RouteLength.mid.minDistanceKm, 2501);
+      expect(RouteLength.long.minDistanceKm, 5001);
+      expect(RouteLength.superLong.minDistanceKm, 10001);
+    });
+  });
+
   group('MapDownloadConfig.resolveRouteLength', () {
     test(
       'classifies short, mid, long, superLong route buckets by thresholds',

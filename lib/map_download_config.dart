@@ -9,7 +9,16 @@ import 'package:flymap/domain/entity/map_detail_level.dart';
 /// - [RouteLength.mid]: `> 2500 km` and `<= 5000 km`
 /// - [RouteLength.long]: `> 5000 km` and `<= 10000 km`
 /// - [RouteLength.superLong]: `> 10000 km`
-enum RouteLength { short, mid, long, superLong }
+enum RouteLength {
+  short(0),
+  mid(2501),
+  long(5001),
+  superLong(10001);
+
+  const RouteLength(this.minDistanceKm);
+
+  final int minDistanceKm;
+}
 
 class MapDownloadConfig {
   MapDownloadConfig._();
@@ -38,23 +47,20 @@ class MapDownloadConfig {
   static const double estimatedArticleMb = 0.5;
 
   static RouteLength resolveRouteLength(double distanceKm) {
-    if (distanceKm > 10000.0) {
-      return RouteLength.superLong;
-    }
-    if (distanceKm > 5000.0) {
-      return RouteLength.long;
-    }
-    if (distanceKm > 2500.0) {
-      return RouteLength.mid;
-    }
-    return RouteLength.short;
+    final bucketDistanceKm = distanceKm.isFinite ? distanceKm.ceil() : 0;
+    return RouteLength.values.lastWhere(
+      (routeLength) => bucketDistanceKm >= routeLength.minDistanceKm,
+      orElse: () => RouteLength.short,
+    );
   }
 
   static double resolveCorridorWidthKm(double distanceKm) {
-    if (distanceKm < 2500.0) {
+    final midBoundaryKm = RouteLength.mid.minDistanceKm - 1;
+    final longBoundaryKm = RouteLength.long.minDistanceKm - 1;
+    if (distanceKm < midBoundaryKm) {
       return shortCorridorWidthKm;
     }
-    if (distanceKm < 5000.0) {
+    if (distanceKm < longBoundaryKm) {
       return midCorridorWidthKm;
     }
     return longCorridorWidthKm;

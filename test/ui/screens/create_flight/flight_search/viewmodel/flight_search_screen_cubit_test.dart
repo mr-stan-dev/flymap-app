@@ -248,7 +248,7 @@ void main() {
         );
         expect(
           cubit.state.overviewWarningMessage,
-          'Approximate route may be inaccurate for long-haul flights. Use real route option by flight number instead.',
+          'Approximate routes can be inaccurate for long-haul flights. Use a real route with a flight number instead.',
         );
       },
     );
@@ -266,7 +266,7 @@ void main() {
       expect(cubit.state.flightRoute, ultraLongHaulRoute);
       expect(
         cubit.state.errorMessage,
-        'Approximate route is inaccurate for ultra long-haul flights. Use real route option by flight number instead.',
+        'Approximate routes are not supported for ultra long-haul flights. Use a real route with a flight number instead.',
       );
       expect(cubit.state.overviewWarningTitle, isNull);
       expect(cubit.state.overviewWarningMessage, isNull);
