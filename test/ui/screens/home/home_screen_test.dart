@@ -7,9 +7,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/data/local/airports_database.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
+import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_route_metrics.dart';
 import 'package:flymap/domain/entity/flight_status.dart';
+import 'package:flymap/domain/entity/flight_timestamp.dart';
+import 'package:flymap/domain/entity/flight_waypoint.dart';
 import 'package:flymap/domain/entity/learn_access.dart';
 import 'package:flymap/domain/entity/learn_article_content.dart';
 import 'package:flymap/domain/entity/learn_article_meta.dart';
@@ -28,6 +33,7 @@ import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/subscription/subscription_product.dart';
 import 'package:flymap/subscription/subscription_status.dart';
 import 'package:flymap/ui/screens/home/home_screen.dart';
+import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_flight_card.dart';
 import 'package:flymap/ui/screens/settings/viewmodel/settings_cubit.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 import 'package:flymap/ui/theme/app_theme.dart';
@@ -40,6 +46,7 @@ import 'package:flymap/domain/usecase/get_learn_category_articles_use_case.dart'
 import 'package:flymap/domain/usecase/mark_learn_article_seen_use_case.dart';
 import 'package:flymap/domain/usecase/toggle_learn_article_favorite_use_case.dart';
 import 'package:get_it/get_it.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -50,7 +57,7 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     await GetIt.I.reset();
-    GetIt.I.registerSingleton<FlightRepository>(_FakeFlightRepository());
+    GetIt.I.registerSingleton<FlightRepository>(const _FakeFlightRepository());
     GetIt.I.registerSingleton<DeleteFlightUseCase>(_FakeDeleteFlightUseCase());
     GetIt.I.registerSingleton<ConnectivityChecker>(
       const _FakeConnectivityChecker(),
@@ -152,6 +159,31 @@ void main() {
       2,
     );
   });
+
+  testWidgets(
+    'keeps summary header and shows in-progress section above upcoming flights',
+    (tester) async {
+      await GetIt.I.unregister<FlightRepository>();
+      GetIt.I.registerSingleton<FlightRepository>(
+        _FakeFlightRepository(
+          flights: [
+            _buildFlight(id: 'in-progress', status: FlightStatus.inProgress),
+            _buildFlight(id: 'upcoming', status: FlightStatus.upcoming),
+          ],
+        ),
+      );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('onboarding.profile.display_name', 'Stan');
+
+      await tester.pumpWidget(_testApp());
+      await _pumpForInitialLoad(tester);
+
+      expect(find.text('Hi Stan, your flight is in progress'), findsOneWidget);
+      expect(find.text('Flight in progress'), findsOneWidget);
+      expect(find.text('Upcoming flights (1)'), findsOneWidget);
+      expect(find.byType(HomeFlightCard), findsNWidgets(2));
+    },
+  );
 }
 
 Widget _testApp({HomeRootTab initialTab = HomeRootTab.flights}) {
@@ -198,8 +230,12 @@ Future<void> _pumpForInitialLoad(WidgetTester tester) async {
 }
 
 class _FakeFlightRepository implements FlightRepository {
+  const _FakeFlightRepository({this.flights = const []});
+
+  final List<Flight> flights;
+
   @override
-  Future<List<Flight>> getAllFlights() async => const [];
+  Future<List<Flight>> getAllFlights() async => flights;
 
   @override
   Future<Flight?> getFlightById(String flightId) async => null;
@@ -208,13 +244,18 @@ class _FakeFlightRepository implements FlightRepository {
   Future<int> getTotalDownloadedMaps() async => 0;
 
   @override
-  Future<int> getTotalFlights() async => 0;
+  Future<int> getTotalFlights() async => flights.length;
 
   @override
   Future<int> getTotalMapSize() async => 0;
 
   @override
-  Future<double> getTotalFlightDistanceKm() async => 0;
+  Future<double> getTotalFlightDistanceKm() async {
+    return flights.fold<double>(
+      0,
+      (sum, flight) => sum + flight.route.distanceInKm,
+    );
+  }
 
   @override
   Future<String> insertFlight(Flight flight) async => 'flight-id';
@@ -243,6 +284,53 @@ class _FakeConnectivityChecker extends ConnectivityChecker {
   Future<bool> hasInternetConnectivity({
     Duration timeout = const Duration(seconds: 2),
   }) async => true;
+}
+
+Flight _buildFlight({required String id, required FlightStatus status}) {
+  const departure = Airport(
+    name: 'London Heathrow',
+    city: 'London',
+    countryCode: 'GB',
+    latLon: LatLng(51.47, -0.45),
+    iataCode: 'LHR',
+    icaoCode: 'EGLL',
+    wikipediaUrl: '',
+  );
+  const arrival = Airport(
+    name: 'Munich Airport',
+    city: 'Munich',
+    countryCode: 'DE',
+    latLon: LatLng(48.35, 11.79),
+    iataCode: 'MUC',
+    icaoCode: 'EDDM',
+    wikipediaUrl: '',
+  );
+  const route = FlightRoute(
+    departure: departure,
+    arrival: arrival,
+    waypoints: [
+      FlightWaypoint(latLon: LatLng(51.47, -0.45)),
+      FlightWaypoint(latLon: LatLng(48.35, 11.79)),
+    ],
+    corridor: [
+      LatLng(51.47, -0.45),
+      LatLng(48.35, -0.45),
+      LatLng(48.35, 11.79),
+    ],
+    metrics: FlightRouteMetrics(
+      greatCircleDistanceKm: 1487.5,
+      approxDurationMinutes: 105,
+    ),
+  );
+
+  return Flight(
+    id: id,
+    route: route,
+    routeInsights: FlightInfo.empty.routeInsights,
+    offlineContent: FlightInfo.empty.offlineContent,
+    timestamp: FlightTimestamp(createdAt: DateTime(2026, 1, 1)),
+    status: status,
+  );
 }
 
 class _FakeDeleteFlightUseCase implements DeleteFlightUseCase {

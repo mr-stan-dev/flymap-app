@@ -7,12 +7,14 @@ class HomeSummaryHeaderFree extends StatelessWidget {
     required this.statistics,
     required this.displayName,
     required this.hasInternet,
+    required this.hasInProgressFlights,
     super.key,
   });
 
   final FlightStatistics statistics;
   final String displayName;
   final bool hasInternet;
+  final bool hasInProgressFlights;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +72,11 @@ class HomeSummaryHeaderFree extends StatelessWidget {
 
   String _resolveWelcomeTitle(BuildContext context) {
     final trimmedName = displayName.trim();
+    if (hasInProgressFlights) {
+      return trimmedName.isNotEmpty
+          ? context.t.home.greetingInProgressWithName(name: trimmedName)
+          : context.t.home.greetingInProgress;
+    }
     if (trimmedName.isNotEmpty) {
       return hasInternet
           ? context.t.home.greetingOnlineWithName(name: trimmedName)

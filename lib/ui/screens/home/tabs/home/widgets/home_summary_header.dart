@@ -11,12 +11,14 @@ class HomeSummaryHeader extends StatelessWidget {
     required this.statistics,
     required this.displayName,
     required this.hasInternet,
+    required this.hasInProgressFlights,
     super.key,
   });
 
   final FlightStatistics statistics;
   final String displayName;
   final bool hasInternet;
+  final bool hasInProgressFlights;
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +30,13 @@ class HomeSummaryHeader extends StatelessWidget {
             statistics: statistics,
             displayName: displayName,
             hasInternet: hasInternet,
+            hasInProgressFlights: hasInProgressFlights,
           )
         : HomeSummaryHeaderFree(
             statistics: statistics,
             displayName: displayName,
             hasInternet: hasInternet,
+            hasInProgressFlights: hasInProgressFlights,
           );
   }
 }

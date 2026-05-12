@@ -161,6 +161,12 @@ class TranslationsHomeEn {
 	/// en: 'Hi $name, ready to explore your flight?'
 	String greetingOfflineWithName({required Object name}) => 'Hi ${name}, ready to explore your flight?';
 
+	/// en: 'Your flight is in progress'
+	String get greetingInProgress => 'Your flight is in progress';
+
+	/// en: 'Hi $name, your flight is in progress'
+	String greetingInProgressWithName({required Object name}) => 'Hi ${name}, your flight is in progress';
+
 	/// en: 'Total flights'
 	String get totalFlights => 'Total flights';
 
@@ -217,6 +223,9 @@ class TranslationsHomeEn {
 
 	/// en: '$count articles'
 	String offlineArticlesCount({required Object count}) => '${count} articles';
+
+	/// en: 'Saved $time'
+	String savedTime({required Object time}) => 'Saved ${time}';
 
 	/// en: 'Just now'
 	String get justNow => 'Just now';
@@ -2168,6 +2177,8 @@ extension on Translations {
 			'home.greetingOnlineWithName' => ({required Object name}) => 'Hi ${name}, ready for the next flight?',
 			'home.greetingOffline' => 'Ready to explore your flight?',
 			'home.greetingOfflineWithName' => ({required Object name}) => 'Hi ${name}, ready to explore your flight?',
+			'home.greetingInProgress' => 'Your flight is in progress',
+			'home.greetingInProgressWithName' => ({required Object name}) => 'Hi ${name}, your flight is in progress',
 			'home.totalFlights' => 'Total flights',
 			'home.storageUsed' => 'Storage used',
 			'home.totalDistance' => 'Total distance',
@@ -2187,6 +2198,7 @@ extension on Translations {
 			'home.noOfflineMap' => 'No offline map',
 			'home.placesCount' => ({required Object count}) => '${count} places',
 			'home.offlineArticlesCount' => ({required Object count}) => '${count} articles',
+			'home.savedTime' => ({required Object time}) => 'Saved ${time}',
 			'home.justNow' => 'Just now',
 			'home.daysAgo' => ({required Object days}) => '${days} d ago',
 			'home.hoursAgo' => ({required Object hours}) => '${hours} h ago',
@@ -2647,11 +2659,11 @@ extension on Translations {
 			'flight.route.premiumGateTitle' => 'Unlock full route timeline',
 			'flight.route.premiumGateBody' => 'Upgrade to Pro to see all regions along your route and timeline details.',
 			'flight.route.premiumGateBodyWithCount' => ({required Object count}) => 'Unlock all ${count} regions on this route with Premium.',
+			_ => null,
+		} ?? switch (path) {
 			'flight.route.premiumGateCta' => 'Subscribe to Premium',
 			'flight.route.premiumOfflineTitle' => 'Internet needed to upgrade',
 			'flight.route.premiumOfflineBody' => 'You are offline right now. Connect to the internet to upgrade and unlock the full route view.',
-			_ => null,
-		} ?? switch (path) {
 			'flight.route.nextHintLabel' => ({required Object region, required Object eta}) => 'Next: ${region} (${eta})',
 			'flight.route.etaUnknownLabel' => 'estimating...',
 			'shareFlight.title' => 'Share flight',

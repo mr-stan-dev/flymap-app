@@ -42,7 +42,14 @@ class HomeTabLoaded extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  HomeSummaryHeader(
+                    statistics: state.statistics,
+                    displayName: state.displayName,
+                    hasInternet: state.hasInternet,
+                    hasInProgressFlights: hasInProgressFlights,
+                  ),
                   if (hasInProgressFlights) ...[
+                    const SizedBox(height: 24),
                     Text(
                       context.t.home.flightInProgressTitle,
                       style: context.textTheme.button18Bold,
@@ -62,12 +69,6 @@ class HomeTabLoaded extends StatelessWidget {
                       if (index < inProgressFlights.length - 1)
                         const SizedBox(height: 12),
                     ],
-                  ] else ...[
-                    HomeSummaryHeader(
-                      statistics: state.statistics,
-                      displayName: state.displayName,
-                      hasInternet: state.hasInternet,
-                    ),
                   ],
                   const SizedBox(height: 24),
                   HomeFlightsList(
@@ -75,8 +76,7 @@ class HomeTabLoaded extends StatelessWidget {
                     distanceUnit: state.distanceUnit,
                     dateDisplayFormat: state.dateDisplayFormat,
                     hasCompletedFlights:
-                        state.statistics.totalFlights > 0 &&
-                        listFlights.isEmpty,
+                        state.statistics.totalFlights > state.flights.length,
                     onViewAll: () => AppRouter.goToSettingsHistory(context),
                     onAddFirstFlight: () =>
                         AppRouter.goToRouteTypeSelector(context),

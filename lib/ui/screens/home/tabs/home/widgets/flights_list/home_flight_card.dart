@@ -200,14 +200,14 @@ class HomeFlightCard extends StatelessWidget {
     required DateDisplayFormat format,
   }) {
     final delta = DateTime.now().difference(createdAt);
-    if (delta.inDays >= 1) {
-      return UnitFormatUtils.formatDate(createdAt, format: format);
-    }
-    if (delta.inHours >= 1) return t.home.hoursAgo(hours: delta.inHours);
-    if (delta.inMinutes >= 1) {
-      return t.home.minutesAgo(minutes: delta.inMinutes);
-    }
-    return t.home.justNow;
+    final savedTime = delta.inDays >= 1
+        ? UnitFormatUtils.formatDate(createdAt, format: format)
+        : delta.inHours >= 1
+        ? t.home.hoursAgo(hours: delta.inHours)
+        : delta.inMinutes >= 1
+        ? t.home.minutesAgo(minutes: delta.inMinutes)
+        : t.home.justNow;
+    return t.home.savedTime(time: savedTime);
   }
 
   List<RoutePoiSummary> _selectRoutePreviewPoi(List<RoutePoiSummary> allPoi) {
