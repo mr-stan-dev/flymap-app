@@ -840,6 +840,7 @@ class _FakeAppCrashlytics implements AppCrashlytics {
     String? screen,
     int? routeLengthKm,
     String? mapDetail,
+    String? flightNumber,
     int? articlesSelectedCount,
     String? downloadStage,
   }) async {}

@@ -1,15 +1,18 @@
 import 'package:flymap/analytics/events/analytics_event.dart';
+import 'package:flymap/domain/entity/flight_route_source.dart';
 
 class DownloadCompletedEvent extends AnalyticsEvent {
   const DownloadCompletedEvent({
     required this.routeLengthKm,
     required this.articlesDownloadedCount,
     required this.mapSizeBytes,
+    required this.routeSource,
   });
 
   final double routeLengthKm;
   final int articlesDownloadedCount;
   final int mapSizeBytes;
+  final FlightRouteSource routeSource;
 
   @override
   String get name => 'download_completed';
@@ -21,5 +24,6 @@ class DownloadCompletedEvent extends AnalyticsEvent {
     'map_size_mb': double.parse(
       (mapSizeBytes / (1024 * 1024)).toStringAsFixed(1),
     ),
+    'route_source': routeSource.rawValue,
   };
 }

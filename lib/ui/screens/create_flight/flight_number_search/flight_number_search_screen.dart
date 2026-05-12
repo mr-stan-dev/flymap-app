@@ -32,6 +32,8 @@ class _FlightNumberSearchScreenState extends State<FlightNumberSearchScreen> {
       create: (context) => FlightNumberSearchCubit(
         lookupFlightByNumberUseCase: GetIt.I.get(),
         flightSearchRepository: GetIt.I.get(),
+        analytics: GetIt.I.get(),
+        crashlytics: GetIt.I.get(),
       ),
       child: BlocConsumer<FlightNumberSearchCubit, FlightNumberSearchState>(
         listener: (context, state) {

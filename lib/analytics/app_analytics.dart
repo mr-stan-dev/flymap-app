@@ -5,6 +5,7 @@ export 'package:flymap/analytics/events/analytics_event.dart';
 export 'package:flymap/analytics/events/download_completed_event.dart';
 export 'package:flymap/analytics/events/download_failed_event.dart';
 export 'package:flymap/analytics/events/download_started_event.dart';
+export 'package:flymap/analytics/events/flight_number_lookup_result_event.dart';
 export 'package:flymap/analytics/events/onboarding_completed_event.dart';
 export 'package:flymap/analytics/events/onboarding_started_event.dart';
 export 'package:flymap/analytics/events/onboarding_step_completed_event.dart';

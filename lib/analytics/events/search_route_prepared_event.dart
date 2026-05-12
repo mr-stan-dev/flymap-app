@@ -1,4 +1,5 @@
 import 'package:flymap/analytics/events/analytics_event.dart';
+import 'package:flymap/domain/entity/flight_route_source.dart';
 import 'package:flymap/domain/entity/map_detail_level.dart';
 import 'package:flymap/map_download_config.dart';
 
@@ -7,11 +8,13 @@ class SearchRoutePreparedEvent extends AnalyticsEvent {
     required this.routeLengthKm,
     required this.routeLength,
     required this.mapDetail,
+    required this.routeSource,
   });
 
   final double routeLengthKm;
   final RouteLength routeLength;
   final MapDetailLevel mapDetail;
+  final FlightRouteSource routeSource;
 
   @override
   String get name => 'search_route_prepared';
@@ -21,6 +24,7 @@ class SearchRoutePreparedEvent extends AnalyticsEvent {
     'route_length_km': routeLengthKm.round(),
     'route_length_bucket': _routeBucket(routeLength),
     'map_detail': mapDetail.name,
+    'route_source': routeSource.rawValue,
   };
 }
 

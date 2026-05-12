@@ -1,4 +1,5 @@
 import 'package:flymap/analytics/events/analytics_event.dart';
+import 'package:flymap/domain/entity/flight_route_source.dart';
 
 class DownloadFailedEvent extends AnalyticsEvent {
   const DownloadFailedEvent({
@@ -6,12 +7,14 @@ class DownloadFailedEvent extends AnalyticsEvent {
     required this.errorType,
     required this.errorMessage,
     required this.routeLengthKm,
+    required this.routeSource,
   });
 
   final String stage;
   final String errorType;
   final String errorMessage;
   final double routeLengthKm;
+  final FlightRouteSource routeSource;
 
   @override
   String get name => 'download_failed';
@@ -22,6 +25,7 @@ class DownloadFailedEvent extends AnalyticsEvent {
     'error_type': errorType,
     'error_message': _normalizeErrorMessage(errorMessage),
     'route_length_km': routeLengthKm.round(),
+    'route_source': routeSource.rawValue,
   };
 
   String _normalizeErrorMessage(String input) {

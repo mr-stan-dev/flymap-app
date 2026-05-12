@@ -150,6 +150,17 @@ void main() {
       expect(event.source, PaywallSource.poiSection);
       expect(event.result, SubscriptionPaywallResult.cancelled);
     });
+
+    test('logs real route gate paywall source', () async {
+      repository.paywallResult = SubscriptionPaywallResult.cancelled;
+
+      final result = await cubit.presentPaywallFromRealRouteGate();
+
+      expect(result, SubscriptionPaywallResult.cancelled);
+      final event = analytics.events.single as PaywallResultEvent;
+      expect(event.source, PaywallSource.realRouteGate);
+      expect(event.result, SubscriptionPaywallResult.cancelled);
+    });
   });
 }
 

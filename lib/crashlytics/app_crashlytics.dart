@@ -8,6 +8,7 @@ abstract class AppCrashlytics {
     String? screen,
     int? routeLengthKm,
     String? mapDetail,
+    String? flightNumber,
     int? articlesSelectedCount,
     String? downloadStage,
   });
@@ -42,6 +43,7 @@ class FirebaseAppCrashlytics implements AppCrashlytics {
     String? screen,
     int? routeLengthKm,
     String? mapDetail,
+    String? flightNumber,
     int? articlesSelectedCount,
     String? downloadStage,
   }) async {
@@ -54,6 +56,9 @@ class FirebaseAppCrashlytics implements AppCrashlytics {
       }
       if (mapDetail != null) {
         await _crashlytics.setCustomKey('map_detail', mapDetail);
+      }
+      if (flightNumber != null) {
+        await _crashlytics.setCustomKey('flight_number', flightNumber);
       }
       if (articlesSelectedCount != null) {
         await _crashlytics.setCustomKey(

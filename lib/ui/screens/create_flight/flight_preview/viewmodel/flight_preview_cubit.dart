@@ -11,6 +11,7 @@ import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/domain/entity/flight_operational_data.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_route_source.dart';
 import 'package:flymap/domain/entity/map_detail_level.dart';
 import 'package:flymap/domain/entity/route_overview.dart';
 import 'package:flymap/domain/entity/route_poi_summary.dart';
@@ -106,7 +107,12 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
   }) {
     unawaited(
       _analytics.log(
-        RouteOverviewCompletedEvent(isSkipped: isSkipped, isProUser: isProUser),
+        RouteOverviewCompletedEvent(
+          isSkipped: isSkipped,
+          isProUser: isProUser,
+          routeSource:
+              state.flightRoute?.source ?? FlightRouteSource.greatCircle,
+        ),
       ),
     );
     _navigationDelegate.continueFromOverview();

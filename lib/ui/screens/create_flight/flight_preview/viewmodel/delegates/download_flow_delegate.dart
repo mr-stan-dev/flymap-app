@@ -244,6 +244,7 @@ class DownloadFlowDelegate {
           mapDetail: mapDetailLevel,
           articlesSelectedCount: selectedUrls.length,
           isProUser: isPro,
+          routeSource: route.source,
         ),
       ),
     );
@@ -650,6 +651,7 @@ class DownloadFlowDelegate {
           routeLengthKm: routeLengthKm,
           articlesDownloadedCount: downloadedArticles.length,
           mapSizeBytes: mapPhase.fileSize,
+          routeSource: route.source,
         ),
       ),
     );
@@ -811,6 +813,7 @@ class DownloadFlowDelegate {
                         errorType: failureReason,
                         errorMessage: event.errorMsg,
                         routeLengthKm: routeLengthKm,
+                        routeSource: route.source,
                       ),
                     ),
                   );
@@ -977,6 +980,7 @@ class DownloadFlowDelegate {
             errorType: e.runtimeType.toString(),
             errorMessage: e.toString(),
             routeLengthKm: routeLengthKm,
+            routeSource: route.source,
           ),
         ),
       );

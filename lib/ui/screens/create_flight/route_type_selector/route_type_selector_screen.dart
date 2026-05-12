@@ -59,7 +59,7 @@ class _FlightRouteTypeSelectorState extends State<FlightRouteTypeSelector> {
                       label: context.t.common.upgrade,
                       onPressed: () => context
                           .read<SubscriptionCubit>()
-                          .presentPaywallFromRouteTypeSelector(),
+                          .presentPaywallFromRealRouteGate(),
                     )
                   else
                     PrimaryButton(

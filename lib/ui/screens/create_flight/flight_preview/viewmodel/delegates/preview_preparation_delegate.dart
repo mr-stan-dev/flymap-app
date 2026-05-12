@@ -82,6 +82,7 @@ class PreviewPreparationDelegate {
             routeLengthKm: route.distanceInKm,
             routeLength: routeLength,
             mapDetail: _cubit.state.selectedMapDetailLevel,
+            routeSource: route.source,
           ),
         ),
       );
