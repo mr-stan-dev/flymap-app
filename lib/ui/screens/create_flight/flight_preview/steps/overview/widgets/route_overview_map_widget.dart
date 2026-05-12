@@ -60,6 +60,7 @@ class _RouteOverviewMapWidgetState extends State<RouteOverviewMapWidget> {
   static const String _planeIconAssetPath =
       'assets/images/icons/plane_blue.png';
   static const double _regionPlaneEntryOffsetKm = 10.0;
+  static const double _airportHeadingSampleKm = 10.0;
   static const String _routePathLayerId = 'flight-route-path-layer';
   static const String _regionHighlightColor = '#8B5CF6';
   static const double _wholeRouteBoundsPadding = 44;
@@ -470,11 +471,19 @@ class _RouteOverviewMapWidgetState extends State<RouteOverviewMapWidget> {
       final airportPoint = selectedAirport.latLon;
       final isDeparture =
           selectedAirport.primaryCode == widget.route.departure.primaryCode;
+      final sampleKm = _airportHeadingSampleKm.clamp(0.0, routeDistanceKm);
       final bearing = isDeparture
-          ? _bearingDegBetween(routePoints.first, routePoints[1])
-          : _bearingDegBetween(
-              routePoints[routePoints.length - 2],
-              routePoints.last,
+          ? _bearingDegForRouteWindow(
+              routePoints: routePoints,
+              routeDistanceKm: routeDistanceKm,
+              fromKm: 0.0,
+              toKm: sampleKm,
+            )
+          : _bearingDegForRouteWindow(
+              routePoints: routePoints,
+              routeDistanceKm: routeDistanceKm,
+              fromKm: (routeDistanceKm - sampleKm).clamp(0.0, routeDistanceKm),
+              toKm: routeDistanceKm,
             );
       return _PlanePlacement(point: airportPoint, bearingDeg: bearing);
     }
@@ -633,6 +642,30 @@ class _RouteOverviewMapWidgetState extends State<RouteOverviewMapWidget> {
     final x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
     final deg = atan2(y, x) * (180.0 / pi);
     return (deg + 360.0) % 360.0;
+  }
+
+  double _bearingDegForRouteWindow({
+    required List<ll.LatLng> routePoints,
+    required double routeDistanceKm,
+    required double fromKm,
+    required double toKm,
+  }) {
+    final fromPoint = _pointAtDistanceKm(
+      routePoints,
+      fromKm.clamp(0.0, routeDistanceKm),
+    );
+    final toPoint = _pointAtDistanceKm(
+      routePoints,
+      toKm.clamp(0.0, routeDistanceKm),
+    );
+    if (fromPoint == null || toPoint == null) {
+      return _bearingDegBetween(routePoints.first, routePoints.last);
+    }
+    if (fromPoint.latitude == toPoint.latitude &&
+        fromPoint.longitude == toPoint.longitude) {
+      return _bearingDegBetween(routePoints.first, routePoints.last);
+    }
+    return _bearingDegBetween(fromPoint, toPoint);
   }
 
   double _interpolateLongitudeShortestPath(
