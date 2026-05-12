@@ -95,9 +95,10 @@ class FlightSearchDownloadingView extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.all(DsSpacing.md),
-          child: InlineMessage(
+          child: InfoBanner(
             message: context.t.createFlight.downloading.doNotClose,
-            tone: DsMessageTone.info,
+            tone: DsMessageTone.warning,
+            icon: Icons.warning_amber_rounded,
           ),
         ),
       ],
