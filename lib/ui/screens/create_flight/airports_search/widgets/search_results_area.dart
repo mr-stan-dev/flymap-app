@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/airport.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/viewmodel/airport_selection_screen_state.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/empty_search_results.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/search_result_list.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/viewmodel/airport_selection_screen_state.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/widgets/empty_search_results.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/widgets/search_result_list.dart';
 
 class SearchResultsArea extends StatelessWidget {
   const SearchResultsArea({

@@ -1,6 +1,7 @@
 import 'package:flymap/data/local/flights_db_service.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
 
 class FlightRepository {
   final FlightsDBService _flightsService;

@@ -57,6 +57,7 @@ class RouteTimelineGrouping {
     required int cruiseSpeedKmh,
     int maxRegions = defaultMaxRegions,
     int minuteStep = timelineMinuteStep,
+    int? maxTimelineMinutes,
   }) {
     final limited = rankAndLimit(regions, maxRegions: maxRegions);
     if (limited.isEmpty) return const [];
@@ -89,10 +90,13 @@ class RouteTimelineGrouping {
           final top = groupRegions.first;
           return RouteTimelineRegionGroup(
             distanceFromDepartureKm: top.pathFirstEncounterKm,
-            minuteFromDeparture: toTimelineMinute(
-              top.pathFirstEncounterKm,
-              cruiseSpeedKmh: cruiseSpeedKmh,
-              minuteStep: minuteStep,
+            minuteFromDeparture: _clampTimelineMinute(
+              regionTimelineMinute(
+                top,
+                cruiseSpeedKmh: cruiseSpeedKmh,
+                minuteStep: minuteStep,
+              ),
+              maxTimelineMinutes: maxTimelineMinutes,
             ),
             regions: groupRegions,
           );
@@ -109,6 +113,23 @@ class RouteTimelineGrouping {
       distanceKm: distanceKm,
       cruiseSpeedKmh: cruiseSpeedKmh,
       roundToMinutes: minuteStep <= 1 ? 1 : minuteStep,
+    );
+  }
+
+  static int regionTimelineMinute(
+    RouteRegion region, {
+    required int cruiseSpeedKmh,
+    int minuteStep = timelineMinuteStep,
+  }) {
+    final timestampMinute = region.pathFirstEncounterMinutes;
+    if (timestampMinute != null && timestampMinute >= 0) {
+      final step = minuteStep <= 1 ? 1 : minuteStep;
+      return (timestampMinute / step).round() * step;
+    }
+    return toTimelineMinute(
+      region.pathFirstEncounterKm,
+      cruiseSpeedKmh: cruiseSpeedKmh,
+      minuteStep: minuteStep,
     );
   }
 
@@ -195,7 +216,11 @@ class RouteTimelineGrouping {
     required int totalRouteMinutes,
     required int cruiseSpeedKmh,
     required List<RouteTimelineRegionGroup> groups,
+    bool totalRouteMinutesIsAuthoritative = false,
   }) {
+    if (totalRouteMinutesIsAuthoritative && totalRouteMinutes > 0) {
+      return totalRouteMinutes;
+    }
     final estimatedTotalMinutes = _kmToMinutes(
       routeDistanceKm,
       cruiseSpeedKmh: cruiseSpeedKmh,
@@ -207,6 +232,16 @@ class RouteTimelineGrouping {
       math.max(totalRouteMinutes, estimatedTotalMinutes),
       groupsLastMinute,
     );
+  }
+
+  static int _clampTimelineMinute(
+    int minute, {
+    required int? maxTimelineMinutes,
+  }) {
+    if (maxTimelineMinutes == null || maxTimelineMinutes <= 0) {
+      return minute;
+    }
+    return minute.clamp(0, maxTimelineMinutes);
   }
 
   static int _kmToMinutes(double distanceKm, {required int cruiseSpeedKmh}) {

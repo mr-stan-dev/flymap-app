@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/airport.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/airport_chip_wrap.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/widgets/airport_chip_wrap.dart';
 
 class AirportCategorySection extends StatelessWidget {
   const AirportCategorySection({

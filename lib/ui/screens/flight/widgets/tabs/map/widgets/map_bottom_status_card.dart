@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/geo_awareness_card.dart';

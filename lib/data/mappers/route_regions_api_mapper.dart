@@ -1,17 +1,21 @@
 import 'dart:math' as math;
 
-import 'package:flymap/domain/policy/flight_duration_estimate_policy.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/entity/route_timeline.dart';
 import 'package:flymap/domain/entity/route_region_type.dart';
+import 'package:flymap/domain/policy/flight_duration_estimate_policy.dart';
+import 'package:flymap/domain/entity/flight_route_metrics.dart';
 
 class RouteRegionsApiMapper {
   RouteTimeline toRouteTimeline(Map<String, dynamic> payload) {
     final metaRaw = payload['meta'];
     final regionsRaw = payload['regions'];
+    final metrics = _parseRouteMetrics(payload);
 
     final cruiseSpeedKmh =
-        _toInt(metaRaw is Map ? metaRaw['cruiseSpeedKmh'] : null) ?? 850;
+        metrics.effectiveAverageSpeedKmh?.round() ??
+        _toInt(metaRaw is Map ? metaRaw['cruiseSpeedKmh'] : null) ??
+        FlightRouteMetrics.defaultCruiseSpeedKmh;
 
     final regions = <RouteRegion>[];
     if (regionsRaw is List) {
@@ -22,20 +26,60 @@ class RouteRegionsApiMapper {
     }
 
     final estimatedRouteDistanceKm = _estimateRouteDistanceKm(regions);
-    final totalRouteMinutes =
-        FlightDurationEstimatePolicy.normalizeTotalMinutes(
-          apiTotalMinutes: _toInt(
-            metaRaw is Map ? metaRaw['totalRouteMinutes'] : null,
-          ),
-          distanceKm: estimatedRouteDistanceKm,
-          cruiseSpeedKmh: cruiseSpeedKmh,
-          roundToMinutes: 5,
-        );
+    final totalRouteMinutes = metrics.effectiveDurationMinutes > 0
+        ? metrics.effectiveDurationMinutes
+        : FlightDurationEstimatePolicy.normalizeTotalMinutes(
+            apiTotalMinutes: _toInt(
+              metaRaw is Map
+                  ? (metaRaw['flightDuration'] ?? metaRaw['totalRouteMinutes'])
+                  : null,
+            ),
+            distanceKm: estimatedRouteDistanceKm,
+            cruiseSpeedKmh: cruiseSpeedKmh,
+            roundToMinutes: 5,
+          );
 
     return RouteTimeline(
       regions: regions,
       totalRouteMinutes: totalRouteMinutes,
       cruiseSpeedKmh: cruiseSpeedKmh,
+    );
+  }
+
+  FlightRouteMetrics _parseRouteMetrics(Map<String, dynamic> payload) {
+    final routeRaw = payload['route'];
+    if (routeRaw is! Map) {
+      return const FlightRouteMetrics(
+        greatCircleDistanceKm: 0,
+        approxDurationMinutes: 0,
+      );
+    }
+    final route = routeRaw.cast<String, dynamic>();
+    final metricsRaw = route['metrics'];
+    final metrics = metricsRaw is Map
+        ? metricsRaw.cast<String, dynamic>()
+        : const <String, dynamic>{};
+    final flightInfoRaw = payload['flightInfo'];
+    final flightInfo = flightInfoRaw is Map
+        ? flightInfoRaw.cast<String, dynamic>()
+        : const <String, dynamic>{};
+    final legacyDistanceKm = _toFiniteDouble(route['distanceInKm']) ?? 0;
+    final greatCircleDistanceKm =
+        _toFiniteDouble(metrics['greatCircleDistanceKm']) ?? legacyDistanceKm;
+    return FlightRouteMetrics(
+      greatCircleDistanceKm: greatCircleDistanceKm,
+      approxDurationMinutes:
+          _toInt(metrics['approxDurationMinutes']) ??
+          FlightRouteMetrics.estimateApproxDurationMinutes(
+            greatCircleDistanceKm,
+          ),
+      actualDistanceKm:
+          _toFiniteDouble(metrics['actualDistanceKm']) ??
+          _toFiniteDouble(flightInfo['actualDistanceKm']),
+      actualDurationMinutes:
+          _toInt(metrics['actualDurationMinutes']) ??
+          _toInt(flightInfo['actualDurationMinutes']) ??
+          _toInt(flightInfo['actualTimeMin']),
     );
   }
 
@@ -62,6 +106,12 @@ class RouteRegionsApiMapper {
     );
     final pathFirstEncounterKm = _toFiniteDouble(props['pathFirstEncounterKm']);
     final pathLengthInsideKm = _toFiniteDouble(props['pathLengthInsideKm']);
+    final pathFirstEncounterMinutes = _toNonNegativeInt(
+      props['pathFirstEncounterMinutes'] ??
+          props['path_first_encounter_minutes'] ??
+          props['pathFirstEncounterTimeMin'] ??
+          props['path_first_encounter_time_min'],
+    );
     if (qid.isEmpty ||
         name.isEmpty ||
         regionTypeRaw.isEmpty ||
@@ -77,6 +127,7 @@ class RouteRegionsApiMapper {
       pathFirstEncounterKm: pathFirstEncounterKm,
       pathLengthInsideKm: pathLengthInsideKm,
       geometry: geometry,
+      pathFirstEncounterMinutes: pathFirstEncounterMinutes,
       wikidataQid: wikidataQid ?? _normalizeWikidataQid(qid),
       description: fromAboveDescription,
     );
@@ -121,6 +172,12 @@ class RouteRegionsApiMapper {
     if (raw is num) return raw.toInt();
     if (raw is String) return int.tryParse(raw);
     return null;
+  }
+
+  int? _toNonNegativeInt(dynamic raw) {
+    final value = _toInt(raw);
+    if (value == null || value < 0) return null;
+    return value;
   }
 
   String? _toNonEmptyString(dynamic raw) {

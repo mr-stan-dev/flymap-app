@@ -112,6 +112,10 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
     return _presentPaywallIfNeeded(source: PaywallSource.geoAwarenessGate);
   }
 
+  Future<SubscriptionPaywallResult> presentPaywallFromRouteTypeSelector() async {
+    return _presentPaywallIfNeeded(source: PaywallSource.routeTypeSelector);
+  }
+
   Future<SubscriptionPaywallResult> presentPaywallForSource({
     required PaywallSource source,
   }) async {

@@ -9,8 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 class DeleteFlightUseCase {
-  DeleteFlightUseCase({required FlightsDBService service})
-    : _service = service;
+  DeleteFlightUseCase({required FlightsDBService service}) : _service = service;
 
   final FlightsDBService _service;
   final _logger = Logger('DeleteFlightUseCase');
@@ -20,7 +19,7 @@ class DeleteFlightUseCase {
     if (flight == null) return false;
 
     await _deleteMbtilesFiles(flight.maps);
-    await _deleteArticleFiles(flight.info.articles);
+    await _deleteArticleFiles(flight.offlineContent.articles);
     return _service.deleteFlightRecord(flightId);
   }
 

@@ -1,4 +1,6 @@
 import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_offline_content.dart';
+import 'package:flymap/domain/entity/flight_route_insights.dart';
 import 'package:flymap/logger.dart';
 
 class FlightInfoOverviewApiMapper {
@@ -13,7 +15,10 @@ class FlightInfoOverviewApiMapper {
       '(overview-only mapping)',
     );
 
-    return FlightInfo(overview, const []);
+    return FlightInfo(
+      FlightRouteInsights(overview: overview.isEmpty ? null : overview),
+      const FlightOfflineContent(),
+    );
   }
 
   String _extractOverview(Map<String, dynamic> map) {

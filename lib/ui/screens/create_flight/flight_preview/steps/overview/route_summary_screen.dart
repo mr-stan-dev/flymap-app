@@ -5,7 +5,6 @@ import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/subscription/paywall_source.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
-import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/ui/screens/common/route/route_places_by_type.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/region_info_screen.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_cubit.dart';
@@ -39,10 +38,7 @@ class RouteSummaryScreen extends StatelessWidget {
     final isProUser = context.select(
       (SubscriptionCubit cubit) => cubit.state.isPro,
     );
-    final distance = MapUtils.distanceFormatted(
-      departure: route.departure,
-      arrival: route.arrival,
-    );
+    final distance = _formatDistanceKm(route.distanceInKm);
     final duration = _formatMinutesCompact(context, totalRouteMinutes);
     final routeTitle =
         '${route.departure.displayCode} → ${route.arrival.displayCode}';
@@ -162,6 +158,12 @@ class RouteSummaryScreen extends StatelessWidget {
         builder: (_) => RegionInfoScreen(region: region, typeLabel: typeLabel),
       ),
     );
+  }
+
+  String _formatDistanceKm(double distanceKm) {
+    if (!distanceKm.isFinite || distanceKm <= 0) return '0km';
+    final roundedDistance = (distanceKm / 10).round() * 10;
+    return '${roundedDistance}km';
   }
 }
 

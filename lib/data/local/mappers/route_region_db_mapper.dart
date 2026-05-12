@@ -8,6 +8,8 @@ class RouteRegionDbKeys {
   static const name = 'name';
   static const regionType = 'regionType';
   static const pathFirstEncounterKm = 'pathFirstEncounterKm';
+  static const pathFirstEncounterMinutes = 'pathFirstEncounterMinutes';
+  static const legacyPathFirstEncounterTimeMin = 'pathFirstEncounterTimeMin';
   static const pathLengthInsideKm = 'pathLengthInsideKm';
   static const geometry = 'geometry';
   static const geometryType = 'type';
@@ -43,6 +45,12 @@ class RouteRegionDbMapper {
       pathFirstEncounterKm: map.getDouble(
         RouteRegionDbKeys.pathFirstEncounterKm,
       ),
+      pathFirstEncounterMinutes:
+          map.containsKey(RouteRegionDbKeys.pathFirstEncounterMinutes)
+          ? map.getInt(RouteRegionDbKeys.pathFirstEncounterMinutes)
+          : map.containsKey(RouteRegionDbKeys.legacyPathFirstEncounterTimeMin)
+          ? map.getInt(RouteRegionDbKeys.legacyPathFirstEncounterTimeMin)
+          : null,
       pathLengthInsideKm: map.getDouble(RouteRegionDbKeys.pathLengthInsideKm),
       geometry: RouteRegionGeometry(
         type: geometryType,
@@ -66,6 +74,9 @@ class RouteRegionDbMapper {
     RouteRegionDbKeys.name: region.name,
     RouteRegionDbKeys.regionType: region.regionType.apiValue,
     RouteRegionDbKeys.pathFirstEncounterKm: region.pathFirstEncounterKm,
+    if (region.pathFirstEncounterMinutes != null)
+      RouteRegionDbKeys.pathFirstEncounterMinutes:
+          region.pathFirstEncounterMinutes,
     RouteRegionDbKeys.pathLengthInsideKm: region.pathLengthInsideKm,
     RouteRegionDbKeys.geometry: {
       RouteRegionDbKeys.geometryType: region.geometry.type,

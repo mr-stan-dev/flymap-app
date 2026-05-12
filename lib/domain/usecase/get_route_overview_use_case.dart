@@ -22,4 +22,16 @@ class GetRouteOverviewUseCase {
       regionsLimit: regionsLimit,
     );
   }
+
+  RouteOverview fromPayload({
+    required Map<String, dynamic> payload,
+    required Airport departure,
+    required Airport arrival,
+  }) {
+    return _repository.mapRouteOverviewPayload(
+      payload,
+      departure: departure,
+      arrival: arrival,
+    );
+  }
 }

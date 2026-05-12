@@ -10,7 +10,9 @@
     "edit": "Edit",
     "upgrade": "Upgrade",
     "loading": "Loading...",
-    "readMore": "Read more"
+    "readMore": "Read more",
+    "pro": "PRO",
+    "search": "Search"
   },
   "home": {
     "title": "Home",
@@ -210,6 +212,26 @@
       "overviewTitle": "Route overview",
       "wikipediaTitle": "Wikipedia articles"
     },
+    "routeTypeSelector": {
+      "title": "New flight",
+      "basicTitle": "By airports",
+      "basicSubtitle": "Approximate route",
+      "basicDescription": "Works well for short and mid-haul flights.",
+      "proTitle": "By flight number",
+      "proSubtitle": "Most accurate route",
+      "proDescription": "Based on recent historical flight data",
+      "mostAccurate": "Most accurate"
+    },
+    "flightNumberSearch": {
+      "title": "Flight number",
+      "subtitle": "Enter a flight number (for example BA117).",
+      "hint": "e.g. BA117",
+      "loading": "Searching your flight",
+      "error": "We couldn't find your flight. Edit number or find by airports",
+      "findByAirports": "Find by Airports",
+      "confirmTitle": "Confirm flight",
+      "foundTitle": "We found your flight"
+    },
     "search": {
       "departureHint": "Search departure airport",
       "arrivalHint": "Search arrival airport",
@@ -246,6 +268,8 @@
       "routeNoteTooltip": "Route note",
       "routeNoteTitle": "Approximate route",
       "routeNoteBody": "Route is approximate — actual path may vary, especially on long-haul flights.",
+      "realRouteNoteTitle": "Historical route",
+      "realRouteNoteBody": "Route is based on recent historical data of the same flight.",
       "startReview": "Start review",
       "skipReview": "Skip review",
       "premiumGateTitle": "Unlock full route overview",

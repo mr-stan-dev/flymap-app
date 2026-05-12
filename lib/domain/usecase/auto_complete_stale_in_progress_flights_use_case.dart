@@ -1,4 +1,4 @@
-import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
 import 'package:flymap/repository/flight_repository.dart';
 
 class AutoCompleteStaleInProgressFlightsUseCase {

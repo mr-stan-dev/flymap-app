@@ -6,8 +6,8 @@ import 'package:flymap/logger.dart';
 import 'package:flymap/repository/favorite_airports_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/repository/recent_airports_repository.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/viewmodel/airport_selection_screen_state.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/popular_flights.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/viewmodel/airport_selection_screen_state.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/popular_flights.dart';
 
 class AirportSelectionScreenCubit extends Cubit<AirportSelectionScreenState> {
   AirportSelectionScreenCubit({

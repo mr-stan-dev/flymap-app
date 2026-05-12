@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/analytics/app_analytics.dart';
@@ -8,8 +9,10 @@ import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_operational_data.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/domain/entity/map_detail_level.dart';
+import 'package:flymap/domain/entity/route_overview.dart';
 import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/entity/user_flight_prefs.dart';
@@ -29,6 +32,7 @@ import 'package:flymap/domain/usecase/download_map_use_case.dart';
 import 'package:flymap/domain/usecase/download_region_wiki_articles_use_case.dart';
 import 'package:flymap/domain/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/domain/usecase/get_route_overview_use_case.dart';
+import 'package:flymap/domain/usecase/build_flight_route_preview_use_case.dart';
 import 'package:flymap/domain/usecase/get_wiki_articles_use_case.dart';
 
 part 'delegates/preview_preparation_delegate.dart';
@@ -40,8 +44,10 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
   FlightPreviewCubit({
     required this.departure,
     required this.arrival,
+    this.flightNumber,
     required ConnectivityChecker connectivityChecker,
     required GetRouteOverviewUseCase getRouteOverviewUseCase,
+    required BuildFlightRoutePreviewUseCase buildFlightRoutePreviewUseCase,
     required DownloadMapUseCase downloadMapUseCase,
     required DownloadRegionWikiArticlesUseCase
     downloadRegionWikiArticlesUseCase,
@@ -61,6 +67,7 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
       this,
       connectivityChecker: connectivityChecker,
       getRouteOverviewUseCase: getRouteOverviewUseCase,
+      buildFlightRoutePreviewUseCase: buildFlightRoutePreviewUseCase,
       getWikiArticlesUseCase: getWikiArticlesUseCase,
       userFlightPrefsRepository: userFlightPrefsRepository,
     );
@@ -85,6 +92,7 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
   final AppCrashlytics _crashlytics;
   final Airport departure;
   final Airport arrival;
+  final String? flightNumber;
   late final PreviewPreparationDelegate _previewPreparationDelegate;
   late final MapAndStepNavigationDelegate _navigationDelegate;
   late final WikiSelectionDelegate _wikiSelectionDelegate;

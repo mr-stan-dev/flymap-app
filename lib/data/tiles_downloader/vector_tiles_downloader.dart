@@ -18,18 +18,19 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class VectorTilesDownloader {
-  final List<LatLng> polygon;
+  final List<List<LatLng>> polygons;
   final int minZoom;
   final int maxZoom;
   final int isolatesCount;
   final _logger = Logger('VectorTilesDownloader');
 
   VectorTilesDownloader({
-    required this.polygon,
+    List<LatLng>? polygon,
+    List<List<LatLng>>? polygons,
     required this.minZoom,
     required this.maxZoom,
     this.isolatesCount = MapDownloadConfig.defaultWorkerCount,
-  });
+  }) : polygons = polygons ?? (polygon == null ? const [] : [polygon]);
 
   final List<Isolate> _isolates = [];
   ReceivePort? _receivePort;
@@ -79,8 +80,15 @@ class VectorTilesDownloader {
         return;
       }
 
+      final validPolygons = polygons
+          .where((polygon) => polygon.length >= 3)
+          .toList(growable: false);
+      final pointsCount = validPolygons.fold<int>(
+        0,
+        (sum, polygon) => sum + polygon.length,
+      );
       _logger.log(
-        'Starting download for polygon with ${polygon.length} points, zoom $minZoom-$maxZoom',
+        'Starting download for ${validPolygons.length} polygon(s) with $pointsCount total points, zoom $minZoom-$maxZoom',
       );
 
       // Initializing
@@ -121,10 +129,15 @@ class VectorTilesDownloader {
       }
 
       // Compute all tiles
-      final allTiles = <MapTile>[];
+      final allTilesByKey = <String, MapTile>{};
       for (int z = minZoom; z <= maxZoom; z++) {
-        allTiles.addAll(TileUtils.tilesForPolygon(polygon, z));
+        for (final polygon in validPolygons) {
+          for (final tile in TileUtils.tilesForPolygon(polygon, z)) {
+            allTilesByKey['${tile.z}/${tile.x}/${tile.y}'] = tile;
+          }
+        }
       }
+      final allTiles = allTilesByKey.values.toList(growable: false);
 
       // Filter out sea tiles from configured sea-filter zoom and above.
       final seaFilter = SeaTilesFilter(

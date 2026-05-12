@@ -52,4 +52,26 @@ void main() {
       ]);
     },
   );
+
+  test(
+    'buildFlightInfoFunctionRequest samples dense routes to backend limit',
+    () {
+      final waypoints = List.generate(
+        360,
+        (index) => LatLng(index / 10, -index / 10),
+      );
+
+      final request = buildFlightInfoFunctionRequest(
+        airportDeparture: 'SFO',
+        airportArrival: 'PEK',
+        waypoints: waypoints,
+        promptVersion: 4,
+      );
+
+      final sampled = request['waypoints'] as List<dynamic>;
+      expect(sampled, hasLength(flightInfoRequestMaxWaypoints));
+      expect(sampled.first, [0.0, 0.0]);
+      expect(sampled.last, [35.9, -35.9]);
+    },
+  );
 }

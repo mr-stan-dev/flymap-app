@@ -8,19 +8,19 @@ import 'package:flymap/repository/favorite_airports_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/repository/recent_airports_repository.dart';
 import 'package:flymap/router/app_router.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/flight_search_airport_selection_step.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/viewmodel/airport_selection_screen_cubit.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/viewmodel/airport_selection_screen_state.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/widgets/flight_search_airport_selection_step.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/viewmodel/airport_selection_screen_cubit.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/viewmodel/airport_selection_screen_state.dart';
 import 'package:get_it/get_it.dart';
 
-class AirportSelectionScreen extends StatefulWidget {
-  const AirportSelectionScreen({super.key});
+class AirportsSearchScreen extends StatefulWidget {
+  const AirportsSearchScreen({super.key});
 
   @override
-  State<AirportSelectionScreen> createState() => _AirportSelectionScreenState();
+  State<AirportsSearchScreen> createState() => _AirportsSearchScreenState();
 }
 
-class _AirportSelectionScreenState extends State<AirportSelectionScreen> {
+class _AirportsSearchScreenState extends State<AirportsSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -179,7 +179,7 @@ class _AirportSelectionScreenState extends State<AirportSelectionScreen> {
     if (departure == null || arrival == null) return;
     await cubit.saveSelectedAirportsAsRecent();
     if (!context.mounted) return;
-    AppRouter.goToFlightPreview(
+    AppRouter.goToFlightOverview(
       context,
       departure: departure,
       arrival: arrival,

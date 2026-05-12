@@ -9,6 +9,7 @@ class RouteRegion extends Equatable {
     required this.pathFirstEncounterKm,
     required this.pathLengthInsideKm,
     required this.geometry,
+    this.pathFirstEncounterMinutes,
     this.wikidataQid,
     this.description,
     this.wikipediaUrl,
@@ -20,6 +21,7 @@ class RouteRegion extends Equatable {
   final double pathFirstEncounterKm;
   final double pathLengthInsideKm;
   final RouteRegionGeometry geometry;
+  final int? pathFirstEncounterMinutes;
   final String? wikidataQid;
   final String? description;
   final String? wikipediaUrl;
@@ -31,6 +33,8 @@ class RouteRegion extends Equatable {
     double? pathFirstEncounterKm,
     double? pathLengthInsideKm,
     RouteRegionGeometry? geometry,
+    int? pathFirstEncounterMinutes,
+    bool clearPathFirstEncounterMinutes = false,
     String? wikidataQid,
     bool clearWikidataQid = false,
     String? fromAboveDescription,
@@ -45,6 +49,9 @@ class RouteRegion extends Equatable {
       pathFirstEncounterKm: pathFirstEncounterKm ?? this.pathFirstEncounterKm,
       pathLengthInsideKm: pathLengthInsideKm ?? this.pathLengthInsideKm,
       geometry: geometry ?? this.geometry,
+      pathFirstEncounterMinutes: clearPathFirstEncounterMinutes
+          ? null
+          : pathFirstEncounterMinutes ?? this.pathFirstEncounterMinutes,
       wikidataQid: clearWikidataQid ? null : wikidataQid ?? this.wikidataQid,
       description: clearFromAboveDescription
           ? null
@@ -63,6 +70,7 @@ class RouteRegion extends Equatable {
     pathFirstEncounterKm,
     pathLengthInsideKm,
     geometry,
+    pathFirstEncounterMinutes,
     wikidataQid,
     description,
     wikipediaUrl,

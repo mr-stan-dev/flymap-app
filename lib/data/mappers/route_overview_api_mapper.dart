@@ -1,6 +1,7 @@
 import 'package:flymap/data/mappers/route_places_api_mapper.dart';
 import 'package:flymap/data/mappers/route_regions_api_mapper.dart';
 import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/flight_summary.dart';
 import 'package:flymap/domain/entity/route_overview.dart';
 
 class RouteOverviewApiMapper {
@@ -24,10 +25,17 @@ class RouteOverviewApiMapper {
       arrival: arrival,
     );
     final timeline = _regionsMapper.toRouteTimeline(payload);
+    final flightInfo = _toFlightSummary(payload['flightInfo']);
     return RouteOverview(
       route: preview.route,
       topPois: preview.topPois,
       timeline: timeline,
+      flightInfo: flightInfo,
     );
+  }
+
+  FlightSummary? _toFlightSummary(dynamic raw) {
+    if (raw is! Map) return null;
+    return FlightSummary.fromApi(raw.cast<String, dynamic>(), '');
   }
 }

@@ -91,6 +91,7 @@ class _FlightSearchRouteOverviewStepState
       orderedRegions: orderedRegions,
       gateDecision: gateDecision,
     );
+    final routeTotalMinutes = _routeTotalMinutes(route, widget.state);
     return Column(
       children: [
         Expanded(
@@ -196,7 +197,7 @@ class _FlightSearchRouteOverviewStepState
             key: const PageStorageKey<String>('route-overview-pager'),
             entries: entries,
             route: route,
-            totalRouteMinutes: entries[entries.length - 2].minuteFromDeparture,
+            totalRouteMinutes: routeTotalMinutes,
             totalRegionCount: orderedRegions.length,
             initialPage: 0,
             onPageChanged: (next) => _selectedIndexNotifier.value = next,
@@ -204,8 +205,7 @@ class _FlightSearchRouteOverviewStepState
               context,
               route: route,
               state: widget.state,
-              totalRouteMinutes:
-                  entries[entries.length - 2].minuteFromDeparture,
+              totalRouteMinutes: routeTotalMinutes,
             ),
             onPremiumGateTap: widget.onPremiumGateTap,
             onContinueFromOverview: widget.onContinueFromOverview,
@@ -223,9 +223,11 @@ class _FlightSearchRouteOverviewStepState
   }) {
     final visibleRegions = gateDecision.freeRegions;
     final hiddenRegions = gateDecision.premiumRegions;
+    final routeTotalMinutes = _routeTotalMinutes(route, state);
     final groupedVisibleRegions = RouteTimelineGrouping.groupByTimeline(
       visibleRegions,
       cruiseSpeedKmh: state.routeCruiseSpeedKmh,
+      maxTimelineMinutes: route.isHistoricalTrack ? routeTotalMinutes : null,
     );
     final regionEntries = groupedVisibleRegions
         .map(RouteOverviewPageEntry.regionGroup)
@@ -233,14 +235,9 @@ class _FlightSearchRouteOverviewStepState
     final lastRegionMinute = groupedVisibleRegions.isEmpty
         ? 0
         : groupedVisibleRegions.last.minuteFromDeparture;
-    final arrivalMinutes = [
-      state.routeTotalMinutes,
-      _kmToMinutes(
-        route.distanceInKm,
-        cruiseSpeedKmh: state.routeCruiseSpeedKmh,
-      ),
-      lastRegionMinute,
-    ].reduce((a, b) => a > b ? a : b);
+    final arrivalMinutes = route.isHistoricalTrack && routeTotalMinutes > 0
+        ? routeTotalMinutes
+        : [routeTotalMinutes, lastRegionMinute].reduce((a, b) => a > b ? a : b);
 
     final entries = <RouteOverviewPageEntry>[
       RouteOverviewPageEntry.summary(),
@@ -342,9 +339,26 @@ class _FlightSearchRouteOverviewStepState
     );
   }
 
+  int _routeTotalMinutes(FlightRoute route, FlightPreviewState state) {
+    final routeMetricMinutes = route.effectiveDurationMinutes;
+    if (route.isHistoricalTrack && routeMetricMinutes > 0) {
+      return routeMetricMinutes;
+    }
+    if (state.routeTotalMinutes > 0) {
+      return state.routeTotalMinutes;
+    }
+    if (routeMetricMinutes > 0) {
+      return routeMetricMinutes;
+    }
+    return _kmToMinutes(
+      route.distanceInKm,
+      cruiseSpeedKmh: state.routeCruiseSpeedKmh,
+    );
+  }
+
   int _regionMinute(RouteRegion region, {required int cruiseSpeedKmh}) {
-    return RouteTimelineGrouping.toTimelineMinute(
-      region.pathFirstEncounterKm,
+    return RouteTimelineGrouping.regionTimelineMinute(
+      region,
       cruiseSpeedKmh: cruiseSpeedKmh,
     );
   }

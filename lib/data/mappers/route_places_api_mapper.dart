@@ -1,6 +1,9 @@
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight_poi_type.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_route_metrics.dart';
+import 'package:flymap/domain/entity/flight_route_source.dart';
+import 'package:flymap/domain/entity/flight_waypoint.dart';
 import 'package:flymap/domain/entity/route_poi.dart';
 import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/domain/entity/route_preview.dart';
@@ -17,8 +20,16 @@ class RoutePlacesApiMapper {
       throw const FormatException('Route payload missing route object');
     }
     final routeMap = route.cast<String, dynamic>();
-    final waypoints = _parseLineString(routeMap['path']);
-    final corridor = _parsePolygonExterior(routeMap['corridor']);
+    final metaRaw = payload['meta'];
+    final metaMap = metaRaw is Map
+        ? metaRaw.cast<String, dynamic>()
+        : const <String, dynamic>{};
+    final waypoints = _parseWaypoints(routeMap);
+    final corridorPolygons = _parseCorridorPolygons(routeMap);
+    final corridor = corridorPolygons.isNotEmpty
+        ? corridorPolygons.first
+        : const <LatLng>[];
+    final metrics = _parseRouteMetrics(routeMap, payload);
     if (waypoints.length < 2) {
       throw const FormatException('Route path must contain at least 2 points');
     }
@@ -27,11 +38,19 @@ class RoutePlacesApiMapper {
         'Route corridor must contain at least 3 points',
       );
     }
+    if (metrics.effectiveDistanceKm <= 0) {
+      throw const FormatException('Route payload missing valid distance');
+    }
     final flightRoute = FlightRoute(
       departure: departure,
       arrival: arrival,
+      source: FlightRouteSource.fromRaw(
+        routeMap['source'] ?? metaMap['routeSource'],
+      ),
       waypoints: waypoints,
       corridor: corridor,
+      corridorPolygons: corridorPolygons,
+      metrics: metrics,
     );
     final topPois = _parseTopPois(payload['places']);
     return RoutePreview(route: flightRoute, topPois: topPois);
@@ -83,16 +102,77 @@ class RoutePlacesApiMapper {
     );
   }
 
-  List<LatLng> _parseLineString(dynamic lineRaw) {
+  List<FlightWaypoint> _parseWaypoints(Map<String, dynamic> routeMap) {
+    final waypointsRaw = routeMap['waypoints'];
+    if (waypointsRaw is List) {
+      final parsed = waypointsRaw
+          .map(_parseWaypointObject)
+          .whereType<FlightWaypoint>()
+          .toList(growable: false);
+      if (parsed.length >= 2) return parsed;
+    }
+    return _parseLineStringToWaypoints(routeMap['path']);
+  }
+
+  FlightRouteMetrics _parseRouteMetrics(
+    Map<String, dynamic> routeMap,
+    Map<String, dynamic> payload,
+  ) {
+    final metricsRaw = routeMap['metrics'];
+    final metricsMap = metricsRaw is Map
+        ? metricsRaw.cast<String, dynamic>()
+        : const <String, dynamic>{};
+    final flightInfoRaw = payload['flightInfo'];
+    final flightInfo = flightInfoRaw is Map
+        ? flightInfoRaw.cast<String, dynamic>()
+        : const <String, dynamic>{};
+    final legacyDistanceKm = _toFiniteDouble(routeMap['distanceInKm']);
+    final greatCircleDistanceKm =
+        _toFiniteDouble(metricsMap['greatCircleDistanceKm']) ??
+        legacyDistanceKm ??
+        0;
+    final actualDistanceKm =
+        _toFiniteDouble(metricsMap['actualDistanceKm']) ??
+        _toFiniteDouble(flightInfo['actualDistanceKm']);
+    final approxDurationMinutes =
+        _toInt(metricsMap['approxDurationMinutes']) ??
+        FlightRouteMetrics.estimateApproxDurationMinutes(greatCircleDistanceKm);
+    final actualDurationMinutes =
+        _toInt(metricsMap['actualDurationMinutes']) ??
+        _toInt(routeMap['actualDurationMinutes']) ??
+        _toInt(flightInfo['actualDurationMinutes']) ??
+        _toInt(flightInfo['actualTimeMin']);
+    return FlightRouteMetrics(
+      greatCircleDistanceKm: greatCircleDistanceKm,
+      approxDurationMinutes: approxDurationMinutes,
+      actualDistanceKm: actualDistanceKm,
+      actualDurationMinutes: actualDurationMinutes,
+    );
+  }
+
+  List<FlightWaypoint> _parseLineStringToWaypoints(dynamic lineRaw) {
     if (lineRaw is! Map) return const [];
     final line = lineRaw.cast<String, dynamic>();
     if (line['type'] != 'LineString') return const [];
     final coordinates = line['coordinates'];
     if (coordinates is! List) return const [];
     return coordinates
-        .map(_parseLonLatPoint)
-        .whereType<LatLng>()
+        .map(_parseLonLatPointForWaypoints)
+        .whereType<FlightWaypoint>()
         .toList(growable: false);
+  }
+
+  FlightWaypoint? _parseWaypointObject(dynamic raw) {
+    if (raw is! Map) return null;
+    final map = raw.cast<String, dynamic>();
+    final lat = _toFiniteDouble(map['lat']);
+    final lon = _toFiniteDouble(map['lon']);
+    if (lat == null || lon == null) return null;
+    return FlightWaypoint(
+      latLon: LatLng(lat, lon),
+      timestamp: _toInt(map['timestamp']) ?? 0,
+      altitude: _toInt(map['altitude']) ?? 0,
+    );
   }
 
   List<LatLng> _parsePolygonExterior(dynamic polygonRaw) {
@@ -109,12 +189,54 @@ class RoutePlacesApiMapper {
         .toList(growable: false);
   }
 
+  List<List<LatLng>> _parseCorridorPolygons(Map<String, dynamic> routeMap) {
+    final multiRaw = routeMap['corridorMultiPolygon'];
+    final parsedMulti = _parseMultiPolygonExteriors(multiRaw);
+    if (parsedMulti.isNotEmpty) {
+      return parsedMulti;
+    }
+    final parsedLegacy = _parsePolygonExterior(routeMap['corridor']);
+    if (parsedLegacy.length >= 3) {
+      return [parsedLegacy];
+    }
+    return const [];
+  }
+
+  List<List<LatLng>> _parseMultiPolygonExteriors(dynamic multiPolygonRaw) {
+    if (multiPolygonRaw is! Map) return const [];
+    final multi = multiPolygonRaw.cast<String, dynamic>();
+    if (multi['type'] != 'MultiPolygon') return const [];
+    final coordinates = multi['coordinates'];
+    if (coordinates is! List || coordinates.isEmpty) return const [];
+
+    final out = <List<LatLng>>[];
+    for (final polygonRaw in coordinates) {
+      if (polygonRaw is! List || polygonRaw.isEmpty) continue;
+      final exteriorRaw = polygonRaw.first;
+      if (exteriorRaw is! List) continue;
+      final ring = exteriorRaw
+          .map(_parseLonLatPoint)
+          .whereType<LatLng>()
+          .toList(growable: false);
+      if (ring.length >= 3) {
+        out.add(ring);
+      }
+    }
+    return out;
+  }
+
   LatLng? _parseLonLatPoint(dynamic pointRaw) {
     if (pointRaw is! List || pointRaw.length < 2) return null;
     final lon = _toFiniteDouble(pointRaw[0]);
     final lat = _toFiniteDouble(pointRaw[1]);
     if (lat == null || lon == null) return null;
     return LatLng(lat, lon);
+  }
+
+  FlightWaypoint? _parseLonLatPointForWaypoints(dynamic pointRaw) {
+    final latLon = _parseLonLatPoint(pointRaw);
+    if (latLon == null) return null;
+    return FlightWaypoint(latLon: latLon, timestamp: 0, altitude: 0);
   }
 
   double? _toFiniteDouble(dynamic raw) {

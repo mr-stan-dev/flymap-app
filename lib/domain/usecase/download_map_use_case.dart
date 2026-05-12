@@ -10,7 +10,9 @@ import 'package:flymap/data/tiles_downloader/vector_tiles_downloader.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/domain/entity/flight_map.dart';
+import 'package:flymap/domain/entity/flight_operational_data.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_timestamp.dart';
 import 'package:flymap/map_download_config.dart';
 import 'package:uuid/uuid.dart';
 
@@ -113,6 +115,7 @@ class DownloadMapUseCase {
     required String flightId,
     required FlightRoute flightRoute,
     required FlightInfo flightInfo,
+    FlightOperationalData? flightOperationalData,
     required String flightAccessTier,
     required int maxZoom,
   }) async* {
@@ -127,7 +130,7 @@ class DownloadMapUseCase {
 
       // Create and start the vector tiles downloader
       final downloader = VectorTilesDownloader(
-        polygon: flightRoute.corridor,
+        polygons: flightRoute.effectiveCorridorPolygons,
         minZoom: MapDownloadConfig.minDownloadZoom,
         maxZoom: maxZoom,
       );
@@ -153,6 +156,7 @@ class DownloadMapUseCase {
             flightMap: mapData,
             flightRoute: flightRoute,
             flightInfo: flightInfo,
+            flightOperationalData: flightOperationalData,
             flightAccessTier: flightAccessTier,
           );
 
@@ -176,6 +180,7 @@ class DownloadMapUseCase {
     required FlightMap flightMap,
     required FlightRoute flightRoute,
     required FlightInfo flightInfo,
+    FlightOperationalData? flightOperationalData,
     required String flightAccessTier,
   }) async {
     _logger.log(
@@ -186,10 +191,11 @@ class DownloadMapUseCase {
         id: flightId,
         route: flightRoute,
         maps: [flightMap],
-        info: flightInfo,
-        createdAt: DateTime.now(),
-        completedAt: null,
+        routeInsights: flightInfo.routeInsights,
+        offlineContent: flightInfo.offlineContent,
+        timestamp: FlightTimestamp(createdAt: DateTime.now()),
         flightAccessTier: flightAccessTier,
+        operationalData: flightOperationalData,
       );
       _logger.log('Inserting flight into DB: id=${flight.id}');
       await _flightsService.saveOrUpdateFlight(flight);

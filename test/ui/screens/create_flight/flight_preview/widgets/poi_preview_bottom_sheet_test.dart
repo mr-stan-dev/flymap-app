@@ -36,7 +36,7 @@ void main() {
     );
   });
 
-  testWidgets('disables Open action when source URL is empty', (tester) async {
+  testWidgets('hides Open action when source URL is empty', (tester) async {
     final useCase = _FakeGetPoiWikiPreviewUseCase();
     final preloaded = PoiWikiPreview(
       qid: 'Q2',
@@ -51,10 +51,7 @@ void main() {
     await tester.tap(find.text('Open POI'));
     await tester.pumpAndSettle();
 
-    final openButton = tester.widget<TextButton>(
-      find.widgetWithText(TextButton, 'Open Wikipedia'),
-    );
-    expect(openButton.onPressed, isNull);
+    expect(find.widgetWithText(TextButton, 'Open Wikipedia'), findsNothing);
   });
 }
 
@@ -77,7 +74,6 @@ Widget _testApp({
                   name: preloaded.title,
                   typeRaw: 'city',
                   qid: preloaded.qid,
-                  wikiPreviewUseCase: useCase,
                   preloadedPreview: preloaded,
                 );
               },

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/airport_category_section.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/search_result_list.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/widgets/airport_category_section.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/widgets/search_result_list.dart';
 
 class HomeAirportSelector extends StatefulWidget {
   const HomeAirportSelector({

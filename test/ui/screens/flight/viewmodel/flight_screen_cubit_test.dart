@@ -4,6 +4,10 @@ import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_route_metrics.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
+import 'package:flymap/domain/entity/flight_timestamp.dart';
+import 'package:flymap/domain/entity/flight_waypoint.dart';
 import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/domain/usecase/complete_flight_use_case.dart';
 import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
@@ -111,15 +115,27 @@ Flight _buildFlight({required FlightStatus status}) {
   const route = FlightRoute(
     departure: departure,
     arrival: arrival,
-    waypoints: [LatLng(51.47, -0.45), LatLng(48.35, 11.79)],
-    corridor: [LatLng(51.47, -0.45), LatLng(48.35, 11.79)],
+    waypoints: [
+      FlightWaypoint(latLon: LatLng(51.47, -0.45)),
+      FlightWaypoint(latLon: LatLng(48.35, 11.79)),
+    ],
+    corridor: [
+      LatLng(51.47, -0.45),
+      LatLng(48.35, -0.45),
+      LatLng(48.35, 11.79),
+    ],
+    metrics: FlightRouteMetrics(
+      greatCircleDistanceKm: 1487.5,
+      approxDurationMinutes: 105,
+    ),
   );
 
   return Flight(
     id: 'flight-1',
     route: route,
-    info: const FlightInfo('', [], [], [], 105, 850),
-    createdAt: DateTime(2026, 1, 1),
+    routeInsights: FlightInfo.empty.routeInsights,
+    offlineContent: FlightInfo.empty.offlineContent,
+    timestamp: FlightTimestamp(createdAt: DateTime(2026, 1, 1)),
     status: status,
   );
 }

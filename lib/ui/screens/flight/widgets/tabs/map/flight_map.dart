@@ -402,7 +402,7 @@ class _FlightMapState extends State<FlightMap> {
 
   List<ll.LatLng> _routePoints() {
     if (widget.flight.route.waypoints.length >= 2) {
-      return widget.flight.route.waypoints;
+      return widget.flight.route.waypointLatLngs;
     }
     return [widget.flight.departure.latLon, widget.flight.arrival.latLon];
   }

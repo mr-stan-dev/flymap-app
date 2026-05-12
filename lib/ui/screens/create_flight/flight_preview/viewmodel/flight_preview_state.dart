@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_operational_data.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/domain/entity/map_detail_level.dart';
 import 'package:flymap/domain/entity/route_region.dart';
@@ -127,6 +128,7 @@ class DownloadSectionsState extends Equatable {
 class RoutePreviewState extends Equatable {
   const RoutePreviewState({
     required this.flightRoute,
+    required this.flightOperationalData,
     required this.allRoutePois,
     required this.routeRegions,
     required this.routeTotalMinutes,
@@ -141,6 +143,7 @@ class RoutePreviewState extends Equatable {
   const RoutePreviewState.initial({
     MapDetailLevel initialSelectedMapDetailLevel = MapDetailLevel.basic,
   }) : flightRoute = null,
+       flightOperationalData = null,
        allRoutePois = const [],
        routeRegions = const [],
        routeTotalMinutes = 0,
@@ -152,6 +155,7 @@ class RoutePreviewState extends Equatable {
        selectedArticleUrls = const [];
 
   final FlightRoute? flightRoute;
+  final FlightOperationalData? flightOperationalData;
   final List<RoutePoiSummary> allRoutePois;
   final List<RouteRegion> routeRegions;
   final int routeTotalMinutes;
@@ -165,6 +169,8 @@ class RoutePreviewState extends Equatable {
   RoutePreviewState copyWith({
     FlightRoute? flightRoute,
     bool clearFlightRoute = false,
+    FlightOperationalData? flightOperationalData,
+    bool clearFlightOperationalData = false,
     List<RoutePoiSummary>? allRoutePois,
     bool clearAllRoutePois = false,
     List<RouteRegion>? routeRegions,
@@ -181,6 +187,9 @@ class RoutePreviewState extends Equatable {
   }) {
     return RoutePreviewState(
       flightRoute: clearFlightRoute ? null : flightRoute ?? this.flightRoute,
+      flightOperationalData: clearFlightOperationalData
+          ? null
+          : flightOperationalData ?? this.flightOperationalData,
       allRoutePois: clearAllRoutePois
           ? const []
           : allRoutePois ?? this.allRoutePois,
@@ -203,6 +212,7 @@ class RoutePreviewState extends Equatable {
   @override
   List<Object?> get props => [
     flightRoute,
+    flightOperationalData,
     allRoutePois,
     routeRegions,
     routeTotalMinutes,
@@ -432,6 +442,8 @@ class FlightPreviewState extends Equatable {
   final PreviewMessageState messageState;
 
   FlightRoute? get flightRoute => routeState.flightRoute;
+  FlightOperationalData? get flightOperationalData =>
+      routeState.flightOperationalData;
   List<RoutePoiSummary> get allRoutePois => routeState.allRoutePois;
   List<RouteRegion> get routeRegions => routeState.routeRegions;
   int get routeTotalMinutes => routeState.routeTotalMinutes;
@@ -474,6 +486,8 @@ class FlightPreviewState extends Equatable {
     CreateFlightStep? step,
     FlightRoute? flightRoute,
     bool clearFlightRoute = false,
+    FlightOperationalData? flightOperationalData,
+    bool clearFlightOperationalData = false,
     List<RoutePoiSummary>? allRoutePois,
     bool clearAllRoutePois = false,
     List<RouteRegion>? routeRegions,
@@ -517,6 +531,8 @@ class FlightPreviewState extends Equatable {
       routeState: routeState.copyWith(
         flightRoute: flightRoute,
         clearFlightRoute: clearFlightRoute,
+        flightOperationalData: flightOperationalData,
+        clearFlightOperationalData: clearFlightOperationalData,
         allRoutePois: allRoutePois,
         clearAllRoutePois: clearAllRoutePois,
         routeRegions: routeRegions,

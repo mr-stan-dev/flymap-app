@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
 import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';

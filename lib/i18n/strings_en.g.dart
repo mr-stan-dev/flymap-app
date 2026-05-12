@@ -94,6 +94,12 @@ class TranslationsCommonEn {
 
 	/// en: 'Read more'
 	String get readMore => 'Read more';
+
+	/// en: 'PRO'
+	String get pro => 'PRO';
+
+	/// en: 'Search'
+	String get search => 'Search';
 }
 
 // Path: home
@@ -670,6 +676,8 @@ class TranslationsCreateFlightEn {
 
 	// Translations
 	late final TranslationsCreateFlightStepsEn steps = TranslationsCreateFlightStepsEn.internal(_root);
+	late final TranslationsCreateFlightRouteTypeSelectorEn routeTypeSelector = TranslationsCreateFlightRouteTypeSelectorEn.internal(_root);
+	late final TranslationsCreateFlightFlightNumberSearchEn flightNumberSearch = TranslationsCreateFlightFlightNumberSearchEn.internal(_root);
 	late final TranslationsCreateFlightSearchEn search = TranslationsCreateFlightSearchEn.internal(_root);
 	late final TranslationsCreateFlightMapPreviewEn mapPreview = TranslationsCreateFlightMapPreviewEn.internal(_root);
 	late final TranslationsCreateFlightOverviewEn overview = TranslationsCreateFlightOverviewEn.internal(_root);
@@ -1090,6 +1098,72 @@ class TranslationsCreateFlightStepsEn {
 	String get wikipediaTitle => 'Wikipedia articles';
 }
 
+// Path: createFlight.routeTypeSelector
+class TranslationsCreateFlightRouteTypeSelectorEn {
+	TranslationsCreateFlightRouteTypeSelectorEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'New flight'
+	String get title => 'New flight';
+
+	/// en: 'By airports'
+	String get basicTitle => 'By airports';
+
+	/// en: 'Approximate route'
+	String get basicSubtitle => 'Approximate route';
+
+	/// en: 'Works well for short and mid-haul flights.'
+	String get basicDescription => 'Works well for short and mid-haul flights.';
+
+	/// en: 'By flight number'
+	String get proTitle => 'By flight number';
+
+	/// en: 'Most accurate route'
+	String get proSubtitle => 'Most accurate route';
+
+	/// en: 'Based on recent historical flight data'
+	String get proDescription => 'Based on recent historical flight data';
+
+	/// en: 'Most accurate'
+	String get mostAccurate => 'Most accurate';
+}
+
+// Path: createFlight.flightNumberSearch
+class TranslationsCreateFlightFlightNumberSearchEn {
+	TranslationsCreateFlightFlightNumberSearchEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Flight number'
+	String get title => 'Flight number';
+
+	/// en: 'Enter a flight number (for example BA117).'
+	String get subtitle => 'Enter a flight number (for example BA117).';
+
+	/// en: 'e.g. BA117'
+	String get hint => 'e.g. BA117';
+
+	/// en: 'Searching your flight'
+	String get loading => 'Searching your flight';
+
+	/// en: 'We couldn't find your flight. Edit number or find by airports'
+	String get error => 'We couldn\'t find your flight. Edit number or find by airports';
+
+	/// en: 'Find by Airports'
+	String get findByAirports => 'Find by Airports';
+
+	/// en: 'Confirm flight'
+	String get confirmTitle => 'Confirm flight';
+
+	/// en: 'We found your flight'
+	String get foundTitle => 'We found your flight';
+}
+
 // Path: createFlight.search
 class TranslationsCreateFlightSearchEn {
 	TranslationsCreateFlightSearchEn.internal(this._root);
@@ -1208,6 +1282,12 @@ class TranslationsCreateFlightOverviewEn {
 
 	/// en: 'Route is approximate — actual path may vary, especially on long-haul flights.'
 	String get routeNoteBody => 'Route is approximate — actual path may vary, especially on long-haul flights.';
+
+	/// en: 'Historical route'
+	String get realRouteNoteTitle => 'Historical route';
+
+	/// en: 'Route is based on recent historical data of the same flight.'
+	String get realRouteNoteBody => 'Route is based on recent historical data of the same flight.';
 
 	/// en: 'Start review'
 	String get startReview => 'Start review';
@@ -2069,6 +2149,8 @@ extension on Translations {
 			'common.upgrade' => 'Upgrade',
 			'common.loading' => 'Loading...',
 			'common.readMore' => 'Read more',
+			'common.pro' => 'PRO',
+			'common.search' => 'Search',
 			'home.title' => 'Home',
 			'home.aboutTooltip' => 'About',
 			'home.settingsTooltip' => 'Settings',
@@ -2254,6 +2336,22 @@ extension on Translations {
 			'createFlight.steps.mapPreviewTitle' => 'Map preview',
 			'createFlight.steps.overviewTitle' => 'Route overview',
 			'createFlight.steps.wikipediaTitle' => 'Wikipedia articles',
+			'createFlight.routeTypeSelector.title' => 'New flight',
+			'createFlight.routeTypeSelector.basicTitle' => 'By airports',
+			'createFlight.routeTypeSelector.basicSubtitle' => 'Approximate route',
+			'createFlight.routeTypeSelector.basicDescription' => 'Works well for short and mid-haul flights.',
+			'createFlight.routeTypeSelector.proTitle' => 'By flight number',
+			'createFlight.routeTypeSelector.proSubtitle' => 'Most accurate route',
+			'createFlight.routeTypeSelector.proDescription' => 'Based on recent historical flight data',
+			'createFlight.routeTypeSelector.mostAccurate' => 'Most accurate',
+			'createFlight.flightNumberSearch.title' => 'Flight number',
+			'createFlight.flightNumberSearch.subtitle' => 'Enter a flight number (for example BA117).',
+			'createFlight.flightNumberSearch.hint' => 'e.g. BA117',
+			'createFlight.flightNumberSearch.loading' => 'Searching your flight',
+			'createFlight.flightNumberSearch.error' => 'We couldn\'t find your flight. Edit number or find by airports',
+			'createFlight.flightNumberSearch.findByAirports' => 'Find by Airports',
+			'createFlight.flightNumberSearch.confirmTitle' => 'Confirm flight',
+			'createFlight.flightNumberSearch.foundTitle' => 'We found your flight',
 			'createFlight.search.departureHint' => 'Search departure airport',
 			'createFlight.search.arrivalHint' => 'Search arrival airport',
 			'createFlight.search.removeFavorite' => 'Remove favorite',
@@ -2285,6 +2383,8 @@ extension on Translations {
 			'createFlight.overview.routeNoteTooltip' => 'Route note',
 			'createFlight.overview.routeNoteTitle' => 'Approximate route',
 			'createFlight.overview.routeNoteBody' => 'Route is approximate — actual path may vary, especially on long-haul flights.',
+			'createFlight.overview.realRouteNoteTitle' => 'Historical route',
+			'createFlight.overview.realRouteNoteBody' => 'Route is based on recent historical data of the same flight.',
 			'createFlight.overview.startReview' => 'Start review',
 			'createFlight.overview.skipReview' => 'Skip review',
 			'createFlight.overview.premiumGateTitle' => 'Unlock full route overview',
@@ -2550,6 +2650,8 @@ extension on Translations {
 			'flight.route.premiumGateCta' => 'Subscribe to Premium',
 			'flight.route.premiumOfflineTitle' => 'Internet needed to upgrade',
 			'flight.route.premiumOfflineBody' => 'You are offline right now. Connect to the internet to upgrade and unlock the full route view.',
+			_ => null,
+		} ?? switch (path) {
 			'flight.route.nextHintLabel' => ({required Object region, required Object eta}) => 'Next: ${region} (${eta})',
 			'flight.route.etaUnknownLabel' => 'estimating...',
 			'shareFlight.title' => 'Share flight',
@@ -2570,8 +2672,6 @@ extension on Translations {
 			'about.chipOffline' => 'Offline map',
 			'about.chipDashboard' => 'Live dashboard',
 			'about.chipSharing' => 'Route sharing',
-			_ => null,
-		} ?? switch (path) {
 			'about.infoBanner' => 'Before takeoff, download your route map. In flight mode, internet access may be limited or unavailable.',
 			'about.whatYouCanDo' => 'What You Can Do',
 			'about.featurePlanTitle' => 'Plan your route',

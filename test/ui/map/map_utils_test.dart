@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_route_metrics.dart';
 import 'package:flymap/domain/entity/map_detail_level.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:latlong2/latlong.dart';
@@ -31,6 +32,7 @@ void main() {
         arrival: _airport('FRA', 50.0379, 8.5622),
         waypoints: const [],
         corridor: const [],
+        metrics: FlightRouteMetrics.fromLegacyDistance(450),
       );
 
       final label = MapUtils.estimatedDownloadSizeRangeLabel(
@@ -47,6 +49,7 @@ void main() {
         arrival: _airport('FRA', 50.0379, 8.5622),
         waypoints: const [],
         corridor: const [],
+        metrics: FlightRouteMetrics.fromLegacyDistance(450),
       );
 
       final basicLabel = MapUtils.estimatedDownloadSizeRangeLabel(

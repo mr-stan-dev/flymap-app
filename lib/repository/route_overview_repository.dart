@@ -10,6 +10,12 @@ abstract interface class RouteOverviewRepository {
     required int placesLimit,
     required int regionsLimit,
   });
+
+  RouteOverview mapRouteOverviewPayload(
+    Map<String, dynamic> payload, {
+    required Airport departure,
+    required Airport arrival,
+  });
 }
 
 class ApiRouteOverviewRepository implements RouteOverviewRepository {
@@ -35,6 +41,19 @@ class ApiRouteOverviewRepository implements RouteOverviewRepository {
       placesLimit: placesLimit,
       regionsLimit: regionsLimit,
     );
+    return _mapper.toRouteOverview(
+      payload,
+      departure: departure,
+      arrival: arrival,
+    );
+  }
+
+  @override
+  RouteOverview mapRouteOverviewPayload(
+    Map<String, dynamic> payload, {
+    required Airport departure,
+    required Airport arrival,
+  }) {
     return _mapper.toRouteOverview(
       payload,
       departure: departure,

@@ -3,7 +3,9 @@ import 'package:flymap/data/local/mappers/flight_article_db_mapper.dart';
 import 'package:flymap/data/local/mappers/flight_info_db_mapper.dart';
 import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_offline_content.dart';
 import 'package:flymap/domain/entity/flight_poi_type.dart';
+import 'package:flymap/domain/entity/flight_route_insights.dart';
 import 'package:flymap/domain/entity/route_poi.dart';
 import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:latlong2/latlong.dart';
@@ -13,40 +15,44 @@ void main() {
     test('roundtrips articles with poi and overview', () {
       final mapper = FlightInfoDbMapper();
       final info = FlightInfo(
-        'overview',
-        [
-          RoutePoiSummary(
-            poi: const RoutePoi(
-              qid: 'Q786',
-              name: 'Alps',
-              latLon: LatLng(1, 2),
-              type: FlightPoiType.mountain,
-              sitelinks: 100,
+        FlightRouteInsights(
+          overview: 'overview',
+          poiHighlights: [
+            RoutePoiSummary(
+              poi: const RoutePoi(
+                qid: 'Q786',
+                name: 'Alps',
+                latLon: LatLng(1, 2),
+                type: FlightPoiType.mountain,
+                sitelinks: 100,
+              ),
+              description: 'desc',
+              wiki: 'https://en.wikipedia.org/wiki/Alps',
             ),
-            description: 'desc',
-            wiki: 'https://en.wikipedia.org/wiki/Alps',
-          ),
-        ],
-        [
-          FlightArticle(
-            qid: 'Q786',
-            sourceUrl: 'https://en.wikipedia.org/wiki/Alps',
-            title: 'Alps',
-            summary: 'summary',
-            contentPlainText: 'content',
-            contentHtml: '<html><body><p>content</p></body></html>',
-            languageCode: 'en',
-            leadImageRelativePath: 'article_media/test/alps.jpg',
-            inlineImageRelativePaths: const [
-              'article_media/test/alps_1.jpg',
-              'article_media/test/alps_2.jpg',
-            ],
-            attributionText: 'attr',
-            licenseText: 'license',
-            downloadedAt: DateTime(2026, 1, 1),
-            sizeBytes: 1234,
-          ),
-        ],
+          ],
+        ),
+        FlightOfflineContent(
+          articles: [
+            FlightArticle(
+              qid: 'Q786',
+              sourceUrl: 'https://en.wikipedia.org/wiki/Alps',
+              title: 'Alps',
+              summary: 'summary',
+              contentPlainText: 'content',
+              contentHtml: '<html><body><p>content</p></body></html>',
+              languageCode: 'en',
+              leadImageRelativePath: 'article_media/test/alps.jpg',
+              inlineImageRelativePaths: const [
+                'article_media/test/alps_1.jpg',
+                'article_media/test/alps_2.jpg',
+              ],
+              attributionText: 'attr',
+              licenseText: 'license',
+              downloadedAt: DateTime(2026, 1, 1),
+              sizeBytes: 1234,
+            ),
+          ],
+        ),
       );
 
       final map = mapper.toFlightInfoMap(info);
@@ -62,12 +68,16 @@ void main() {
       final legacyMap = <String, dynamic>{
         FlightInfoDBKeys.overview: 'legacy',
         FlightInfoDBKeys.poi: const <Map<String, dynamic>>[],
+        FlightInfoDBKeys.routeTotalMinutes: 125,
+        FlightInfoDBKeys.routeCruiseSpeedKmh: 760,
       };
 
       final restored = mapper.toFlightInfo(legacyMap);
 
       expect(restored.overview, 'legacy');
       expect(restored.articles, isEmpty);
+      expect(restored.routeTotalMinutes, 125);
+      expect(restored.routeCruiseSpeedKmh, 760);
     });
 
     test('reads legacy article records without html fields', () {

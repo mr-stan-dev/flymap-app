@@ -6,11 +6,16 @@ import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_operational_data.dart';
+import 'package:flymap/domain/entity/flight_summary.dart';
 import 'package:flymap/domain/entity/user_profile.dart';
 import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/domain/entity/route_poi.dart';
 import 'package:flymap/domain/entity/flight_poi_type.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_route_metrics.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
+import 'package:flymap/domain/entity/flight_waypoint.dart';
 import 'package:flymap/domain/entity/route_overview.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/entity/route_region_type.dart';
@@ -31,7 +36,9 @@ import 'package:flymap/domain/usecase/download_region_wiki_articles_use_case.dar
 import 'package:flymap/domain/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/domain/usecase/get_wiki_articles_use_case.dart';
 import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
+import 'package:flymap/domain/usecase/build_flight_route_preview_use_case.dart';
 import 'package:flymap/domain/usecase/get_route_overview_use_case.dart';
+import 'package:flymap/repository/flight_search_repository.dart';
 import 'package:latlong2/latlong.dart';
 
 void main() {
@@ -55,6 +62,7 @@ void main() {
         arrival: route.arrival,
         connectivityChecker: connectivityChecker,
         getRouteOverviewUseCase: _FakeGetRouteOverviewUseCase(),
+        buildFlightRoutePreviewUseCase: _FakeBuildFlightRoutePreviewUseCase(),
         downloadMapUseCase: mapUseCase,
         downloadRegionWikiArticlesUseCase: regionWikiDownloadUseCase,
         downloadWikipediaArticlesUseCase: wikiDownloadUseCase,
@@ -373,8 +381,15 @@ FlightRoute _route() {
   return const FlightRoute(
     departure: departure,
     arrival: arrival,
-    waypoints: [LatLng(10, 10), LatLng(20, 20)],
-    corridor: [LatLng(10, 10), LatLng(20, 20)],
+    waypoints: [
+      FlightWaypoint(latLon: LatLng(10, 10)),
+      FlightWaypoint(latLon: LatLng(20, 20)),
+    ],
+    corridor: [LatLng(10, 10), LatLng(20, 10), LatLng(20, 20)],
+    metrics: FlightRouteMetrics(
+      greatCircleDistanceKm: 1500,
+      approxDurationMinutes: 105,
+    ),
   );
 }
 
@@ -400,8 +415,15 @@ FlightRoute _longRoute() {
   return const FlightRoute(
     departure: departure,
     arrival: arrival,
-    waypoints: [LatLng(10, 10), LatLng(35, 35)],
-    corridor: [LatLng(10, 10), LatLng(35, 35)],
+    waypoints: [
+      FlightWaypoint(latLon: LatLng(10, 10)),
+      FlightWaypoint(latLon: LatLng(35, 35)),
+    ],
+    corridor: [LatLng(10, 10), LatLng(35, 10), LatLng(35, 35)],
+    metrics: FlightRouteMetrics(
+      greatCircleDistanceKm: 3500,
+      approxDurationMinutes: 245,
+    ),
   );
 }
 
@@ -427,6 +449,7 @@ class _TestFlightPreviewCubit extends FlightPreviewCubit {
     required super.arrival,
     required super.connectivityChecker,
     required super.getRouteOverviewUseCase,
+    required super.buildFlightRoutePreviewUseCase,
     required super.downloadMapUseCase,
     required super.downloadRegionWikiArticlesUseCase,
     required super.downloadWikipediaArticlesUseCase,
@@ -477,10 +500,18 @@ class _FakeGetRouteOverviewUseCase implements GetRouteOverviewUseCase {
           icaoCode: 'BBBB',
           wikipediaUrl: '',
         ),
-        waypoints: [LatLng(10, 10), LatLng(20, 20)],
-        corridor: [LatLng(10, 10), LatLng(20, 20)],
+        waypoints: [
+          FlightWaypoint(latLon: LatLng(10, 10)),
+          FlightWaypoint(latLon: LatLng(20, 20)),
+        ],
+        corridor: [LatLng(10, 10), LatLng(20, 10), LatLng(20, 20)],
+        metrics: FlightRouteMetrics(
+          greatCircleDistanceKm: 1500,
+          approxDurationMinutes: 105,
+        ),
       ),
       topPois: [],
+      flightInfo: null,
       timeline: RouteTimeline(
         regions: [
           RouteRegion(
@@ -511,6 +542,62 @@ class _FakeGetRouteOverviewUseCase implements GetRouteOverviewUseCase {
       ),
     );
   }
+
+  @override
+  RouteOverview fromPayload({
+    required Map<String, dynamic> payload,
+    required Airport departure,
+    required Airport arrival,
+  }) {
+    throw UnimplementedError();
+  }
+}
+
+class _FakeBuildFlightRoutePreviewUseCase
+    extends BuildFlightRoutePreviewUseCase {
+  _FakeBuildFlightRoutePreviewUseCase()
+    : super(repository: _UnusedFlightSearchRepository());
+
+  @override
+  Future<FlightRoutePreviewResult> call({
+    required String flightNumber,
+    String? origCode,
+    String? destCode,
+    required String lang,
+  }) {
+    throw UnimplementedError();
+  }
+}
+
+class _UnusedFlightSearchRepository implements FlightSearchRepository {
+  @override
+  Future<Map<String, dynamic>> buildFlightRoutePreview({
+    required String flightNumber,
+    required int placesLimit,
+    required int regionsLimit,
+    String lang = 'en',
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<FlightSummary> lookupFlightByNumber(String flightNumber) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Airport> resolveAirport({
+    LatLng? latLon,
+    required String? code,
+    required String fallbackName,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String?> resolveAirlineNameByCode(String? code) {
+    throw UnimplementedError();
+  }
 }
 
 class _FakeDownloadMapUseCase implements DownloadMapUseCase {
@@ -524,6 +611,7 @@ class _FakeDownloadMapUseCase implements DownloadMapUseCase {
     required String flightId,
     required FlightRoute flightRoute,
     required FlightInfo flightInfo,
+    FlightOperationalData? flightOperationalData,
     required String flightAccessTier,
     required int maxZoom,
   }) {

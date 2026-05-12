@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/ui/screens/about/about_screen.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/airport_selection_screen.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/airports_search_screen.dart';
+import 'package:flymap/ui/screens/create_flight/flight_number_search/flight_number_search_screen.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/flight_preview_args.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/flight_preview_screen.dart';
+import 'package:flymap/ui/screens/create_flight/route_type_selector/route_type_selector_screen.dart';
 import 'package:flymap/ui/screens/feedback/feedback_screen.dart';
 import 'package:flymap/ui/screens/feedback/feedback_screen_args.dart';
 import 'package:flymap/ui/screens/flight/flight_screen.dart';
@@ -23,7 +25,9 @@ import 'package:go_router/go_router.dart';
 /// App router configuration using go_router
 class AppRouter {
   static const String homeRoute = '/';
-  static const String flightSearchRoute = '/flight-search';
+  static const String airportsSearchRoute = '/flight-search';
+  static const String routeTypeSelectorRoute = '/route-type-selector';
+  static const String flightNumberSearchRoute = '/flight-number-selector';
   static const String flightPreviewRoute = '/flight-preview';
   static const String flightRoute = '/flight';
   static const String shareFlightRoute = '/share-flight';
@@ -60,9 +64,21 @@ class AppRouter {
 
         // Flight Search screen route
         GoRoute(
-          path: flightSearchRoute,
-          name: 'flight-search',
-          builder: (context, state) => const AirportSelectionScreen(),
+          path: airportsSearchRoute,
+          name: 'airports-search',
+          builder: (context, state) => const AirportsSearchScreen(),
+        ),
+
+        GoRoute(
+          path: flightNumberSearchRoute,
+          name: 'flight-number-search',
+          builder: (context, state) => const FlightNumberSearchScreen(),
+        ),
+        
+        GoRoute(
+          path: routeTypeSelectorRoute,
+          name: 'route-type-selector',
+          builder: (context, state) => const FlightRouteTypeSelector(),
         ),
 
         GoRoute(
@@ -72,11 +88,16 @@ class AppRouter {
             final extra = state.extra as Map<String, dynamic>?;
             final departure = extra?['departure'] as Airport?;
             final arrival = extra?['arrival'] as Airport?;
+            final flightNumber = extra?['flightNumber'] as String?;
             if (departure == null || arrival == null) {
-              return const AirportSelectionScreen();
+              return const AirportsSearchScreen();
             }
             return FlightPreviewScreen(
-              args: FlightPreviewArgs(departure: departure, arrival: arrival),
+              args: FlightPreviewArgs(
+                departure: departure,
+                arrival: arrival,
+                flightNumber: flightNumber,
+              ),
             );
           },
         ),
@@ -166,7 +187,15 @@ class AppRouter {
   }
 
   static void goToFlightSearch(BuildContext context) {
-    context.go(flightSearchRoute);
+    context.go(airportsSearchRoute);
+  }
+
+  static void goToFlightNumberSelector(BuildContext context) {
+    context.push(flightNumberSearchRoute);
+  }
+
+  static void goToRouteTypeSelector(BuildContext context) {
+    context.push(routeTypeSelectorRoute);
   }
 
   /// Navigate to flight screen with flight
@@ -174,16 +203,18 @@ class AppRouter {
     context.push(flightRoute, extra: {'flight': flight});
   }
 
-  /// Navigate to flight preview with selected airports
-  static void goToFlightPreview(
+  /// Navigate to flight overview with selected airports
+  static void goToFlightOverview(
     BuildContext context, {
     required Airport departure,
     required Airport arrival,
+    String? flightNumber,
   }) {
-    context.push(
-      flightPreviewRoute,
-      extra: {'departure': departure, 'arrival': arrival},
-    );
+    final extra = <String, dynamic>{'departure': departure, 'arrival': arrival};
+    if (flightNumber != null && flightNumber.trim().isNotEmpty) {
+      extra['flightNumber'] = flightNumber;
+    }
+    context.push(flightPreviewRoute, extra: extra);
   }
 
   /// Navigate to share flight screen with flight

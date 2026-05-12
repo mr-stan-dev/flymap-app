@@ -3,6 +3,9 @@ import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
+import 'package:flymap/domain/entity/flight_timestamp.dart';
+import 'package:flymap/domain/entity/flight_waypoint.dart';
 import 'package:flymap/domain/usecase/auto_complete_stale_in_progress_flights_use_case.dart';
 import 'package:flymap/repository/flight_repository.dart';
 import 'package:latlong2/latlong.dart';
@@ -160,15 +163,25 @@ Flight _flight({
   const route = FlightRoute(
     departure: departure,
     arrival: arrival,
-    waypoints: [LatLng(51.47, -0.45), LatLng(48.35, 11.79)],
-    corridor: [LatLng(51.47, -0.45), LatLng(48.35, 11.79)],
+    waypoints: [
+      FlightWaypoint(latLon: LatLng(51.47, -0.45)),
+      FlightWaypoint(latLon: LatLng(48.35, 11.79)),
+    ],
+    corridor: [
+      LatLng(51.47, -0.45),
+      LatLng(48.35, -0.45),
+      LatLng(48.35, 11.79),
+    ],
   );
   return Flight(
     id: id,
     route: route,
-    info: FlightInfo.empty,
-    createdAt: createdAt,
-    inProgressAt: inProgressAt,
+    routeInsights: FlightInfo.empty.routeInsights,
+    offlineContent: FlightInfo.empty.offlineContent,
+    timestamp: FlightTimestamp(
+      createdAt: createdAt,
+      inProgressAt: inProgressAt,
+    ),
     status: status,
   );
 }

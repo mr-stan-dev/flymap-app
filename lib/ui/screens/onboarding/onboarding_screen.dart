@@ -348,7 +348,7 @@ class _OnboardingFlowViewState extends State<_OnboardingFlowView> {
       ),
     );
     if (!mounted) return;
-    AppRouter.goToFlightSearch(context);
+    AppRouter.goToRouteTypeSelector(context);
   }
 
   Future<void> _skipCurrentStep({

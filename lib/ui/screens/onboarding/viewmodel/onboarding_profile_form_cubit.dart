@@ -7,7 +7,7 @@ import 'package:flymap/logger.dart';
 import 'package:flymap/repository/favorite_airports_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/repository/recent_airports_repository.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/popular_flights.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/popular_flights.dart';
 import 'package:flymap/ui/screens/onboarding/viewmodel/onboarding_profile_form_state.dart';
 
 class OnboardingProfileFormCubit extends Cubit<OnboardingProfileFormState> {

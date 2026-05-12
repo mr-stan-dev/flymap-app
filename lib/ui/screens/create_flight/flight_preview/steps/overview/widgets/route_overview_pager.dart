@@ -10,7 +10,6 @@ import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/wi
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/overview_summary_card.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/widgets/overview_title_card.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
-import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/utils/route_utils.dart';
 
 class RouteOverviewPager extends StatefulWidget {
@@ -87,10 +86,7 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
     switch (entry.kind) {
       case RouteOverviewPageKind.summary:
         final route = widget.route;
-        final distance = MapUtils.distanceFormatted(
-          departure: route.departure,
-          arrival: route.arrival,
-        );
+        final distance = _formatDistanceKm(route.distanceInKm);
         final duration = _formatMinutesCompact(
           context,
           widget.totalRouteMinutes,
@@ -195,6 +191,12 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
       return '$h${timelineT.hourCompactUnit}';
     }
     return '$h${timelineT.hourCompactUnit} $m${timelineT.minuteCompactUnit}';
+  }
+
+  String _formatDistanceKm(double distanceKm) {
+    if (!distanceKm.isFinite || distanceKm <= 0) return '0km';
+    final roundedDistance = (distanceKm / 10).round() * 10;
+    return '${roundedDistance}km';
   }
 
   void _animateToNextCard() {

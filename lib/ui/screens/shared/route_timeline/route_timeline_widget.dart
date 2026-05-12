@@ -46,6 +46,7 @@ class RouteTimelineWidget extends StatelessWidget {
     final groups = RouteTimelineGrouping.groupByTimeline(
       regions,
       cruiseSpeedKmh: cruiseSpeedKmh,
+      maxTimelineMinutes: route.isHistoricalTrack ? totalRouteMinutes : null,
     );
     final entriesBuild = _buildEntries(groups, gateDecision: gateDecision);
     final entries = entriesBuild.entries;
@@ -104,6 +105,7 @@ class RouteTimelineWidget extends StatelessWidget {
       totalRouteMinutes: totalRouteMinutes,
       cruiseSpeedKmh: cruiseSpeedKmh,
       groups: groups,
+      totalRouteMinutesIsAuthoritative: route.isHistoricalTrack,
     );
 
     if (!gateDecision.isGated) {

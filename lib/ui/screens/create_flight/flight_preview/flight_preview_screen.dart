@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/crashlytics/app_crashlytics.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
+import 'package:flymap/domain/usecase/build_flight_route_preview_use_case.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/rating/rate_prompt_policy_service.dart';
 import 'package:flymap/rating/rate_prompt_trigger.dart';
@@ -45,8 +46,11 @@ class FlightPreviewScreen extends StatelessWidget {
       create: (_) => FlightPreviewCubit(
         departure: args.departure,
         arrival: args.arrival,
+        flightNumber: args.flightNumber,
         connectivityChecker: GetIt.I.get<ConnectivityChecker>(),
         getRouteOverviewUseCase: GetIt.I.get<GetRouteOverviewUseCase>(),
+        buildFlightRoutePreviewUseCase: GetIt.I
+            .get<BuildFlightRoutePreviewUseCase>(),
         downloadMapUseCase: GetIt.I.get<DownloadMapUseCase>(),
         downloadRegionWikiArticlesUseCase: GetIt.I
             .get<DownloadRegionWikiArticlesUseCase>(),
@@ -144,7 +148,7 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
                       IconButton(
                         tooltip:
                             context.t.createFlight.overview.routeNoteTooltip,
-                        onPressed: () => _showRouteNoteDialog(context),
+                        onPressed: () => _showRouteNoteDialog(context, state),
                         icon: const Icon(Icons.info_outline_rounded),
                       ),
                     ]
@@ -272,13 +276,26 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
     }
   }
 
-  Future<void> _showRouteNoteDialog(BuildContext context) async {
+  Future<void> _showRouteNoteDialog(
+    BuildContext context,
+    FlightPreviewState state,
+  ) async {
+    final isHistoricalTrack = state.flightRoute?.isHistoricalTrack ?? false;
+    final overviewT = context.t.createFlight.overview;
     await showDialog<void>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: Text(context.t.createFlight.overview.routeNoteTitle),
-          content: Text(context.t.createFlight.overview.routeNoteBody),
+          title: Text(
+            isHistoricalTrack
+                ? overviewT.realRouteNoteTitle
+                : overviewT.routeNoteTitle,
+          ),
+          content: Text(
+            isHistoricalTrack
+                ? overviewT.realRouteNoteBody
+                : overviewT.routeNoteBody,
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),

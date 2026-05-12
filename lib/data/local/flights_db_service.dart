@@ -2,6 +2,8 @@ import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/domain/entity/flight_map.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
+import 'package:flymap/domain/entity/flight_timestamp.dart';
 import 'package:flymap/logger.dart';
 import 'package:sembast/sembast_io.dart';
 
@@ -37,7 +39,10 @@ class FlightsDBService {
     final map = _flightMapper.toDb(flight);
     _writeLightArticlesToFlightMap(map);
     await _database.flightsStore.record(key).put(_database.database, map);
-    await _upsertArticleAssets(flightId: key, articles: flight.info.articles);
+    await _upsertArticleAssets(
+      flightId: key,
+      articles: flight.offlineContent.articles,
+    );
     return key;
   }
 
@@ -48,12 +53,12 @@ class FlightsDBService {
       id: existing.id,
       route: existing.route,
       maps: existing.maps,
-      info: info,
-      createdAt: existing.createdAt,
-      inProgressAt: existing.inProgressAt,
-      completedAt: existing.completedAt,
+      routeInsights: info.routeInsights,
+      offlineContent: info.offlineContent,
+      timestamp: existing.timestamp,
       status: existing.status,
       flightAccessTier: existing.flightAccessTier,
+      operationalData: existing.operationalData,
     );
     await saveOrUpdateFlight(updated);
     return true;
@@ -66,12 +71,12 @@ class FlightsDBService {
       id: existing.id,
       route: existing.route,
       maps: maps,
-      info: existing.info,
-      createdAt: existing.createdAt,
-      inProgressAt: existing.inProgressAt,
-      completedAt: existing.completedAt,
+      routeInsights: existing.routeInsights,
+      offlineContent: existing.offlineContent,
+      timestamp: existing.timestamp,
       status: existing.status,
       flightAccessTier: existing.flightAccessTier,
+      operationalData: existing.operationalData,
     );
     await saveOrUpdateFlight(updated);
     return true;
@@ -106,12 +111,16 @@ class FlightsDBService {
       id: existing.id,
       route: existing.route,
       maps: existing.maps,
-      info: existing.info,
-      createdAt: existing.createdAt,
-      inProgressAt: nextInProgressAt,
-      completedAt: nextCompletedAt,
+      routeInsights: existing.routeInsights,
+      offlineContent: existing.offlineContent,
+      timestamp: FlightTimestamp(
+        createdAt: existing.createdAt,
+        inProgressAt: nextInProgressAt,
+        completedAt: nextCompletedAt,
+      ),
       status: status,
       flightAccessTier: existing.flightAccessTier,
+      operationalData: existing.operationalData,
     );
     await saveOrUpdateFlight(updated);
     return true;
@@ -156,14 +165,27 @@ class FlightsDBService {
   }
 
   void _writeLightArticlesToFlightMap(Map<String, dynamic> map) {
-    final infoRaw = map[FlightDBKeys.flightInfo];
-    if (infoRaw is! Map<String, dynamic>) return;
-    final rawArticles = infoRaw[FlightInfoDBKeys.articles];
-    if (rawArticles is! List) return;
+    final offlineRaw = map[FlightDBKeys.offlineContent];
+    if (offlineRaw is Map<String, dynamic>) {
+      final rawArticles = offlineRaw[FlightDBKeys.articles];
+      if (rawArticles is! List) return;
+      final lightArticles = _stripHeavyArticleFields(rawArticles);
+      offlineRaw[FlightDBKeys.articles] = lightArticles;
+      return;
+    }
 
-    final lightArticles = rawArticles.whereType<Map<String, dynamic>>().map((
-      article,
-    ) {
+    // Legacy fallback while old `flightInfo` records are still around.
+    final legacyInfoRaw = map[FlightDBKeys.flightInfo];
+    if (legacyInfoRaw is! Map<String, dynamic>) return;
+    final legacyRawArticles = legacyInfoRaw[FlightInfoDBKeys.articles];
+    if (legacyRawArticles is! List) return;
+    legacyInfoRaw[FlightInfoDBKeys.articles] = _stripHeavyArticleFields(
+      legacyRawArticles,
+    );
+  }
+
+  List<Map<String, dynamic>> _stripHeavyArticleFields(List rawArticles) {
+    return rawArticles.whereType<Map<String, dynamic>>().map((article) {
       final light = Map<String, dynamic>.from(article);
       light.remove(FlightArticleDBKeys.contentPlainText);
       light.remove(FlightArticleDBKeys.contentHtml);
@@ -171,7 +193,6 @@ class FlightsDBService {
       light.remove(FlightArticleDBKeys.inlineImageRelativePaths);
       return light;
     }).toList();
-    infoRaw[FlightInfoDBKeys.articles] = lightArticles;
   }
 
   Future<void> _upsertArticleAssets({
@@ -242,7 +263,7 @@ class FlightsDBService {
   }
 
   Future<Flight> _hydrateFlightArticles(Flight baseFlight) async {
-    if (baseFlight.info.articles.isEmpty) return baseFlight;
+    if (baseFlight.offlineContent.articles.isEmpty) return baseFlight;
 
     final assets = await _database.flightAssetsStore.find(
       _database.database,
@@ -261,7 +282,9 @@ class FlightsDBService {
       byUrl[sourceUrl] = asset.value;
     }
 
-    final hydratedArticles = baseFlight.info.articles.map((lightArticle) {
+    final hydratedArticles = baseFlight.offlineContent.articles.map((
+      lightArticle,
+    ) {
       final asset = byUrl[lightArticle.sourceUrl];
       if (asset == null) return lightArticle;
       final payload = asset[_assetKeyPayload];
@@ -296,12 +319,14 @@ class FlightsDBService {
       id: baseFlight.id,
       route: baseFlight.route,
       maps: baseFlight.maps,
-      info: baseFlight.info.copyWith(articles: hydratedArticles),
-      createdAt: baseFlight.createdAt,
-      inProgressAt: baseFlight.inProgressAt,
-      completedAt: baseFlight.completedAt,
+      routeInsights: baseFlight.routeInsights,
+      offlineContent: baseFlight.offlineContent.copyWith(
+        articles: hydratedArticles,
+      ),
+      timestamp: baseFlight.timestamp,
       status: baseFlight.status,
       flightAccessTier: baseFlight.flightAccessTier,
+      operationalData: baseFlight.operationalData,
     );
   }
 

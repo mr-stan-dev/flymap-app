@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flymap/data/local/flights_db_service.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_map.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/map_download_config.dart';
 import 'package:path/path.dart' as p;
@@ -36,12 +37,15 @@ class CompleteFlightUseCase {
       id: flight.id,
       route: flight.route,
       maps: const [],
-      info: flight.info.copyWith(articles: const []),
-      createdAt: flight.createdAt,
-      inProgressAt: null,
-      completedAt: DateTime.now(),
+      routeInsights: flight.routeInsights,
+      offlineContent: flight.offlineContent.copyWith(articles: const []),
+      timestamp: flight.timestamp.copyWith(
+        clearInProgressAt: true,
+        completedAt: DateTime.now(),
+      ),
       status: FlightStatus.completed,
       flightAccessTier: flight.flightAccessTier,
+      operationalData: flight.operationalData,
     );
     await _service.saveOrUpdateFlight(updated);
     return true;
@@ -70,7 +74,7 @@ class CompleteFlightUseCase {
   }
 
   Future<void> _deleteArticleFiles(Flight flight) async {
-    final articles = flight.info.articles;
+    final articles = flight.offlineContent.articles;
     if (articles.isEmpty) return;
     final docsDir = await getApplicationDocumentsDirectory();
     final articleRootPath = p.join(docsDir.path, 'article_media');

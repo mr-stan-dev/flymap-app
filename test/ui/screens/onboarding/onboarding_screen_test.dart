@@ -93,27 +93,28 @@ void main() {
     expect(find.text('Set your home airport'), findsOneWidget);
   });
 
-  testWidgets('final CTA completes onboarding and routes to flight search', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_buildTestApp());
-    await _pumpUntilVisible(tester, find.text('Discover what’s below'));
+  testWidgets(
+    'final CTA completes onboarding and routes to route type selector',
+    (tester) async {
+      await tester.pumpWidget(_buildTestApp());
+      await _pumpUntilVisible(tester, find.text('Discover what’s below'));
 
-    for (var i = 0; i < 5; i++) {
-      await tester.tap(find.widgetWithText(TertiaryButton, 'Skip'));
-      await _pumpUi(tester);
-    }
+      for (var i = 0; i < 5; i++) {
+        await tester.tap(find.widgetWithText(TertiaryButton, 'Skip'));
+        await _pumpUi(tester);
+      }
 
-    await _pumpUntilVisible(tester, find.text('Get more from every flight'));
+      await _pumpUntilVisible(tester, find.text('Get more from every flight'));
 
-    await tester.tap(find.widgetWithText(TertiaryButton, 'Continue Free'));
-    await _pumpUntilVisible(tester, find.text('Flight search screen'));
+      await tester.tap(find.widgetWithText(TertiaryButton, 'Continue Free'));
+      await _pumpUntilVisible(tester, find.text('Route type selector screen'));
 
-    expect(find.text('Flight search screen'), findsOneWidget);
+      expect(find.text('Route type selector screen'), findsOneWidget);
 
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.getBool('onboarding.seen'), isTrue);
-  });
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('onboarding.seen'), isTrue);
+    },
+  );
 }
 
 Widget _buildTestApp() {
@@ -125,6 +126,12 @@ Widget _buildTestApp() {
         path: '/flight-search',
         builder: (context, state) =>
             const Scaffold(body: Center(child: Text('Flight search screen'))),
+      ),
+      GoRoute(
+        path: '/route-type-selector',
+        builder: (context, state) => const Scaffold(
+          body: Center(child: Text('Route type selector screen')),
+        ),
       ),
     ],
   );

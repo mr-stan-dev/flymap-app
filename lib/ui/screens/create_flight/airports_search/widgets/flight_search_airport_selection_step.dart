@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/viewmodel/airport_selection_screen_state.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/airport_category_section.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/search_input_area.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/search_results_area.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/widgets/selected_departure_row.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/viewmodel/airport_selection_screen_state.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/widgets/airport_category_section.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/widgets/search_input_area.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/widgets/search_results_area.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/widgets/selected_departure_row.dart';
 
 class FlightSearchAirportSelectionStep extends StatelessWidget {
   const FlightSearchAirportSelectionStep({

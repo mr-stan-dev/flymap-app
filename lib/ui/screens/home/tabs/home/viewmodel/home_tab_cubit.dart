@@ -1,6 +1,7 @@
 import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
 import 'package:flymap/domain/entity/units.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';

@@ -573,7 +573,7 @@ class _RouteOverviewMapWidgetState extends State<RouteOverviewMapWidget> {
 
   List<ll.LatLng> _routePoints() {
     if (widget.route.waypoints.length >= 2) {
-      return widget.route.waypoints;
+      return widget.route.waypointLatLngs;
     }
     return [widget.route.departure.latLon, widget.route.arrival.latLon];
   }
@@ -662,8 +662,11 @@ class _RouteOverviewMapWidgetState extends State<RouteOverviewMapWidget> {
   }
 
   LatLngBounds? _overviewBounds() {
-    final source = widget.route.corridor.length >= 3
-        ? widget.route.corridor
+    final allCorridorPoints = widget.route.effectiveCorridorPolygons
+        .expand((ring) => ring)
+        .toList(growable: false);
+    final source = allCorridorPoints.isNotEmpty
+        ? allCorridorPoints
         : _routePoints();
     if (source.isEmpty) {
       return null;

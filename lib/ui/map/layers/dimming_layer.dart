@@ -4,19 +4,30 @@ import 'package:latlong2/latlong.dart' as ll;
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 class DimmingLayer extends MapLayer {
+  static const double _worldEdgeLat = 89.9;
+  static const double _worldEdgeLon = 179.999;
+
   late FillOptions fillOptions;
 
-  DimmingLayer(List<ll.LatLng> corridor) {
+  DimmingLayer(
+    List<List<ll.LatLng>> corridors, {
+    List<List<ll.LatLng>> endpointPads = const [],
+  }) {
+    final corridorHoles = corridors
+        .where((ring) => ring.length >= 3)
+        .map((ring) => ring.toGeometry());
+
     fillOptions = FillOptions(
       geometry: [
         [
-          LatLng(-89.9, -179.9), // Southwest corner
-          LatLng(-89.9, 179.9), // Southeast corner
-          LatLng(89.9, 179.9), // Northeast corner
-          LatLng(89.9, -179.9), // Northwest corner
-          LatLng(-89.9, -179.9), // Close the polygon
+          LatLng(-_worldEdgeLat, -_worldEdgeLon),
+          LatLng(-_worldEdgeLat, _worldEdgeLon),
+          LatLng(_worldEdgeLat, _worldEdgeLon),
+          LatLng(_worldEdgeLat, -_worldEdgeLon),
+          LatLng(-_worldEdgeLat, -_worldEdgeLon),
         ],
-        corridor.toGeometry(),
+        ...corridorHoles,
+        ...endpointPads.map((ring) => ring.toGeometry()),
       ],
       fillColor: "#808080",
       fillOpacity: 0.3,

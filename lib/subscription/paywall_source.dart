@@ -31,6 +31,9 @@ enum PaywallSource {
 
   /// User opened paywall from geo awareness premium gate.
   geoAwarenessGate,
+
+  /// User opened paywall from route type selector screen.
+  routeTypeSelector,
 }
 
 extension PaywallSourceAnalyticsValue on PaywallSource {
@@ -47,6 +50,7 @@ extension PaywallSourceAnalyticsValue on PaywallSource {
       PaywallSource.routeOverviewGate => 'route_overview_gate',
       PaywallSource.routeTimelineGate => 'route_timeline_gate',
       PaywallSource.geoAwarenessGate => 'geo_awareness_gate',
+      PaywallSource.routeTypeSelector => 'route_type_selector',
     };
   }
 }

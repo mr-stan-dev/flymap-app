@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/i18n/strings.g.dart';
-import 'package:flymap/ui/screens/create_flight/airport_selection/viewmodel/airport_selection_screen_state.dart';
+import 'package:flymap/ui/screens/create_flight/airports_search/viewmodel/airport_selection_screen_state.dart';
 
 class EmptySearchResults extends StatelessWidget {
   const EmptySearchResults({required this.step, super.key});

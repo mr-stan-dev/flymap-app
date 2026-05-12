@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/data/gps_data_provider.dart';
 import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
+import 'package:flymap/domain/entity/flight_timestamp.dart';
 import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
@@ -42,7 +44,7 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
        _gpsProvider = gpsProvider ?? GpsDataProvider(),
        _geoAwarenessEngine = geoAwarenessEngine ?? const GeoAwarenessEngine(),
        super(FlightScreenLoading()) {
-    _logger.log('flight flightInfo: ${flight.info}');
+    _logger.log('flight routeInsights: ${flight.routeInsights}');
     load();
   }
 
@@ -80,7 +82,9 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
         final geo = _geoAwarenessEngine.compute(
           route: _currentFlight.route,
           routeRegions: _currentFlight.info.routeRegions,
-          cruiseSpeedKmh: _currentFlight.info.routeCruiseSpeedKmh,
+          cruiseSpeedKmh:
+              _currentFlight.route.metrics.effectiveAverageSpeedKmh?.round() ??
+              850,
           gpsData: data,
           previous: previousGeo,
         );
@@ -147,12 +151,14 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
         id: _currentFlight.id,
         route: _currentFlight.route,
         maps: _currentFlight.maps,
-        info: _currentFlight.info,
-        createdAt: _currentFlight.createdAt,
-        inProgressAt: DateTime.now(),
-        completedAt: _currentFlight.completedAt,
+        routeInsights: _currentFlight.routeInsights,
+        offlineContent: _currentFlight.offlineContent,
+        timestamp: _currentFlight.timestamp.copyWith(
+          inProgressAt: DateTime.now(),
+        ),
         status: FlightStatus.inProgress,
         flightAccessTier: _currentFlight.flightAccessTier,
+        operationalData: _currentFlight.operationalData,
       );
 
       final currentState = state;
@@ -180,22 +186,25 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
       );
       if (!ok) return false;
 
-      if (deleteOfflineData) {
-        final current = state;
-        if (current is FlightScreenLoaded) {
-          _currentFlight = Flight(
-            id: current.flight.id,
-            route: current.flight.route,
-            maps: const [],
-            info: current.flight.info.copyWith(articles: const []),
+      final current = state;
+      if (current is FlightScreenLoaded) {
+        _currentFlight = Flight(
+          id: current.flight.id,
+          route: current.flight.route,
+          maps: deleteOfflineData ? const [] : current.flight.maps,
+          routeInsights: current.flight.routeInsights,
+          offlineContent: deleteOfflineData
+              ? current.flight.offlineContent.copyWith(articles: const [])
+              : current.flight.offlineContent,
+          timestamp: FlightTimestamp(
             createdAt: current.flight.createdAt,
-            inProgressAt: null,
             completedAt: DateTime.now(),
-            status: FlightStatus.completed,
-            flightAccessTier: current.flight.flightAccessTier,
-          );
-          emit(current.copyWith(flight: _currentFlight));
-        }
+          ),
+          status: FlightStatus.completed,
+          flightAccessTier: current.flight.flightAccessTier,
+          operationalData: current.flight.operationalData,
+        );
+        emit(current.copyWith(flight: _currentFlight));
       }
       return true;
     } catch (_) {

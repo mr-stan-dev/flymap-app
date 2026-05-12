@@ -1,4 +1,7 @@
 import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_offline_content.dart';
+import 'package:flymap/domain/entity/flight_route_metrics.dart';
+import 'package:flymap/domain/entity/flight_route_insights.dart';
 import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/domain/entity/route_region.dart';
@@ -47,13 +50,28 @@ class FlightInfoDbMapper {
         .whereType<RouteRegion>()
         .toList();
     final overview = map.getString(FlightInfoDBKeys.overview);
+    final routeTotalMinutesRaw = map[FlightInfoDBKeys.routeTotalMinutes];
+    final routeTotalMinutes = routeTotalMinutesRaw == null
+        ? null
+        : map.getInt(FlightInfoDBKeys.routeTotalMinutes);
+    final routeCruiseSpeedKmh = map.getInt(
+      FlightInfoDBKeys.routeCruiseSpeedKmh,
+    );
+    final inferredDistanceKm =
+        routeTotalMinutes != null && routeCruiseSpeedKmh > 0
+        ? routeCruiseSpeedKmh * (routeTotalMinutes / 60.0)
+        : 0.0;
     return FlightInfo(
-      overview,
-      pois,
-      articles,
-      routeRegions,
-      map.getInt(FlightInfoDBKeys.routeTotalMinutes),
-      map.getInt(FlightInfoDBKeys.routeCruiseSpeedKmh, defVal: 850),
+      FlightRouteInsights(
+        overview: overview.isEmpty ? null : overview,
+        poiHighlights: pois,
+        regions: routeRegions,
+      ),
+      FlightOfflineContent(articles: articles),
+      FlightRouteMetrics(
+        greatCircleDistanceKm: inferredDistanceKm,
+        approxDurationMinutes: routeTotalMinutes ?? 0,
+      ),
     );
   }
 
@@ -64,7 +82,8 @@ class FlightInfoDbMapper {
     FlightInfoDBKeys.routeRegions: info.routeRegions
         .map(_routeRegionMapper.toDb)
         .toList(),
-    FlightInfoDBKeys.routeTotalMinutes: info.routeTotalMinutes,
+    if (info.routeTotalMinutes > 0)
+      FlightInfoDBKeys.routeTotalMinutes: info.routeTotalMinutes,
     FlightInfoDBKeys.routeCruiseSpeedKmh: info.routeCruiseSpeedKmh,
   };
 }

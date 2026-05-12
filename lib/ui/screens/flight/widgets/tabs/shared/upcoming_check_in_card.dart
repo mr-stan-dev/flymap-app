@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/i18n/strings.g.dart';
-import 'package:flymap/ui/widgets/pulsing_highlight_card.dart';
 
 class UpcomingCheckInCard extends StatelessWidget {
   const UpcomingCheckInCard({

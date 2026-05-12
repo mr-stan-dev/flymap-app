@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/router/app_router.dart';
 import 'package:flymap/ui/screens/home/tabs/home/viewmodel/home_tab_cubit.dart';
@@ -9,7 +9,6 @@ import 'package:flymap/ui/screens/home/tabs/home/widgets/flights_list/home_fligh
 import 'package:flymap/ui/screens/home/tabs/home/widgets/home_flights_list.dart';
 import 'package:flymap/ui/screens/home/tabs/home/widgets/home_summary_header.dart';
 import 'package:flymap/ui/theme/app_theme_ext.dart';
-import 'package:go_router/go_router.dart';
 
 class HomeTabLoaded extends StatelessWidget {
   const HomeTabLoaded(this.state, {super.key});
@@ -80,7 +79,7 @@ class HomeTabLoaded extends StatelessWidget {
                         listFlights.isEmpty,
                     onViewAll: () => AppRouter.goToSettingsHistory(context),
                     onAddFirstFlight: () =>
-                        context.push(AppRouter.flightSearchRoute),
+                        AppRouter.goToRouteTypeSelector(context),
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -90,7 +89,7 @@ class HomeTabLoaded extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(AppRouter.flightSearchRoute),
+        onPressed: () => AppRouter.goToRouteTypeSelector(context),
         icon: const Icon(Icons.flight_takeoff),
         label: Text(context.t.home.newFlight),
       ),

@@ -4,12 +4,15 @@ import 'package:flymap/crashlytics/app_crashlytics.dart';
 import 'package:flymap/crashlytics/app_crashlytics_initializer.dart';
 import 'package:flymap/data/api/feedback_api.dart';
 import 'package:flymap/data/api/flight_info_api.dart';
+import 'package:flymap/data/api/flight_lookup_api.dart';
+import 'package:flymap/data/api/flight_route_preview_api.dart';
 import 'package:flymap/data/api/route_overview_api.dart';
 import 'package:flymap/data/api/route_places_api.dart';
 import 'package:flymap/data/api/route_regions_api.dart';
 import 'package:flymap/data/api/flight_info_api_mapper.dart';
 import 'package:flymap/data/map_asset_cache_service.dart';
 import 'package:flymap/data/local/airports_database.dart';
+import 'package:flymap/data/local/airlines_database.dart';
 import 'package:flymap/data/local/app_database.dart';
 import 'package:flymap/data/local/flights_db_service.dart';
 import 'package:flymap/data/local/learn_pack_local_db.dart';
@@ -42,6 +45,8 @@ import 'package:flymap/repository/route_timeline_repository.dart';
 import 'package:flymap/repository/settings_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_repository.dart';
+import 'package:flymap/repository/flight_search_repository.dart';
+
 import 'package:flymap/repository/user_flight_prefs_storage.dart';
 import 'package:flymap/subscription/revenuecat_client.dart';
 import 'package:flymap/subscription/revenuecat_env_config.dart';
@@ -54,6 +59,9 @@ import 'package:flymap/domain/usecase/download_map_use_case.dart';
 import 'package:flymap/domain/usecase/download_region_wiki_articles_use_case.dart';
 import 'package:flymap/domain/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/domain/usecase/get_flight_info_use_case.dart';
+import 'package:flymap/domain/usecase/lookup_flight_by_number_use_case.dart';
+import 'package:flymap/domain/usecase/build_flight_route_preview_use_case.dart';
+
 import 'package:flymap/domain/usecase/get_place_info_use_case.dart';
 import 'package:flymap/domain/usecase/get_route_preview_use_case.dart';
 import 'package:flymap/domain/usecase/get_route_overview_use_case.dart';
@@ -84,6 +92,7 @@ class DiModule {
     );
 
     i.registerLazySingleton<AirportsDatabase>(() => AirportsDatabase.instance);
+    i.registerLazySingleton<AirlinesDatabase>(() => AirlinesDatabase.instance);
 
     // Register database
     i.registerLazySingleton<AppDatabase>(() => AppDatabase.instance);
@@ -115,6 +124,10 @@ class DiModule {
     i.registerLazySingleton<RouteOverviewApi>(
       () => RouteOverviewApi(httpClient: i.get()),
     );
+    i.registerLazySingleton<FlightLookupApi>(() => FlightLookupApi());
+    i.registerLazySingleton<FlightRoutePreviewApi>(
+      () => FlightRoutePreviewApi(),
+    );
     i.registerLazySingleton<RoutePlacesApi>(
       () => RoutePlacesApi(httpClient: i.get()),
     );
@@ -138,6 +151,20 @@ class DiModule {
     );
     i.registerLazySingleton<GetRouteRegionsUseCase>(
       () => GetRouteRegionsUseCase(repository: i.get()),
+    );
+    i.registerLazySingleton<FlightSearchRepository>(
+      () => ApiFlightSearchRepository(
+        lookupApi: i.get(),
+        routePreviewApi: i.get(),
+        airportsDb: i.get(),
+        airlinesDb: i.get(),
+      ),
+    );
+    i.registerLazySingleton<LookupFlightByNumberUseCase>(
+      () => LookupFlightByNumberUseCase(repository: i.get()),
+    );
+    i.registerLazySingleton<BuildFlightRoutePreviewUseCase>(
+      () => BuildFlightRoutePreviewUseCase(repository: i.get()),
     );
 
     // Connectivity checker

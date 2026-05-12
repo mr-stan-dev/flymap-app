@@ -10,6 +10,7 @@ import 'package:flymap/logger.dart';
 import 'package:latlong2/latlong.dart';
 
 const _waypointFractionDigits = 2;
+const flightInfoRequestMaxWaypoints = 200;
 
 Map<String, dynamic> buildFlightInfoFunctionRequest({
   required String airportDeparture,
@@ -18,8 +19,9 @@ Map<String, dynamic> buildFlightInfoFunctionRequest({
   required int promptVersion,
   List<UsersInterests>? interests,
 }) {
+  final sampledWaypoints = _sampleWaypointsForFlightInfo(waypoints);
   final request = <String, dynamic>{
-    'waypoints': waypoints
+    'waypoints': sampledWaypoints
         .map(
           (c) => [
             _roundCoordinate(
@@ -50,6 +52,19 @@ Map<String, dynamic> buildFlightInfoFunctionRequest({
 
 double _roundCoordinate(double value, {required int fractionDigits}) =>
     double.parse(value.toStringAsFixed(fractionDigits));
+
+List<LatLng> _sampleWaypointsForFlightInfo(List<LatLng> waypoints) {
+  if (waypoints.length <= flightInfoRequestMaxWaypoints) {
+    return waypoints;
+  }
+
+  final lastIndex = waypoints.length - 1;
+  return List.generate(flightInfoRequestMaxWaypoints, (index) {
+    final sourceIndex =
+        (index * lastIndex / (flightInfoRequestMaxWaypoints - 1)).round();
+    return waypoints[sourceIndex.clamp(0, lastIndex)];
+  }, growable: false);
+}
 
 class FlightInfoApi {
   final functions = FirebaseFunctions.instance;
@@ -100,9 +115,20 @@ class FlightInfoApi {
     List<LatLng> waypoints, {
     List<UsersInterests>? interests,
   }) async {
+    final request = _buildFunctionRequest(
+      airportDeparture: airportDeparture,
+      airportArrival: airportArrival,
+      waypoints: waypoints,
+      promptVersion: _wikiArticlesPromptVersion,
+      interests: interests,
+    );
+    final requestWaypoints = request['waypoints'] is List
+        ? (request['waypoints'] as List).length
+        : waypoints.length;
     _logger.log(
       'getFlightWikiArticles dep="$airportDeparture" arr="$airportArrival" '
-      'waypoints=${waypoints.length} prompt=$_wikiArticlesPromptVersion',
+      'waypoints=${waypoints.length} requestWaypoints=$requestWaypoints '
+      'prompt=$_wikiArticlesPromptVersion',
     );
     if (waypoints.isNotEmpty) {
       final first = waypoints.first;
@@ -114,15 +140,7 @@ class FlightInfoApi {
     }
     final result = await functions
         .httpsCallable(_getWikiArticlesFunction)
-        .call(
-          _buildFunctionRequest(
-            airportDeparture: airportDeparture,
-            airportArrival: airportArrival,
-            waypoints: waypoints,
-            promptVersion: _wikiArticlesPromptVersion,
-            interests: interests,
-          ),
-        );
+        .call(request);
     _logger.log(
       'Wiki callable raw result type=${result.data.runtimeType} '
       'preview=${_previewData(result.data)}',

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_article.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/subscription/paywall_source.dart';
@@ -79,6 +79,12 @@ class _LoadedRouteTab extends StatelessWidget {
     final isProUser = isCurrentUserPro || state.flight.hasProAccess;
     final routeRegions = state.routeRegions;
     final route = state.flight.route;
+    final routeCruiseSpeedKmh =
+        route.metrics.effectiveAverageSpeedKmh?.round() ??
+        info.routeCruiseSpeedKmh;
+    final routeTotalMinutes = route.effectiveDurationMinutes > 0
+        ? route.effectiveDurationMinutes
+        : info.routeTotalMinutes;
     final hasRegionTimeline = routeRegions.isNotEmpty;
     final hasOverview = info.overview.trim().isNotEmpty;
 
@@ -92,7 +98,7 @@ class _LoadedRouteTab extends StatelessWidget {
 
     final groups = RouteTimelineGrouping.groupByTimeline(
       routeRegions,
-      cruiseSpeedKmh: info.routeCruiseSpeedKmh,
+      cruiseSpeedKmh: routeCruiseSpeedKmh,
     );
 
     final isUpcoming = state.flight.status == FlightStatus.upcoming;
@@ -109,7 +115,7 @@ class _LoadedRouteTab extends StatelessWidget {
             if (isUpcoming)
               UpcomingRouteFactsStrip(
                 route: route,
-                totalMinutes: info.routeTotalMinutes,
+                totalMinutes: routeTotalMinutes,
               ),
             if (!isUpcoming && hasGpsFix)
               RouteProgressCard(route: route, gpsData: state.gpsData),
@@ -127,8 +133,8 @@ class _LoadedRouteTab extends StatelessWidget {
               route: route,
               regions: routeRegions,
               isProUser: isProUser,
-              cruiseSpeedKmh: info.routeCruiseSpeedKmh,
-              totalRouteMinutes: info.routeTotalMinutes,
+              cruiseSpeedKmh: routeCruiseSpeedKmh,
+              totalRouteMinutes: routeTotalMinutes,
               lastVisitedRegionId: state.lastVisitedRegionId,
               onPremiumGateTap: () => RoutePremiumGateInteractions.onGateTap(
                 context: context,

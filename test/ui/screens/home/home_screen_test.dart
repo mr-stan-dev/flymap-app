@@ -9,6 +9,7 @@ import 'package:flymap/data/local/airports_database.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_status.dart';
 import 'package:flymap/domain/entity/learn_access.dart';
 import 'package:flymap/domain/entity/learn_article_content.dart';
 import 'package:flymap/domain/entity/learn_article_meta.dart';
