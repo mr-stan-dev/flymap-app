@@ -1031,6 +1031,9 @@ class TranslationsOnboardingEn {
 	/// en: 'Detailed maps for your flight'
 	String get proFeatureMaps => 'Detailed maps for your flight';
 
+	/// en: 'Most accurate flight routes'
+	String get proFeatureRoutes => 'Most accurate flight routes';
+
 	/// en: '10x more places along the route'
 	String get proFeaturePlaces => '10x more places along the route';
 
@@ -1301,11 +1304,11 @@ class TranslationsCreateFlightOverviewEn {
 	/// en: 'This route is based on the most recent recorded route for the same flight. Actual routing may vary due to weather, air traffic, and operational constraints.'
 	String get realRouteNoteBody => 'This route is based on the most recent recorded route for the same flight.\nActual routing may vary due to weather, air traffic, and operational constraints.';
 
-	/// en: 'Approximate route may be inaccurate'
-	String get approximateRouteLongHaulWarningTitle => 'Approximate route may be inaccurate';
+	/// en: 'This is approximate route'
+	String get approximateRouteLongHaulWarningTitle => 'This is approximate route';
 
-	/// en: 'Approximate routes can be inaccurate for long-haul flights. Use a real route with a flight number instead.'
-	String get approximateRouteLongHaulWarningBody => 'Approximate routes can be inaccurate for long-haul flights. Use a real route with a flight number instead.';
+	/// en: 'Approximate routes may be inaccurate for long-haul flights. Use a real route with a flight number instead.'
+	String get approximateRouteLongHaulWarningBody => 'Approximate routes may be inaccurate for long-haul flights. Use a real route with a flight number instead.';
 
 	/// en: 'Approximate routes are not supported for ultra long-haul flights. Use a real route with a flight number instead.'
 	String get approximateRouteUltraLongHaulUnsupportedBody => 'Approximate routes are not supported for ultra long-haul flights. Use a real route with a flight number instead.';
@@ -2410,8 +2413,8 @@ extension on Translations {
 			'createFlight.overview.routeNoteBody' => 'Route is approximate — actual path may vary, especially on long-haul flights.',
 			'createFlight.overview.realRouteNoteTitle' => 'Real route',
 			'createFlight.overview.realRouteNoteBody' => 'This route is based on the most recent recorded route for the same flight.\nActual routing may vary due to weather, air traffic, and operational constraints.',
-			'createFlight.overview.approximateRouteLongHaulWarningTitle' => 'Approximate route may be inaccurate',
-			'createFlight.overview.approximateRouteLongHaulWarningBody' => 'Approximate routes can be inaccurate for long-haul flights. Use a real route with a flight number instead.',
+			'createFlight.overview.approximateRouteLongHaulWarningTitle' => 'This is approximate route',
+			'createFlight.overview.approximateRouteLongHaulWarningBody' => 'Approximate routes may be inaccurate for long-haul flights. Use a real route with a flight number instead.',
 			'createFlight.overview.approximateRouteUltraLongHaulUnsupportedBody' => 'Approximate routes are not supported for ultra long-haul flights. Use a real route with a flight number instead.',
 			'createFlight.overview.startReview' => 'Start review',
 			'createFlight.overview.skipReview' => 'Skip review',
@@ -2749,6 +2752,7 @@ extension on Translations {
 			'onboarding.proTitle' => 'Get more from every flight',
 			'onboarding.proStepSubtitle' => 'Unlock detailed maps, places and articles — even offline.',
 			'onboarding.proFeatureMaps' => 'Detailed maps for your flight',
+			'onboarding.proFeatureRoutes' => 'Most accurate flight routes',
 			'onboarding.proFeaturePlaces' => '10x more places along the route',
 			'onboarding.proFeatureTimeline' => 'A detailed timeline of your entire flight',
 			'onboarding.proFeatureArticles' => 'Complete pack of offline articles',

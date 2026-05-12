@@ -28,19 +28,24 @@ class OnboardingProStep extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox.square(
-                dimension: 240,
+                dimension: 232,
                 child: Image.asset('assets/images/logo_pro.webp'),
               ),
             ],
           ),
           const SizedBox(height: 16),
           _ProFeatureItem(
+            icon: Icons.route_rounded,
+            text: context.t.onboarding.proFeatureRoutes,
+          ),
+          const SizedBox(height: 12),
+          _ProFeatureItem(
             icon: Icons.map_rounded,
             text: context.t.onboarding.proFeatureMaps,
           ),
           const SizedBox(height: 12),
           _ProFeatureItem(
-            icon: Icons.timeline,
+            icon: Icons.timeline_rounded,
             text: context.t.onboarding.proFeatureTimeline,
           ),
           const SizedBox(height: 12),
