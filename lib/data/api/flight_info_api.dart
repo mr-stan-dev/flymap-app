@@ -11,6 +11,7 @@ import 'package:latlong2/latlong.dart';
 
 const _waypointFractionDigits = 2;
 const flightInfoRequestMaxWaypoints = 200;
+const wikiArticlesRequestMaxWaypoints = 20;
 
 Map<String, dynamic> buildFlightInfoFunctionRequest({
   required String airportDeparture,
@@ -18,8 +19,12 @@ Map<String, dynamic> buildFlightInfoFunctionRequest({
   required List<LatLng> waypoints,
   required int promptVersion,
   List<UsersInterests>? interests,
+  int maxWaypoints = flightInfoRequestMaxWaypoints,
 }) {
-  final sampledWaypoints = _sampleWaypointsForFlightInfo(waypoints);
+  final sampledWaypoints = sampleWaypointsForFlightRequest(
+    waypoints,
+    maxWaypoints: maxWaypoints,
+  );
   final request = <String, dynamic>{
     'waypoints': sampledWaypoints
         .map(
@@ -53,15 +58,17 @@ Map<String, dynamic> buildFlightInfoFunctionRequest({
 double _roundCoordinate(double value, {required int fractionDigits}) =>
     double.parse(value.toStringAsFixed(fractionDigits));
 
-List<LatLng> _sampleWaypointsForFlightInfo(List<LatLng> waypoints) {
-  if (waypoints.length <= flightInfoRequestMaxWaypoints) {
+List<LatLng> sampleWaypointsForFlightRequest(
+  List<LatLng> waypoints, {
+  required int maxWaypoints,
+}) {
+  if (waypoints.length <= maxWaypoints) {
     return waypoints;
   }
 
   final lastIndex = waypoints.length - 1;
-  return List.generate(flightInfoRequestMaxWaypoints, (index) {
-    final sourceIndex =
-        (index * lastIndex / (flightInfoRequestMaxWaypoints - 1)).round();
+  return List.generate(maxWaypoints, (index) {
+    final sourceIndex = (index * lastIndex / (maxWaypoints - 1)).round();
     return waypoints[sourceIndex.clamp(0, lastIndex)];
   }, growable: false);
 }
@@ -121,6 +128,7 @@ class FlightInfoApi {
       waypoints: waypoints,
       promptVersion: _wikiArticlesPromptVersion,
       interests: interests,
+      maxWaypoints: wikiArticlesRequestMaxWaypoints,
     );
     final requestWaypoints = request['waypoints'] is List
         ? (request['waypoints'] as List).length
@@ -165,6 +173,7 @@ class FlightInfoApi {
     required List<LatLng> waypoints,
     required int promptVersion,
     List<UsersInterests>? interests,
+    int maxWaypoints = flightInfoRequestMaxWaypoints,
   }) {
     return buildFlightInfoFunctionRequest(
       airportDeparture: airportDeparture,
@@ -172,6 +181,7 @@ class FlightInfoApi {
       waypoints: waypoints,
       promptVersion: promptVersion,
       interests: interests,
+      maxWaypoints: maxWaypoints,
     );
   }
 

@@ -74,4 +74,27 @@ void main() {
       expect(sampled.last, [35.9, -35.9]);
     },
   );
+
+  test(
+    'buildFlightInfoFunctionRequest can clamp dense routes to 20 waypoints for wiki',
+    () {
+      final waypoints = List.generate(
+        500,
+        (index) => LatLng(index / 10, -index / 10),
+      );
+
+      final request = buildFlightInfoFunctionRequest(
+        airportDeparture: 'SFO',
+        airportArrival: 'PEK',
+        waypoints: waypoints,
+        promptVersion: 4,
+        maxWaypoints: wikiArticlesRequestMaxWaypoints,
+      );
+
+      final sampled = request['waypoints'] as List<dynamic>;
+      expect(sampled, hasLength(wikiArticlesRequestMaxWaypoints));
+      expect(sampled.first, [0.0, 0.0]);
+      expect(sampled.last, [49.9, -49.9]);
+    },
+  );
 }
