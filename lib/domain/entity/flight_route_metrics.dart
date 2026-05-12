@@ -37,6 +37,16 @@ class FlightRouteMetrics extends Equatable {
   int get effectiveDurationMinutes =>
       _positiveInt(actualDurationMinutes) ?? approxDurationMinutes;
 
+  int get displayDistanceKm => roundDistanceKmForDisplay(
+    effectiveDistanceKm,
+    isActual: _positiveFinite(actualDistanceKm) != null,
+  );
+
+  int get displayDurationMinutes => roundDurationMinutesForDisplay(
+    effectiveDurationMinutes,
+    isActual: _positiveInt(actualDurationMinutes) != null,
+  );
+
   double? get effectiveAverageSpeedKmh {
     final duration = effectiveDurationMinutes;
     final distance = effectiveDistanceKm;
@@ -70,6 +80,24 @@ class FlightRouteMetrics extends Equatable {
     if (!distanceKm.isFinite || distanceKm <= 0) return 0;
     final cruiseMinutes = (distanceKm * 60) / defaultCruiseSpeedKmh;
     return (cruiseMinutes / 5).round() * 5;
+  }
+
+  static int roundDistanceKmForDisplay(
+    double distanceKm, {
+    required bool isActual,
+  }) {
+    if (!distanceKm.isFinite || distanceKm <= 0) return 0;
+    if (!isActual) return distanceKm.round();
+    return ((distanceKm / 10).round() * 10).toInt();
+  }
+
+  static int roundDurationMinutesForDisplay(
+    int minutes, {
+    required bool isActual,
+  }) {
+    if (minutes <= 0) return 0;
+    if (!isActual) return minutes;
+    return (minutes / 5).round() * 5;
   }
 
   static double? _positiveFinite(double? value) {

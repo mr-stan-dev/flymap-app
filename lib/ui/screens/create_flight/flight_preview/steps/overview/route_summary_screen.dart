@@ -38,8 +38,13 @@ class RouteSummaryScreen extends StatelessWidget {
     final isProUser = context.select(
       (SubscriptionCubit cubit) => cubit.state.isPro,
     );
-    final distance = _formatDistanceKm(route.distanceInKm);
-    final duration = _formatMinutesCompact(context, totalRouteMinutes);
+    final distance = _formatDistanceKm(route);
+    final duration = _formatMinutesCompact(
+      context,
+      route.isHistoricalTrack
+          ? route.displayDurationMinutes
+          : totalRouteMinutes,
+    );
     final routeTitle =
         '${route.departure.displayCode} → ${route.arrival.displayCode}';
     final routeSubtitle =
@@ -160,10 +165,10 @@ class RouteSummaryScreen extends StatelessWidget {
     );
   }
 
-  String _formatDistanceKm(double distanceKm) {
-    if (!distanceKm.isFinite || distanceKm <= 0) return '0km';
-    final roundedDistance = (distanceKm / 10).round() * 10;
-    return '${roundedDistance}km';
+  String _formatDistanceKm(FlightRoute route) {
+    final distanceKm = route.displayDistanceKm;
+    if (distanceKm <= 0) return '0km';
+    return '${distanceKm}km';
   }
 }
 

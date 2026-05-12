@@ -43,7 +43,7 @@ class HomeFlightCard extends StatelessWidget {
     final departure = route.departure;
     final arrival = route.arrival;
     final distance = UnitFormatUtils.formatDistance(
-      route.distanceInKm,
+      route.displayDistanceKm.toDouble(),
       distanceUnit,
     );
     final offlineSize = _formatOfflineSize(flight);

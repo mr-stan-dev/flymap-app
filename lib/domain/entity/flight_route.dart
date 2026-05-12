@@ -51,6 +51,17 @@ class FlightRoute extends Equatable {
       ? metrics.effectiveDurationMinutes
       : approxDurationMinutes;
 
+  int get displayDistanceKm => metrics.displayDistanceKm > 0
+      ? metrics.displayDistanceKm
+      : FlightRouteMetrics.roundDistanceKmForDisplay(
+          legacyDistanceInKm ?? 0,
+          isActual: false,
+        );
+
+  int get displayDurationMinutes => metrics.displayDurationMinutes > 0
+      ? metrics.displayDurationMinutes
+      : approxDurationMinutes;
+
   bool get isHistoricalTrack => source == FlightRouteSource.fr24Historical;
 
   List<LatLng> get waypointLatLngs =>

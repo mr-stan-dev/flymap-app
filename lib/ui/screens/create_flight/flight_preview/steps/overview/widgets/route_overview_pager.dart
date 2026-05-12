@@ -86,10 +86,12 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
     switch (entry.kind) {
       case RouteOverviewPageKind.summary:
         final route = widget.route;
-        final distance = _formatDistanceKm(route.distanceInKm);
+        final distance = _formatDistanceKm(route);
         final duration = _formatMinutesCompact(
           context,
-          widget.totalRouteMinutes,
+          route.isHistoricalTrack
+              ? route.displayDurationMinutes
+              : widget.totalRouteMinutes,
         );
         return OverviewTitleCard(
           routeCodeLine:
@@ -193,10 +195,10 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
     return '$h${timelineT.hourCompactUnit} $m${timelineT.minuteCompactUnit}';
   }
 
-  String _formatDistanceKm(double distanceKm) {
-    if (!distanceKm.isFinite || distanceKm <= 0) return '0km';
-    final roundedDistance = (distanceKm / 10).round() * 10;
-    return '${roundedDistance}km';
+  String _formatDistanceKm(FlightRoute route) {
+    final distanceKm = route.displayDistanceKm;
+    if (distanceKm <= 0) return '0km';
+    return '${distanceKm}km';
   }
 
   void _animateToNextCard() {

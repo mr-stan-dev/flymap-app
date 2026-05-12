@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/flight_route_metrics.dart';
 
 class FlightSummary extends Equatable {
   const FlightSummary({
@@ -8,6 +9,7 @@ class FlightSummary extends Equatable {
     required this.destIcao,
     this.airlineCode,
     this.airlineName,
+    this.historicalFlightDate,
     this.actualDistanceKm,
     this.actualDurationMinutes,
     this.departure,
@@ -19,10 +21,29 @@ class FlightSummary extends Equatable {
   final String? destIcao;
   final String? airlineCode;
   final String? airlineName;
+  final DateTime? historicalFlightDate;
   final double? actualDistanceKm;
   final int? actualDurationMinutes;
   final Airport? departure;
   final Airport? arrival;
+
+  int? get displayActualDistanceKm {
+    final distanceKm = _toFiniteDouble(actualDistanceKm);
+    if (distanceKm == null || distanceKm <= 0) return null;
+    return FlightRouteMetrics.roundDistanceKmForDisplay(
+      distanceKm,
+      isActual: true,
+    );
+  }
+
+  int? get displayActualDurationMinutes {
+    final durationMinutes = _toInt(actualDurationMinutes);
+    if (durationMinutes == null || durationMinutes <= 0) return null;
+    return FlightRouteMetrics.roundDurationMinutesForDisplay(
+      durationMinutes,
+      isActual: true,
+    );
+  }
 
   factory FlightSummary.fromApi(
     Map<String, dynamic> map,
@@ -76,6 +97,12 @@ class FlightSummary extends Equatable {
       airlineName: _toNonEmptyString(
         map['airlineName'] ?? map['airline_name'] ?? map['airline'],
       ),
+      historicalFlightDate: _toDate(
+        map['historicalFlightDate'] ??
+            map['historical_flight_date'] ??
+            map['historicalDate'] ??
+            map['historical_date'],
+      ),
       actualDistanceKm: _toFiniteDouble(
         map['actualDistanceKm'] ??
             map['actual_distance'] ??
@@ -102,6 +129,7 @@ class FlightSummary extends Equatable {
     String? destIcao,
     String? airlineCode,
     String? airlineName,
+    DateTime? historicalFlightDate,
     double? actualDistanceKm,
     int? actualDurationMinutes,
     Airport? departure,
@@ -113,6 +141,7 @@ class FlightSummary extends Equatable {
       destIcao: destIcao ?? this.destIcao,
       airlineCode: airlineCode ?? this.airlineCode,
       airlineName: airlineName ?? this.airlineName,
+      historicalFlightDate: historicalFlightDate ?? this.historicalFlightDate,
       actualDistanceKm: actualDistanceKm ?? this.actualDistanceKm,
       actualDurationMinutes:
           actualDurationMinutes ?? this.actualDurationMinutes,
@@ -147,6 +176,30 @@ class FlightSummary extends Equatable {
     return null;
   }
 
+  static DateTime? _toDate(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is DateTime) {
+      return DateTime.utc(raw.year, raw.month, raw.day);
+    }
+    if (raw is int) {
+      final dt = DateTime.fromMillisecondsSinceEpoch(raw * 1000, isUtc: true);
+      return DateTime.utc(dt.year, dt.month, dt.day);
+    }
+    if (raw is num) {
+      final dt = DateTime.fromMillisecondsSinceEpoch(
+        raw.toInt() * 1000,
+        isUtc: true,
+      );
+      return DateTime.utc(dt.year, dt.month, dt.day);
+    }
+    if (raw is String) {
+      final parsed = DateTime.tryParse(raw);
+      if (parsed == null) return null;
+      return DateTime.utc(parsed.year, parsed.month, parsed.day);
+    }
+    return null;
+  }
+
   @override
   List<Object?> get props => [
     flightNumber,
@@ -154,6 +207,7 @@ class FlightSummary extends Equatable {
     destIcao,
     airlineCode,
     airlineName,
+    historicalFlightDate,
     actualDistanceKm,
     actualDurationMinutes,
     departure,

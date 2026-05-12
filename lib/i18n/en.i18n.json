@@ -233,7 +233,8 @@
       "error": "We couldn't find your flight. Edit number or find by airports",
       "findByAirports": "Find by Airports",
       "confirmTitle": "Confirm flight",
-      "foundTitle": "We found your flight"
+      "foundTitle": "We found your flight",
+      "basedOnSameFlightOn": "* Based on the most recent recorded route for the same flight"
     },
     "search": {
       "departureHint": "Search departure airport",
@@ -272,7 +273,7 @@
       "routeNoteTitle": "Approximate route",
       "routeNoteBody": "Route is approximate — actual path may vary, especially on long-haul flights.",
       "realRouteNoteTitle": "Real route",
-      "realRouteNoteBody": "Route is based on recent historical data of the same flight.",
+      "realRouteNoteBody": "This route is based on the most recent recorded route for the same flight.\nActual routing may vary due to weather, air traffic, and operational constraints.",
       "approximateRouteLongHaulWarningTitle": "Approximate route may be inaccurate",
 "approximateRouteLongHaulWarningBody": "Approximate routes can be inaccurate for long-haul flights. Use a real route with a flight number instead.",
 "approximateRouteUltraLongHaulUnsupportedBody": "Approximate routes are not supported for ultra long-haul flights. Use a real route with a flight number instead.",

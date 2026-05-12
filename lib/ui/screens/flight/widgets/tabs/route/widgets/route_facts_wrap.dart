@@ -16,7 +16,7 @@ class RouteFactsWrap extends StatelessWidget {
         _FactChip(
           icon: Icons.route,
           label: context.t.flight.info.distanceKm(
-            distance: route.distanceInKm.toStringAsFixed(0),
+            distance: route.displayDistanceKm.toString(),
           ),
         ),
         _FactChip(

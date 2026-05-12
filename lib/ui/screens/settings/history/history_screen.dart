@@ -400,7 +400,7 @@ class _HistoryTile extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final route = item.flight.route;
     final distanceLabel = UnitFormatUtils.formatDistance(
-      route.distanceInKm,
+      route.displayDistanceKm.toDouble(),
       distanceUnit,
     );
     final dateSource = item.flight.status == FlightStatus.completed

@@ -24,13 +24,23 @@ class FlightSummaryCard extends StatelessWidget {
         departure.latLon.latitude != 0 &&
         arrival.latLon.latitude != 0;
 
-    final distanceKm = hasCoords
+    final actualDistanceKm = summary.actualDistanceKm;
+    final actualDurationMinutes = summary.actualDurationMinutes;
+    final historicalFlightDate = summary.historicalFlightDate;
+    final estimatedDistanceKm = hasCoords
         ? MapUtils.distance(departure: departure, arrival: arrival)
         : 0.0;
+    final distanceKm = actualDistanceKm != null && actualDistanceKm > 0
+        ? summary.displayActualDistanceKm ?? actualDistanceKm.round()
+        : estimatedDistanceKm;
 
-    // Estimate duration: distance / 850 km/h + 30 mins for taxi/takeoff/landing
-    final durationMinutes = distanceKm > 0
-        ? (distanceKm / 850 * 60 + 30).round()
+    // For FR24 historical lookups, actual duration is authoritative.
+    // Otherwise fall back to a simple airport-to-airport estimate.
+    final durationMinutes =
+        actualDurationMinutes != null && actualDurationMinutes > 0
+        ? summary.displayActualDurationMinutes ?? actualDurationMinutes
+        : estimatedDistanceKm > 0
+        ? (estimatedDistanceKm / 850 * 60 + 30).round()
         : 0;
 
     return Card(
@@ -128,6 +138,15 @@ class FlightSummaryCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (historicalFlightDate != null) ...[
+                const SizedBox(height: 14),
+                Text(
+                  context.t.createFlight.flightNumberSearch.basedOnSameFlightOn,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ],
           ],
         ),

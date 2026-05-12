@@ -81,7 +81,11 @@ class _ShareFlightViewState extends State<_ShareFlightView> {
                         child: LayoutBuilder(
                           builder: (context, constraints) {
                             final mapSize = constraints.biggest;
-                            final distanceKm = state.flight.route.distanceInKm;
+                            final distanceKm = state
+                                .flight
+                                .route
+                                .displayDistanceKm
+                                .toDouble();
                             final maxLeft =
                                 (mapSize.width -
                                         shareDistanceChipWidth -

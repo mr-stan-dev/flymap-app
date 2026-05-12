@@ -1171,6 +1171,9 @@ class TranslationsCreateFlightFlightNumberSearchEn {
 
 	/// en: 'We found your flight'
 	String get foundTitle => 'We found your flight';
+
+	/// en: '* Based on the most recent recorded route for the same flight'
+	String get basedOnSameFlightOn => '* Based on the most recent recorded route for the same flight';
 }
 
 // Path: createFlight.search
@@ -1295,8 +1298,8 @@ class TranslationsCreateFlightOverviewEn {
 	/// en: 'Real route'
 	String get realRouteNoteTitle => 'Real route';
 
-	/// en: 'Route is based on recent historical data of the same flight.'
-	String get realRouteNoteBody => 'Route is based on recent historical data of the same flight.';
+	/// en: 'This route is based on the most recent recorded route for the same flight. Actual routing may vary due to weather, air traffic, and operational constraints.'
+	String get realRouteNoteBody => 'This route is based on the most recent recorded route for the same flight.\nActual routing may vary due to weather, air traffic, and operational constraints.';
 
 	/// en: 'Approximate route may be inaccurate'
 	String get approximateRouteLongHaulWarningTitle => 'Approximate route may be inaccurate';
@@ -2373,6 +2376,7 @@ extension on Translations {
 			'createFlight.flightNumberSearch.findByAirports' => 'Find by Airports',
 			'createFlight.flightNumberSearch.confirmTitle' => 'Confirm flight',
 			'createFlight.flightNumberSearch.foundTitle' => 'We found your flight',
+			'createFlight.flightNumberSearch.basedOnSameFlightOn' => '* Based on the most recent recorded route for the same flight',
 			'createFlight.search.departureHint' => 'Search departure airport',
 			'createFlight.search.arrivalHint' => 'Search arrival airport',
 			'createFlight.search.removeFavorite' => 'Remove favorite',
@@ -2405,7 +2409,7 @@ extension on Translations {
 			'createFlight.overview.routeNoteTitle' => 'Approximate route',
 			'createFlight.overview.routeNoteBody' => 'Route is approximate — actual path may vary, especially on long-haul flights.',
 			'createFlight.overview.realRouteNoteTitle' => 'Real route',
-			'createFlight.overview.realRouteNoteBody' => 'Route is based on recent historical data of the same flight.',
+			'createFlight.overview.realRouteNoteBody' => 'This route is based on the most recent recorded route for the same flight.\nActual routing may vary due to weather, air traffic, and operational constraints.',
 			'createFlight.overview.approximateRouteLongHaulWarningTitle' => 'Approximate route may be inaccurate',
 			'createFlight.overview.approximateRouteLongHaulWarningBody' => 'Approximate routes can be inaccurate for long-haul flights. Use a real route with a flight number instead.',
 			'createFlight.overview.approximateRouteUltraLongHaulUnsupportedBody' => 'Approximate routes are not supported for ultra long-haul flights. Use a real route with a flight number instead.',
@@ -2667,9 +2671,9 @@ extension on Translations {
 			'flight.route.nextRegionLabel' => 'Next',
 			'flight.route.etaLabel' => ({required Object time}) => 'ETA: ${time}',
 			'flight.route.flyingOverLabel' => 'You are flying over:',
-			'flight.route.premiumLockedChipLabel' => 'Unlock',
 			_ => null,
 		} ?? switch (path) {
+			'flight.route.premiumLockedChipLabel' => 'Unlock',
 			'flight.route.premiumGateTitle' => 'Unlock full route timeline',
 			'flight.route.premiumGateBody' => 'Upgrade to Pro to see all regions along your route and timeline details.',
 			'flight.route.premiumGateBodyWithCount' => ({required Object count}) => 'Unlock all ${count} regions on this route with Premium.',
