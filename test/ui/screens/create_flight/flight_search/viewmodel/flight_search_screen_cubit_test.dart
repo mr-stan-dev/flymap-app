@@ -48,6 +48,7 @@ void main() {
     late _FakeDownloadMapUseCase mapUseCase;
     late _FakeConnectivityChecker connectivityChecker;
     late _FakeSubscriptionRepository subscriptionRepository;
+    late _FakeGetRouteOverviewUseCase routeOverviewUseCase;
     late _TestFlightPreviewCubit cubit;
 
     setUp(() {
@@ -57,11 +58,14 @@ void main() {
       connectivityChecker = _FakeConnectivityChecker();
       subscriptionRepository = _FakeSubscriptionRepository();
       final route = _route();
+      routeOverviewUseCase = _FakeGetRouteOverviewUseCase(
+        routeOverview: _routeOverviewFor(route),
+      );
       cubit = _TestFlightPreviewCubit(
         departure: route.departure,
         arrival: route.arrival,
         connectivityChecker: connectivityChecker,
-        getRouteOverviewUseCase: _FakeGetRouteOverviewUseCase(),
+        getRouteOverviewUseCase: routeOverviewUseCase,
         buildFlightRoutePreviewUseCase: _FakeBuildFlightRoutePreviewUseCase(),
         downloadMapUseCase: mapUseCase,
         downloadRegionWikiArticlesUseCase: regionWikiDownloadUseCase,
@@ -227,6 +231,47 @@ void main() {
       expect(cubit.state.hasInternetForMapPreview, isFalse);
     });
 
+    test(
+      'long-haul approximate route shows blocking warning in overview',
+      () async {
+        final longHaulRoute = _warningThresholdRoute();
+        routeOverviewUseCase.routeOverview = _routeOverviewFor(longHaulRoute);
+        cubit.setStateForTest(FlightPreviewState.initial());
+
+        await cubit.preparePreview();
+
+        expect(cubit.state.step, CreateFlightStep.overview);
+        expect(cubit.state.flightRoute, longHaulRoute);
+        expect(
+          cubit.state.overviewWarningTitle,
+          'Approximate route may be inaccurate',
+        );
+        expect(
+          cubit.state.overviewWarningMessage,
+          'Approximate route may be inaccurate for long-haul flights. Use real route option by flight number instead.',
+        );
+      },
+    );
+
+    test('ultra long-haul approximate route is blocked', () async {
+      final ultraLongHaulRoute = _unsupportedThresholdRoute();
+      routeOverviewUseCase.routeOverview = _routeOverviewFor(
+        ultraLongHaulRoute,
+      );
+      cubit.setStateForTest(FlightPreviewState.initial());
+
+      await cubit.preparePreview();
+
+      expect(cubit.state.step, CreateFlightStep.routeNotSupported);
+      expect(cubit.state.flightRoute, ultraLongHaulRoute);
+      expect(
+        cubit.state.errorMessage,
+        'Approximate route is inaccurate for ultra long-haul flights. Use real route option by flight number instead.',
+      );
+      expect(cubit.state.overviewWarningTitle, isNull);
+      expect(cubit.state.overviewWarningMessage, isNull);
+    });
+
     test('refreshPoisForPro applies cached pro POI slice', () async {
       final pois = _routePoiSummaries(80);
       cubit.setStateForTest(
@@ -378,14 +423,14 @@ FlightRoute _route() {
     icaoCode: 'BBBB',
     wikipediaUrl: '',
   );
-  return const FlightRoute(
+  return FlightRoute(
     departure: departure,
     arrival: arrival,
     waypoints: [
       FlightWaypoint(latLon: LatLng(10, 10)),
       FlightWaypoint(latLon: LatLng(20, 20)),
     ],
-    corridor: [LatLng(10, 10), LatLng(20, 10), LatLng(20, 20)],
+    corridor: _corridorBetween(departure.latLon, arrival.latLon),
     metrics: FlightRouteMetrics(
       greatCircleDistanceKm: 1500,
       approxDurationMinutes: 105,
@@ -412,17 +457,132 @@ FlightRoute _longRoute() {
     icaoCode: 'DDDD',
     wikipediaUrl: '',
   );
-  return const FlightRoute(
+  return FlightRoute(
     departure: departure,
     arrival: arrival,
     waypoints: [
       FlightWaypoint(latLon: LatLng(10, 10)),
       FlightWaypoint(latLon: LatLng(35, 35)),
     ],
-    corridor: [LatLng(10, 10), LatLng(35, 10), LatLng(35, 35)],
+    corridor: _corridorBetween(departure.latLon, arrival.latLon),
     metrics: FlightRouteMetrics(
       greatCircleDistanceKm: 3500,
       approxDurationMinutes: 245,
+    ),
+  );
+}
+
+FlightRoute _warningThresholdRoute() {
+  const departure = Airport(
+    name: 'San Francisco International Airport',
+    city: 'San Francisco',
+    countryCode: 'US',
+    latLon: LatLng(37.6213, -122.3790),
+    iataCode: 'SFO',
+    icaoCode: 'KSFO',
+    wikipediaUrl: '',
+  );
+  const arrival = Airport(
+    name: 'Heathrow Airport',
+    city: 'London',
+    countryCode: 'GB',
+    latLon: LatLng(51.4700, -0.4543),
+    iataCode: 'LHR',
+    icaoCode: 'EGLL',
+    wikipediaUrl: '',
+  );
+  return FlightRoute(
+    departure: departure,
+    arrival: arrival,
+    waypoints: [
+      FlightWaypoint(latLon: departure.latLon),
+      FlightWaypoint(latLon: arrival.latLon),
+    ],
+    corridor: _corridorBetween(departure.latLon, arrival.latLon),
+    metrics: FlightRouteMetrics(
+      greatCircleDistanceKm: 8600,
+      approxDurationMinutes: 605,
+    ),
+  );
+}
+
+FlightRoute _unsupportedThresholdRoute() {
+  const departure = Airport(
+    name: 'John F. Kennedy International Airport',
+    city: 'New York',
+    countryCode: 'US',
+    latLon: LatLng(40.6413, -73.7781),
+    iataCode: 'JFK',
+    icaoCode: 'KJFK',
+    wikipediaUrl: '',
+  );
+  const arrival = Airport(
+    name: 'Singapore Changi Airport',
+    city: 'Singapore',
+    countryCode: 'SG',
+    latLon: LatLng(1.3644, 103.9915),
+    iataCode: 'SIN',
+    icaoCode: 'WSSS',
+    wikipediaUrl: '',
+  );
+  return FlightRoute(
+    departure: departure,
+    arrival: arrival,
+    waypoints: [
+      FlightWaypoint(latLon: departure.latLon),
+      FlightWaypoint(latLon: arrival.latLon),
+    ],
+    corridor: _corridorBetween(departure.latLon, arrival.latLon),
+    metrics: FlightRouteMetrics(
+      greatCircleDistanceKm: 11000,
+      approxDurationMinutes: 775,
+    ),
+  );
+}
+
+List<LatLng> _corridorBetween(LatLng departure, LatLng arrival) {
+  return [
+    departure,
+    LatLng(
+      (departure.latitude + arrival.latitude) / 2,
+      (departure.longitude + arrival.longitude) / 2,
+    ),
+    arrival,
+  ];
+}
+
+RouteOverview _routeOverviewFor(FlightRoute route) {
+  return RouteOverview(
+    route: route,
+    topPois: const [],
+    flightInfo: null,
+    timeline: const RouteTimeline(
+      regions: [
+        RouteRegion(
+          qid: 'Q1',
+          name: 'France',
+          regionType: RouteRegionType.country,
+          pathFirstEncounterKm: 100,
+          pathLengthInsideKm: 120,
+          geometry: RouteRegionGeometry(
+            type: 'Polygon',
+            geoJson: {
+              'type': 'Polygon',
+              'coordinates': [
+                [
+                  [2.0, 45.0],
+                  [2.1, 45.0],
+                  [2.1, 45.1],
+                  [2.0, 45.1],
+                  [2.0, 45.0],
+                ],
+              ],
+            },
+          ),
+        ),
+      ],
+      totalRouteMinutes: 95,
+      cruiseSpeedKmh: 850,
     ),
   );
 }
@@ -475,72 +635,16 @@ class _FakeConnectivityChecker implements ConnectivityChecker {
 }
 
 class _FakeGetRouteOverviewUseCase implements GetRouteOverviewUseCase {
+  _FakeGetRouteOverviewUseCase({required this.routeOverview});
+
+  RouteOverview routeOverview;
+
   @override
   Future<RouteOverview> call({
     required Airport departure,
     required Airport arrival,
   }) async {
-    return const RouteOverview(
-      route: FlightRoute(
-        departure: Airport(
-          name: 'A',
-          city: 'A',
-          countryCode: 'US',
-          latLon: LatLng(10, 10),
-          iataCode: 'AAA',
-          icaoCode: 'AAAA',
-          wikipediaUrl: '',
-        ),
-        arrival: Airport(
-          name: 'B',
-          city: 'B',
-          countryCode: 'US',
-          latLon: LatLng(20, 20),
-          iataCode: 'BBB',
-          icaoCode: 'BBBB',
-          wikipediaUrl: '',
-        ),
-        waypoints: [
-          FlightWaypoint(latLon: LatLng(10, 10)),
-          FlightWaypoint(latLon: LatLng(20, 20)),
-        ],
-        corridor: [LatLng(10, 10), LatLng(20, 10), LatLng(20, 20)],
-        metrics: FlightRouteMetrics(
-          greatCircleDistanceKm: 1500,
-          approxDurationMinutes: 105,
-        ),
-      ),
-      topPois: [],
-      flightInfo: null,
-      timeline: RouteTimeline(
-        regions: [
-          RouteRegion(
-            qid: 'Q1',
-            name: 'France',
-            regionType: RouteRegionType.country,
-            pathFirstEncounterKm: 100,
-            pathLengthInsideKm: 120,
-            geometry: RouteRegionGeometry(
-              type: 'Polygon',
-              geoJson: {
-                'type': 'Polygon',
-                'coordinates': [
-                  [
-                    [2.0, 45.0],
-                    [2.1, 45.0],
-                    [2.1, 45.1],
-                    [2.0, 45.1],
-                    [2.0, 45.0],
-                  ],
-                ],
-              },
-            ),
-          ),
-        ],
-        totalRouteMinutes: 95,
-        cruiseSpeedKmh: 850,
-      ),
-    );
+    return routeOverview;
   }
 
   @override

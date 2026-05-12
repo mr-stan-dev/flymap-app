@@ -138,19 +138,28 @@ class VectorTilesDownloader {
         }
       }
       final allTiles = allTilesByKey.values.toList(growable: false);
+      final validTiles = allTiles
+          .where(TileUtils.isValidTile)
+          .toList(growable: false);
+      final invalidTilesSkipped = allTiles.length - validTiles.length;
+      if (invalidTilesSkipped > 0) {
+        _logger.log(
+          'Skipped $invalidTilesSkipped invalid tile coordinates before sea filtering',
+        );
+      }
 
       // Filter out sea tiles from configured sea-filter zoom and above.
       final seaFilter = SeaTilesFilter(
         minZoomToFilter: MapDownloadConfig.seaFilterMinZoom,
       );
-      final filteredTiles = await seaFilter.filterTiles(allTiles);
-      final skipped = allTiles.length - filteredTiles.length;
+      final filteredTiles = await seaFilter.filterTiles(validTiles);
+      final skipped = validTiles.length - filteredTiles.length;
       final skippedByZoom = _buildSkippedByZoom(
-        allTiles: allTiles,
+        allTiles: validTiles,
         filteredTiles: filteredTiles,
       );
       _logger.log(
-        'Computed ${allTiles.length} tiles; skipped $skipped sea tiles; downloading ${filteredTiles.length} tiles',
+        'Computed ${validTiles.length} valid tiles; skipped $skipped sea tiles; downloading ${filteredTiles.length} tiles',
       );
       if (skippedByZoom.isNotEmpty) {
         final details = skippedByZoom.entries

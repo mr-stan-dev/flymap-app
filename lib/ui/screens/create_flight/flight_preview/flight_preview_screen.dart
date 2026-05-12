@@ -81,6 +81,7 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
   double _stepEnterFrom = 0.0;
   bool _showDownloadSuccess = false;
   bool _downloadCompletionHandled = false;
+  bool _isShowingOverviewWarning = false;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +90,8 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
         return previous.errorMessage != current.errorMessage ||
             previous.downloadErrorMessage != current.downloadErrorMessage ||
             previous.downloadDone != current.downloadDone ||
+            previous.overviewWarningTitle != current.overviewWarningTitle ||
+            previous.overviewWarningMessage != current.overviewWarningMessage ||
             previous.step != current.step;
       },
       listener: (listenerContext, state) {
@@ -118,6 +121,24 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
         if (state.downloadDone && !_downloadCompletionHandled) {
           _downloadCompletionHandled = true;
           unawaited(_handleDownloadCompleted());
+        }
+
+        final warningTitle = state.overviewWarningTitle;
+        final warningMessage = state.overviewWarningMessage;
+        if (!_isShowingOverviewWarning &&
+            state.step == CreateFlightStep.overview &&
+            warningTitle != null &&
+            warningTitle.isNotEmpty &&
+            warningMessage != null &&
+            warningMessage.isNotEmpty) {
+          _isShowingOverviewWarning = true;
+          unawaited(
+            _showOverviewWarningDialog(
+              listenerContext,
+              title: warningTitle,
+              message: warningMessage,
+            ),
+          );
         }
       },
       builder: (context, state) {
@@ -385,6 +406,33 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
     if (shouldPop && context.mounted) {
       Navigator.of(context).pop();
     }
+  }
+
+  Future<void> _showOverviewWarningDialog(
+    BuildContext context, {
+    required String title,
+    required String message,
+  }) async {
+    final previewCubit = context.read<FlightPreviewCubit>();
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(context.t.common.ok),
+            ),
+          ],
+        );
+      },
+    );
+    if (!mounted) return;
+    _isShowingOverviewWarning = false;
+    previewCubit.dismissOverviewWarning();
   }
 
   Future<void> _handleDownloadCompleted() async {

@@ -112,6 +112,15 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     _navigationDelegate.continueFromOverview();
   }
 
+  void dismissOverviewWarning() {
+    _emitState(
+      state.copyWith(
+        clearOverviewWarningTitle: true,
+        clearOverviewWarningMessage: true,
+      ),
+    );
+  }
+
   void toggleWikiArticleSelection(String url) =>
       _wikiSelectionDelegate.toggleWikiArticleSelection(url);
 

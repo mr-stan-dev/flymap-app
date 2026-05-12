@@ -1292,11 +1292,20 @@ class TranslationsCreateFlightOverviewEn {
 	/// en: 'Route is approximate — actual path may vary, especially on long-haul flights.'
 	String get routeNoteBody => 'Route is approximate — actual path may vary, especially on long-haul flights.';
 
-	/// en: 'Historical route'
-	String get realRouteNoteTitle => 'Historical route';
+	/// en: 'Real route'
+	String get realRouteNoteTitle => 'Real route';
 
 	/// en: 'Route is based on recent historical data of the same flight.'
 	String get realRouteNoteBody => 'Route is based on recent historical data of the same flight.';
+
+	/// en: 'Approximate route may be inaccurate'
+	String get approximateRouteLongHaulWarningTitle => 'Approximate route may be inaccurate';
+
+	/// en: 'Approximate routes can be inaccurate for long-haul flights. Use a real route with a flight number instead.'
+	String get approximateRouteLongHaulWarningBody => 'Approximate routes can be inaccurate for long-haul flights. Use a real route with a flight number instead.';
+
+	/// en: 'Approximate routes are not supported for ultra long-haul flights. Use a real route with a flight number instead.'
+	String get approximateRouteUltraLongHaulUnsupportedBody => 'Approximate routes are not supported for ultra long-haul flights. Use a real route with a flight number instead.';
 
 	/// en: 'Start review'
 	String get startReview => 'Start review';
@@ -2395,8 +2404,11 @@ extension on Translations {
 			'createFlight.overview.routeNoteTooltip' => 'Route note',
 			'createFlight.overview.routeNoteTitle' => 'Approximate route',
 			'createFlight.overview.routeNoteBody' => 'Route is approximate — actual path may vary, especially on long-haul flights.',
-			'createFlight.overview.realRouteNoteTitle' => 'Historical route',
+			'createFlight.overview.realRouteNoteTitle' => 'Real route',
 			'createFlight.overview.realRouteNoteBody' => 'Route is based on recent historical data of the same flight.',
+			'createFlight.overview.approximateRouteLongHaulWarningTitle' => 'Approximate route may be inaccurate',
+			'createFlight.overview.approximateRouteLongHaulWarningBody' => 'Approximate routes can be inaccurate for long-haul flights. Use a real route with a flight number instead.',
+			'createFlight.overview.approximateRouteUltraLongHaulUnsupportedBody' => 'Approximate routes are not supported for ultra long-haul flights. Use a real route with a flight number instead.',
 			'createFlight.overview.startReview' => 'Start review',
 			'createFlight.overview.skipReview' => 'Skip review',
 			'createFlight.overview.premiumGateTitle' => 'Unlock full route overview',
@@ -2656,11 +2668,11 @@ extension on Translations {
 			'flight.route.etaLabel' => ({required Object time}) => 'ETA: ${time}',
 			'flight.route.flyingOverLabel' => 'You are flying over:',
 			'flight.route.premiumLockedChipLabel' => 'Unlock',
+			_ => null,
+		} ?? switch (path) {
 			'flight.route.premiumGateTitle' => 'Unlock full route timeline',
 			'flight.route.premiumGateBody' => 'Upgrade to Pro to see all regions along your route and timeline details.',
 			'flight.route.premiumGateBodyWithCount' => ({required Object count}) => 'Unlock all ${count} regions on this route with Premium.',
-			_ => null,
-		} ?? switch (path) {
 			'flight.route.premiumGateCta' => 'Subscribe to Premium',
 			'flight.route.premiumOfflineTitle' => 'Internet needed to upgrade',
 			'flight.route.premiumOfflineBody' => 'You are offline right now. Connect to the internet to upgrade and unlock the full route view.',

@@ -10,36 +10,67 @@ class MapTile {
   MapTile(this.z, this.x, this.y);
 }
 
-/// Utility class to convert between tile and lat/lon coordinates
+/// Helpers for mapping between geographic coordinates and XYZ vector tiles.
+///
+/// All public entry points sanitize input into Web Mercator bounds first.
+/// That keeps near-polar and edge-longitude inputs from producing invalid
+/// tile rows/columns during route map downloads.
 class TileUtils {
-  /// Converts latitude & longitude to XYZ tile coordinates at a given zoom level
+  static const double _webMercatorMaxLatitude = 85.05112878;
+  static const double _maxLongitudeInclusive = 180.0;
+  static const double _minLongitudeInclusive = -180.0;
+  static const double _longitudeEpsilon = 1e-9;
+
+  /// Converts a lat/lon point to an XYZ tile at [zoom].
+  ///
+  /// The input is clamped to valid Web Mercator bounds before projection, so
+  /// callers can safely pass route geometry that reaches the poles or exactly
+  /// `180` longitude.
   static MapTile xyzFromLatLon(LatLng latLon, int zoom) {
-    final n = math.pow(2, zoom).toDouble();
-    final xTile = ((latLon.longitude + 180.0) / 360.0 * n).floor();
-    final yTile =
-        ((1 -
-                    math.log(
-                          math.tan(latLon.latitude * math.pi / 180.0) +
-                              1 / math.cos(latLon.latitude * math.pi / 180.0),
-                        ) /
-                        math.pi) /
-                2 *
-                n)
-            .floor();
+    final tileCount = 1 << zoom;
+    final n = tileCount.toDouble();
+    final sanitized = sanitizeLatLng(latLon);
+    final xTile = (((sanitized.longitude + 180.0) / 360.0) * n).floor().clamp(
+      0,
+      tileCount - 1,
+    );
+    final mercatorY =
+        (1 -
+            math.log(
+                  math.tan(sanitized.latitude * math.pi / 180.0) +
+                      1 / math.cos(sanitized.latitude * math.pi / 180.0),
+                ) /
+                math.pi) /
+        2;
+    final yTile = (mercatorY * n).floor().clamp(0, tileCount - 1);
     return MapTile(zoom, xTile, yTile);
   }
 
-  /// Iterates all tile coords inside polygon for zoom level
+  /// Yields tiles whose area intersects the given polygon at [zoom].
+  ///
+  /// The polygon is sanitized first; non-finite points are dropped and the
+  /// remaining coordinates are clamped into Web Mercator bounds. If fewer than
+  /// three valid points remain, there is no drawable polygon and the result is
+  /// empty.
   static Iterable<MapTile> tilesForPolygon(
     List<LatLng> polygon,
     int zoom,
   ) sync* {
-    // Rough approach: iterate over bounding box tiles and include tile if its center in polygon.
-    double minLat = polygon.first.latitude;
-    double maxLat = polygon.first.latitude;
-    double minLon = polygon.first.longitude;
-    double maxLon = polygon.first.longitude;
-    for (final pnt in polygon) {
+    final sanitizedPolygon = polygon
+        .where((point) => point.latitude.isFinite && point.longitude.isFinite)
+        .map(sanitizeLatLng)
+        .toList(growable: false);
+    if (sanitizedPolygon.length < 3) return;
+
+    // Iterate over the polygon's tile bounding box, then keep only tiles whose
+    // rectangle intersects the polygon. This is deliberately conservative: an
+    // empty result near the poles is acceptable, but invalid tile coordinates
+    // are not.
+    double minLat = sanitizedPolygon.first.latitude;
+    double maxLat = sanitizedPolygon.first.latitude;
+    double minLon = sanitizedPolygon.first.longitude;
+    double maxLon = sanitizedPolygon.first.longitude;
+    for (final pnt in sanitizedPolygon) {
       if (pnt.latitude < minLat) minLat = pnt.latitude;
       if (pnt.latitude > maxLat) maxLat = pnt.latitude;
       if (pnt.longitude < minLon) minLon = pnt.longitude;
@@ -52,7 +83,7 @@ class TileUtils {
       final minY = math.min(topLeft.y, bottomRight.y);
       final maxY = math.max(topLeft.y, bottomRight.y);
       for (int y = minY; y <= maxY; y++) {
-        final intersects = _tileIntersectsPolygon(x, y, zoom, polygon);
+        final intersects = _tileIntersectsPolygon(x, y, zoom, sanitizedPolygon);
         if (intersects) {
           yield MapTile(zoom, x, y);
           tileCount++;
@@ -62,6 +93,37 @@ class TileUtils {
     if (kDebugMode) {
       print('[VectorTilesDownloader] Zoom $zoom: $tileCount tiles selected');
     }
+  }
+
+  /// Clamps coordinates into the valid Web Mercator input range.
+  ///
+  /// Longitude is nudged slightly away from the inclusive `180` edge so tile
+  /// projection still lands inside the last valid column.
+  static LatLng sanitizeLatLng(LatLng point) {
+    final lat = point.latitude.isFinite ? point.latitude : 0.0;
+    final lon = point.longitude.isFinite ? point.longitude : 0.0;
+    final clampedLat = lat.clamp(
+      -_webMercatorMaxLatitude,
+      _webMercatorMaxLatitude,
+    );
+    final clampedLon = lon.clamp(
+      _minLongitudeInclusive,
+      _maxLongitudeInclusive,
+    );
+    final adjustedLon = clampedLon >= _maxLongitudeInclusive
+        ? _maxLongitudeInclusive - _longitudeEpsilon
+        : clampedLon;
+    return LatLng(clampedLat, adjustedLon);
+  }
+
+  /// Returns whether [tile] falls inside the valid XYZ range for its zoom.
+  static bool isValidTile(MapTile tile) {
+    if (tile.z < 0) return false;
+    final tileCount = 1 << tile.z;
+    return tile.x >= 0 &&
+        tile.x < tileCount &&
+        tile.y >= 0 &&
+        tile.y < tileCount;
   }
 
   static LatLng latLonFromTileCenter(int x, int y, int z) {
@@ -89,11 +151,11 @@ class TileUtils {
   }
 
   static bool _tileIntersectsPolygon(int x, int y, int z, List<LatLng> poly) {
-    // Tile rectangle in lat/lon
+    // Tile rectangle in lat/lon.
     final n = math.pow(2, z).toDouble();
     final west = x / n * 360.0 - 180.0;
     final east = (x + 1) / n * 360.0 - 180.0;
-    // Better: use edge computation
+    // Use adjacent tile centers to approximate the tile's north/south bounds.
     final northLat = latLonFromTileCenter(x, y, z).latitude;
     final southLat = latLonFromTileCenter(x, y + 1, z).latitude;
 

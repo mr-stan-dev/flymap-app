@@ -383,20 +383,30 @@ class PreviewMessageState extends Equatable {
   const PreviewMessageState({
     required this.errorMessage,
     required this.downloadErrorMessage,
+    required this.overviewWarningTitle,
+    required this.overviewWarningMessage,
   });
 
   const PreviewMessageState.initial()
     : errorMessage = null,
-      downloadErrorMessage = null;
+      downloadErrorMessage = null,
+      overviewWarningTitle = null,
+      overviewWarningMessage = null;
 
   final String? errorMessage;
   final String? downloadErrorMessage;
+  final String? overviewWarningTitle;
+  final String? overviewWarningMessage;
 
   PreviewMessageState copyWith({
     String? errorMessage,
     bool clearErrorMessage = false,
     String? downloadErrorMessage,
     bool clearDownloadErrorMessage = false,
+    String? overviewWarningTitle,
+    bool clearOverviewWarningTitle = false,
+    String? overviewWarningMessage,
+    bool clearOverviewWarningMessage = false,
   }) {
     return PreviewMessageState(
       errorMessage: clearErrorMessage
@@ -405,11 +415,22 @@ class PreviewMessageState extends Equatable {
       downloadErrorMessage: clearDownloadErrorMessage
           ? null
           : downloadErrorMessage ?? this.downloadErrorMessage,
+      overviewWarningTitle: clearOverviewWarningTitle
+          ? null
+          : overviewWarningTitle ?? this.overviewWarningTitle,
+      overviewWarningMessage: clearOverviewWarningMessage
+          ? null
+          : overviewWarningMessage ?? this.overviewWarningMessage,
     );
   }
 
   @override
-  List<Object?> get props => [errorMessage, downloadErrorMessage];
+  List<Object?> get props => [
+    errorMessage,
+    downloadErrorMessage,
+    overviewWarningTitle,
+    overviewWarningMessage,
+  ];
 }
 
 class FlightPreviewState extends Equatable {
@@ -478,6 +499,8 @@ class FlightPreviewState extends Equatable {
 
   String? get errorMessage => messageState.errorMessage;
   String? get downloadErrorMessage => messageState.downloadErrorMessage;
+  String? get overviewWarningTitle => messageState.overviewWarningTitle;
+  String? get overviewWarningMessage => messageState.overviewWarningMessage;
 
   bool get canContinueFromMap =>
       flightRoute != null && !isPreviewLoading && !isDownloading;
@@ -525,6 +548,10 @@ class FlightPreviewState extends Equatable {
     bool clearErrorMessage = false,
     String? downloadErrorMessage,
     bool clearDownloadErrorMessage = false,
+    String? overviewWarningTitle,
+    bool clearOverviewWarningTitle = false,
+    String? overviewWarningMessage,
+    bool clearOverviewWarningMessage = false,
   }) {
     return FlightPreviewState(
       step: step ?? this.step,
@@ -576,6 +603,10 @@ class FlightPreviewState extends Equatable {
         clearErrorMessage: clearErrorMessage,
         downloadErrorMessage: downloadErrorMessage,
         clearDownloadErrorMessage: clearDownloadErrorMessage,
+        overviewWarningTitle: overviewWarningTitle,
+        clearOverviewWarningTitle: clearOverviewWarningTitle,
+        overviewWarningMessage: overviewWarningMessage,
+        clearOverviewWarningMessage: clearOverviewWarningMessage,
       ),
     );
   }

@@ -1,6 +1,9 @@
 part of '../flight_preview_cubit.dart';
 
 class PreviewPreparationDelegate {
+  static const double _approximateRouteWarningDistanceKm = 7000;
+  static const double _approximateRouteUnsupportedDistanceKm = 10000;
+
   PreviewPreparationDelegate(
     this._cubit, {
     required ConnectivityChecker connectivityChecker,
@@ -36,6 +39,8 @@ class PreviewPreparationDelegate {
             isOverviewLoading: false,
             hasInternetForMapPreview: false,
             clearErrorMessage: true,
+            clearOverviewWarningTitle: true,
+            clearOverviewWarningMessage: true,
           ),
         );
         return;
@@ -116,10 +121,40 @@ class PreviewPreparationDelegate {
             articleCandidates: const [],
             clearSelectedArticleUrls: true,
             errorMessage: t.createFlight.mapPreview.routeNotSupportedMsg,
+            clearOverviewWarningTitle: true,
+            clearOverviewWarningMessage: true,
           ),
         );
         return;
       }
+
+      if (!route.isHistoricalTrack &&
+          route.distanceInKm > _approximateRouteUnsupportedDistanceKm) {
+        _cubit._emitState(
+          _cubit.state.copyWith(
+            step: CreateFlightStep.routeNotSupported,
+            flightRoute: route,
+            flightOperationalData: operationalData,
+            isPreviewLoading: false,
+            isWikiSuggestionsLoading: false,
+            isOverviewLoading: false,
+            flightInfo: FlightInfo.empty,
+            articleCandidates: const [],
+            clearSelectedArticleUrls: true,
+            errorMessage: t
+                .createFlight
+                .overview
+                .approximateRouteUltraLongHaulUnsupportedBody,
+            clearOverviewWarningTitle: true,
+            clearOverviewWarningMessage: true,
+          ),
+        );
+        return;
+      }
+
+      final showApproximateRouteWarning =
+          !route.isHistoricalTrack &&
+          route.distanceInKm > _approximateRouteWarningDistanceKm;
 
       _cubit._emitState(
         _cubit.state.copyWith(
@@ -151,6 +186,14 @@ class PreviewPreparationDelegate {
           clearSelectedArticleUrls: true,
           isWikiSuggestionsLoading: true,
           isOverviewLoading: false,
+          overviewWarningTitle: showApproximateRouteWarning
+              ? t.createFlight.overview.approximateRouteLongHaulWarningTitle
+              : null,
+          clearOverviewWarningTitle: !showApproximateRouteWarning,
+          overviewWarningMessage: showApproximateRouteWarning
+              ? t.createFlight.overview.approximateRouteLongHaulWarningBody
+              : null,
+          clearOverviewWarningMessage: !showApproximateRouteWarning,
         ),
       );
 
@@ -171,6 +214,8 @@ class PreviewPreparationDelegate {
           isWikiSuggestionsLoading: false,
           isOverviewLoading: false,
           errorMessage: t.createFlight.errors.failedBuildPreview,
+          clearOverviewWarningTitle: true,
+          clearOverviewWarningMessage: true,
         ),
       );
     }
