@@ -217,11 +217,11 @@
     },
     "routeTypeSelector": {
       "title": "New flight",
-      "basicTitle": "By airports",
-      "basicSubtitle": "Approximate route",
+      "basicTitle": "Approximate route",
+      "basicSubtitle": "By airports",
       "basicDescription": "Works well for short and mid-haul flights.",
-      "proTitle": "By flight number",
-      "proSubtitle": "Most accurate route",
+      "proTitle": "Real route",
+      "proSubtitle": "By flight number",
       "proDescription": "Based on recent historical flight data",
       "mostAccurate": "Most accurate"
     },

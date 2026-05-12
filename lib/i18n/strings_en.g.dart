@@ -1118,20 +1118,20 @@ class TranslationsCreateFlightRouteTypeSelectorEn {
 	/// en: 'New flight'
 	String get title => 'New flight';
 
-	/// en: 'By airports'
-	String get basicTitle => 'By airports';
-
 	/// en: 'Approximate route'
-	String get basicSubtitle => 'Approximate route';
+	String get basicTitle => 'Approximate route';
+
+	/// en: 'By airports'
+	String get basicSubtitle => 'By airports';
 
 	/// en: 'Works well for short and mid-haul flights.'
 	String get basicDescription => 'Works well for short and mid-haul flights.';
 
-	/// en: 'By flight number'
-	String get proTitle => 'By flight number';
+	/// en: 'Real route'
+	String get proTitle => 'Real route';
 
-	/// en: 'Most accurate route'
-	String get proSubtitle => 'Most accurate route';
+	/// en: 'By flight number'
+	String get proSubtitle => 'By flight number';
 
 	/// en: 'Based on recent historical flight data'
 	String get proDescription => 'Based on recent historical flight data';
@@ -2349,11 +2349,11 @@ extension on Translations {
 			'createFlight.steps.overviewTitle' => 'Route overview',
 			'createFlight.steps.wikipediaTitle' => 'Wikipedia articles',
 			'createFlight.routeTypeSelector.title' => 'New flight',
-			'createFlight.routeTypeSelector.basicTitle' => 'By airports',
-			'createFlight.routeTypeSelector.basicSubtitle' => 'Approximate route',
+			'createFlight.routeTypeSelector.basicTitle' => 'Approximate route',
+			'createFlight.routeTypeSelector.basicSubtitle' => 'By airports',
 			'createFlight.routeTypeSelector.basicDescription' => 'Works well for short and mid-haul flights.',
-			'createFlight.routeTypeSelector.proTitle' => 'By flight number',
-			'createFlight.routeTypeSelector.proSubtitle' => 'Most accurate route',
+			'createFlight.routeTypeSelector.proTitle' => 'Real route',
+			'createFlight.routeTypeSelector.proSubtitle' => 'By flight number',
 			'createFlight.routeTypeSelector.proDescription' => 'Based on recent historical flight data',
 			'createFlight.routeTypeSelector.mostAccurate' => 'Most accurate',
 			'createFlight.flightNumberSearch.title' => 'Flight number',
