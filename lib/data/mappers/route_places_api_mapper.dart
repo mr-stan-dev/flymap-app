@@ -20,10 +20,6 @@ class RoutePlacesApiMapper {
       throw const FormatException('Route payload missing route object');
     }
     final routeMap = route.cast<String, dynamic>();
-    final metaRaw = payload['meta'];
-    final metaMap = metaRaw is Map
-        ? metaRaw.cast<String, dynamic>()
-        : const <String, dynamic>{};
     final waypoints = _parseWaypoints(routeMap);
     final corridorPolygons = _parseCorridorPolygons(routeMap);
     final corridor = corridorPolygons.isNotEmpty
@@ -44,9 +40,7 @@ class RoutePlacesApiMapper {
     final flightRoute = FlightRoute(
       departure: departure,
       arrival: arrival,
-      source: FlightRouteSource.fromRaw(
-        routeMap['source'] ?? metaMap['routeSource'],
-      ),
+      source: FlightRouteSource.fromRaw(routeMap['source']),
       waypoints: waypoints,
       corridor: corridor,
       corridorPolygons: corridorPolygons,
@@ -126,22 +120,15 @@ class RoutePlacesApiMapper {
     final flightInfo = flightInfoRaw is Map
         ? flightInfoRaw.cast<String, dynamic>()
         : const <String, dynamic>{};
-    final legacyDistanceKm = _toFiniteDouble(routeMap['distanceInKm']);
     final greatCircleDistanceKm =
-        _toFiniteDouble(metricsMap['greatCircleDistanceKm']) ??
-        legacyDistanceKm ??
-        0;
-    final actualDistanceKm =
-        _toFiniteDouble(metricsMap['actualDistanceKm']) ??
-        _toFiniteDouble(flightInfo['actualDistanceKm']);
+        _toFiniteDouble(metricsMap['greatCircleDistanceKm']) ?? 0;
+    final actualDistanceKm = _toFiniteDouble(metricsMap['actualDistanceKm']);
     final approxDurationMinutes =
         _toInt(metricsMap['approxDurationMinutes']) ??
         FlightRouteMetrics.estimateApproxDurationMinutes(greatCircleDistanceKm);
     final actualDurationMinutes =
         _toInt(metricsMap['actualDurationMinutes']) ??
-        _toInt(routeMap['actualDurationMinutes']) ??
-        _toInt(flightInfo['actualDurationMinutes']) ??
-        _toInt(flightInfo['actualTimeMin']);
+        _toInt(flightInfo['actualDurationMinutes']);
     return FlightRouteMetrics(
       greatCircleDistanceKm: greatCircleDistanceKm,
       approxDurationMinutes: approxDurationMinutes,

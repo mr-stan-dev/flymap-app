@@ -30,9 +30,7 @@ class RouteRegionsApiMapper {
         ? metrics.effectiveDurationMinutes
         : FlightDurationEstimatePolicy.normalizeTotalMinutes(
             apiTotalMinutes: _toInt(
-              metaRaw is Map
-                  ? (metaRaw['flightDuration'] ?? metaRaw['totalRouteMinutes'])
-                  : null,
+              metaRaw is Map ? metaRaw['totalRouteMinutes'] : null,
             ),
             distanceKm: estimatedRouteDistanceKm,
             cruiseSpeedKmh: cruiseSpeedKmh,
@@ -63,9 +61,8 @@ class RouteRegionsApiMapper {
     final flightInfo = flightInfoRaw is Map
         ? flightInfoRaw.cast<String, dynamic>()
         : const <String, dynamic>{};
-    final legacyDistanceKm = _toFiniteDouble(route['distanceInKm']) ?? 0;
     final greatCircleDistanceKm =
-        _toFiniteDouble(metrics['greatCircleDistanceKm']) ?? legacyDistanceKm;
+        _toFiniteDouble(metrics['greatCircleDistanceKm']) ?? 0;
     return FlightRouteMetrics(
       greatCircleDistanceKm: greatCircleDistanceKm,
       approxDurationMinutes:
@@ -78,8 +75,7 @@ class RouteRegionsApiMapper {
           _toFiniteDouble(flightInfo['actualDistanceKm']),
       actualDurationMinutes:
           _toInt(metrics['actualDurationMinutes']) ??
-          _toInt(flightInfo['actualDurationMinutes']) ??
-          _toInt(flightInfo['actualTimeMin']),
+          _toInt(flightInfo['actualDurationMinutes']),
     );
   }
 
@@ -92,25 +88,17 @@ class RouteRegionsApiMapper {
     final props = propsRaw.cast<String, dynamic>();
     final geometry = _parseGeometry(geometryRaw);
     if (geometry == null) return null;
-    final qid = (props['regionId'] ?? props['qid'] ?? '').toString().trim();
+    final qid = (props['qid'] ?? props['regionId'] ?? '').toString().trim();
     final name = (props['name'] ?? '').toString().trim();
     final regionTypeRaw = (props['regionType'] ?? '').toString().trim();
-    final wikidataQid = _normalizeWikidataQid(
-      props['wikidataQid'] ??
-          props['wikidata_qid'] ??
-          props['wikidata_id'] ??
-          props['wikidataId'],
-    );
+    final wikidataQid = _normalizeWikidataQid(props['wikidataQid']);
     final fromAboveDescription = _toNonEmptyString(
-      props['fromAboveDescription'] ?? props['from_above'],
+      props['fromAboveDescription'],
     );
     final pathFirstEncounterKm = _toFiniteDouble(props['pathFirstEncounterKm']);
     final pathLengthInsideKm = _toFiniteDouble(props['pathLengthInsideKm']);
     final pathFirstEncounterMinutes = _toNonNegativeInt(
-      props['pathFirstEncounterMinutes'] ??
-          props['path_first_encounter_minutes'] ??
-          props['pathFirstEncounterTimeMin'] ??
-          props['path_first_encounter_time_min'],
+      props['pathFirstEncounterMinutes'],
     );
     if (qid.isEmpty ||
         name.isEmpty ||

@@ -49,77 +49,16 @@ class FlightSummary extends Equatable {
     Map<String, dynamic> map,
     String fallbackFlightNumber,
   ) {
-    // Check multiple possible key formats (camelCase, snake_case, nested)
-    final origCode = _toNonEmptyString(
-      map['origIata'] ??
-          map['orig_iata'] ??
-          map['originIata'] ??
-          map['origin_iata'] ??
-          map['origIcao'] ??
-          map['orig_icao'] ??
-          map['originIcao'] ??
-          map['origin_icao'] ??
-          map['origin']?['iata'] ??
-          map['origin']?['icao'] ??
-          map['departure']?['iata'] ??
-          map['departure']?['icao'],
-    );
-
-    final destCode = _toNonEmptyString(
-      map['destIata'] ??
-          map['dest_iata'] ??
-          map['destinationIata'] ??
-          map['destination_iata'] ??
-          map['destIcao'] ??
-          map['dest_icao'] ??
-          map['destinationIcao'] ??
-          map['destination_icao'] ??
-          map['destination']?['iata'] ??
-          map['destination']?['icao'] ??
-          map['arrival']?['iata'] ??
-          map['arrival']?['icao'],
-    );
-
     return FlightSummary(
       flightNumber:
-          _toNonEmptyString(map['flightNumber'] ?? map['flight_number']) ??
-          fallbackFlightNumber,
-      origIcao: origCode,
-      destIcao: destCode,
-      airlineCode: _toNonEmptyString(
-        map['airlineCode'] ??
-            map['airline_code'] ??
-            map['operatingAs'] ??
-            map['operating_as'] ??
-            map['paintedAs'] ??
-            map['painted_as'],
-      ),
-      airlineName: _toNonEmptyString(
-        map['airlineName'] ?? map['airline_name'] ?? map['airline'],
-      ),
-      historicalFlightDate: _toDate(
-        map['historicalFlightDate'] ??
-            map['historical_flight_date'] ??
-            map['historicalDate'] ??
-            map['historical_date'],
-      ),
-      actualDistanceKm: _toFiniteDouble(
-        map['actualDistanceKm'] ??
-            map['actual_distance'] ??
-            map['actual_distance_km'] ??
-            map['distanceKm'] ??
-            map['distance_km'],
-      ),
-      actualDurationMinutes: _toInt(
-        map['actualDurationMinutes'] ??
-            map['actual_duration_minutes'] ??
-            map['actualTimeMin'] ??
-            map['actual_time_min'] ??
-            map['flightDuration'] ??
-            map['flight_duration'] ??
-            map['durationMin'] ??
-            map['duration_min'],
-      ),
+          _toNonEmptyString(map['flightNumber']) ?? fallbackFlightNumber,
+      origIcao: _toNonEmptyString(map['origIcao']),
+      destIcao: _toNonEmptyString(map['destIcao']),
+      airlineCode: _toNonEmptyString(map['airlineCode']),
+      airlineName: _toNonEmptyString(map['airlineName']),
+      historicalFlightDate: _toDate(map['historicalFlightDate']),
+      actualDistanceKm: _toFiniteDouble(map['actualDistanceKm']),
+      actualDurationMinutes: _toInt(map['actualDurationMinutes']),
     );
   }
 

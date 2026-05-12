@@ -8,6 +8,7 @@ class FlightInfoOverviewApiMapper {
   final _logger = const Logger('FlightInfoOverviewApiMapper');
 
   // TODO Remove legacy overview (was removed in v2.0.0)
+  @Deprecated('was removed in v2.0.0')
   FlightInfo toFlightInfo(Map<String, dynamic> map) {
     final overview = _extractOverview(map);
     final keys = map.keys.take(10).join(', ');
