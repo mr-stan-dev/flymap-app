@@ -82,8 +82,14 @@ class _LoadedRouteTab extends StatelessWidget {
     final routeCruiseSpeedKmh =
         route.metrics.effectiveAverageSpeedKmh?.round() ??
         info.routeCruiseSpeedKmh;
-    final routeTotalMinutes = route.effectiveDurationMinutes > 0
-        ? route.effectiveDurationMinutes
+    final routeTotalMinutes =
+        (route.isHistoricalTrack
+                ? route.displayPrimaryDurationMinutes
+                : route.primaryDurationMinutes) >
+            0
+        ? (route.isHistoricalTrack
+              ? route.displayPrimaryDurationMinutes
+              : route.primaryDurationMinutes)
         : info.routeTotalMinutes;
     final hasRegionTimeline = routeRegions.isNotEmpty;
     final hasOverview = info.overview.trim().isNotEmpty;
@@ -99,6 +105,17 @@ class _LoadedRouteTab extends StatelessWidget {
     final groups = RouteTimelineGrouping.groupByTimeline(
       routeRegions,
       cruiseSpeedKmh: routeCruiseSpeedKmh,
+      maxTimelineMinutes: route.isHistoricalTrack ? routeTotalMinutes : null,
+      routeDistanceKm: route.distanceInKm,
+      totalRouteMinutes: routeTotalMinutes,
+      useTotalDurationProportion: !route.isHistoricalTrack,
+    );
+    final timelineTotalMinutes = RouteTimelineGrouping.arrivalMinutes(
+      routeDistanceKm: route.distanceInKm,
+      totalRouteMinutes: routeTotalMinutes,
+      cruiseSpeedKmh: routeCruiseSpeedKmh,
+      groups: groups,
+      totalRouteMinutesIsAuthoritative: route.isHistoricalTrack,
     );
 
     final isUpcoming = state.flight.status == FlightStatus.upcoming;
@@ -115,7 +132,7 @@ class _LoadedRouteTab extends StatelessWidget {
             if (isUpcoming)
               UpcomingRouteFactsStrip(
                 route: route,
-                totalMinutes: routeTotalMinutes,
+                totalMinutes: timelineTotalMinutes,
               ),
             if (!isUpcoming && hasGpsFix)
               RouteProgressCard(route: route, gpsData: state.gpsData),
@@ -134,7 +151,7 @@ class _LoadedRouteTab extends StatelessWidget {
               regions: routeRegions,
               isProUser: isProUser,
               cruiseSpeedKmh: routeCruiseSpeedKmh,
-              totalRouteMinutes: routeTotalMinutes,
+              totalRouteMinutes: timelineTotalMinutes,
               lastVisitedRegionId: state.lastVisitedRegionId,
               onPremiumGateTap: () => RoutePremiumGateInteractions.onGateTap(
                 context: context,

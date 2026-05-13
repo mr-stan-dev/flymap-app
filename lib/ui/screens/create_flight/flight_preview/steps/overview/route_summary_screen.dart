@@ -39,12 +39,7 @@ class RouteSummaryScreen extends StatelessWidget {
       (SubscriptionCubit cubit) => cubit.state.isPro,
     );
     final distance = _formatDistanceKm(route);
-    final duration = _formatMinutesCompact(
-      context,
-      route.isHistoricalTrack
-          ? route.displayDurationMinutes
-          : totalRouteMinutes,
-    );
+    final duration = _formatMinutesCompact(context, totalRouteMinutes);
     final routeTitle =
         '${route.departure.displayCode} → ${route.arrival.displayCode}';
     final routeSubtitle =

@@ -47,6 +47,9 @@ class RouteTimelineWidget extends StatelessWidget {
       regions,
       cruiseSpeedKmh: cruiseSpeedKmh,
       maxTimelineMinutes: route.isHistoricalTrack ? totalRouteMinutes : null,
+      routeDistanceKm: route.distanceInKm,
+      totalRouteMinutes: totalRouteMinutes,
+      useTotalDurationProportion: !route.isHistoricalTrack,
     );
     final entriesBuild = _buildEntries(groups, gateDecision: gateDecision);
     final entries = entriesBuild.entries;

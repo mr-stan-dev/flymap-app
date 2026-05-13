@@ -4,6 +4,37 @@ import 'package:flymap/domain/entity/route_region_type.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_grouping.dart';
 
 void main() {
+  test(
+    'groupByTimeline can use proportional total duration for approximate routes',
+    () {
+      final groups = RouteTimelineGrouping.groupByTimeline(
+        [_region(pathFirstEncounterKm: 744, pathFirstEncounterMinutes: -1)],
+        cruiseSpeedKmh: 850,
+        routeDistanceKm: 1487.5,
+        totalRouteMinutes: 160,
+        useTotalDurationProportion: true,
+      );
+
+      expect(groups.single.minuteFromDeparture, 80);
+    },
+  );
+
+  test('arrivalMinutes uses provided approximate total as SSOT', () {
+    final groups = RouteTimelineGrouping.groupByTimeline([
+      _region(pathFirstEncounterKm: 1400, pathFirstEncounterMinutes: 100),
+    ], cruiseSpeedKmh: 850);
+
+    expect(
+      RouteTimelineGrouping.arrivalMinutes(
+        routeDistanceKm: 1487.5,
+        totalRouteMinutes: 105,
+        cruiseSpeedKmh: 850,
+        groups: groups,
+      ),
+      105,
+    );
+  });
+
   test('arrivalMinutes can treat actual FR24 duration as authoritative', () {
     final groups = RouteTimelineGrouping.groupByTimeline(
       [_region(pathFirstEncounterKm: 6400, pathFirstEncounterMinutes: 570)],

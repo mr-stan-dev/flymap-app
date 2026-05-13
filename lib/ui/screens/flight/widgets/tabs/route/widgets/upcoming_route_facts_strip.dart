@@ -17,10 +17,7 @@ class UpcomingRouteFactsStrip extends StatelessWidget {
     final distanceLabel = context.t.flight.info.distanceKm(
       distance: route.displayDistanceKm.toString(),
     );
-    final durationLabel = _formatMinutesCompact(
-      context,
-      route.isHistoricalTrack ? route.displayDurationMinutes : totalMinutes,
-    );
+    final durationLabel = _formatMinutesCompact(context, totalMinutes);
     final routeLabel =
         '${route.departure.displayCode} → ${route.arrival.displayCode}';
 

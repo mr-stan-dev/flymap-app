@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight_route_metrics.dart';
 import 'package:flymap/domain/entity/flight_route_source.dart';
+import 'package:flymap/domain/policy/flight_duration_estimate_policy.dart';
 import 'package:flymap/domain/entity/flight_waypoint.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -31,9 +32,17 @@ class FlightRoute extends Equatable {
 
   String get routeCode => '${departure.primaryCode}_${arrival.primaryCode}';
 
-  double get distanceInKm => metrics.effectiveDistanceKm > 0
-      ? metrics.effectiveDistanceKm
-      : (legacyDistanceInKm ?? 0);
+  double get primaryDistanceKm {
+    if (isHistoricalTrack) {
+      return (actualDistanceKm != null && actualDistanceKm! > 0)
+          ? actualDistanceKm!
+          : greatCircleDistanceKm;
+    }
+    return greatCircleDistanceKm;
+  }
+
+  double get distanceInKm =>
+      primaryDistanceKm > 0 ? primaryDistanceKm : (legacyDistanceInKm ?? 0);
 
   double get greatCircleDistanceKm => metrics.greatCircleDistanceKm > 0
       ? metrics.greatCircleDistanceKm
@@ -47,20 +56,56 @@ class FlightRoute extends Equatable {
 
   int? get actualDurationMinutes => metrics.actualDurationMinutes;
 
-  int get effectiveDurationMinutes => metrics.effectiveDurationMinutes > 0
-      ? metrics.effectiveDurationMinutes
+  int get estimatedTotalDurationMinutes {
+    final distanceKm = greatCircleDistanceKm > 0
+        ? greatCircleDistanceKm
+        : (legacyDistanceInKm ?? 0);
+    final cruiseSpeedKmh =
+        metrics.effectiveAverageSpeedKmh?.round() ??
+        FlightRouteMetrics.defaultCruiseSpeedKmh;
+    return FlightDurationEstimatePolicy.estimateTotalMinutes(
+      distanceKm: distanceKm,
+      cruiseSpeedKmh: cruiseSpeedKmh,
+      roundToMinutes: 5,
+    );
+  }
+
+  int get primaryDurationMinutes {
+    if (isHistoricalTrack) {
+      return (actualDurationMinutes != null && actualDurationMinutes! > 0)
+          ? actualDurationMinutes!
+          : estimatedTotalDurationMinutes;
+    }
+    return estimatedTotalDurationMinutes;
+  }
+
+  int get effectiveDurationMinutes => primaryDurationMinutes > 0
+      ? primaryDurationMinutes
       : approxDurationMinutes;
 
-  int get displayDistanceKm => metrics.displayDistanceKm > 0
-      ? metrics.displayDistanceKm
-      : FlightRouteMetrics.roundDistanceKmForDisplay(
-          legacyDistanceInKm ?? 0,
-          isActual: false,
-        );
+  int get displayPrimaryDistanceKm =>
+      FlightRouteMetrics.roundDistanceKmForDisplay(
+        primaryDistanceKm > 0 ? primaryDistanceKm : (legacyDistanceInKm ?? 0),
+        isActual:
+            isHistoricalTrack &&
+            actualDistanceKm != null &&
+            actualDistanceKm! > 0,
+      );
 
-  int get displayDurationMinutes => metrics.displayDurationMinutes > 0
-      ? metrics.displayDurationMinutes
-      : approxDurationMinutes;
+  int get displayDistanceKm => displayPrimaryDistanceKm;
+
+  int get displayPrimaryDurationMinutes =>
+      FlightRouteMetrics.roundDurationMinutesForDisplay(
+        primaryDurationMinutes > 0
+            ? primaryDurationMinutes
+            : approxDurationMinutes,
+        isActual:
+            isHistoricalTrack &&
+            actualDurationMinutes != null &&
+            actualDurationMinutes! > 0,
+      );
+
+  int get displayDurationMinutes => displayPrimaryDurationMinutes;
 
   bool get isHistoricalTrack => source == FlightRouteSource.fr24Historical;
 

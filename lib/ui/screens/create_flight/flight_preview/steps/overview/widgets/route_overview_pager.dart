@@ -89,9 +89,7 @@ class _RouteOverviewPagerState extends State<RouteOverviewPager> {
         final distance = _formatDistanceKm(route);
         final duration = _formatMinutesCompact(
           context,
-          route.isHistoricalTrack
-              ? route.displayDurationMinutes
-              : widget.totalRouteMinutes,
+          widget.totalRouteMinutes,
         );
         return OverviewTitleCard(
           routeCodeLine:

@@ -11,6 +11,7 @@ import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/domain/entity/flight_route_metrics.dart';
+import 'package:flymap/domain/entity/flight_route_source.dart';
 import 'package:flymap/domain/entity/flight_status.dart';
 import 'package:flymap/domain/entity/flight_timestamp.dart';
 import 'package:flymap/domain/entity/flight_waypoint.dart';
@@ -97,9 +98,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Begin your flight journey'), findsOneWidget);
-    expect(find.text('Start to see your live dashboard'), findsOneWidget);
-    expect(find.text('Start'), findsOneWidget);
+    expect(find.text('Begin your flight journey'), findsNothing);
     expect(find.byType(FlightDashboardPanel), findsOneWidget);
   });
 
@@ -138,6 +137,67 @@ void main() {
 
     expect(find.text('Route progress'), findsNothing);
     expect(find.text('LHR → MUC'), findsOneWidget);
+    expect(find.text('2h 40m'), findsOneWidget);
+  });
+
+  testWidgets('route tab upcoming keeps historical duration consistent', (
+    tester,
+  ) async {
+    final subscriptionCubit = _buildSubscriptionCubit();
+    addTearDown(subscriptionCubit.close);
+
+    const departure = Airport(
+      name: 'Abu Dhabi International Airport',
+      city: 'Abu Dhabi',
+      countryCode: 'AE',
+      latLon: LatLng(24.4330, 54.6511),
+      iataCode: 'AUH',
+      icaoCode: 'OMAA',
+      wikipediaUrl: '',
+    );
+    const arrival = Airport(
+      name: 'John F. Kennedy International Airport',
+      city: 'New York',
+      countryCode: 'US',
+      latLon: LatLng(40.6413, -73.7781),
+      iataCode: 'JFK',
+      icaoCode: 'KJFK',
+      wikipediaUrl: '',
+    );
+    const route = FlightRoute(
+      departure: departure,
+      arrival: arrival,
+      source: FlightRouteSource.fr24Historical,
+      waypoints: [
+        FlightWaypoint(latLon: LatLng(24.4330, 54.6511)),
+        FlightWaypoint(latLon: LatLng(40.6413, -73.7781)),
+      ],
+      corridor: [
+        LatLng(24.4330, 54.6511),
+        LatLng(40.6413, 54.6511),
+        LatLng(40.6413, -73.7781),
+      ],
+      metrics: FlightRouteMetrics(
+        greatCircleDistanceKm: 11121,
+        approxDurationMinutes: 780,
+        actualDistanceKm: 12570,
+        actualDurationMinutes: 823,
+      ),
+    );
+
+    await tester.pumpWidget(
+      _testApp(
+        child: BlocProvider.value(
+          value: subscriptionCubit,
+          child: FlightRouteTabView(
+            state: _loadedState(status: FlightStatus.upcoming, route: route),
+            topPadding: 0,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('13h 45m'), findsOneWidget);
   });
 
   testWidgets('route tab in-progress keeps route progress card behavior', (
@@ -181,8 +241,9 @@ Widget _testApp({required Widget child}) {
 FlightScreenLoaded _loadedState({
   required FlightStatus status,
   GpsData? gpsData,
+  FlightRoute? route,
 }) {
-  final flight = _buildFlight(status: status);
+  final flight = _buildFlight(status: status, route: route);
   return FlightScreenLoaded(
     flight: flight,
     routeRegions: flight.info.routeRegions,
@@ -191,7 +252,7 @@ FlightScreenLoaded _loadedState({
   );
 }
 
-Flight _buildFlight({required FlightStatus status}) {
+Flight _buildFlight({required FlightStatus status, FlightRoute? route}) {
   const departure = Airport(
     name: 'London Heathrow',
     city: 'London',
@@ -210,7 +271,7 @@ Flight _buildFlight({required FlightStatus status}) {
     icaoCode: 'EDDM',
     wikipediaUrl: '',
   );
-  const route = FlightRoute(
+  const defaultRoute = FlightRoute(
     departure: departure,
     arrival: arrival,
     waypoints: [
@@ -230,7 +291,7 @@ Flight _buildFlight({required FlightStatus status}) {
 
   return Flight(
     id: 'flight-1',
-    route: route,
+    route: route ?? defaultRoute,
     routeInsights: FlightInfo.empty.routeInsights,
     offlineContent: FlightInfo.empty.offlineContent,
     timestamp: FlightTimestamp(createdAt: DateTime(2026, 1, 1)),

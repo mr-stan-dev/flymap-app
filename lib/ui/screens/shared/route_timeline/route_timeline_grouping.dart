@@ -58,6 +58,9 @@ class RouteTimelineGrouping {
     int maxRegions = defaultMaxRegions,
     int minuteStep = timelineMinuteStep,
     int? maxTimelineMinutes,
+    double? routeDistanceKm,
+    int? totalRouteMinutes,
+    bool useTotalDurationProportion = false,
   }) {
     final limited = rankAndLimit(regions, maxRegions: maxRegions);
     if (limited.isEmpty) return const [];
@@ -95,6 +98,9 @@ class RouteTimelineGrouping {
                 top,
                 cruiseSpeedKmh: cruiseSpeedKmh,
                 minuteStep: minuteStep,
+                routeDistanceKm: routeDistanceKm,
+                totalRouteMinutes: totalRouteMinutes,
+                useTotalDurationProportion: useTotalDurationProportion,
               ),
               maxTimelineMinutes: maxTimelineMinutes,
             ),
@@ -120,11 +126,28 @@ class RouteTimelineGrouping {
     RouteRegion region, {
     required int cruiseSpeedKmh,
     int minuteStep = timelineMinuteStep,
+    double? routeDistanceKm,
+    int? totalRouteMinutes,
+    bool useTotalDurationProportion = false,
   }) {
     final timestampMinute = region.pathFirstEncounterMinutes;
     if (timestampMinute != null && timestampMinute >= 0) {
       final step = minuteStep <= 1 ? 1 : minuteStep;
       return (timestampMinute / step).round() * step;
+    }
+    if (useTotalDurationProportion &&
+        totalRouteMinutes != null &&
+        totalRouteMinutes > 0 &&
+        routeDistanceKm != null &&
+        routeDistanceKm.isFinite &&
+        routeDistanceKm > 0) {
+      final progress = (region.pathFirstEncounterKm / routeDistanceKm).clamp(
+        0.0,
+        1.0,
+      );
+      final rawMinutes = totalRouteMinutes * progress;
+      final step = minuteStep <= 1 ? 1 : minuteStep;
+      return (rawMinutes / step).round() * step;
     }
     return toTimelineMinute(
       region.pathFirstEncounterKm,
@@ -218,7 +241,7 @@ class RouteTimelineGrouping {
     required List<RouteTimelineRegionGroup> groups,
     bool totalRouteMinutesIsAuthoritative = false,
   }) {
-    if (totalRouteMinutesIsAuthoritative && totalRouteMinutes > 0) {
+    if (totalRouteMinutes > 0) {
       return totalRouteMinutes;
     }
     final estimatedTotalMinutes = _kmToMinutes(

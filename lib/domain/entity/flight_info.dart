@@ -30,7 +30,7 @@ class FlightInfo extends Equatable {
   List<RoutePoiSummary> get poi => routeInsights.poiHighlights;
   List<FlightArticle> get articles => offlineContent.articles;
   List<RouteRegion> get routeRegions => routeInsights.regions;
-  int get routeTotalMinutes => routeMetrics.effectiveDurationMinutes;
+  int get routeTotalMinutes => routeMetrics.approxDurationMinutes;
   int get routeCruiseSpeedKmh =>
       routeMetrics.effectiveAverageSpeedKmh?.round() ??
       FlightRouteMetrics.defaultCruiseSpeedKmh;

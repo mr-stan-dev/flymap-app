@@ -103,9 +103,9 @@ class FlightDbMapper {
           legacyInfo[FlightDBKeys.articles] ?? const <dynamic>[],
     };
     out[FlightDBKeys.routePlan] = <String, dynamic>{
-      if (flight.route.effectiveDurationMinutes > 0)
+      if (flight.route.primaryDurationMinutes > 0)
         FlightDBKeys.plannedDurationMinutes:
-            flight.route.effectiveDurationMinutes,
+            flight.route.primaryDurationMinutes,
       if (flight.route.metrics.effectiveAverageSpeedKmh != null)
         FlightDBKeys.plannedCruiseSpeedKmh: flight
             .route

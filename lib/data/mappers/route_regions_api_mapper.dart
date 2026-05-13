@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flymap/domain/entity/route_region.dart';
+import 'package:flymap/domain/entity/flight_route_source.dart';
 import 'package:flymap/domain/entity/route_timeline.dart';
 import 'package:flymap/domain/entity/route_region_type.dart';
 import 'package:flymap/domain/policy/flight_duration_estimate_policy.dart';
@@ -10,6 +11,11 @@ class RouteRegionsApiMapper {
   RouteTimeline toRouteTimeline(Map<String, dynamic> payload) {
     final metaRaw = payload['meta'];
     final regionsRaw = payload['regions'];
+    final routeRaw = payload['route'];
+    final routeMap = routeRaw is Map
+        ? routeRaw.cast<String, dynamic>()
+        : const <String, dynamic>{};
+    final routeSource = FlightRouteSource.fromRaw(routeMap['source']);
     final metrics = _parseRouteMetrics(payload);
 
     final cruiseSpeedKmh =
@@ -26,8 +32,9 @@ class RouteRegionsApiMapper {
     }
 
     final estimatedRouteDistanceKm = _estimateRouteDistanceKm(regions);
-    final totalRouteMinutes = metrics.effectiveDurationMinutes > 0
-        ? metrics.effectiveDurationMinutes
+    final totalRouteMinutes =
+        _primaryDurationMinutes(metrics, routeSource: routeSource) > 0
+        ? _primaryDurationMinutes(metrics, routeSource: routeSource)
         : FlightDurationEstimatePolicy.normalizeTotalMinutes(
             apiTotalMinutes: _toInt(
               metaRaw is Map ? metaRaw['totalRouteMinutes'] : null,
@@ -41,6 +48,29 @@ class RouteRegionsApiMapper {
       regions: regions,
       totalRouteMinutes: totalRouteMinutes,
       cruiseSpeedKmh: cruiseSpeedKmh,
+    );
+  }
+
+  int _primaryDurationMinutes(
+    FlightRouteMetrics metrics, {
+    required FlightRouteSource routeSource,
+  }) {
+    if (routeSource == FlightRouteSource.fr24Historical) {
+      final rawMinutes =
+          metrics.actualDurationMinutes ?? metrics.approxDurationMinutes;
+      if (rawMinutes <= 0) return 0;
+      return FlightRouteMetrics.roundDurationMinutesForDisplay(
+        rawMinutes,
+        isActual: metrics.actualDurationMinutes != null,
+      );
+    }
+    final cruiseSpeedKmh =
+        metrics.effectiveAverageSpeedKmh?.round() ??
+        FlightRouteMetrics.defaultCruiseSpeedKmh;
+    return FlightDurationEstimatePolicy.estimateTotalMinutes(
+      distanceKm: metrics.greatCircleDistanceKm,
+      cruiseSpeedKmh: cruiseSpeedKmh,
+      roundToMinutes: 5,
     );
   }
 

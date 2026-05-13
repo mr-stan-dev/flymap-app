@@ -228,6 +228,9 @@ class _FlightSearchRouteOverviewStepState
       visibleRegions,
       cruiseSpeedKmh: state.routeCruiseSpeedKmh,
       maxTimelineMinutes: route.isHistoricalTrack ? routeTotalMinutes : null,
+      routeDistanceKm: route.distanceInKm,
+      totalRouteMinutes: routeTotalMinutes,
+      useTotalDurationProportion: !route.isHistoricalTrack,
     );
     final regionEntries = groupedVisibleRegions
         .map(RouteOverviewPageEntry.regionGroup)
@@ -235,9 +238,9 @@ class _FlightSearchRouteOverviewStepState
     final lastRegionMinute = groupedVisibleRegions.isEmpty
         ? 0
         : groupedVisibleRegions.last.minuteFromDeparture;
-    final arrivalMinutes = route.isHistoricalTrack && routeTotalMinutes > 0
+    final arrivalMinutes = routeTotalMinutes > 0
         ? routeTotalMinutes
-        : [routeTotalMinutes, lastRegionMinute].reduce((a, b) => a > b ? a : b);
+        : lastRegionMinute;
 
     final entries = <RouteOverviewPageEntry>[
       RouteOverviewPageEntry.summary(),
@@ -248,6 +251,9 @@ class _FlightSearchRouteOverviewStepState
           minuteFromDeparture: _regionMinute(
             hiddenRegions.first,
             cruiseSpeedKmh: state.routeCruiseSpeedKmh,
+            routeDistanceKm: route.distanceInKm,
+            totalRouteMinutes: routeTotalMinutes,
+            useTotalDurationProportion: !route.isHistoricalTrack,
           ),
         ),
       RouteOverviewPageEntry.arrival(
@@ -340,10 +346,9 @@ class _FlightSearchRouteOverviewStepState
   }
 
   int _routeTotalMinutes(FlightRoute route, FlightPreviewState state) {
-    final routeMetricMinutes = route.effectiveDurationMinutes;
-    if (route.isHistoricalTrack && routeMetricMinutes > 0) {
-      return routeMetricMinutes;
-    }
+    final routeMetricMinutes = route.isHistoricalTrack
+        ? route.displayPrimaryDurationMinutes
+        : route.primaryDurationMinutes;
     if (state.routeTotalMinutes > 0) {
       return state.routeTotalMinutes;
     }
@@ -356,10 +361,19 @@ class _FlightSearchRouteOverviewStepState
     );
   }
 
-  int _regionMinute(RouteRegion region, {required int cruiseSpeedKmh}) {
+  int _regionMinute(
+    RouteRegion region, {
+    required int cruiseSpeedKmh,
+    double? routeDistanceKm,
+    int? totalRouteMinutes,
+    bool useTotalDurationProportion = false,
+  }) {
     return RouteTimelineGrouping.regionTimelineMinute(
       region,
       cruiseSpeedKmh: cruiseSpeedKmh,
+      routeDistanceKm: routeDistanceKm,
+      totalRouteMinutes: totalRouteMinutes,
+      useTotalDurationProportion: useTotalDurationProportion,
     );
   }
 
