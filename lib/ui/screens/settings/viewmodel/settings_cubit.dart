@@ -34,6 +34,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     final time = await _unitsRepo.getTimeFormat();
     final distance = await _unitsRepo.getDistanceUnit();
     final dateDisplay = await _unitsRepo.getDateDisplayFormat();
+    final temperature = await _unitsRepo.getTemperatureUnit();
     final profile = await _onboardingRepository.getProfile();
     await _airportsDb.initialize();
     final homeAirportDisplayCode = _resolveHomeAirportDisplayCode(profile);
@@ -46,6 +47,7 @@ class SettingsCubit extends Cubit<SettingsState> {
         timeFormat: _formatTime(time),
         distanceUnit: _formatDistance(distance),
         dateDisplayFormat: _formatDateDisplay(dateDisplay),
+        temperatureUnit: _formatTemperature(temperature),
         profile: profile,
         homeAirportDisplayCode: homeAirportDisplayCode,
         isLoading: false,
@@ -94,12 +96,23 @@ class SettingsCubit extends Cubit<SettingsState> {
     await _unitsRepo.setDateDisplayFormat(enumFormat);
   }
 
+  Future<void> setTemperatureUnit(String unit) async {
+    final enumUnit = unit == '°F' || unit == 'F'
+        ? TemperatureUnit.fahrenheit
+        : TemperatureUnit.celsius;
+    emit(state.copyWith(temperatureUnit: unit));
+    await _unitsRepo.setTemperatureUnit(enumUnit);
+  }
+
   String _formatAltitude(AltitudeUnit u) => UnitFormatUtils.formatAltitude(u);
   String _formatSpeed(SpeedUnit u) => UnitFormatUtils.formatSpeed(u);
   String _formatTime(TimeFormat t) => UnitFormatUtils.formatTime(t);
-  String _formatDistance(DistanceUnit u) => UnitFormatUtils.formatDistanceUnit(u);
+  String _formatDistance(DistanceUnit u) =>
+      UnitFormatUtils.formatDistanceUnit(u);
   String _formatDateDisplay(DateDisplayFormat f) =>
       UnitFormatUtils.formatDateDisplay(f);
+  String _formatTemperature(TemperatureUnit u) =>
+      UnitFormatUtils.formatTemperature(u);
 
   String? _resolveHomeAirportDisplayCode(UserProfile profile) {
     final code = profile.homeAirportCode;

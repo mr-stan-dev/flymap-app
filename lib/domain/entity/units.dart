@@ -7,3 +7,5 @@ enum TimeFormat { format24h, format12h }
 enum DistanceUnit { km, mile }
 
 enum DateDisplayFormat { us, international }
+
+enum TemperatureUnit { celsius, fahrenheit }

@@ -1,0 +1,239 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flymap/data/debug/dashboard_debug_gps_provider.dart';
+import 'package:flymap/domain/entity/gps_data.dart';
+import 'package:flymap/domain/entity/units.dart';
+import 'package:flymap/domain/policy/flight_phase_policy.dart';
+import 'package:flymap/repository/metric_units_repository.dart';
+import 'package:flymap/ui/design_system/design_system.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/instruments/altitude_instrument.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/instruments/compass_instrument.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/instruments/instrument_telemetry.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/instruments/speed_instrument.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/instruments/temperature_instrument.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/metric_row.dart';
+
+class FlightInstrumentCluster extends StatefulWidget {
+  const FlightInstrumentCluster({required this.gpsData, super.key});
+
+  final GpsData? gpsData;
+
+  @override
+  State<FlightInstrumentCluster> createState() =>
+      _FlightInstrumentClusterState();
+}
+
+class _FlightInstrumentClusterState extends State<FlightInstrumentCluster> {
+  double? _previousSpeedMs;
+  double? _previousAltitudeM;
+  double? _speedDeltaKmh;
+  double? _altitudeDeltaM;
+  MetricTrend _speedTrend = MetricTrend.steady;
+  MetricTrend _altitudeTrend = MetricTrend.steady;
+  TemperatureUnit _temperatureUnit = TemperatureUnit.celsius;
+  final MetricUnitsRepository _unitsRepository = MetricUnitsRepository();
+  final DashboardDebugGpsProvider _debugGpsProvider = DashboardDebugGpsProvider();
+  GpsData? _debugGpsData;
+  bool _debugSimulationRunning = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _primePreviousValues(widget.gpsData);
+    _loadTemperatureUnit();
+  }
+
+  @override
+  void didUpdateWidget(covariant FlightInstrumentCluster oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_debugSimulationRunning && oldWidget.gpsData != widget.gpsData) {
+      _updateTrends(widget.gpsData);
+    }
+  }
+
+  @override
+  void dispose() {
+    _debugGpsProvider.stop();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveGpsData = _debugGpsData ?? widget.gpsData;
+    final telemetry = InstrumentTelemetry.fromGpsData(effectiveGpsData);
+    final phase = FlightPhasePolicy.classify(
+      speedKmh: telemetry.speedKmh,
+      altitudeMeters: telemetry.altitudeMeters,
+      speedDeltaKmh: _speedDeltaKmh,
+      altitudeDeltaMeters: _altitudeDeltaM,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        GroundSpeedInstrument(
+          telemetry: telemetry,
+          speedTrend: _speedTrend,
+          phase: phase,
+        ),
+        const SizedBox(height: DsSpacing.sm),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 200,
+                    child: AltitudeInstrument(
+                      telemetry: telemetry,
+                      trend: _altitudeTrend,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: DsSpacing.sm),
+                Expanded(
+                  child: SizedBox(
+                    height: 200,
+                    child: CompassInstrument(telemetry: telemetry),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: DsSpacing.sm),
+        TemperatureInstrument(
+          telemetry: telemetry,
+          temperatureUnit: _temperatureUnit,
+        ),
+        if (kDebugMode) ...[
+          const SizedBox(height: DsSpacing.sm),
+          SecondaryButton(
+            label: _debugSimulationRunning
+                ? 'Running GPS Simulation...'
+                : 'Start GPS Simulation',
+            onPressed: _debugSimulationRunning ? null : _startDebugSimulation,
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _primePreviousValues(GpsData? data) {
+    _previousSpeedMs = _toMetersPerSecond(data?.speed);
+    _previousAltitudeM = data?.altitude == null
+        ? null
+        : _toMeters(data?.altitude);
+    _speedDeltaKmh = null;
+    _altitudeDeltaM = null;
+  }
+
+  Future<void> _loadTemperatureUnit() async {
+    final unit = await _unitsRepository.getTemperatureUnit();
+    if (mounted) {
+      setState(() {
+        _temperatureUnit = unit;
+      });
+    }
+  }
+
+  Future<void> _startDebugSimulation() async {
+    if (_debugSimulationRunning) return;
+
+    final speedUnit = await _unitsRepository.getSpeedUnit();
+    final altitudeUnit = await _unitsRepository.getAltitudeUnit();
+    if (!mounted) return;
+
+    _primePreviousValues(_debugGpsData ?? widget.gpsData);
+    setState(() {
+      _debugSimulationRunning = true;
+      _debugGpsData = null;
+    });
+
+    _debugGpsProvider.start(
+      speedUnit: speedUnit,
+      altitudeUnit: altitudeUnit,
+      onUpdate: (gpsData) {
+        if (!mounted) return;
+        _updateTrends(gpsData);
+        setState(() {
+          _debugGpsData = gpsData;
+        });
+      },
+      onDone: () {
+        if (!mounted) return;
+        setState(() {
+          _debugSimulationRunning = false;
+          _debugGpsData = null;
+        });
+        _primePreviousValues(widget.gpsData);
+      },
+    );
+  }
+
+  void _updateTrends(GpsData? data) {
+    final speedMs = _toMetersPerSecond(data?.speed);
+    final altitudeM = data?.altitude == null ? null : _toMeters(data?.altitude);
+    _speedDeltaKmh = _previousSpeedMs == null
+        ? null
+        : (speedMs - _previousSpeedMs!) * 3.6;
+    _altitudeDeltaM = _previousAltitudeM == null || altitudeM == null
+        ? null
+        : altitudeM - _previousAltitudeM!;
+    _speedTrend = _trend(
+      previous: _previousSpeedMs,
+      current: speedMs,
+      epsilon: 0.3,
+    );
+    _altitudeTrend = _trend(
+      previous: _previousAltitudeM,
+      current: altitudeM,
+      epsilon: 1.0,
+    );
+    _previousSpeedMs = speedMs;
+    _previousAltitudeM = altitudeM;
+  }
+
+  MetricTrend _trend({
+    required double? previous,
+    required double? current,
+    required double epsilon,
+  }) {
+    if (previous == null || current == null) return MetricTrend.steady;
+    final delta = current - previous;
+    if (delta > epsilon) return MetricTrend.up;
+    if (delta < -epsilon) return MetricTrend.down;
+    return MetricTrend.steady;
+  }
+
+  double _toMetersPerSecond(SpeedValue? speed) {
+    if (speed == null) return 0;
+    switch (speed.unit.toLowerCase()) {
+      case 'm/s':
+        return speed.value;
+      case 'kt':
+      case 'kts':
+      case 'kn':
+        return speed.value * 0.514444;
+      case 'mph':
+        return speed.value * 0.44704;
+      case 'km/h':
+      default:
+        return speed.value / 3.6;
+    }
+  }
+
+  double _toMeters(AltitudeValue? altitude) {
+    if (altitude == null) return 0;
+    switch (altitude.unit.toLowerCase()) {
+      case 'm':
+        return altitude.value;
+      case 'ft':
+      default:
+        return altitude.value * 0.3048;
+    }
+  }
+}

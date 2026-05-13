@@ -19,7 +19,7 @@ class UnitsSettingItem extends StatelessWidget {
       title: context.t.settings.units,
       leading: const Icon(Icons.straighten),
       subtitle:
-          '${state.altitudeUnit} • ${state.speedUnit} • ${state.timeFormat} • ${state.distanceUnit} • ${state.dateDisplayFormat}',
+          '${state.altitudeUnit} • ${state.speedUnit} • ${state.temperatureUnit} • ${state.timeFormat} • ${state.distanceUnit} • ${state.dateDisplayFormat}',
       onTap: () => showUnitsSheet(context, initialState: state),
     );
   }
@@ -35,6 +35,7 @@ Future<void> showUnitsSheet(
   var timeFormat = initialState.timeFormat;
   var distanceUnit = initialState.distanceUnit;
   var dateDisplayFormat = initialState.dateDisplayFormat;
+  var temperatureUnit = initialState.temperatureUnit;
 
   await showModalBottomSheet<void>(
     context: context,
@@ -62,6 +63,9 @@ Future<void> showUnitsSheet(
               if (dateDisplayFormat != initialState.dateDisplayFormat) {
                 await cubit.setDateDisplayFormat(dateDisplayFormat);
               }
+              if (temperatureUnit != initialState.temperatureUnit) {
+                await cubit.setTemperatureUnit(temperatureUnit);
+              }
               if (ctx.mounted) {
                 Navigator.of(ctx).pop();
               }
@@ -88,6 +92,17 @@ Future<void> showUnitsSheet(
                   onChanged: (value) {
                     setModalState(() {
                       speedUnit = value;
+                    });
+                  },
+                ),
+                const SizedBox(height: 12),
+                SettingsChoiceSection(
+                  title: context.t.settings.temperatureUnit,
+                  options: const ['°C', '°F'],
+                  current: temperatureUnit,
+                  onChanged: (value) {
+                    setModalState(() {
+                      temperatureUnit = value;
                     });
                   },
                 ),

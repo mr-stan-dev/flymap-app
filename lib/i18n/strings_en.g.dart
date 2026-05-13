@@ -445,6 +445,9 @@ class TranslationsSettingsEn {
 	/// en: 'Speed unit'
 	String get speedUnit => 'Speed unit';
 
+	/// en: 'Temperature unit'
+	String get temperatureUnit => 'Temperature unit';
+
 	/// en: 'Time format'
 	String get timeFormat => 'Time format';
 
@@ -1749,6 +1752,45 @@ class TranslationsFlightDashboardEn {
 	/// en: 'Live instruments'
 	String get liveInstruments => 'Live instruments';
 
+	/// en: 'Ground speed'
+	String get groundSpeed => 'Ground speed';
+
+	/// en: 'Altitude MSL'
+	String get altitudeMsl => 'Altitude MSL';
+
+	/// en: 'Outside air temperature'
+	String get outsideAirApprox => 'Outside air temperature';
+
+	/// en: 'Available after $threshold'
+	String temperatureAvailableAfter({required Object threshold}) => 'Available after ${threshold}';
+
+	/// en: 'Rough estimate based on altitude'
+	String get temperatureApproxHint => 'Rough estimate based on altitude';
+
+	/// en: 'Heading'
+	String get headingPanel => 'Heading';
+
+	/// en: 'Taxi'
+	String get flightPhaseTaxi => 'Taxi';
+
+	/// en: 'Ground roll'
+	String get flightPhaseGroundRoll => 'Ground roll';
+
+	/// en: 'Takeoff roll'
+	String get flightPhaseTakeoffRoll => 'Takeoff roll';
+
+	/// en: 'Landing roll'
+	String get flightPhaseLandingRoll => 'Landing roll';
+
+	/// en: 'Ascending'
+	String get flightPhaseAscending => 'Ascending';
+
+	/// en: 'Cruising'
+	String get flightPhaseCruising => 'Cruising';
+
+	/// en: 'Descending'
+	String get flightPhaseDescending => 'Descending';
+
 	/// en: 'Acquiring GPS signal'
 	String get acquiringGpsSignal => 'Acquiring GPS signal';
 
@@ -2283,6 +2325,7 @@ extension on Translations {
 			'settings.altitudeUnit' => 'Altitude unit',
 			'settings.speed' => 'Speed',
 			'settings.speedUnit' => 'Speed unit',
+			'settings.temperatureUnit' => 'Temperature unit',
 			'settings.timeFormat' => 'Time format',
 			'settings.distanceUnit' => 'Distance unit',
 			'settings.dateFormat' => 'Date format',
@@ -2613,6 +2656,19 @@ extension on Translations {
 			'flight.dashboard.aircraftHeading' => 'Aircraft heading',
 			'flight.dashboard.headingShort' => ({required Object heading}) => 'HDG ${heading}°',
 			'flight.dashboard.liveInstruments' => 'Live instruments',
+			'flight.dashboard.groundSpeed' => 'Ground speed',
+			'flight.dashboard.altitudeMsl' => 'Altitude MSL',
+			'flight.dashboard.outsideAirApprox' => 'Outside air temperature',
+			'flight.dashboard.temperatureAvailableAfter' => ({required Object threshold}) => 'Available after ${threshold}',
+			'flight.dashboard.temperatureApproxHint' => 'Rough estimate based on altitude',
+			'flight.dashboard.headingPanel' => 'Heading',
+			'flight.dashboard.flightPhaseTaxi' => 'Taxi',
+			'flight.dashboard.flightPhaseGroundRoll' => 'Ground roll',
+			'flight.dashboard.flightPhaseTakeoffRoll' => 'Takeoff roll',
+			'flight.dashboard.flightPhaseLandingRoll' => 'Landing roll',
+			'flight.dashboard.flightPhaseAscending' => 'Ascending',
+			'flight.dashboard.flightPhaseCruising' => 'Cruising',
+			'flight.dashboard.flightPhaseDescending' => 'Descending',
 			'flight.dashboard.acquiringGpsSignal' => 'Acquiring GPS signal',
 			'flight.dashboard.acquiringGpsHint' => 'Keep the device steady and in open sky for a reliable fix.',
 			'flight.dashboard.weakSignalBanner' => 'Weak GPS signal. Values may drift until accuracy improves.',
@@ -2660,6 +2716,8 @@ extension on Translations {
 			'flight.info.altitude' => 'Altitude',
 			'flight.info.copyRouteTitle' => 'Flymap Route',
 			'flight.info.copyRouteCode' => ({required Object routeCode}) => 'Route code: ${routeCode}',
+			_ => null,
+		} ?? switch (path) {
 			'flight.info.copyDistance' => ({required Object distance}) => 'Distance: ${distance} km',
 			'flight.info.copyFrom' => 'From',
 			'flight.info.copyTo' => 'To',
@@ -2674,8 +2732,6 @@ extension on Translations {
 			'flight.route.nextRegionLabel' => 'Next',
 			'flight.route.etaLabel' => ({required Object time}) => 'ETA: ${time}',
 			'flight.route.flyingOverLabel' => 'You are flying over:',
-			_ => null,
-		} ?? switch (path) {
 			'flight.route.premiumLockedChipLabel' => 'Unlock',
 			'flight.route.premiumGateTitle' => 'Unlock full route timeline',
 			'flight.route.premiumGateBody' => 'Upgrade to Pro to see all regions along your route and timeline details.',

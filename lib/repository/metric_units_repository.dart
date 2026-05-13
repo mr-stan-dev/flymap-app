@@ -7,6 +7,7 @@ class MetricUnitsRepository {
   static const _kTime = 'settings.timeFormat';
   static const _kDistance = 'settings.distanceUnit';
   static const _kDateDisplay = 'settings.dateDisplayFormat';
+  static const _kTemperature = 'settings.temperatureUnit';
 
   // Altitude
   Future<AltitudeUnit> getAltitudeUnit() async {
@@ -68,6 +69,18 @@ class MetricUnitsRepository {
     await prefs.setString(_kDateDisplay, format.name);
   }
 
+  // Temperature unit
+  Future<TemperatureUnit> getTemperatureUnit() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString(_kTemperature);
+    return _parseTemperature(stored);
+  }
+
+  Future<void> setTemperatureUnit(TemperatureUnit unit) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kTemperature, unit.name);
+  }
+
   // Backward-compatible parsing helpers
   AltitudeUnit _parseAltitude(String? v) {
     switch (v) {
@@ -116,6 +129,16 @@ class MetricUnitsRepository {
       case 'us':
       default:
         return DateDisplayFormat.us;
+    }
+  }
+
+  TemperatureUnit _parseTemperature(String? v) {
+    switch (v) {
+      case 'fahrenheit':
+        return TemperatureUnit.fahrenheit;
+      case 'celsius':
+      default:
+        return TemperatureUnit.celsius;
     }
   }
 }

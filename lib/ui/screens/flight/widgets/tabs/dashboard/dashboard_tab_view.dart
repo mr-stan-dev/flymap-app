@@ -6,7 +6,6 @@ import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/dashboard_panel.
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/gps_live_status_card.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/telemetry_searching_overlay.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/shared/tab_state_placeholder.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/weak_signal_banner.dart';
 
 class FlightDashboardTabView extends StatelessWidget {
   const FlightDashboardTabView({
@@ -79,10 +78,6 @@ class _LoadedDashboardTab extends StatelessWidget {
               )
             else
               FlightDashboardPanel(state: state),
-            if (state.gpsStatus == GpsStatus.weakSignal) ...[
-              const SizedBox(height: 12),
-              const WeakSignalBanner(),
-            ],
           ],
         ),
       ),
