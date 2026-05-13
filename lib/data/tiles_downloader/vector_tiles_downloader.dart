@@ -72,6 +72,8 @@ class VectorTilesDownloader {
     StreamController<DownloadMapEvent> controller,
   ) async {
     Database? db;
+    String? mbtilesPath;
+    var keepArtifacts = false;
     _cancelCompleter = Completer<void>();
     try {
       if (_canceled) {
@@ -101,7 +103,7 @@ class VectorTilesDownloader {
         MapDownloadConfig.mbtilesDirectoryName,
       );
 
-      final mbtilesPath = p.join(targetDirPath, '$fileName.mbtiles');
+      mbtilesPath = p.join(targetDirPath, '$fileName.mbtiles');
       _logger.log('MBTiles file: $mbtilesPath');
 
       // Ensure target directory exists
@@ -388,6 +390,7 @@ class VectorTilesDownloader {
 
       if (verification.isValid) {
         _logger.log('File verification successful, yielding success event');
+        keepArtifacts = true;
         controller.add(DownloadMapDone(mbtilesPath, verification.fileSize));
       } else {
         final verifierError =
@@ -420,6 +423,9 @@ class VectorTilesDownloader {
       try {
         await db?.close();
       } catch (_) {}
+      if (!keepArtifacts && mbtilesPath != null) {
+        await _deleteMbtilesArtifacts(mbtilesPath);
+      }
     }
   }
 
@@ -465,6 +471,25 @@ class VectorTilesDownloader {
       if (!await file.exists()) continue;
       _logger.log('Deleting stale MBTiles artifact: $path');
       await file.delete();
+    }
+  }
+
+  Future<void> _deleteMbtilesArtifacts(String mbtilesPath) async {
+    final artifactPaths = <String>[
+      mbtilesPath,
+      '$mbtilesPath-wal',
+      '$mbtilesPath-shm',
+      '$mbtilesPath-journal',
+    ];
+    for (final path in artifactPaths) {
+      final file = File(path);
+      if (!await file.exists()) continue;
+      try {
+        _logger.log('Deleting unfinished MBTiles artifact: $path');
+        await file.delete();
+      } catch (e) {
+        _logger.error('Failed to delete unfinished MBTiles artifact $path: $e');
+      }
     }
   }
 
