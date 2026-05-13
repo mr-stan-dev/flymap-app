@@ -3,20 +3,25 @@ import 'dart:async';
 import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/layers/user_layer.dart';
+import 'package:flutter/services.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 class FlightMapUserLocationController {
   FlightMapUserLocationController({required Logger logger}) : _logger = logger;
 
+  static const _planeImageId = 'flight-map-user-plane';
+  static const _planeIconAssetPath = 'assets/images/icons/plane_blue.png';
+  static const _stationarySpeedThresholdMetersPerSecond = 4.0;
   static const _defaultAnimationDuration = Duration(milliseconds: 1200);
   static const _minAnimationDuration = Duration(milliseconds: 350);
   static const _maxAnimationDuration = Duration(milliseconds: 2200);
   static const _frameInterval = Duration(milliseconds: 100);
 
   final Logger _logger;
+  final Map<String, Uint8List> _assetBytesCache = {};
 
   Circle? _userCircle;
-  Symbol? _userHeadingSymbol;
+  Symbol? _userPlaneSymbol;
   GpsData? _pendingGpsData;
   bool _isApplyingUserLocation = false;
   LatLng? _renderedPosition;
@@ -26,8 +31,7 @@ class FlightMapUserLocationController {
 
   LatLng? get currentUserLocation =>
       _renderedPosition ??
-      _userCircle?.options.geometry ??
-      _userHeadingSymbol?.options.geometry;
+      _userPlaneSymbol?.options.geometry;
 
   Future<void> updateUserLocation(
     GpsData data, {
@@ -70,12 +74,24 @@ class FlightMapUserLocationController {
     if (lat == null || lon == null) return;
     final pos = LatLng(lat, lon);
     final heading = data.course ?? 0;
+    final showCircle = _shouldShowStationaryCircle(data.speed);
 
     try {
-      if (_userCircle == null) {
-        _userCircle = await controller.addCircle(UserLayer.markerCircle(pos));
-        _userHeadingSymbol = await controller.addSymbol(
-          UserLayer.headingArrow(pos, heading),
+      if (_userPlaneSymbol == null || _userCircle == null) {
+        await _ensurePlaneImageRegistered(controller);
+        _userCircle = await controller.addCircle(
+          UserLayer.markerCircle(
+            pos,
+            visible: showCircle,
+          ),
+        );
+        _userPlaneSymbol = await controller.addSymbol(
+          UserLayer.planePin(
+            pos,
+            heading,
+            imageId: _planeImageId,
+            visible: !showCircle,
+          ),
         );
         _renderedPosition = pos;
         _renderedHeading = heading;
@@ -85,6 +101,7 @@ class FlightMapUserLocationController {
           controller: controller,
           targetPosition: pos,
           targetHeading: heading,
+          showCircle: showCircle,
         );
         if (!reachedTarget) {
           return;
@@ -120,6 +137,7 @@ class FlightMapUserLocationController {
     required MapLibreMapController controller,
     required LatLng targetPosition,
     required double targetHeading,
+    required bool showCircle,
   }) async {
     final startPosition = _renderedPosition ?? targetPosition;
     final startHeading = _renderedHeading;
@@ -132,6 +150,7 @@ class FlightMapUserLocationController {
         controller: controller,
         position: targetPosition,
         heading: targetHeading,
+        showCircle: showCircle,
       );
       return true;
     }
@@ -164,6 +183,7 @@ class FlightMapUserLocationController {
         controller: controller,
         position: position,
         heading: heading,
+        showCircle: showCircle,
       );
       if (frame < totalFrames) {
         await Future.delayed(_frameInterval);
@@ -176,14 +196,81 @@ class FlightMapUserLocationController {
     required MapLibreMapController controller,
     required LatLng position,
     required double heading,
+    required bool showCircle,
   }) async {
-    await controller.updateCircle(_userCircle!, CircleOptions(geometry: position));
+    await controller.updateCircle(
+      _userCircle!,
+      UserLayer.markerCircle(position, visible: showCircle),
+    );
     await controller.updateSymbol(
-      _userHeadingSymbol!,
-      UserLayer.headingArrow(position, heading),
+      _userPlaneSymbol!,
+      UserLayer.planePin(
+        position,
+        heading,
+        imageId: _planeImageId,
+        visible: !showCircle,
+      ),
     );
     _renderedPosition = position;
     _renderedHeading = heading;
+  }
+
+  bool _shouldShowStationaryCircle(SpeedValue? speed) {
+    if (speed == null) return false;
+    return _toMetersPerSecond(speed) <= _stationarySpeedThresholdMetersPerSecond;
+  }
+
+  double _toMetersPerSecond(SpeedValue speed) {
+    switch (speed.unit.toLowerCase()) {
+      case 'm/s':
+        return speed.value;
+      case 'kn':
+      case 'knot':
+      case 'knots':
+        return speed.value * 0.514444;
+      case 'mph':
+        return speed.value * 0.44704;
+      case 'km/h':
+      default:
+        return speed.value / 3.6;
+    }
+  }
+
+  Future<void> _ensurePlaneImageRegistered(
+    MapLibreMapController controller,
+  ) async {
+    final bytes = await _loadAssetBytes(_planeIconAssetPath);
+    if (bytes == null) return;
+    try {
+      await controller.addImage(_planeImageId, bytes);
+    } catch (error) {
+      if (!_isImageAlreadyRegisteredError(error)) {
+        _logger.error(
+          'Failed to register plane image "$_planeImageId": $error',
+        );
+      }
+    }
+  }
+
+  Future<Uint8List?> _loadAssetBytes(String assetPath) async {
+    final cached = _assetBytesCache[assetPath];
+    if (cached != null) return cached;
+    try {
+      final data = await rootBundle.load(assetPath);
+      final bytes = data.buffer.asUint8List();
+      _assetBytesCache[assetPath] = bytes;
+      return bytes;
+    } catch (error) {
+      _logger.error('Failed to load asset "$assetPath": $error');
+      return null;
+    }
+  }
+
+  bool _isImageAlreadyRegisteredError(Object error) {
+    final text = error.toString().toLowerCase();
+    return text.contains('already exists') ||
+        text.contains('image already added') ||
+        text.contains('name already exists');
   }
 
   Duration _resolveAnimationDuration(DateTime now) {
@@ -275,7 +362,7 @@ class FlightMapUserLocationController {
   void dispose() {
     _animationGeneration++;
     _userCircle = null;
-    _userHeadingSymbol = null;
+    _userPlaneSymbol = null;
     _pendingGpsData = null;
     _isApplyingUserLocation = false;
     _renderedPosition = null;

@@ -1,14 +1,17 @@
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 class UserLayer {
-  static CircleOptions markerCircle(LatLng userPosition) {
+  static CircleOptions markerCircle(
+    LatLng userPosition, {
+    bool visible = true,
+  }) {
     return CircleOptions(
       geometry: userPosition,
       circleColor: '#2E7DFF',
-      circleRadius: 6.0,
-      circleOpacity: 0.9,
+      circleRadius: visible ? 6.0 : 0.0,
+      circleOpacity: visible ? 0.9 : 0.0,
       circleStrokeColor: '#FFFFFF',
-      circleStrokeWidth: 2.0,
+      circleStrokeWidth: visible ? 2.0 : 0.0,
     );
   }
 
@@ -22,6 +25,21 @@ class UserLayer {
       textHaloWidth: 2.0,
       textRotate: _normalizeHeading(headingDeg),
       textAnchor: 'center',
+    );
+  }
+
+  static SymbolOptions planePin(
+    LatLng userPosition,
+    double headingDeg, {
+    required String imageId,
+    bool visible = true,
+  }) {
+    return SymbolOptions(
+      geometry: userPosition,
+      iconImage: imageId,
+      iconSize: visible ? 0.52 : 0.0,
+      iconRotate: _normalizeHeading(headingDeg),
+      iconAnchor: 'center',
     );
   }
 
