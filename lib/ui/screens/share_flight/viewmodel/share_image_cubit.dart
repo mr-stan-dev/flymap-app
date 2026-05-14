@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/usecase/generate_share_image_use_case.dart';
@@ -17,13 +18,16 @@ class ShareImageCubit extends Cubit<ShareImageState> {
   ShareImageCubit({
     required Flight flight,
     GenerateShareImageUseCase? generateUseCase,
+    AppAnalytics? analytics,
   }) : _generateUseCase =
            generateUseCase ?? GetIt.I.get<GenerateShareImageUseCase>(),
+       _analytics = analytics ?? GetIt.I.get<AppAnalytics>(),
        super(ShareImageState.initial(flight: flight)) {
     _generate();
   }
 
   final GenerateShareImageUseCase _generateUseCase;
+  final AppAnalytics _analytics;
   final Logger _logger = const Logger('ShareImageCubit');
 
   /// Generates the share image. Called automatically on construction.
@@ -34,6 +38,7 @@ class ShareImageCubit extends Cubit<ShareImageState> {
     if (isClosed) return;
 
     if (path != null) {
+      _analytics.log(const ShareCardGeneratedEvent(success: true, error: ''));
       emit(
         state.copyWith(
           status: ShareImageStatus.ready,
@@ -42,6 +47,12 @@ class ShareImageCubit extends Cubit<ShareImageState> {
         ),
       );
     } else {
+      _analytics.log(
+        const ShareCardGeneratedEvent(
+          success: false,
+          error: 'could_not_generate_flight_card',
+        ),
+      );
       emit(
         state.copyWith(
           status: ShareImageStatus.error,
@@ -54,6 +65,10 @@ class ShareImageCubit extends Cubit<ShareImageState> {
   /// Retry generating the image after an error.
   Future<void> retry() async {
     await _generate();
+  }
+
+  void onShareCardCtaTapped() {
+    _analytics.log(const ShareCardSharedEvent());
   }
 
   /// Share the generated image via the native share sheet.

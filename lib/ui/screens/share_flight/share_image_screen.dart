@@ -173,6 +173,7 @@ class _ShareImageViewState extends State<_ShareImageView> {
       onPressed: state.isReady
           ? () async {
               final cubit = buildContext.read<ShareImageCubit>();
+              cubit.onShareCardCtaTapped();
               final sharePath = await _captureComposedCard(
                 routeCode: state.flight.route.routeCode,
               );
