@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-const double shareRouteCitiesChipWidth = 260;
-const double shareRouteCitiesChipHeight = 58;
+import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/ui/screens/share_flight/widgets/overlay/config/share_overlay_chip_config.dart';
 
 class ShareRouteCitiesChip extends StatelessWidget {
   const ShareRouteCitiesChip({
@@ -19,6 +18,7 @@ class ShareRouteCitiesChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
@@ -50,7 +50,7 @@ class ShareRouteCitiesChip extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Route',
+            t.shareFlight.route,
             style: textTheme.labelSmall?.copyWith(
               color: colorScheme.onPrimary.withValues(alpha: 0.82),
               fontWeight: FontWeight.w600,

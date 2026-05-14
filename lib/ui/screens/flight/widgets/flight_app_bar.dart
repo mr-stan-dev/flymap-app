@@ -15,9 +15,6 @@ import 'package:flymap/utils/route_utils.dart';
 class FlightAppBar extends StatelessWidget {
   const FlightAppBar({required this.flight, super.key});
 
-  // TODO: Re-enable share route menu item after we fix android snapshot
-  static const bool _shareRouteMenuEnabled = false;
-
   static const double _outerPadding = 16;
   static const double _innerPadding = 8;
   static const double _buttonSize = 48;
@@ -113,11 +110,10 @@ class FlightAppBar extends StatelessWidget {
                             await _handleMenuAction(context, value);
                           },
                           itemBuilder: (context) => [
-                            if (_shareRouteMenuEnabled)
-                              PopupMenuItem(
-                                value: 'share_route',
-                                child: Text(context.t.flight.shareRoute),
-                              ),
+                            PopupMenuItem(
+                              value: 'share_route',
+                              child: Text(context.t.flight.shareRoute),
+                            ),
                             PopupMenuItem(
                               value: 'copy_route',
                               child: Text(context.t.flight.copyRoute),
@@ -148,7 +144,7 @@ class FlightAppBar extends StatelessWidget {
   Future<void> _handleMenuAction(BuildContext context, String value) async {
     switch (value) {
       case 'share_route':
-        AppRouter.goToShareFlight(context, flight: flight);
+        AppRouter.goToShareImage(context, flight: flight);
         break;
       case 'copy_route':
         final routeSummary = RouteCopyBuilder.build(flight.route);

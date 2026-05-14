@@ -6,6 +6,7 @@ class ShareFlymapWatermark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     final colorScheme = Theme.of(context).colorScheme;
     final textStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
       fontWeight: FontWeight.w800,

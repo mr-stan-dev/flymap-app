@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/i18n/strings.g.dart';
-
-const double shareDistanceChipWidth = 184;
-const double shareDistanceChipHeight = 58;
+import 'package:flymap/ui/screens/share_flight/widgets/overlay/config/share_overlay_chip_config.dart';
 
 class ShareDistanceChip extends StatelessWidget {
   const ShareDistanceChip({required this.distanceKm, super.key});

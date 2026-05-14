@@ -6,6 +6,7 @@ import 'package:flymap/data/api/feedback_api.dart';
 import 'package:flymap/data/api/flight_info_api.dart';
 import 'package:flymap/data/api/flight_lookup_api.dart';
 import 'package:flymap/data/api/flight_route_preview_api.dart';
+import 'package:flymap/data/api/mapbox_static_image_api.dart';
 import 'package:flymap/data/api/route_overview_api.dart';
 import 'package:flymap/data/api/route_places_api.dart';
 import 'package:flymap/data/api/route_regions_api.dart';
@@ -61,6 +62,7 @@ import 'package:flymap/domain/usecase/download_wikipedia_articles_use_case.dart'
 import 'package:flymap/domain/usecase/get_flight_info_use_case.dart';
 import 'package:flymap/domain/usecase/lookup_flight_by_number_use_case.dart';
 import 'package:flymap/domain/usecase/build_flight_route_preview_use_case.dart';
+import 'package:flymap/domain/usecase/generate_share_image_use_case.dart';
 
 import 'package:flymap/domain/usecase/get_place_info_use_case.dart';
 import 'package:flymap/domain/usecase/get_route_preview_use_case.dart';
@@ -165,6 +167,16 @@ class DiModule {
     );
     i.registerLazySingleton<BuildFlightRoutePreviewUseCase>(
       () => BuildFlightRoutePreviewUseCase(repository: i.get()),
+    );
+
+    i.registerLazySingleton<MapboxStaticImageApi>(
+      () => MapboxStaticImageApi(
+        httpClient: i.get(),
+        accessToken: 'pk.eyJ1IjoiYXBwdHJhY3RvciIsImEiOiJjbW9hN2VnbXkwM2NtMnByMGI2cGo1enVsIn0.mEqDtVKF1gb1dBimBCFt-g',
+      ),
+    );
+    i.registerLazySingleton<GenerateShareImageUseCase>(
+      () => GenerateShareImageUseCase(mapboxApi: i.get()),
     );
 
     // Connectivity checker

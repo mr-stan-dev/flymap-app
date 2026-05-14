@@ -14,6 +14,7 @@ import 'package:flymap/ui/screens/flight/flight_screen.dart';
 import 'package:flymap/ui/screens/home/home_screen.dart';
 import 'package:flymap/ui/screens/onboarding/onboarding_screen.dart';
 import 'package:flymap/ui/screens/share_flight/share_flight_screen.dart';
+import 'package:flymap/ui/screens/share_flight/share_image_screen.dart';
 import 'package:flymap/ui/screens/settings/profile/settings_profile_screen.dart';
 import 'package:flymap/ui/screens/settings/history/history_screen.dart';
 import 'package:flymap/ui/screens/settings/storage/storage_screen.dart';
@@ -31,6 +32,7 @@ class AppRouter {
   static const String flightPreviewRoute = '/flight-preview';
   static const String flightRoute = '/flight';
   static const String shareFlightRoute = '/share-flight';
+  static const String shareImageRoute = '/share-image';
   static const String settingsRoute = '/settings';
   static const String feedbackRoute = '/feedback';
   static const String subscriptionRoute = '/subscription';
@@ -123,6 +125,18 @@ class AppRouter {
             final flight = extra?['flight'] as Flight;
 
             return ShareFlightScreen(flight: flight);
+          },
+        ),
+
+        // Share Image Screen route
+        GoRoute(
+          path: shareImageRoute,
+          name: 'share-image',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            final flight = extra?['flight'] as Flight;
+
+            return ShareImageScreen(flight: flight);
           },
         ),
 
@@ -220,6 +234,11 @@ class AppRouter {
   /// Navigate to share flight screen with flight
   static void goToShareFlight(BuildContext context, {required Flight flight}) {
     context.push(shareFlightRoute, extra: {'flight': flight});
+  }
+
+  /// Navigate to share image screen with flight
+  static void goToShareImage(BuildContext context, {required Flight flight}) {
+    context.push(shareImageRoute, extra: {'flight': flight});
   }
 
   /// Navigate to settings

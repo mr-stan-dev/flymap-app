@@ -53,6 +53,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final TranslationsPreviewEn preview = TranslationsPreviewEn.internal(_root);
 	late final TranslationsFlightEn flight = TranslationsFlightEn.internal(_root);
 	late final TranslationsShareFlightEn shareFlight = TranslationsShareFlightEn.internal(_root);
+	late final TranslationsShareImageEn shareImage = TranslationsShareImageEn.internal(_root);
 	late final TranslationsAboutEn about = TranslationsAboutEn.internal(_root);
 	late final TranslationsOnboardingEn onboarding = TranslationsOnboardingEn.internal(_root);
 }
@@ -827,6 +828,9 @@ class TranslationsShareFlightEn {
 	/// en: 'Share'
 	String get share => 'Share';
 
+	/// en: 'Route'
+	String get route => 'Route';
+
 	/// en: 'Offline map missing. Using online style.'
 	String get offlineMapMissing => 'Offline map missing. Using online style.';
 
@@ -850,6 +854,57 @@ class TranslationsShareFlightEn {
 
 	/// en: '$distance km'
 	String distanceKm({required Object distance}) => '${distance} km';
+}
+
+// Path: shareImage
+class TranslationsShareImageEn {
+	TranslationsShareImageEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Share flight'
+	String get title => 'Share flight';
+
+	/// en: 'Creating your flight card...'
+	String get generating => 'Creating your flight card...';
+
+	/// en: 'Share'
+	String get share => 'Share';
+
+	/// en: 'Sharing...'
+	String get sharing => 'Sharing...';
+
+	/// en: 'Retry'
+	String get retry => 'Retry';
+
+	/// en: 'Could not generate flight card'
+	String get error => 'Could not generate flight card';
+
+	/// en: 'Every flight has a story'
+	String get tagline => 'Every flight has a story';
+
+	/// en: 'Flymap'
+	String get brand => 'Flymap';
+
+	/// en: 'Explore your flight'
+	String get exploreYourFlight => 'Explore your flight';
+
+	/// en: '$count countries'
+	String countries({required Object count}) => '${count} countries';
+
+	/// en: 'Unknown'
+	String get unknownCity => 'Unknown';
+
+	/// en: '--'
+	String get durationUnavailable => '--';
+
+	/// en: '$minutes m'
+	String durationMinutes({required Object minutes}) => '${minutes} m';
+
+	/// en: '$hours h $minutes m'
+	String durationHoursMinutes({required Object hours, required Object minutes}) => '${hours} h ${minutes} m';
 }
 
 // Path: about
@@ -2745,6 +2800,7 @@ extension on Translations {
 			'shareFlight.preparingMap' => 'Preparing share preview map...',
 			'shareFlight.preparingScreenshot' => 'Preparing screenshot...',
 			'shareFlight.share' => 'Share',
+			'shareFlight.route' => 'Route',
 			'shareFlight.offlineMapMissing' => 'Offline map missing. Using online style.',
 			'shareFlight.offlineStyleFailed' => 'Failed to load offline style. Using online style.',
 			'shareFlight.captureFailed' => 'Could not capture route screenshot',
@@ -2753,6 +2809,20 @@ extension on Translations {
 			'shareFlight.watermark' => 'Flymap',
 			'shareFlight.flightDistance' => 'Flight distance',
 			'shareFlight.distanceKm' => ({required Object distance}) => '${distance} km',
+			'shareImage.title' => 'Share flight',
+			'shareImage.generating' => 'Creating your flight card...',
+			'shareImage.share' => 'Share',
+			'shareImage.sharing' => 'Sharing...',
+			'shareImage.retry' => 'Retry',
+			'shareImage.error' => 'Could not generate flight card',
+			'shareImage.tagline' => 'Every flight has a story',
+			'shareImage.brand' => 'Flymap',
+			'shareImage.exploreYourFlight' => 'Explore your flight',
+			'shareImage.countries' => ({required Object count}) => '${count} countries',
+			'shareImage.unknownCity' => 'Unknown',
+			'shareImage.durationUnavailable' => '--',
+			'shareImage.durationMinutes' => ({required Object minutes}) => '${minutes} m',
+			'shareImage.durationHoursMinutes' => ({required Object hours, required Object minutes}) => '${hours} h ${minutes} m',
 			'about.title' => 'About Flymap',
 			'about.welcome' => 'Welcome to Flymap',
 			'about.intro' => 'Flymap keeps your route visible in the air. Plan the trip, download your map on the ground, and track your flight offline with confidence.',

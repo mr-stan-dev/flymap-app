@@ -26,8 +26,7 @@ class HomeFlightCard extends StatelessWidget {
     super.key,
   });
 
-  // TODO: Re-enable share route menu item after we fix android snapshot.
-  static const bool _shareRouteMenuEnabled = false;
+  static const bool _shareRouteMenuEnabled = true;
 
   final Flight flight;
   final DistanceUnit distanceUnit;
@@ -154,7 +153,7 @@ class HomeFlightCard extends StatelessWidget {
       case _FlightCardAction.open:
         AppRouter.goToFlight(context, flight: flight);
       case _FlightCardAction.share:
-        AppRouter.goToShareFlight(context, flight: flight);
+        AppRouter.goToShareImage(context, flight: flight);
       case _FlightCardAction.completeFlight:
         final result = await CompleteFlightConfirmationDialog.show(context);
         if (result == null || !context.mounted) return;

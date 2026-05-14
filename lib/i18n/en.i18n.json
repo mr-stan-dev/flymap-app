@@ -595,6 +595,7 @@
     "preparingMap": "Preparing share preview map...",
     "preparingScreenshot": "Preparing screenshot...",
     "share": "Share",
+    "route": "Route",
     "offlineMapMissing": "Offline map missing. Using online style.",
     "offlineStyleFailed": "Failed to load offline style. Using online style.",
     "captureFailed": "Could not capture route screenshot",
@@ -603,6 +604,22 @@
     "watermark": "Flymap",
     "flightDistance": "Flight distance",
     "distanceKm": "$distance km"
+  },
+  "shareImage": {
+    "title": "Share flight",
+    "generating": "Creating your flight card...",
+    "share": "Share",
+    "sharing": "Sharing...",
+    "retry": "Retry",
+    "error": "Could not generate flight card",
+    "tagline": "Every flight has a story",
+    "brand": "Flymap",
+    "exploreYourFlight": "Explore your flight",
+    "countries": "$count countries",
+    "unknownCity": "Unknown",
+    "durationUnavailable": "--",
+    "durationMinutes": "$minutes m",
+    "durationHoursMinutes": "$hours h $minutes m"
   },
   "about": {
     "title": "About Flymap",

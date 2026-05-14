@@ -81,6 +81,12 @@ flutter:
     - assets/images/poi/
     - assets/images/regions/
 
+  fonts:
+    - family: Caveat
+      fonts:
+        - asset: assets/fonts/Caveat-Medium.ttf
+          weight: 500
+
 flutter_launcher_icons:
   android: true
   ios: true
