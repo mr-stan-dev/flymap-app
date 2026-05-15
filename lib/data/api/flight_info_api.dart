@@ -12,6 +12,10 @@ import 'package:latlong2/latlong.dart';
 const _waypointFractionDigits = 2;
 const flightInfoRequestMaxWaypoints = 200;
 const wikiArticlesRequestMaxWaypoints = 20;
+const _maxLatitude = 90.0;
+const _minLatitude = -90.0;
+const _maxLongitude = 180.0;
+const _minLongitude = -180.0;
 
 Map<String, dynamic> buildFlightInfoFunctionRequest({
   required String airportDeparture,
@@ -30,11 +34,11 @@ Map<String, dynamic> buildFlightInfoFunctionRequest({
         .map(
           (c) => [
             _roundCoordinate(
-              c.latitude,
+              _clampLatitude(c.latitude),
               fractionDigits: _waypointFractionDigits,
             ),
             _roundCoordinate(
-              c.longitude,
+              _normalizeLongitude(c.longitude),
               fractionDigits: _waypointFractionDigits,
             ),
           ],
@@ -57,6 +61,24 @@ Map<String, dynamic> buildFlightInfoFunctionRequest({
 
 double _roundCoordinate(double value, {required int fractionDigits}) =>
     double.parse(value.toStringAsFixed(fractionDigits));
+
+double _clampLatitude(double value) {
+  if (!value.isFinite) return 0;
+  return value.clamp(_minLatitude, _maxLatitude).toDouble();
+}
+
+double _normalizeLongitude(double value) {
+  if (!value.isFinite) return 0;
+  var normalized = value;
+  while (normalized > _maxLongitude) {
+    normalized -= 360.0;
+  }
+  while (normalized < _minLongitude) {
+    normalized += 360.0;
+  }
+  if (normalized == -180.0) return 180.0;
+  return normalized;
+}
 
 List<LatLng> sampleWaypointsForFlightRequest(
   List<LatLng> waypoints, {
