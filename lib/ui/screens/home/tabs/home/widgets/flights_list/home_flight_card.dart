@@ -153,7 +153,7 @@ class HomeFlightCard extends StatelessWidget {
       case _FlightCardAction.open:
         AppRouter.goToFlight(context, flight: flight);
       case _FlightCardAction.share:
-        AppRouter.goToShareImage(context, flight: flight);
+        AppRouter.goToShareImage(context, flightId: flight.id);
       case _FlightCardAction.completeFlight:
         final result = await CompleteFlightConfirmationDialog.show(context);
         if (result == null || !context.mounted) return;

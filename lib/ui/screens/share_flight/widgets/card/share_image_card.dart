@@ -6,7 +6,7 @@ import 'package:flymap/ui/screens/share_flight/widgets/card/config/share_image_c
 import 'package:flymap/ui/screens/share_flight/widgets/card/sections/share_image_card_footer_tagline.dart';
 import 'package:flymap/ui/screens/share_flight/widgets/card/sections/share_image_card_headline.dart';
 import 'package:flymap/ui/screens/share_flight/widgets/card/sections/share_image_card_header.dart';
-import 'package:flymap/ui/screens/share_flight/widgets/card/sections/share_image_card_map_scrim.dart';
+import 'package:flymap/ui/screens/share_flight/widgets/card/sections/share_image_card_map_shadow.dart';
 import 'package:flymap/ui/screens/share_flight/widgets/card/sections/share_image_card_metrics_row.dart';
 import 'package:flymap/ui/screens/share_flight/widgets/card/sections/share_route_card_region_chips.dart';
 
@@ -26,7 +26,7 @@ class ShareImageCard extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         Image.file(File(mapImagePath), fit: BoxFit.cover),
-        const ShareImageCardMapScrim(),
+        const ShareImageCardMapShadow(),
         Padding(
           padding: ShareImageCardConfig.contentPadding,
           child: Column(

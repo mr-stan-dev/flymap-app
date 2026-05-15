@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/share_flight/viewmodel/share_image_cubit.dart';
@@ -15,14 +14,14 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 class ShareImageScreen extends StatelessWidget {
-  const ShareImageScreen({required this.flight, super.key});
+  const ShareImageScreen({required this.flightId, super.key});
 
-  final Flight flight;
+  final String flightId;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ShareImageCubit(flight: flight),
+      create: (_) => ShareImageCubit(flightId: flightId),
       child: const _ShareImageView(),
     );
   }
@@ -55,16 +54,20 @@ class _ShareImageViewState extends State<_ShareImageView> {
           ).showSnackBar(SnackBar(content: Text(message)));
         },
         builder: (context, state) {
+          final showBottomAction =
+              state.status != ShareImageStatus.initial &&
+              state.status != ShareImageStatus.generating;
           return Column(
             children: [
               Expanded(child: _buildContent(context, state)),
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.all(DsSpacing.md),
-                  child: _buildBottomAction(context, state),
+              if (showBottomAction)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(DsSpacing.md),
+                    child: _buildBottomAction(context, state),
+                  ),
                 ),
-              ),
             ],
           );
         },
@@ -116,7 +119,8 @@ class _ShareImageViewState extends State<_ShareImageView> {
       case ShareImageStatus.ready:
       case ShareImageStatus.sharing:
         final path = state.imagePath;
-        if (path == null) return const SizedBox.shrink();
+        final flight = state.flight;
+        if (path == null || flight == null) return const SizedBox.shrink();
         return InteractiveViewer(
           minScale: 0.5,
           maxScale: 3,
@@ -144,10 +148,7 @@ class _ShareImageViewState extends State<_ShareImageView> {
                   child: SizedBox(
                     width: ShareImageCardConfig.width,
                     height: ShareImageCardConfig.height,
-                    child: ShareImageCard(
-                      mapImagePath: path,
-                      flight: state.flight,
-                    ),
+                    child: ShareImageCard(mapImagePath: path, flight: flight),
                   ),
                 ),
               ),
@@ -172,10 +173,12 @@ class _ShareImageViewState extends State<_ShareImageView> {
       label: state.isSharing ? t.shareImage.sharing : t.shareImage.share,
       onPressed: state.isReady
           ? () async {
+              final flight = state.flight;
+              if (flight == null) return;
               final cubit = buildContext.read<ShareImageCubit>();
               cubit.onShareCardCtaTapped();
               final sharePath = await _captureComposedCard(
-                routeCode: state.flight.route.routeCode,
+                routeCode: flight.route.routeCode,
               );
               if (!mounted || sharePath == null) return;
               cubit.shareImage(

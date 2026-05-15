@@ -31,6 +31,7 @@ import 'package:flymap/data/wiki/wikimedia_api_client.dart';
 import 'package:flymap/data/wiki/wikidata_wikipedia_preview_repository.dart';
 import 'package:flymap/rating/rate_prompt_policy_service.dart';
 import 'package:flymap/rating/rate_prompt_repository.dart';
+import 'package:flymap/rating/rate_review_launcher.dart';
 import 'package:flymap/rating/rate_store_launcher.dart';
 import 'package:flymap/repository/favorite_airports_repository.dart';
 import 'package:flymap/repository/flight_repository.dart';
@@ -79,6 +80,7 @@ import 'package:flymap/domain/usecase/submit_feedback_use_case.dart';
 import 'package:flymap/domain/usecase/toggle_learn_article_favorite_use_case.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+import 'package:in_app_review/in_app_review.dart';
 
 class DiModule {
   final i = GetIt.I;
@@ -172,7 +174,8 @@ class DiModule {
     i.registerLazySingleton<MapboxStaticImageApi>(
       () => MapboxStaticImageApi(
         httpClient: i.get(),
-        accessToken: 'pk.eyJ1IjoiYXBwdHJhY3RvciIsImEiOiJjbW9hN2VnbXkwM2NtMnByMGI2cGo1enVsIn0.mEqDtVKF1gb1dBimBCFt-g',
+        accessToken:
+            'pk.eyJ1IjoiYXBwdHJhY3RvciIsImEiOiJjbW9hN2VnbXkwM2NtMnByMGI2cGo1enVsIn0.mEqDtVKF1gb1dBimBCFt-g',
       ),
     );
     i.registerLazySingleton<GenerateShareImageUseCase>(
@@ -203,6 +206,12 @@ class DiModule {
     );
     i.registerLazySingleton<RateStoreLauncher>(
       () => DefaultRateStoreLauncher(httpClient: i.get()),
+    );
+    i.registerLazySingleton<RateReviewLauncher>(
+      () => DefaultRateReviewLauncher(
+        inAppReview: InAppReview.instance,
+        storeLauncher: i.get(),
+      ),
     );
     i.registerLazySingleton<FeedbackApi>(() => FeedbackApi());
     i.registerLazySingleton<SubmitFeedbackUseCase>(

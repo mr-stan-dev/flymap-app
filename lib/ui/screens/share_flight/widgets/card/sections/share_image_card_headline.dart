@@ -37,11 +37,13 @@ class ShareImageCardHeadline extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              dep,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: cityStyle,
+            Flexible(
+              child: Text(
+                dep,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: cityStyle,
+              ),
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8),
@@ -51,12 +53,14 @@ class ShareImageCardHeadline extends StatelessWidget {
                 size: 24,
               ),
             ),
-            Text(
-              arr,
-              textAlign: TextAlign.right,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: cityStyle,
+            Flexible(
+              child: Text(
+                arr,
+                textAlign: TextAlign.right,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: cityStyle,
+              ),
             ),
           ],
         ),

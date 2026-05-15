@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/usecase/generate_share_image_use_case.dart';
 import 'package:flymap/logger.dart';
+import 'package:flymap/rating/rate_prompt_policy_service.dart';
+import 'package:flymap/rating/rate_prompt_trigger.dart';
+import 'package:flymap/repository/flight_repository.dart';
 import 'package:get_it/get_it.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -16,17 +19,24 @@ import 'share_image_state.dart';
 ///                                  ↘ error(message)
 class ShareImageCubit extends Cubit<ShareImageState> {
   ShareImageCubit({
-    required Flight flight,
+    required String flightId,
+    FlightRepository? flightRepository,
+    RatePromptPolicyService? ratePromptPolicyService,
     GenerateShareImageUseCase? generateUseCase,
     AppAnalytics? analytics,
   }) : _generateUseCase =
            generateUseCase ?? GetIt.I.get<GenerateShareImageUseCase>(),
+       _flightRepository = flightRepository ?? GetIt.I.get<FlightRepository>(),
+       _ratePromptPolicyService =
+           ratePromptPolicyService ?? GetIt.I.get<RatePromptPolicyService>(),
        _analytics = analytics ?? GetIt.I.get<AppAnalytics>(),
-       super(ShareImageState.initial(flight: flight)) {
+       super(ShareImageState.initial(flightId: flightId)) {
     _generate();
   }
 
   final GenerateShareImageUseCase _generateUseCase;
+  final FlightRepository _flightRepository;
+  final RatePromptPolicyService _ratePromptPolicyService;
   final AppAnalytics _analytics;
   final Logger _logger = const Logger('ShareImageCubit');
 
@@ -34,13 +44,32 @@ class ShareImageCubit extends Cubit<ShareImageState> {
   Future<void> _generate() async {
     emit(state.copyWith(status: ShareImageStatus.generating, clearError: true));
 
-    final path = await _generateUseCase.call(state.flight);
+    final flight = await _flightRepository.getFlightById(state.flightId);
+    if (isClosed) return;
+    if (flight == null) {
+      _analytics.log(
+        const ShareCardGeneratedEvent(
+          success: false,
+          error: 'flight_not_found',
+        ),
+      );
+      emit(
+        state.copyWith(
+          status: ShareImageStatus.error,
+          errorMessage: 'Could not generate flight card',
+        ),
+      );
+      return;
+    }
+
+    final path = await _generateUseCase.call(flight);
     if (isClosed) return;
 
     if (path != null) {
       _analytics.log(const ShareCardGeneratedEvent(success: true, error: ''));
       emit(
         state.copyWith(
+          flight: flight,
           status: ShareImageStatus.ready,
           imagePath: path,
           clearError: true,
@@ -69,6 +98,11 @@ class ShareImageCubit extends Cubit<ShareImageState> {
 
   void onShareCardCtaTapped() {
     _analytics.log(const ShareCardSharedEvent());
+    unawaited(
+      _ratePromptPolicyService.registerTrigger(
+        RatePromptTrigger.shareCardShared,
+      ),
+    );
   }
 
   /// Share the generated image via the native share sheet.
@@ -77,12 +111,13 @@ class ShareImageCubit extends Cubit<ShareImageState> {
     String? imagePathOverride,
   }) async {
     final path = imagePathOverride ?? state.imagePath;
-    if (path == null || state.isSharing) return;
+    final flight = state.flight;
+    if (path == null || state.isSharing || flight == null) return;
 
     emit(state.copyWith(status: ShareImageStatus.sharing, clearError: true));
 
     try {
-      final route = state.flight.route;
+      final route = flight.route;
       await Share.shareXFiles(
         [XFile(path)],
         text:

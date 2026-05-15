@@ -21,6 +21,7 @@ class ShareImageCardMetricsRow extends StatelessWidget {
     final distanceUnit = distanceUnitLabel == 'mi'
         ? DistanceUnit.mile
         : DistanceUnit.km;
+    final countryCount = shareCardCountryCount(flight);
 
     final metrics = [
       (
@@ -36,7 +37,9 @@ class ShareImageCardMetricsRow extends StatelessWidget {
       ),
       (
         Icons.account_balance_outlined,
-        t.shareImage.countries(count: shareCardCountryCount(flight)),
+        countryCount == 1
+            ? t.shareImage.countrySingle
+            : t.shareImage.countries(count: countryCount),
       ),
     ];
 

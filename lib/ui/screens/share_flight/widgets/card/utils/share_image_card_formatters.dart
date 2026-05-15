@@ -2,6 +2,7 @@ import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/route_region_type.dart';
 import 'package:flymap/domain/entity/units.dart';
 import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/utils/route_utils.dart';
 import 'package:flymap/utils/country_name_utils.dart';
 import 'package:flymap/utils/unit_format_utils.dart';
 
@@ -62,6 +63,6 @@ String shareCardFormatThousands(int value) {
 }
 
 String shareCardCityName(Translations t, String value) {
-  final trimmed = value.trim();
+  final trimmed = RouteUtils.cityLabel(value).trim();
   return trimmed.isEmpty ? t.shareImage.unknownCity : trimmed;
 }

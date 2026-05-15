@@ -5,17 +5,23 @@ enum ShareImageStatus { initial, generating, ready, sharing, error }
 
 class ShareImageState extends Equatable {
   const ShareImageState({
+    required this.flightId,
     required this.flight,
     required this.status,
     this.imagePath,
     this.errorMessage,
   });
 
-  factory ShareImageState.initial({required Flight flight}) {
-    return ShareImageState(flight: flight, status: ShareImageStatus.initial);
+  factory ShareImageState.initial({required String flightId}) {
+    return ShareImageState(
+      flightId: flightId,
+      flight: null,
+      status: ShareImageStatus.initial,
+    );
   }
 
-  final Flight flight;
+  final String flightId;
+  final Flight? flight;
   final ShareImageStatus status;
   final String? imagePath;
   final String? errorMessage;
@@ -26,7 +32,9 @@ class ShareImageState extends Equatable {
   bool get isError => status == ShareImageStatus.error;
 
   ShareImageState copyWith({
+    String? flightId,
     Flight? flight,
+    bool clearFlight = false,
     ShareImageStatus? status,
     String? imagePath,
     String? errorMessage,
@@ -34,7 +42,8 @@ class ShareImageState extends Equatable {
     bool clearImagePath = false,
   }) {
     return ShareImageState(
-      flight: flight ?? this.flight,
+      flightId: flightId ?? this.flightId,
+      flight: clearFlight ? null : (flight ?? this.flight),
       status: status ?? this.status,
       imagePath: clearImagePath ? null : (imagePath ?? this.imagePath),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
@@ -42,5 +51,11 @@ class ShareImageState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [flight, status, imagePath, errorMessage];
+  List<Object?> get props => [
+    flightId,
+    flight,
+    status,
+    imagePath,
+    errorMessage,
+  ];
 }

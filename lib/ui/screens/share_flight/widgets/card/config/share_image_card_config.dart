@@ -11,11 +11,11 @@ class ShareImageCardConfig {
   static const EdgeInsets contentPadding = EdgeInsets.fromLTRB(22, 16, 22, 16);
   static const EdgeInsets overlaySafePadding = EdgeInsets.fromLTRB(
     width * 0.14,
-    height * 0.26,
+    height * 0.30,
     width * 0.14,
-    height * 0.34,
+    height * 0.32,
   );
 
-  static const double topScrimHeight = height * 0.20;
-  static const double bottomScrimHeight = height * 0.28;
+  static const double topShadowHeight = height * 0.20;
+  static const double bottomShadowHeight = height * 0.24;
 }

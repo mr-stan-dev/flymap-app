@@ -285,6 +285,7 @@ class PreviewDownloadState extends Equatable {
     required this.downloadTileCount,
     required this.downloadWorkerCount,
     required this.downloadDone,
+    required this.savedFlightId,
   });
 
   const PreviewDownloadState.initial()
@@ -301,7 +302,8 @@ class PreviewDownloadState extends Equatable {
       articleDownloadFailed = 0,
       downloadTileCount = null,
       downloadWorkerCount = null,
-      downloadDone = false;
+      downloadDone = false,
+      savedFlightId = null;
 
   final DownloadSectionsState downloadSections;
   final bool isDownloading;
@@ -317,6 +319,7 @@ class PreviewDownloadState extends Equatable {
   final int? downloadTileCount;
   final int? downloadWorkerCount;
   final bool downloadDone;
+  final String? savedFlightId;
 
   PreviewDownloadState copyWith({
     DownloadSectionsState? downloadSections,
@@ -335,6 +338,8 @@ class PreviewDownloadState extends Equatable {
     int? downloadWorkerCount,
     bool clearDownloadWorkerCount = false,
     bool? downloadDone,
+    String? savedFlightId,
+    bool clearSavedFlightId = false,
   }) {
     return PreviewDownloadState(
       downloadSections: downloadSections ?? this.downloadSections,
@@ -357,6 +362,9 @@ class PreviewDownloadState extends Equatable {
           ? null
           : downloadWorkerCount ?? this.downloadWorkerCount,
       downloadDone: downloadDone ?? this.downloadDone,
+      savedFlightId: clearSavedFlightId
+          ? null
+          : savedFlightId ?? this.savedFlightId,
     );
   }
 
@@ -376,6 +384,7 @@ class PreviewDownloadState extends Equatable {
     downloadTileCount,
     downloadWorkerCount,
     downloadDone,
+    savedFlightId,
   ];
 }
 
@@ -496,6 +505,7 @@ class FlightPreviewState extends Equatable {
   int? get downloadTileCount => downloadState.downloadTileCount;
   int? get downloadWorkerCount => downloadState.downloadWorkerCount;
   bool get downloadDone => downloadState.downloadDone;
+  String? get savedFlightId => downloadState.savedFlightId;
 
   String? get errorMessage => messageState.errorMessage;
   String? get downloadErrorMessage => messageState.downloadErrorMessage;
@@ -544,6 +554,8 @@ class FlightPreviewState extends Equatable {
     int? downloadWorkerCount,
     bool clearDownloadWorkerCount = false,
     bool? downloadDone,
+    String? savedFlightId,
+    bool clearSavedFlightId = false,
     String? errorMessage,
     bool clearErrorMessage = false,
     String? downloadErrorMessage,
@@ -597,6 +609,8 @@ class FlightPreviewState extends Equatable {
         downloadWorkerCount: downloadWorkerCount,
         clearDownloadWorkerCount: clearDownloadWorkerCount,
         downloadDone: downloadDone,
+        savedFlightId: savedFlightId,
+        clearSavedFlightId: clearSavedFlightId,
       ),
       messageState: messageState.copyWith(
         errorMessage: errorMessage,

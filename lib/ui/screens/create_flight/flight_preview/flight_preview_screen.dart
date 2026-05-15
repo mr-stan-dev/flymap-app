@@ -9,7 +9,6 @@ import 'package:flymap/domain/usecase/build_flight_route_preview_use_case.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/rating/rate_prompt_policy_service.dart';
 import 'package:flymap/rating/rate_prompt_trigger.dart';
-import 'package:flymap/rating/rate_store_launcher.dart';
 import 'package:flymap/repository/flight_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_repository.dart';
@@ -23,10 +22,7 @@ import 'package:flymap/ui/screens/create_flight/flight_preview/steps/route_not_s
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/wikipedia_articles/flight_search_wikipedia_articles_step.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_cubit.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
-import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/flight_download_completion.dart';
-import 'package:flymap/ui/screens/home/tabs/home/home_tab.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
-import 'package:flymap/ui/widgets/rate_app_dialog.dart';
 import 'package:flymap/domain/usecase/download_map_use_case.dart';
 import 'package:flymap/domain/usecase/download_region_wiki_articles_use_case.dart';
 import 'package:flymap/domain/usecase/download_wikipedia_articles_use_case.dart';
@@ -79,7 +75,6 @@ class _FlightPreviewBody extends StatefulWidget {
 class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
   int _previousStepIndex = 0;
   double _stepEnterFrom = 0.0;
-  bool _showDownloadSuccess = false;
   bool _downloadCompletionHandled = false;
   bool _isShowingOverviewWarning = false;
 
@@ -120,7 +115,7 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
 
         if (state.downloadDone && !_downloadCompletionHandled) {
           _downloadCompletionHandled = true;
-          unawaited(_handleDownloadCompleted());
+          _handleDownloadCompleted(state);
         }
 
         final warningTitle = state.overviewWarningTitle;
@@ -210,10 +205,6 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
     required FlightPreviewCubit cubit,
     required SubscriptionCubit subscriptionCubit,
   }) {
-    if (_showDownloadSuccess) {
-      return const FlightDownloadCompletion();
-    }
-
     if (state.isDownloading) {
       return FlightSearchDownloadingView(
         state: state,
@@ -435,63 +426,19 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
     previewCubit.dismissOverviewWarning();
   }
 
-  Future<void> _handleDownloadCompleted() async {
-    if (!mounted) return;
-    setState(() {
-      _showDownloadSuccess = true;
-    });
-
-    // Keep the success state visible first, then ask for feedback
-    // right before the home navigation.
-    await Future<void>.delayed(const Duration(milliseconds: 900));
-    if (!mounted) return;
-
-    await _maybeShowRateDialog();
-    if (!mounted) return;
-
-    homeRefreshNotifier.value = true;
-    AppRouter.goHome(context);
-  }
-
-  Future<void> _maybeShowRateDialog() async {
-    final policy = GetIt.I.get<RatePromptPolicyService>();
-    final shouldShow = await policy.registerTriggerAndShouldShow(
-      RatePromptTrigger.flightMapDownloadSuccess,
-    );
-    if (!shouldShow || !mounted) return;
-
-    final likedApp = await RateAppDialog.show(context);
-    final action = likedApp == true
-        ? 'yes'
-        : likedApp == false
-        ? 'no'
-        : 'dismiss';
+  void _handleDownloadCompleted(FlightPreviewState state) {
     unawaited(
-      GetIt.I.get<AppAnalytics>().log(
-        RatePromptActionEvent(
-          source: RatePromptTrigger.flightMapDownloadSuccess.name,
-          action: action,
-        ),
+      GetIt.I.get<RatePromptPolicyService>().registerTrigger(
+        RatePromptTrigger.flightMapDownloadSuccess,
       ),
     );
-    if (likedApp == true) {
-      await policy.recordAccepted();
-      final opened = await GetIt.I.get<RateStoreLauncher>().openStoreListing();
-      if (!opened && mounted) {
-        _showSnackBar(context, context.t.settings.couldNotOpenStorePage);
-      }
+    final flightId = state.savedFlightId;
+    if (flightId == null || flightId.isEmpty) {
+      _showSnackBar(context, context.t.preview.errorSomethingWrong);
+      AppRouter.goHome(context);
       return;
     }
-
-    await policy.recordDeclined();
-    if (!mounted) return;
-    final submitted = await AppRouter.goToFeedback(
-      context,
-      source: 'rate_prompt_declined',
-      isPro: context.read<SubscriptionCubit>().state.isPro,
-    );
-    if (!mounted || !submitted) return;
-    _showSnackBar(context, context.t.settings.feedbackThanks);
+    AppRouter.goToDownloadCompleted(context, flightId: flightId);
   }
 
   int _stepIndex(CreateFlightStep step) {

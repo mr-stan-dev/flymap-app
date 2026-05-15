@@ -720,11 +720,23 @@ class TranslationsPreviewEn {
 	/// en: 'Try Again'
 	String get tryAgain => 'Try Again';
 
-	/// en: 'Download Complete!'
-	String get downloadComplete => 'Download Complete!';
+	/// en: 'Congrats! You are all set.'
+	String get downloadCongratsTitle => 'Congrats! You are all set.';
 
-	/// en: 'Flight has been saved'
-	String get flightSaved => 'Flight has been saved';
+	/// en: 'Map and selected flight data are saved for offline use during your flight.'
+	String get offlineSavedDetail => 'Map and selected flight data are saved for offline use during your flight.';
+
+	/// en: 'Download completed'
+	String get downloadCompletedTitle => 'Download completed';
+
+	/// en: 'Share your awesome flight card'
+	String get shareFlightCard => 'Share your awesome flight card';
+
+	/// en: 'Share flight card'
+	String get share => 'Share flight card';
+
+	/// en: 'Home'
+	String get home => 'Home';
 
 	/// en: 'Navigating to home...'
 	String get navigatingHome => 'Navigating to home...';
@@ -882,14 +894,17 @@ class TranslationsShareImageEn {
 	/// en: 'Could not generate flight card'
 	String get error => 'Could not generate flight card';
 
-	/// en: 'Every flight has a story'
-	String get tagline => 'Every flight has a story';
+	/// en: 'Every flight is a discovery'
+	String get tagline => 'Every flight is a discovery';
 
 	/// en: 'Flymap'
 	String get brand => 'Flymap';
 
 	/// en: 'Explore your flight'
 	String get exploreYourFlight => 'Explore your flight';
+
+	/// en: '1 country'
+	String get countrySingle => '1 country';
 
 	/// en: '$count countries'
 	String countries({required Object count}) => '${count} countries';
@@ -2641,8 +2656,12 @@ extension on Translations {
 			'preview.errorTitle' => 'Error',
 			'preview.errorSomethingWrong' => 'Something went wrong',
 			'preview.tryAgain' => 'Try Again',
-			'preview.downloadComplete' => 'Download Complete!',
-			'preview.flightSaved' => 'Flight has been saved',
+			'preview.downloadCongratsTitle' => 'Congrats! You are all set.',
+			'preview.offlineSavedDetail' => 'Map and selected flight data are saved for offline use during your flight.',
+			'preview.downloadCompletedTitle' => 'Download completed',
+			'preview.shareFlightCard' => 'Share your awesome flight card',
+			'preview.share' => 'Share flight card',
+			'preview.home' => 'Home',
 			'preview.navigatingHome' => 'Navigating to home...',
 			'preview.downloadingMapTitle' => 'Downloading Flight Map',
 			'preview.cancelDownload' => 'Cancel download',
@@ -2767,12 +2786,12 @@ extension on Translations {
 			'flight.info.openSource' => 'Open Source',
 			'flight.info.openSourcePageTooltip' => 'Open source page',
 			'flight.info.distanceKm' => ({required Object distance}) => '${distance} km',
+			_ => null,
+		} ?? switch (path) {
 			'flight.info.speed' => 'Speed',
 			'flight.info.altitude' => 'Altitude',
 			'flight.info.copyRouteTitle' => 'Flymap Route',
 			'flight.info.copyRouteCode' => ({required Object routeCode}) => 'Route code: ${routeCode}',
-			_ => null,
-		} ?? switch (path) {
 			'flight.info.copyDistance' => ({required Object distance}) => 'Distance: ${distance} km',
 			'flight.info.copyFrom' => 'From',
 			'flight.info.copyTo' => 'To',
@@ -2815,9 +2834,10 @@ extension on Translations {
 			'shareImage.sharing' => 'Sharing...',
 			'shareImage.retry' => 'Retry',
 			'shareImage.error' => 'Could not generate flight card',
-			'shareImage.tagline' => 'Every flight has a story',
+			'shareImage.tagline' => 'Every flight is a discovery',
 			'shareImage.brand' => 'Flymap',
 			'shareImage.exploreYourFlight' => 'Explore your flight',
+			'shareImage.countrySingle' => '1 country',
 			'shareImage.countries' => ({required Object count}) => '${count} countries',
 			'shareImage.unknownCity' => 'Unknown',
 			'shareImage.durationUnavailable' => '--',

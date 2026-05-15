@@ -13,11 +13,16 @@ abstract interface class RatePromptRepository {
   Future<DateTime?> getSnoozedUntil();
 
   Future<void> setSnoozedUntil(DateTime? value);
+
+  Future<DateTime?> getFirstSeenAt();
+
+  Future<void> setFirstSeenAt(DateTime value);
 }
 
 class SharedPrefsRatePromptRepository implements RatePromptRepository {
   static const _kCompleted = 'rate_prompt.completed';
   static const _kSnoozedUntil = 'rate_prompt.snoozed_until';
+  static const _kFirstSeenAt = 'rate_prompt.first_seen_at';
   static const _kTriggerCountPrefix = 'rate_prompt.trigger_count';
 
   @override
@@ -60,6 +65,20 @@ class SharedPrefsRatePromptRepository implements RatePromptRepository {
       return;
     }
     await prefs.setString(_kSnoozedUntil, value.toUtc().toIso8601String());
+  }
+
+  @override
+  Future<DateTime?> getFirstSeenAt() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_kFirstSeenAt);
+    if (raw == null || raw.trim().isEmpty) return null;
+    return DateTime.tryParse(raw);
+  }
+
+  @override
+  Future<void> setFirstSeenAt(DateTime value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kFirstSeenAt, value.toUtc().toIso8601String());
   }
 
   String _triggerCountKey(RatePromptTrigger trigger) =>

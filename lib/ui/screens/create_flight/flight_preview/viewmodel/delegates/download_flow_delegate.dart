@@ -233,6 +233,7 @@ class DownloadFlowDelegate {
         clearDownloadTileCount: true,
         clearDownloadWorkerCount: true,
         downloadDone: false,
+        clearSavedFlightId: true,
         clearDownloadErrorMessage: true,
         clearErrorMessage: true,
       ),
@@ -663,6 +664,7 @@ class DownloadFlowDelegate {
         downloadedBytes: mapPhase.fileSize,
         downloadStage: DownloadStage.completed,
         downloadDone: true,
+        savedFlightId: flightId,
         clearDownloadErrorMessage: true,
       ),
     );
@@ -693,6 +695,7 @@ class DownloadFlowDelegate {
         clearDownloadWorkerCount: true,
         clearErrorMessage: true,
         clearDownloadErrorMessage: true,
+        clearSavedFlightId: true,
       ),
     );
     _savedFlightIdDuringDownload = null;

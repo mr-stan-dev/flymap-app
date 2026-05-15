@@ -42,7 +42,7 @@ class ShareRouteCardRegionChips extends StatelessWidget {
                 ShareRouteCardRegionChip(chip: chips[i], textStyle: textStyle),
                 if (i < chips.length - 1)
                   const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 2),
+                    padding: EdgeInsets.only(left: 2),
                     child: Icon(
                       Icons.arrow_right_alt_rounded,
                       color: Color(0xFF47EFFF),

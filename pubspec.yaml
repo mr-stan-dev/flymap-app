@@ -35,6 +35,7 @@ dependencies:
   sqflite: ^2.3.2
   shared_preferences: ^2.2.3
   share_plus: ^10.0.2
+  in_app_review: ^2.0.10
   url_launcher: ^6.3.2
   csv: ^5.0.2
   flutter_markdown: ^0.7.4+3

@@ -44,7 +44,7 @@ class ShareFlightCardPolicy {
   ///
   /// 3) Prioritize oceans in the middle section:
   ///    - Include all deduped `ocean` regions first (until slots run out).
-  ///    - Display oceans before other middle items.
+  ///    - Final display order is still timeline-based.
   ///
   /// 4) Fill remaining middle slots with countries, then non-countries:
   ///    - Countries are ranked by path intersection length (desc), then
@@ -190,7 +190,8 @@ class ShareFlightCardPolicy {
       );
     }
 
-    selected.sort(_compareMiddleDisplayOrder);
+    // Always return middle chips in real route timeline order.
+    selected.sort(_compareByRouteOrder);
     return selected
         .map(
           (region) => ShareFlightCardChip(
@@ -290,13 +291,6 @@ class ShareFlightCardPolicy {
     final byPath = a.pathFirstEncounterKm.compareTo(b.pathFirstEncounterKm);
     if (byPath != 0) return byPath;
     return _compareByIntersection(a, b);
-  }
-
-  static int _compareMiddleDisplayOrder(RouteRegion a, RouteRegion b) {
-    final aIsOcean = a.regionType == RouteRegionType.ocean;
-    final bIsOcean = b.regionType == RouteRegionType.ocean;
-    if (aIsOcean != bIsOcean) return aIsOcean ? -1 : 1;
-    return _compareByRouteOrder(a, b);
   }
 
   static String _regionKey(RouteRegion region) {

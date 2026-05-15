@@ -8,7 +8,7 @@ class RateAppDialog extends StatelessWidget {
   static Future<bool?> show(BuildContext context) {
     return showDialog<bool>(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (_) => const RateAppDialog(),
     );
   }

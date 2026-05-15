@@ -2,6 +2,8 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/ui/screens/create_flight/download_completed/download_completed_args.dart';
+import 'package:flymap/ui/screens/create_flight/download_completed/download_completed_screen.dart';
 import 'package:flymap/ui/screens/about/about_screen.dart';
 import 'package:flymap/ui/screens/create_flight/airports_search/airports_search_screen.dart';
 import 'package:flymap/ui/screens/create_flight/flight_number_search/flight_number_search_screen.dart';
@@ -33,6 +35,7 @@ class AppRouter {
   static const String flightRoute = '/flight';
   static const String shareFlightRoute = '/share-flight';
   static const String shareImageRoute = '/share-image';
+  static const String downloadCompletedRoute = '/download-completed';
   static const String settingsRoute = '/settings';
   static const String feedbackRoute = '/feedback';
   static const String subscriptionRoute = '/subscription';
@@ -76,7 +79,7 @@ class AppRouter {
           name: 'flight-number-search',
           builder: (context, state) => const FlightNumberSearchScreen(),
         ),
-        
+
         GoRoute(
           path: routeTypeSelectorRoute,
           name: 'route-type-selector',
@@ -134,9 +137,26 @@ class AppRouter {
           name: 'share-image',
           builder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
-            final flight = extra?['flight'] as Flight;
+            final flightIdFromExtra = extra?['flightId'] as String?;
+            final flightFromExtra = extra?['flight'] as Flight?;
+            final flightId = flightIdFromExtra ?? flightFromExtra?.id;
+            if (flightId == null || flightId.isEmpty) {
+              return const HomeScreen();
+            }
 
-            return ShareImageScreen(flight: flight);
+            return ShareImageScreen(flightId: flightId);
+          },
+        ),
+
+        GoRoute(
+          path: downloadCompletedRoute,
+          name: 'download-completed',
+          builder: (context, state) {
+            final args = state.extra as DownloadCompletedArgs?;
+            if (args == null || args.flightId.isEmpty) {
+              return const HomeScreen();
+            }
+            return DownloadCompletedRouteScreen(args: args);
           },
         ),
 
@@ -236,9 +256,19 @@ class AppRouter {
     context.push(shareFlightRoute, extra: {'flight': flight});
   }
 
-  /// Navigate to share image screen with flight
-  static void goToShareImage(BuildContext context, {required Flight flight}) {
-    context.push(shareImageRoute, extra: {'flight': flight});
+  /// Navigate to share image screen with flight id.
+  static void goToShareImage(BuildContext context, {required String flightId}) {
+    context.push(shareImageRoute, extra: {'flightId': flightId});
+  }
+
+  static void goToDownloadCompleted(
+    BuildContext context, {
+    required String flightId,
+  }) {
+    context.go(
+      downloadCompletedRoute,
+      extra: DownloadCompletedArgs(flightId: flightId),
+    );
   }
 
   /// Navigate to settings

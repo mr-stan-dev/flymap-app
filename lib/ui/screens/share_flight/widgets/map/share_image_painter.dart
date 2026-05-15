@@ -20,6 +20,7 @@ class ShareImagePainter {
   static const Color _cyan = Color(0xFF47EFFF);
   static const double _planeGapLength = 80.0;
   static const double _planeGapCenterForwardBias = 6.0;
+  static const double _routeStrokeWidth = 5.0;
 
   void paint(Canvas canvas, Size size) {
     _drawRoute(canvas, size);
@@ -34,9 +35,9 @@ class ShareImagePainter {
     final end = points.last;
     final path = _buildArcPath(start, end);
 
-    final paint = Paint()
+    final routePaint = Paint()
       ..color = _cyan
-      ..strokeWidth = 5
+      ..strokeWidth = _routeStrokeWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
@@ -54,14 +55,12 @@ class ShareImagePainter {
       final gapEnd = min(metric.length, gapCenter + (_planeGapLength / 2));
 
       if (gapStart > 0) {
-        _drawDashedPath(canvas, metric.extractPath(0, gapStart), paint);
+        final segment = metric.extractPath(0, gapStart);
+        _drawDashedPath(canvas, segment, routePaint);
       }
       if (gapEnd < metric.length) {
-        _drawDashedPath(
-          canvas,
-          metric.extractPath(gapEnd, metric.length),
-          paint,
-        );
+        final segment = metric.extractPath(gapEnd, metric.length);
+        _drawDashedPath(canvas, segment, routePaint);
       }
 
       final tangent = metric.getTangentForOffset(midOffset);
@@ -69,7 +68,7 @@ class ShareImagePainter {
         _drawAirplane(canvas, tangent.position, tangent.vector);
       }
     } else {
-      _drawDashedPath(canvas, path, paint);
+      _drawDashedPath(canvas, path, routePaint);
     }
 
     _drawDot(canvas, start);
@@ -160,8 +159,8 @@ class ShareImagePainter {
   }
 
   void _drawDot(Canvas canvas, Offset position) {
-    canvas.drawCircle(position, 12, Paint()..color = const Color(0xFFE4FFFF));
-    canvas.drawCircle(position, 11, Paint()..color = _cyan);
+    canvas.drawCircle(position, 12, Paint()..color = Colors.white);
+    canvas.drawCircle(position, 10, Paint()..color = _cyan);
   }
 
   void _drawAirportCodeLabels(

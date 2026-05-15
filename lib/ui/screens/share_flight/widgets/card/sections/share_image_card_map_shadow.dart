@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/ui/screens/share_flight/widgets/card/config/share_image_card_config.dart';
 
-class ShareImageCardMapScrim extends StatelessWidget {
-  const ShareImageCardMapScrim({super.key});
+class ShareImageCardMapShadow extends StatelessWidget {
+  const ShareImageCardMapShadow({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class ShareImageCardMapScrim extends StatelessWidget {
         Align(
           alignment: Alignment.topCenter,
           child: Container(
-            height: ShareImageCardConfig.topScrimHeight,
+            height: ShareImageCardConfig.topShadowHeight,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -31,7 +31,7 @@ class ShareImageCardMapScrim extends StatelessWidget {
         Align(
           alignment: Alignment.bottomCenter,
           child: Container(
-            height: ShareImageCardConfig.bottomScrimHeight,
+            height: ShareImageCardConfig.bottomShadowHeight,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,

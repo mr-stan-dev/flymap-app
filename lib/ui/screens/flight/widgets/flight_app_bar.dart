@@ -144,7 +144,7 @@ class FlightAppBar extends StatelessWidget {
   Future<void> _handleMenuAction(BuildContext context, String value) async {
     switch (value) {
       case 'share_route':
-        AppRouter.goToShareImage(context, flight: flight);
+        AppRouter.goToShareImage(context, flightId: flight.id);
         break;
       case 'copy_route':
         final routeSummary = RouteCopyBuilder.build(flight.route);
