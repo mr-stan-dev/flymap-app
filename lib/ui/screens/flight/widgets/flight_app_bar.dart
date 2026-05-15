@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/i18n/strings.g.dart';
@@ -7,7 +6,6 @@ import 'package:flymap/router/app_router.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/widgets/complete_flight_confirmation_dialog.dart';
 import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dialog.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/shared/route_copy_builder.dart';
 import 'package:flymap/ui/theme/app_theme_ext.dart';
 import 'package:flymap/ui/widgets/pro_widgets.dart';
 import 'package:flymap/utils/route_utils.dart';
@@ -114,10 +112,6 @@ class FlightAppBar extends StatelessWidget {
                               value: 'share_route',
                               child: Text(context.t.flight.shareRoute),
                             ),
-                            PopupMenuItem(
-                              value: 'copy_route',
-                              child: Text(context.t.flight.copyRoute),
-                            ),
                             PopupMenuDivider(),
                             PopupMenuItem(
                               value: 'complete_flight',
@@ -145,15 +139,6 @@ class FlightAppBar extends StatelessWidget {
     switch (value) {
       case 'share_route':
         AppRouter.goToShareImage(context, flightId: flight.id);
-        break;
-      case 'copy_route':
-        final routeSummary = RouteCopyBuilder.build(flight.route);
-        await Clipboard.setData(ClipboardData(text: routeSummary));
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.t.flight.routeSummaryCopied)),
-          );
-        }
         break;
       case 'delete_flight':
         final confirmed = await DeleteFlightConfirmationDialog.show(
