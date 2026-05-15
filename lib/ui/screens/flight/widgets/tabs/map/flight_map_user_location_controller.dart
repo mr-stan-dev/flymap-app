@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/layers/user_layer.dart';
+import 'package:flymap/ui/map/map_style_safety.dart';
 import 'package:flymap/utils/speed_unit_utils.dart';
 import 'package:flutter/services.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
@@ -11,6 +13,8 @@ class FlightMapUserLocationController {
   FlightMapUserLocationController({required Logger logger}) : _logger = logger;
 
   static const _planeImageId = 'flight-map-user-plane';
+  static const _planeSourceId = 'flight-map-user-plane-source';
+  static const _planeLayerId = 'flight-map-user-plane-layer';
   static const _planeIconAssetPath = 'assets/images/icons/plane_blue.png';
   static const _stationarySpeedThresholdMetersPerSecond = 4.0;
   static const _defaultAnimationDuration = Duration(milliseconds: 1200);
@@ -22,22 +26,25 @@ class FlightMapUserLocationController {
   final Map<String, Uint8List> _assetBytesCache = {};
 
   Circle? _userCircle;
-  Symbol? _userPlaneSymbol;
   GpsData? _pendingGpsData;
   bool _isApplyingUserLocation = false;
+  bool _isPlaneLayerReady = false;
   LatLng? _renderedPosition;
   double _renderedHeading = 0;
   DateTime? _lastAppliedFixAt;
   int _animationGeneration = 0;
 
-  LatLng? get currentUserLocation =>
-      _renderedPosition ?? _userPlaneSymbol?.options.geometry;
+  LatLng? get currentUserLocation => _renderedPosition;
+  double get currentUserHeading => _renderedHeading;
 
   Future<void> updateUserLocation(
     GpsData data, {
     required MapLibreMapController? controller,
     required bool isReady,
-    required bool followUser,
+    required bool Function() shouldFollowUser,
+    required bool Function() shouldFollowHeadingUp,
+    required double Function() followZoomProvider,
+    required double Function() followTiltProvider,
   }) async {
     _pendingGpsData = data;
 
@@ -53,7 +60,10 @@ class FlightMapUserLocationController {
           next,
           controller: controller,
           isReady: isReady,
-          followUser: followUser,
+          shouldFollowUser: shouldFollowUser,
+          shouldFollowHeadingUp: shouldFollowHeadingUp,
+          followZoomProvider: followZoomProvider,
+          followTiltProvider: followTiltProvider,
         );
       }
     } finally {
@@ -65,7 +75,10 @@ class FlightMapUserLocationController {
     GpsData data, {
     required MapLibreMapController controller,
     required bool isReady,
-    required bool followUser,
+    required bool Function() shouldFollowUser,
+    required bool Function() shouldFollowHeadingUp,
+    required double Function() followZoomProvider,
+    required double Function() followTiltProvider,
   }) async {
     if (!isReady) return;
     final lat = data.latitude;
@@ -73,36 +86,40 @@ class FlightMapUserLocationController {
     _logger.log('updateUserLocation lat: $lat, lon: $lon');
     if (lat == null || lon == null) return;
     final pos = LatLng(lat, lon);
-    final heading = data.course ?? 0;
+    final heading = _resolveHeading(
+      targetPosition: pos,
+      fallbackHeading: data.course ?? _renderedHeading,
+    );
     final showCircle = _shouldShowStationaryCircle(data.speed);
 
     try {
-      if (_userPlaneSymbol == null || _userCircle == null) {
-        await _ensurePlaneImageRegistered(controller);
+      if (_userCircle == null) {
         _userCircle = await controller.addCircle(
           UserLayer.markerCircle(pos, visible: showCircle),
         );
-        _userPlaneSymbol = await controller.addSymbol(
-          UserLayer.planePin(
-            pos,
-            heading,
-            imageId: _planeImageId,
-            visible: !showCircle,
-          ),
-        );
-        _renderedPosition = pos;
-        _renderedHeading = heading;
-        _lastAppliedFixAt = DateTime.now();
       } else {
         final reachedTarget = await _animateMarkerTransition(
           controller: controller,
           targetPosition: pos,
           targetHeading: heading,
+          shouldFollowUser: shouldFollowUser,
+          shouldFollowHeadingUp: shouldFollowHeadingUp,
+          followZoomProvider: followZoomProvider,
+          followTiltProvider: followTiltProvider,
           showCircle: showCircle,
         );
         if (!reachedTarget) {
           return;
         }
+      }
+
+      if (_renderedPosition == null) {
+        await _updateRenderedMarker(
+          controller: controller,
+          position: pos,
+          heading: heading,
+          showCircle: showCircle,
+        );
       }
     } catch (error) {
       _logger.error('Failed to apply user location marker: $error');
@@ -116,7 +133,10 @@ class FlightMapUserLocationController {
                 pending,
                 controller: controller,
                 isReady: isReady,
-                followUser: followUser,
+                shouldFollowUser: shouldFollowUser,
+                shouldFollowHeadingUp: shouldFollowHeadingUp,
+                followZoomProvider: followZoomProvider,
+                followTiltProvider: followTiltProvider,
               ),
             );
           }
@@ -125,8 +145,15 @@ class FlightMapUserLocationController {
       return;
     }
 
-    if (followUser) {
-      await controller.animateCamera(CameraUpdate.newLatLng(pos));
+    if (shouldFollowUser()) {
+      await _moveFollowCamera(
+        controller: controller,
+        position: pos,
+        heading: heading,
+        followHeadingUp: shouldFollowHeadingUp(),
+        followZoom: followZoomProvider(),
+        followTilt: followTiltProvider(),
+      );
     }
   }
 
@@ -134,6 +161,10 @@ class FlightMapUserLocationController {
     required MapLibreMapController controller,
     required LatLng targetPosition,
     required double targetHeading,
+    required bool Function() shouldFollowUser,
+    required bool Function() shouldFollowHeadingUp,
+    required double Function() followZoomProvider,
+    required double Function() followTiltProvider,
     required bool showCircle,
   }) async {
     final startPosition = _renderedPosition ?? targetPosition;
@@ -149,6 +180,16 @@ class FlightMapUserLocationController {
         heading: targetHeading,
         showCircle: showCircle,
       );
+      if (shouldFollowUser()) {
+        await _moveFollowCamera(
+          controller: controller,
+          position: targetPosition,
+          heading: targetHeading,
+          followHeadingUp: shouldFollowHeadingUp(),
+          followZoom: followZoomProvider(),
+          followTilt: followTiltProvider(),
+        );
+      }
       return true;
     }
 
@@ -157,9 +198,28 @@ class FlightMapUserLocationController {
         (animationDuration.inMilliseconds / _frameInterval.inMilliseconds)
             .ceil()
             .clamp(1, 24);
+    var previousFramePosition = startPosition;
     for (var frame = 1; frame <= totalFrames; frame++) {
       if (generation != _animationGeneration) return false;
-      if (_pendingGpsData != null) return false;
+      if (_pendingGpsData != null) {
+        await _updateRenderedMarker(
+          controller: controller,
+          position: targetPosition,
+          heading: targetHeading,
+          showCircle: showCircle,
+        );
+        if (shouldFollowUser()) {
+          await _moveFollowCamera(
+            controller: controller,
+            position: targetPosition,
+            heading: targetHeading,
+            followHeadingUp: shouldFollowHeadingUp(),
+            followZoom: followZoomProvider(),
+            followTilt: followTiltProvider(),
+          );
+        }
+        return true;
+      }
 
       final t = frame / totalFrames;
       final position = LatLng(
@@ -171,22 +231,64 @@ class FlightMapUserLocationController {
           t,
         ),
       );
-      final heading = _interpolateHeadingShortestPath(
+      final interpolatedHeading = _interpolateHeadingShortestPath(
         startHeading,
         targetHeading,
         t,
       );
+      final heading = _headingFromMovement(
+        from: previousFramePosition,
+        to: position,
+        fallbackHeading: interpolatedHeading,
+      );
+      previousFramePosition = position;
       await _updateRenderedMarker(
         controller: controller,
         position: position,
         heading: heading,
         showCircle: showCircle,
       );
+      if (shouldFollowUser()) {
+        await _moveFollowCamera(
+          controller: controller,
+          position: position,
+          heading: heading,
+          followHeadingUp: shouldFollowHeadingUp(),
+          followZoom: followZoomProvider(),
+          followTilt: followTiltProvider(),
+        );
+      }
       if (frame < totalFrames) {
         await Future.delayed(_frameInterval);
       }
     }
     return true;
+  }
+
+  Future<void> _moveFollowCamera({
+    required MapLibreMapController controller,
+    required LatLng position,
+    required double heading,
+    required bool followHeadingUp,
+    required double followZoom,
+    required double followTilt,
+  }) async {
+    if (!followHeadingUp) {
+      await controller.moveCamera(CameraUpdate.newLatLng(position));
+      return;
+    }
+    final zoom = followZoom.isFinite ? followZoom : 5.0;
+    final tilt = followTilt.isFinite ? followTilt : 0.0;
+    await controller.moveCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: position,
+          zoom: zoom,
+          tilt: tilt,
+          bearing: _normalizeHeading(heading),
+        ),
+      ),
+    );
   }
 
   Future<void> _updateRenderedMarker({
@@ -199,17 +301,131 @@ class FlightMapUserLocationController {
       _userCircle!,
       UserLayer.markerCircle(position, visible: showCircle),
     );
-    await controller.updateSymbol(
-      _userPlaneSymbol!,
-      UserLayer.planePin(
-        position,
-        heading,
-        imageId: _planeImageId,
-        visible: !showCircle,
-      ),
+    await _updatePlaneLayer(
+      controller: controller,
+      position: position,
+      heading: heading,
+      visible: !showCircle,
     );
     _renderedPosition = position;
     _renderedHeading = heading;
+  }
+
+  Future<void> _updatePlaneLayer({
+    required MapLibreMapController controller,
+    required LatLng position,
+    required double heading,
+    required bool visible,
+  }) async {
+    if (!_isPlaneLayerReady) {
+      await _rebuildPlaneLayer(
+        controller: controller,
+        position: position,
+        heading: heading,
+        visible: visible,
+      );
+      return;
+    }
+
+    try {
+      await controller.setGeoJsonSource(
+        _planeSourceId,
+        _planeFeatureCollection(
+          position: position,
+          heading: heading,
+          visible: visible,
+        ),
+      );
+    } on PlatformException catch (error) {
+      if (isStaleStylePlatformException(error)) {
+        _isPlaneLayerReady = false;
+        return;
+      }
+      _logger.log('Rebuilding plane layer after source update error: $error');
+      await _rebuildPlaneLayer(
+        controller: controller,
+        position: position,
+        heading: heading,
+        visible: visible,
+      );
+    }
+  }
+
+  Future<void> _rebuildPlaneLayer({
+    required MapLibreMapController controller,
+    required LatLng position,
+    required double heading,
+    required bool visible,
+  }) async {
+    await _ensurePlaneImageRegistered(controller);
+    await _removePlaneLayerArtifacts(controller);
+    await controller.addGeoJsonSource(
+      _planeSourceId,
+      _planeFeatureCollection(
+        position: position,
+        heading: heading,
+        visible: visible,
+      ),
+    );
+    await controller.addLayer(
+      _planeSourceId,
+      _planeLayerId,
+      SymbolLayerProperties(
+        iconImage: _planeImageId,
+        iconSize: 0.52,
+        iconRotate: ['get', 'bearing'],
+        iconRotationAlignment: 'map',
+        iconPitchAlignment: 'map',
+        iconAllowOverlap: true,
+        iconIgnorePlacement: true,
+        iconAnchor: 'center',
+        iconOpacity: [
+          'case',
+          [
+            '==',
+            ['get', 'visible'],
+            true,
+          ],
+          1.0,
+          0.0,
+        ],
+      ),
+    );
+    _isPlaneLayerReady = true;
+  }
+
+  Future<void> _removePlaneLayerArtifacts(
+    MapLibreMapController controller,
+  ) async {
+    try {
+      await controller.removeLayer(_planeLayerId);
+    } catch (_) {}
+    try {
+      await controller.removeSource(_planeSourceId);
+    } catch (_) {}
+  }
+
+  Map<String, dynamic> _planeFeatureCollection({
+    required LatLng position,
+    required double heading,
+    required bool visible,
+  }) {
+    return <String, dynamic>{
+      'type': 'FeatureCollection',
+      'features': <Map<String, dynamic>>[
+        <String, dynamic>{
+          'type': 'Feature',
+          'properties': <String, dynamic>{
+            'bearing': _normalizeHeading(heading),
+            'visible': visible,
+          },
+          'geometry': <String, dynamic>{
+            'type': 'Point',
+            'coordinates': <double>[position.longitude, position.latitude],
+          },
+        },
+      ],
+    };
   }
 
   bool _shouldShowStationaryCircle(SpeedValue? speed) {
@@ -311,6 +527,47 @@ class FlightMapUserLocationController {
     return _normalizeHeading(normalizedFrom + delta * t);
   }
 
+  double _resolveHeading({
+    required LatLng targetPosition,
+    required double fallbackHeading,
+  }) {
+    final current = _renderedPosition;
+    if (current == null) {
+      return _normalizeHeading(fallbackHeading);
+    }
+    return _headingFromMovement(
+      from: current,
+      to: targetPosition,
+      fallbackHeading: fallbackHeading,
+    );
+  }
+
+  double _headingFromMovement({
+    required LatLng from,
+    required LatLng to,
+    required double fallbackHeading,
+  }) {
+    final distanceSquared =
+        math.pow(to.latitude - from.latitude, 2) +
+        math.pow(_normalizeLongitude(to.longitude - from.longitude), 2);
+    if (distanceSquared < 1e-10) {
+      return _normalizeHeading(fallbackHeading);
+    }
+    return _bearingDegrees(from, to);
+  }
+
+  double _bearingDegrees(LatLng from, LatLng to) {
+    final lat1 = _degToRad(from.latitude);
+    final lat2 = _degToRad(to.latitude);
+    final dLon = _degToRad(_normalizeLongitude(to.longitude - from.longitude));
+    final y = math.sin(dLon) * math.cos(lat2);
+    final x =
+        (math.cos(lat1) * math.sin(lat2)) -
+        (math.sin(lat1) * math.cos(lat2) * math.cos(dLon));
+    final raw = _radToDeg(math.atan2(y, x));
+    return _normalizeHeading(raw);
+  }
+
   double _normalizeLongitude(double longitude) {
     var lon = longitude;
     while (lon > 180.0) {
@@ -327,10 +584,16 @@ class FlightMapUserLocationController {
     return normalized < 0 ? normalized + 360 : normalized;
   }
 
+  double _degToRad(double value) => value * (math.pi / 180);
+  double _radToDeg(double value) => value * (180 / math.pi);
+
   Future<void> flushPendingGpsData({
     required MapLibreMapController? controller,
     required bool isReady,
-    required bool followUser,
+    required bool Function() shouldFollowUser,
+    required bool Function() shouldFollowHeadingUp,
+    required double Function() followZoomProvider,
+    required double Function() followTiltProvider,
   }) async {
     final pending = _pendingGpsData;
     if (pending == null) return;
@@ -338,16 +601,19 @@ class FlightMapUserLocationController {
       pending,
       controller: controller,
       isReady: isReady,
-      followUser: followUser,
+      shouldFollowUser: shouldFollowUser,
+      shouldFollowHeadingUp: shouldFollowHeadingUp,
+      followZoomProvider: followZoomProvider,
+      followTiltProvider: followTiltProvider,
     );
   }
 
   void dispose() {
     _animationGeneration++;
     _userCircle = null;
-    _userPlaneSymbol = null;
     _pendingGpsData = null;
     _isApplyingUserLocation = false;
+    _isPlaneLayerReady = false;
     _renderedPosition = null;
     _renderedHeading = 0;
     _lastAppliedFixAt = null;

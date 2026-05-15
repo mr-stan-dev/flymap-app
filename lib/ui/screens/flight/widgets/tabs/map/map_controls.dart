@@ -8,8 +8,11 @@ class FlightMapControls extends StatefulWidget {
     required this.visible,
     required this.is3D,
     required this.followUser,
+    required this.showResetNorth,
+    required this.mapBearingDegrees,
     required this.onToggle3D,
     required this.onToggleFollowUser,
+    required this.onResetNorth,
     super.key,
   });
 
@@ -17,8 +20,11 @@ class FlightMapControls extends StatefulWidget {
   final bool visible;
   final bool is3D;
   final bool followUser;
+  final bool showResetNorth;
+  final double mapBearingDegrees;
   final Future<void> Function() onToggle3D;
   final Future<void> Function() onToggleFollowUser;
+  final Future<void> Function() onResetNorth;
 
   @override
   State<FlightMapControls> createState() => _FlightMapControlsState();
@@ -101,24 +107,39 @@ class _FlightMapControlsState extends State<FlightMapControls>
                 ),
               ),
               const SizedBox(height: 8),
-              ScaleTransition(
-                scale: _pulseAnimation,
-                child: FloatingActionButton(
-                  heroTag: 'flight_map_follow_fab',
-                  backgroundColor: widget.followUser
-                      ? successColor.withValues(alpha: 0.75)
-                      : buttonBg,
-                  foregroundColor: colorScheme.onSurface,
-                  mini: true,
-                  tooltip: widget.followUser
-                      ? context.t.flight.map.uncenterMap
-                      : context.t.flight.map.centerOnMe,
-                  onPressed: widget.onToggleFollowUser,
+              FloatingActionButton(
+                heroTag: 'flight_map_follow_fab',
+                backgroundColor: widget.followUser
+                    ? successColor.withValues(alpha: 0.75)
+                    : buttonBg,
+                foregroundColor: colorScheme.onSurface,
+                mini: true,
+                tooltip: widget.followUser
+                    ? context.t.flight.map.uncenterMap
+                    : context.t.flight.map.centerOnMe,
+                onPressed: widget.onToggleFollowUser,
+                child: ScaleTransition(
+                  scale: _pulseAnimation,
                   child: Icon(
                     widget.followUser ? Icons.gps_fixed : Icons.gps_not_fixed,
                   ),
                 ),
               ),
+              if (widget.showResetNorth) ...[
+                const SizedBox(height: 8),
+                FloatingActionButton(
+                  heroTag: 'flight_map_reset_north_fab',
+                  backgroundColor: buttonBg,
+                  foregroundColor: colorScheme.onSurface,
+                  mini: true,
+                  tooltip: 'Reset north',
+                  onPressed: widget.onResetNorth,
+                  child: Transform.rotate(
+                    angle: -(widget.mapBearingDegrees * 3.1415926535 / 180),
+                    child: const Icon(Icons.explore),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

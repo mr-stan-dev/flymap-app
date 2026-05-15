@@ -51,8 +51,13 @@ class _FlightMapState extends State<FlightMap> {
   bool _is3D = false;
   bool _followUser = false;
   bool _showControls = true;
+  bool _showResetNorth = false;
+  double _mapBearingDegrees = 0;
+  double _cameraZoom = 1.0;
+  double _cameraTilt = 0.0;
   Timer? _controlsHideTimer;
   int? _lastLoggedZoomTenths;
+  int? _lastBearingTenths;
   String? _mapLoadError;
   bool _featureTapListenerAttached = false;
   String? _selectedGeoRegionId;
@@ -89,6 +94,7 @@ class _FlightMapState extends State<FlightMap> {
   void initState() {
     super.initState();
     _routeRegions = widget.flight.info.routeRegions;
+    _cameraZoom = _initialZoom();
     _mapSession = FlightMapSessionController(
       logger: _logger,
       flight: widget.flight,
@@ -149,17 +155,24 @@ class _FlightMapState extends State<FlightMap> {
     setState(() {
       _followUser = true;
     });
-    final update = CameraUpdate.newLatLng(userLoc);
+    await _flushPendingGpsData();
+    final followBearing = _userLocationController.currentUserHeading;
+    final update = CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: userLoc,
+        zoom: _cameraZoom,
+        tilt: _cameraTilt,
+        bearing: followBearing,
+      ),
+    );
     await _mapSession.controller?.animateCamera(update);
   }
 
   Future<void> _toggle3D() async {
     _showControlsTemporarily();
-    if (_is3D) {
-      await _mapSession.controller?.animateCamera(CameraUpdate.tiltTo(0));
-    } else {
-      await _mapSession.controller?.animateCamera(CameraUpdate.tiltTo(45));
-    }
+    final nextTilt = _is3D ? 0.0 : 45.0;
+    _cameraTilt = nextTilt;
+    await _mapSession.controller?.animateCamera(CameraUpdate.tiltTo(nextTilt));
     if (mounted) {
       setState(() => _is3D = !_is3D);
     }
@@ -261,7 +274,10 @@ class _FlightMapState extends State<FlightMap> {
       data,
       controller: _mapSession.controller,
       isReady: _mapSession.isReadyForUserLocation,
-      followUser: _followUser,
+      shouldFollowUser: () => _followUser,
+      shouldFollowHeadingUp: () => _followUser,
+      followZoomProvider: () => _cameraZoom,
+      followTiltProvider: () => _cameraTilt,
     );
   }
 
@@ -269,7 +285,10 @@ class _FlightMapState extends State<FlightMap> {
     await _userLocationController.flushPendingGpsData(
       controller: _mapSession.controller,
       isReady: _mapSession.isReadyForUserLocation,
-      followUser: _followUser,
+      shouldFollowUser: () => _followUser,
+      shouldFollowHeadingUp: () => _followUser,
+      followZoomProvider: () => _cameraZoom,
+      followTiltProvider: () => _cameraTilt,
     );
   }
 
@@ -282,18 +301,45 @@ class _FlightMapState extends State<FlightMap> {
   }
 
   void _onCameraMove(CameraPosition cameraPosition) {
+    if (cameraPosition.zoom.isFinite) {
+      _cameraZoom = cameraPosition.zoom;
+    }
+    if (cameraPosition.tilt.isFinite) {
+      _cameraTilt = cameraPosition.tilt;
+    }
+
+    final bearing = _normalizeBearing(cameraPosition.bearing);
+    final bearingTenths = (bearing * 10).round();
+    if (_lastBearingTenths == bearingTenths) {
+      return;
+    }
+    _lastBearingTenths = bearingTenths;
+    final showResetNorth = bearing.abs() > 1.5;
+    if (_showResetNorth != showResetNorth ||
+        (_mapBearingDegrees - bearing).abs() >= 0.2) {
+      setState(() {
+        _mapBearingDegrees = bearing;
+        _showResetNorth = showResetNorth;
+      });
+    }
+
     final nextZoom = cameraPosition.zoom;
     if (!nextZoom.isFinite) {
       return;
     }
 
     final nextZoomTenths = (nextZoom * 10).round();
-    if (_lastLoggedZoomTenths == nextZoomTenths) {
-      return;
+    if (_lastLoggedZoomTenths != nextZoomTenths) {
+      _lastLoggedZoomTenths = nextZoomTenths;
+      _logger.log('Camera zoom: ${nextZoom.toStringAsFixed(1)}');
     }
+  }
 
-    _lastLoggedZoomTenths = nextZoomTenths;
-    _logger.log('Camera zoom: ${nextZoom.toStringAsFixed(1)}');
+  double _normalizeBearing(double bearing) {
+    var normalized = bearing % 360;
+    if (normalized > 180) normalized -= 360;
+    if (normalized < -180) normalized += 360;
+    return normalized;
   }
 
   RouteRegion? _selectedGeoRegion() {
@@ -554,8 +600,7 @@ class _FlightMapState extends State<FlightMap> {
               styleString: _styleString!,
               trackCameraPosition: true,
               onCameraMove: _onCameraMove,
-              compassViewPosition: CompassViewPosition.bottomRight,
-              compassViewMargins: const Point(16, 16),
+              compassEnabled: false,
               onStyleLoadedCallback: _onStyleLoaded,
             ),
           ),
@@ -590,8 +635,11 @@ class _FlightMapState extends State<FlightMap> {
             visible: _showControls || _followUser,
             is3D: _is3D,
             followUser: _followUser,
+            showResetNorth: _showResetNorth,
+            mapBearingDegrees: _mapBearingDegrees,
             onToggle3D: _toggle3D,
             onToggleFollowUser: _toggleUserFollow,
+            onResetNorth: _resetNorth,
           ),
           // Geo-awareness cards — bottom-left
           Positioned(
@@ -647,5 +695,21 @@ class _FlightMapState extends State<FlightMap> {
     messenger?.showSnackBar(
       SnackBar(content: Text(context.t.flight.upcoming.checkInError)),
     );
+  }
+
+  Future<void> _resetNorth() async {
+    _showControlsTemporarily();
+    if (_followUser && mounted) {
+      setState(() {
+        _followUser = false;
+      });
+    }
+    await _mapSession.controller?.animateCamera(CameraUpdate.bearingTo(0));
+    if (!mounted) return;
+    setState(() {
+      _mapBearingDegrees = 0;
+      _showResetNorth = false;
+      _lastBearingTenths = 0;
+    });
   }
 }
