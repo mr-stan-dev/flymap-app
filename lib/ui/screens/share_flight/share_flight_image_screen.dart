@@ -214,12 +214,40 @@ class _ShareImageViewState extends State<_ShareImageView> {
     if (byteData == null) return null;
 
     final tempDir = await getTemporaryDirectory();
+    final safeRouteCode = _safeRouteCode(routeCode);
+    await _cleanupLegacyShareCardFiles(
+      tempDir: tempDir,
+      safeRouteCode: safeRouteCode,
+    );
     final filePath = p.join(
       tempDir.path,
-      'flymap_share_card_${routeCode}_${DateTime.now().millisecondsSinceEpoch}.png',
+      'flymap_share_card_$safeRouteCode.png',
     );
     final file = File(filePath);
     await file.writeAsBytes(byteData.buffer.asUint8List(), flush: true);
     return filePath;
+  }
+
+  String _safeRouteCode(String routeCode) {
+    final sanitized = routeCode.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+    return sanitized.isEmpty ? 'route' : sanitized;
+  }
+
+  Future<void> _cleanupLegacyShareCardFiles({
+    required Directory tempDir,
+    required String safeRouteCode,
+  }) async {
+    final legacyPrefix = 'flymap_share_card_${safeRouteCode}_';
+    try {
+      await for (final entity in tempDir.list(followLinks: false)) {
+        if (entity is! File) continue;
+        final name = p.basename(entity.path);
+        if (name.startsWith(legacyPrefix) && name.endsWith('.png')) {
+          await entity.delete();
+        }
+      }
+    } catch (_) {
+      // Best-effort cleanup only.
+    }
   }
 }

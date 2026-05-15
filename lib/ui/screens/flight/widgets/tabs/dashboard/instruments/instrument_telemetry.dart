@@ -1,5 +1,6 @@
 import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/domain/policy/outside_temperature_policy.dart';
+import 'package:flymap/utils/speed_unit_utils.dart';
 
 class InstrumentTelemetry {
   const InstrumentTelemetry({
@@ -82,19 +83,7 @@ class InstrumentTelemetry {
       (value / nearest).round() * nearest;
 
   static double _speedKmh(SpeedValue speed) {
-    switch (speed.unit.toLowerCase()) {
-      case 'm/s':
-        return speed.value * 3.6;
-      case 'kt':
-      case 'kts':
-      case 'kn':
-        return speed.value * 1.852;
-      case 'mph':
-        return speed.value * 1.609344;
-      case 'km/h':
-      default:
-        return speed.value;
-    }
+    return SpeedUnitUtils.toKmh(speed);
   }
 
   static double _altitudeMeters(AltitudeValue altitude) {

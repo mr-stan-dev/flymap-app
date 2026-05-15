@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/layers/user_layer.dart';
+import 'package:flymap/utils/speed_unit_utils.dart';
 import 'package:flutter/services.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
@@ -30,8 +31,7 @@ class FlightMapUserLocationController {
   int _animationGeneration = 0;
 
   LatLng? get currentUserLocation =>
-      _renderedPosition ??
-      _userPlaneSymbol?.options.geometry;
+      _renderedPosition ?? _userPlaneSymbol?.options.geometry;
 
   Future<void> updateUserLocation(
     GpsData data, {
@@ -80,10 +80,7 @@ class FlightMapUserLocationController {
       if (_userPlaneSymbol == null || _userCircle == null) {
         await _ensurePlaneImageRegistered(controller);
         _userCircle = await controller.addCircle(
-          UserLayer.markerCircle(
-            pos,
-            visible: showCircle,
-          ),
+          UserLayer.markerCircle(pos, visible: showCircle),
         );
         _userPlaneSymbol = await controller.addSymbol(
           UserLayer.planePin(
@@ -156,10 +153,10 @@ class FlightMapUserLocationController {
     }
 
     final generation = ++_animationGeneration;
-    final totalFrames = (animationDuration.inMilliseconds /
-            _frameInterval.inMilliseconds)
-        .ceil()
-        .clamp(1, 24);
+    final totalFrames =
+        (animationDuration.inMilliseconds / _frameInterval.inMilliseconds)
+            .ceil()
+            .clamp(1, 24);
     for (var frame = 1; frame <= totalFrames; frame++) {
       if (generation != _animationGeneration) return false;
       if (_pendingGpsData != null) return false;
@@ -217,23 +214,8 @@ class FlightMapUserLocationController {
 
   bool _shouldShowStationaryCircle(SpeedValue? speed) {
     if (speed == null) return false;
-    return _toMetersPerSecond(speed) <= _stationarySpeedThresholdMetersPerSecond;
-  }
-
-  double _toMetersPerSecond(SpeedValue speed) {
-    switch (speed.unit.toLowerCase()) {
-      case 'm/s':
-        return speed.value;
-      case 'kn':
-      case 'knot':
-      case 'knots':
-        return speed.value * 0.514444;
-      case 'mph':
-        return speed.value * 0.44704;
-      case 'km/h':
-      default:
-        return speed.value / 3.6;
-    }
+    return SpeedUnitUtils.toMetersPerSecond(speed) <=
+        _stationarySpeedThresholdMetersPerSecond;
   }
 
   Future<void> _ensurePlaneImageRegistered(
@@ -293,8 +275,9 @@ class FlightMapUserLocationController {
 
   bool _shouldSkipInterpolation(LatLng start, LatLng target) {
     final latDelta = (target.latitude - start.latitude).abs();
-    final lonDelta = (_normalizeLongitude(target.longitude - start.longitude))
-        .abs();
+    final lonDelta = (_normalizeLongitude(
+      target.longitude - start.longitude,
+    )).abs();
     return latDelta < 0.0001 && lonDelta < 0.0001;
   }
 

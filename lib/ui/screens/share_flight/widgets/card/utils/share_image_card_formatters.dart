@@ -37,15 +37,22 @@ int shareCardCountryCount(Flight flight) {
 
 String shareCardFormatDistance(double distanceKm, DistanceUnit unit) {
   final value = unit == DistanceUnit.mile ? distanceKm * 0.621371 : distanceKm;
-  final rounded = value.round();
+  var rounded = _roundToNearest(value, 10);
+  if (value > 0 && rounded < 10) {
+    rounded = 10;
+  }
   final unitLabel = UnitFormatUtils.formatDistanceUnit(unit);
   return '${shareCardFormatThousands(rounded)} $unitLabel';
 }
 
 String shareCardFormatDuration(Translations t, int minutes) {
   if (minutes <= 0) return t.shareImage.durationUnavailable;
-  final h = minutes ~/ 60;
-  final m = minutes % 60;
+  var roundedMinutes = _roundToNearest(minutes.toDouble(), 5);
+  if (roundedMinutes < 5) {
+    roundedMinutes = 5;
+  }
+  final h = roundedMinutes ~/ 60;
+  final m = roundedMinutes % 60;
   if (h == 0) {
     return t.shareImage.durationMinutes(minutes: m);
   }
@@ -65,4 +72,9 @@ String shareCardFormatThousands(int value) {
 String shareCardCityName(Translations t, String value) {
   final trimmed = RouteUtils.cityLabel(value).trim();
   return trimmed.isEmpty ? t.shareImage.unknownCity : trimmed;
+}
+
+int _roundToNearest(double value, int step) {
+  if (step <= 1) return value.round();
+  return ((value / step).round()) * step;
 }

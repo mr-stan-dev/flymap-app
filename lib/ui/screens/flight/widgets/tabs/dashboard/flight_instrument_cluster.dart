@@ -12,6 +12,7 @@ import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/instruments/inst
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/instruments/speed_instrument.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/instruments/temperature_instrument.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/metric_row.dart';
+import 'package:flymap/utils/speed_unit_utils.dart';
 
 class FlightInstrumentCluster extends StatefulWidget {
   const FlightInstrumentCluster({required this.gpsData, super.key});
@@ -155,20 +156,7 @@ class _FlightInstrumentClusterState extends State<FlightInstrumentCluster> {
   }
 
   double _toMetersPerSecond(SpeedValue? speed) {
-    if (speed == null) return 0;
-    switch (speed.unit.toLowerCase()) {
-      case 'm/s':
-        return speed.value;
-      case 'kt':
-      case 'kts':
-      case 'kn':
-        return speed.value * 0.514444;
-      case 'mph':
-        return speed.value * 0.44704;
-      case 'km/h':
-      default:
-        return speed.value / 3.6;
-    }
+    return SpeedUnitUtils.toMetersPerSecond(speed);
   }
 
   double _toMeters(AltitudeValue? altitude) {

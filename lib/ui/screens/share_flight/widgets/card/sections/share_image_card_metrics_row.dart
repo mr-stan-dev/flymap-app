@@ -25,18 +25,18 @@ class ShareImageCardMetricsRow extends StatelessWidget {
 
     final metrics = [
       (
-        Icons.public,
+        Icons.route_rounded,
         shareCardFormatDistance(
           flight.route.displayDistanceKm.toDouble(),
           distanceUnit,
         ),
       ),
       (
-        Icons.schedule,
+        Icons.schedule_rounded,
         shareCardFormatDuration(t, flight.route.displayDurationMinutes),
       ),
       (
-        Icons.account_balance_outlined,
+        Icons.public_rounded,
         countryCount == 1
             ? t.shareImage.countrySingle
             : t.shareImage.countries(count: countryCount),
