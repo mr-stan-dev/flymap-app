@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/domain/entity/flight.dart';
@@ -7,6 +8,7 @@ import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/flight/widgets/flight_app_bar.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/dashboard_tab_view.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/debug/debug_tab_view.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_tab.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/read/read_tab_view.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/route/flight_route_tab_view.dart';
@@ -75,6 +77,12 @@ class _FlightScreenViewState extends State<_FlightScreenView> {
             activeIcon: const Icon(Icons.article),
             label: 'Read',
           ),
+          if (kDebugMode)
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.bug_report_outlined),
+              activeIcon: Icon(Icons.bug_report),
+              label: 'Debug',
+            ),
         ],
       ),
       body: BlocConsumer<FlightScreenCubit, FlightScreenState>(
@@ -114,6 +122,11 @@ class _FlightScreenViewState extends State<_FlightScreenView> {
                       state: state,
                       topPadding: _tabTopPadding(context),
                     ),
+                    if (kDebugMode)
+                      FlightDebugTabView(
+                        state: state,
+                        topPadding: _tabTopPadding(context),
+                      ),
                   ],
                 ),
               ),

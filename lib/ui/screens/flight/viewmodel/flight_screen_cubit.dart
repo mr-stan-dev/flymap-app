@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/data/gps_data_provider.dart';
 import 'package:flymap/domain/entity/flight.dart';
@@ -29,6 +30,7 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
   Timer? _gpsCheckTimer;
   int _gpsUpdateTick = 0;
   DateTime? _lastGpsEventAt;
+  bool _debugGpsOverrideActive = false;
 
   FlightScreenCubit({
     required this.flight,
@@ -58,9 +60,9 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
 
     await _gpsProvider.start(
       onUpdate: (status, {data}) {
-        final current = state is FlightScreenLoaded
-            ? state as FlightScreenLoaded
-            : null;
+        if (_debugGpsOverrideActive) {
+          return;
+        }
         switch (status) {
           case GpsStatus.gpsActive:
           case GpsStatus.weakSignal:
@@ -72,41 +74,7 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
             _lastGpsEventAt = null;
             break;
         }
-        final previousGeo = current == null
-            ? null
-            : GeoAwarenessSnapshot(
-                currentRegionIds: current.currentRegionIds,
-                nextRegionId: current.nextRegionId,
-                nextRegionEtaMinutes: current.nextRegionEtaMinutes,
-              );
-        final geo = _geoAwarenessEngine.compute(
-          route: _currentFlight.route,
-          routeRegions: _currentFlight.info.routeRegions,
-          cruiseSpeedKmh:
-              _currentFlight.route.metrics.effectiveAverageSpeedKmh?.round() ??
-              850,
-          gpsData: data,
-          previous: previousGeo,
-        );
-
-        var lastVisitedRegionId = current?.lastVisitedRegionId;
-        if (geo.currentRegionIds.isNotEmpty) {
-          lastVisitedRegionId = geo.currentRegionIds.last;
-        }
-        _gpsUpdateTick++;
-        emit(
-          FlightScreenLoaded(
-            gpsStatus: status,
-            gpsData: data,
-            gpsUpdateTick: _gpsUpdateTick,
-            flight: _currentFlight,
-            routeRegions: _currentFlight.info.routeRegions,
-            lastVisitedRegionId: lastVisitedRegionId,
-            currentRegionIds: geo.currentRegionIds,
-            nextRegionId: geo.nextRegionId,
-            nextRegionEtaMinutes: geo.nextRegionEtaMinutes,
-          ),
-        );
+        _emitTelemetryUpdate(status: status, data: data);
       },
     );
     _gpsCheckTimer = Timer.periodic(
@@ -213,6 +181,8 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
   }
 
   Future<void> _checkGpsStatus() async {
+    if (_debugGpsOverrideActive) return;
+
     final current = state;
     if (current is! FlightScreenLoaded) return;
 
@@ -252,6 +222,68 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
 
   void openLocationSettings() {
     Geolocator.openLocationSettings();
+  }
+
+  void applyDebugGpsData(GpsData data, {bool resetGeoState = false}) {
+    if (!kDebugMode) return;
+    _debugGpsOverrideActive = true;
+    _lastGpsEventAt = DateTime.now();
+    _emitTelemetryUpdate(
+      status: GpsStatus.gpsActive,
+      data: data,
+      resetGeoState: resetGeoState,
+    );
+  }
+
+  void disableDebugGpsOverride() {
+    if (!kDebugMode) return;
+    _debugGpsOverrideActive = false;
+  }
+
+  void _emitTelemetryUpdate({
+    required GpsStatus status,
+    GpsData? data,
+    bool resetGeoState = false,
+  }) {
+    final current = state is FlightScreenLoaded
+        ? state as FlightScreenLoaded
+        : null;
+    final previousGeo = resetGeoState || current == null
+        ? null
+        : GeoAwarenessSnapshot(
+            currentRegionIds: current.currentRegionIds,
+            nextRegionId: current.nextRegionId,
+            nextRegionEtaMinutes: current.nextRegionEtaMinutes,
+          );
+    final geo = _geoAwarenessEngine.compute(
+      route: _currentFlight.route,
+      routeRegions: _currentFlight.info.routeRegions,
+      cruiseSpeedKmh:
+          _currentFlight.route.metrics.effectiveAverageSpeedKmh?.round() ?? 850,
+      gpsData: data,
+      previous: previousGeo,
+    );
+
+    var lastVisitedRegionId = resetGeoState
+        ? null
+        : current?.lastVisitedRegionId;
+    if (geo.currentRegionIds.isNotEmpty) {
+      lastVisitedRegionId = geo.currentRegionIds.last;
+    }
+    _gpsUpdateTick++;
+    emit(
+      FlightScreenLoaded(
+        gpsStatus: status,
+        gpsData: data,
+        gpsUpdateTick: _gpsUpdateTick,
+        flight: _currentFlight,
+        routeRegions: _currentFlight.info.routeRegions,
+        lastVisitedRegionId: lastVisitedRegionId,
+        currentRegionIds: geo.currentRegionIds,
+        nextRegionId: geo.nextRegionId,
+        nextRegionEtaMinutes: geo.nextRegionEtaMinutes,
+      ),
+    );
   }
 
   @override

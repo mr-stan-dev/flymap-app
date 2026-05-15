@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flymap/data/debug/dashboard_debug_gps_provider.dart';
 import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/domain/entity/units.dart';
 import 'package:flymap/domain/policy/flight_phase_policy.dart';
@@ -34,9 +32,6 @@ class _FlightInstrumentClusterState extends State<FlightInstrumentCluster> {
   MetricTrend _altitudeTrend = MetricTrend.steady;
   TemperatureUnit _temperatureUnit = TemperatureUnit.celsius;
   final MetricUnitsRepository _unitsRepository = MetricUnitsRepository();
-  final DashboardDebugGpsProvider _debugGpsProvider = DashboardDebugGpsProvider();
-  GpsData? _debugGpsData;
-  bool _debugSimulationRunning = false;
 
   @override
   void initState() {
@@ -48,21 +43,14 @@ class _FlightInstrumentClusterState extends State<FlightInstrumentCluster> {
   @override
   void didUpdateWidget(covariant FlightInstrumentCluster oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!_debugSimulationRunning && oldWidget.gpsData != widget.gpsData) {
+    if (oldWidget.gpsData != widget.gpsData) {
       _updateTrends(widget.gpsData);
     }
   }
 
   @override
-  void dispose() {
-    _debugGpsProvider.stop();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final effectiveGpsData = _debugGpsData ?? widget.gpsData;
-    final telemetry = InstrumentTelemetry.fromGpsData(effectiveGpsData);
+    final telemetry = InstrumentTelemetry.fromGpsData(widget.gpsData);
     final phase = FlightPhasePolicy.classify(
       speedKmh: telemetry.speedKmh,
       altitudeMeters: telemetry.altitudeMeters,
@@ -109,15 +97,6 @@ class _FlightInstrumentClusterState extends State<FlightInstrumentCluster> {
           telemetry: telemetry,
           temperatureUnit: _temperatureUnit,
         ),
-        if (kDebugMode) ...[
-          const SizedBox(height: DsSpacing.sm),
-          SecondaryButton(
-            label: _debugSimulationRunning
-                ? 'Running GPS Simulation...'
-                : 'Start GPS Simulation',
-            onPressed: _debugSimulationRunning ? null : _startDebugSimulation,
-          ),
-        ],
       ],
     );
   }
@@ -138,40 +117,6 @@ class _FlightInstrumentClusterState extends State<FlightInstrumentCluster> {
         _temperatureUnit = unit;
       });
     }
-  }
-
-  Future<void> _startDebugSimulation() async {
-    if (_debugSimulationRunning) return;
-
-    final speedUnit = await _unitsRepository.getSpeedUnit();
-    final altitudeUnit = await _unitsRepository.getAltitudeUnit();
-    if (!mounted) return;
-
-    _primePreviousValues(_debugGpsData ?? widget.gpsData);
-    setState(() {
-      _debugSimulationRunning = true;
-      _debugGpsData = null;
-    });
-
-    _debugGpsProvider.start(
-      speedUnit: speedUnit,
-      altitudeUnit: altitudeUnit,
-      onUpdate: (gpsData) {
-        if (!mounted) return;
-        _updateTrends(gpsData);
-        setState(() {
-          _debugGpsData = gpsData;
-        });
-      },
-      onDone: () {
-        if (!mounted) return;
-        setState(() {
-          _debugSimulationRunning = false;
-          _debugGpsData = null;
-        });
-        _primePreviousValues(widget.gpsData);
-      },
-    );
   }
 
   void _updateTrends(GpsData? data) {
