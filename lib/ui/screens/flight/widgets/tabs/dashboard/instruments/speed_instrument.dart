@@ -55,7 +55,7 @@ class GroundSpeedInstrument extends StatelessWidget {
                           children: [
                             Text(
                               telemetry.speedLabel,
-                              style: Theme.of(context).textTheme.displaySmall
+                              style: Theme.of(context).textTheme.headlineLarge
                                   ?.copyWith(
                                     color: palette.primaryText,
                                     fontWeight: FontWeight.w900,
@@ -166,7 +166,7 @@ class _FlightPhaseChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(999),
@@ -176,7 +176,6 @@ class _FlightPhaseChip extends StatelessWidget {
         label.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: color,
-          fontWeight: FontWeight.w900,
           fontFamily: 'monospace',
         ),
       ),
