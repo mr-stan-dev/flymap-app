@@ -24,6 +24,7 @@ class FlightDebugTabView extends StatefulWidget {
 
 class _FlightDebugTabViewState extends State<FlightDebugTabView> {
   final MapDebugGpsProvider _simulator = MapDebugGpsProvider();
+  FlightScreenCubit? _flightCubit;
   bool _playing = false;
   int _speed = 1;
   bool _resetGeoOnNextUpdate = false;
@@ -44,9 +45,15 @@ class _FlightDebugTabViewState extends State<FlightDebugTabView> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _flightCubit ??= context.read<FlightScreenCubit>();
+  }
+
+  @override
   void dispose() {
     _simulator.dispose();
-    context.read<FlightScreenCubit>().disableDebugGpsOverride();
+    _flightCubit?.disableDebugGpsOverride();
     super.dispose();
   }
 
@@ -143,7 +150,7 @@ class _FlightDebugTabViewState extends State<FlightDebugTabView> {
   void _togglePlayPause() {
     if (_playing) {
       _simulator.pause();
-      context.read<FlightScreenCubit>().disableDebugGpsOverride();
+      _flightCubit?.disableDebugGpsOverride();
       if (!mounted) return;
       setState(() {
         _playing = false;
@@ -188,7 +195,7 @@ class _FlightDebugTabViewState extends State<FlightDebugTabView> {
     if (!mounted) return;
     final resetGeo = _resetGeoOnNextUpdate;
     _resetGeoOnNextUpdate = false;
-    context.read<FlightScreenCubit>().applyDebugGpsData(
+    _flightCubit?.applyDebugGpsData(
       gpsData,
       resetGeoState: resetGeo,
     );
@@ -196,7 +203,7 @@ class _FlightDebugTabViewState extends State<FlightDebugTabView> {
 
   void _onSimDone() {
     if (!mounted) return;
-    context.read<FlightScreenCubit>().disableDebugGpsOverride();
+    _flightCubit?.disableDebugGpsOverride();
     setState(() {
       _playing = false;
     });
