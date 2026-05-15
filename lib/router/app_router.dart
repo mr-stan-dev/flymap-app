@@ -15,8 +15,7 @@ import 'package:flymap/ui/screens/feedback/feedback_screen_args.dart';
 import 'package:flymap/ui/screens/flight/flight_screen.dart';
 import 'package:flymap/ui/screens/home/home_screen.dart';
 import 'package:flymap/ui/screens/onboarding/onboarding_screen.dart';
-import 'package:flymap/ui/screens/share_flight/share_flight_screen.dart';
-import 'package:flymap/ui/screens/share_flight/share_image_screen.dart';
+import 'package:flymap/ui/screens/share_flight/share_flight_image_screen.dart';
 import 'package:flymap/ui/screens/settings/profile/settings_profile_screen.dart';
 import 'package:flymap/ui/screens/settings/history/history_screen.dart';
 import 'package:flymap/ui/screens/settings/storage/storage_screen.dart';
@@ -33,7 +32,6 @@ class AppRouter {
   static const String flightNumberSearchRoute = '/flight-number-selector';
   static const String flightPreviewRoute = '/flight-preview';
   static const String flightRoute = '/flight';
-  static const String shareFlightRoute = '/share-flight';
   static const String shareImageRoute = '/share-image';
   static const String downloadCompletedRoute = '/download-completed';
   static const String settingsRoute = '/settings';
@@ -119,32 +117,18 @@ class AppRouter {
           },
         ),
 
-        // Share Flight Screen route
-        GoRoute(
-          path: shareFlightRoute,
-          name: 'share-flight',
-          builder: (context, state) {
-            final extra = state.extra as Map<String, dynamic>?;
-            final flight = extra?['flight'] as Flight;
-
-            return ShareFlightScreen(flight: flight);
-          },
-        ),
-
         // Share Image Screen route
         GoRoute(
           path: shareImageRoute,
           name: 'share-image',
           builder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
-            final flightIdFromExtra = extra?['flightId'] as String?;
-            final flightFromExtra = extra?['flight'] as Flight?;
-            final flightId = flightIdFromExtra ?? flightFromExtra?.id;
+            final flightId = extra?['flightId'] as String?;
             if (flightId == null || flightId.isEmpty) {
               return const HomeScreen();
             }
 
-            return ShareImageScreen(flightId: flightId);
+            return ShareFlightImageScreen(flightId: flightId);
           },
         ),
 
@@ -249,11 +233,6 @@ class AppRouter {
       extra['flightNumber'] = flightNumber;
     }
     context.push(flightPreviewRoute, extra: extra);
-  }
-
-  /// Navigate to share flight screen with flight
-  static void goToShareFlight(BuildContext context, {required Flight flight}) {
-    context.push(shareFlightRoute, extra: {'flight': flight});
   }
 
   /// Navigate to share image screen with flight id.

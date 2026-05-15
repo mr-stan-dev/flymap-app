@@ -621,6 +621,7 @@
     "exploreYourFlight": "Explore your flight",
     "countrySingle": "1 country",
     "countries": "$count countries",
+    "shareText": "$fromCity ($fromCode) \u2192 $toCity ($toCode) on Flymap \u2708\ufe0f",
     "unknownCity": "Unknown",
     "durationUnavailable": "--",
     "durationMinutes": "$minutes m",

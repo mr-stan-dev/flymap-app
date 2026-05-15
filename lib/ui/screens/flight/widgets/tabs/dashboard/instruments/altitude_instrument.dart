@@ -7,6 +7,8 @@ import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/instruments/inst
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/instruments/instrument_telemetry.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/metric_row.dart';
 
+const _altitudeScaleMaxMeters = 14000.0;
+
 class AltitudeInstrument extends StatelessWidget {
   const AltitudeInstrument({
     required this.telemetry,
@@ -20,9 +22,10 @@ class AltitudeInstrument extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = InstrumentPalette.of(context);
-    final normalizedAltitude = (telemetry.altitudeMeters / 12000)
-        .clamp(0.0, 1.0)
-        .toDouble();
+    final normalizedAltitude =
+        (telemetry.altitudeMeters / _altitudeScaleMaxMeters)
+            .clamp(0.0, 1.0)
+            .toDouble();
     final altitudeColor = Color.lerp(
       palette.altitudeLow,
       palette.altitudeHigh,
@@ -77,9 +80,10 @@ class _SimpleAltitudeScale extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final normalizedAltitude = (telemetry.altitudeMeters / 12000)
-        .clamp(0.0, 1.0)
-        .toDouble();
+    final normalizedAltitude =
+        (telemetry.altitudeMeters / _altitudeScaleMaxMeters)
+            .clamp(0.0, 1.0)
+            .toDouble();
     final markerMeters = _markerMetersForUnit(telemetry.altitudeUnit);
 
     return LayoutBuilder(
@@ -125,9 +129,10 @@ class _SimpleAltitudeScale extends StatelessWidget {
                     ),
                   ),
                   ...markerMeters.map((meters) {
-                    final markerY = (1 - ((meters / 12000) * 2))
-                        .clamp(-1.0, 1.0)
-                        .toDouble();
+                    final markerY =
+                        (1 - ((meters / _altitudeScaleMaxMeters) * 2))
+                            .clamp(-1.0, 1.0)
+                            .toDouble();
                     return Align(
                       alignment: Alignment(0, markerY),
                       child: Container(
@@ -164,7 +169,7 @@ class _SimpleAltitudeScale extends StatelessWidget {
   List<double> _markerMetersForUnit(String altitudeUnit) {
     final isMetric = altitudeUnit.toLowerCase() == 'm';
     final stepMeters = isMetric ? 2000.0 : 1524.0; // 5,000 ft
-    const maxMeters = 12000.0;
+    const maxMeters = _altitudeScaleMaxMeters;
     final markers = <double>[];
     for (double value = 0; value <= maxMeters; value += stepMeters) {
       markers.add(value);

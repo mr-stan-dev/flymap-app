@@ -105,12 +105,9 @@ class GenerateShareImageUseCase {
 
       // 7. Save to temp file
       final tempDir = await getTemporaryDirectory();
-      final routeCode = flight.route.routeCode;
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final filePath = p.join(
-        tempDir.path,
-        'flymap_share_${routeCode}_$timestamp.png',
-      );
+      final routeCode = _safeRouteCode(flight.route.routeCode);
+      await _cleanupLegacyRouteFiles(tempDir: tempDir, routeCode: routeCode);
+      final filePath = p.join(tempDir.path, 'flymap_share_$routeCode.png');
       final file = File(filePath);
       await file.writeAsBytes(byteData.buffer.asUint8List(), flush: true);
 
@@ -119,6 +116,29 @@ class GenerateShareImageUseCase {
     } catch (e, stack) {
       _logger.error('GenerateShareImageUseCase failed: $e\n$stack');
       return null;
+    }
+  }
+
+  String _safeRouteCode(String routeCode) {
+    final sanitized = routeCode.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+    return sanitized.isEmpty ? 'route' : sanitized;
+  }
+
+  Future<void> _cleanupLegacyRouteFiles({
+    required Directory tempDir,
+    required String routeCode,
+  }) async {
+    final legacyPrefix = 'flymap_share_${routeCode}_';
+    try {
+      await for (final entity in tempDir.list(followLinks: false)) {
+        if (entity is! File) continue;
+        final name = p.basename(entity.path);
+        if (name.startsWith(legacyPrefix) && name.endsWith('.png')) {
+          await entity.delete();
+        }
+      }
+    } catch (_) {
+      // Best-effort cleanup only; generation should not fail because of this.
     }
   }
 

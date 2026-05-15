@@ -4,10 +4,12 @@ import 'dart:ui';
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/domain/usecase/generate_share_image_use_case.dart';
+import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/rating/rate_prompt_policy_service.dart';
 import 'package:flymap/rating/rate_prompt_trigger.dart';
 import 'package:flymap/repository/flight_repository.dart';
+import 'package:flymap/utils/route_utils.dart';
 import 'package:get_it/get_it.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -18,19 +20,12 @@ import 'share_image_state.dart';
 /// State flow: initial → generating → ready(imagePath) → sharing → ready
 ///                                  ↘ error(message)
 class ShareImageCubit extends Cubit<ShareImageState> {
-  ShareImageCubit({
-    required String flightId,
-    FlightRepository? flightRepository,
-    RatePromptPolicyService? ratePromptPolicyService,
-    GenerateShareImageUseCase? generateUseCase,
-    AppAnalytics? analytics,
-  }) : _generateUseCase =
-           generateUseCase ?? GetIt.I.get<GenerateShareImageUseCase>(),
-       _flightRepository = flightRepository ?? GetIt.I.get<FlightRepository>(),
-       _ratePromptPolicyService =
-           ratePromptPolicyService ?? GetIt.I.get<RatePromptPolicyService>(),
-       _analytics = analytics ?? GetIt.I.get<AppAnalytics>(),
-       super(ShareImageState.initial(flightId: flightId)) {
+  ShareImageCubit({required String flightId})
+    : _generateUseCase = GetIt.I.get<GenerateShareImageUseCase>(),
+      _flightRepository = GetIt.I.get<FlightRepository>(),
+      _ratePromptPolicyService = GetIt.I.get<RatePromptPolicyService>(),
+      _analytics = GetIt.I.get<AppAnalytics>(),
+      super(ShareImageState.initial(flightId: flightId)) {
     _generate();
   }
 
@@ -118,11 +113,16 @@ class ShareImageCubit extends Cubit<ShareImageState> {
 
     try {
       final route = flight.route;
+      final depCity = RouteUtils.cityLabel(route.departure.city);
+      final arrCity = RouteUtils.cityLabel(route.arrival.city);
       await Share.shareXFiles(
         [XFile(path)],
-        text:
-            'Flight route '
-            '${route.departure.displayCode} → ${route.arrival.displayCode}',
+        text: t.shareImage.shareText(
+          fromCity: depCity,
+          fromCode: route.departure.displayCode,
+          toCity: arrCity,
+          toCode: route.arrival.displayCode,
+        ),
         sharePositionOrigin: sharePositionOrigin,
       );
       if (isClosed) return;

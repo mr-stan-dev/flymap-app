@@ -1,4 +1,5 @@
 {
   "RC_API_KEY_IOS": "appl_DAoTadsOXLJAUhsfyEypScpDagK",
-  "RC_API_KEY_ANDROID": "goog_XoFZsAZuaVlPbzvuRdHQcBasoiD"
+  "RC_API_KEY_ANDROID": "goog_XoFZsAZuaVlPbzvuRdHQcBasoiD",
+  "MAPBOX_ACCESS_TOKEN": "pk.eyJ1IjoiYXBwdHJhY3RvciIsImEiOiJjbW9hN2VnbXkwM2NtMnByMGI2cGo1enVsIn0.mEqDtVKF1gb1dBimBCFt-g"
 }

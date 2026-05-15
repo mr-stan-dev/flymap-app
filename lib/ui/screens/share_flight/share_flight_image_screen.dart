@@ -13,8 +13,8 @@ import 'package:flymap/ui/screens/share_flight/widgets/card/share_image_card.dar
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-class ShareImageScreen extends StatelessWidget {
-  const ShareImageScreen({required this.flightId, super.key});
+class ShareFlightImageScreen extends StatelessWidget {
+  const ShareFlightImageScreen({required this.flightId, super.key});
 
   final String flightId;
 

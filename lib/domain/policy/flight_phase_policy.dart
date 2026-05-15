@@ -12,7 +12,9 @@ class FlightPhasePolicy {
   const FlightPhasePolicy._();
 
   static const double minAirborneSpeedKmh = 160;
-  static const double maxRunwayAltitudeMeters = 120;
+  // GPS altitude is MSL; keep runway detection available at high-elevation
+  // airports (e.g. Denver, Mexico City, Lhasa) by using a permissive ceiling.
+  static const double maxRunwayAltitudeMeters = 4500;
   static const double taxiMaxSpeedKmh = 40;
   static const double minRunwayRollSpeedKmh = 30;
   static const double maxRunwayRollSpeedKmh = 200;

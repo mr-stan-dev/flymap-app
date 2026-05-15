@@ -909,6 +909,9 @@ class TranslationsShareImageEn {
 	/// en: '$count countries'
 	String countries({required Object count}) => '${count} countries';
 
+	/// en: '$fromCity ($fromCode) → $toCity ($toCode) on Flymap ✈️'
+	String shareText({required Object fromCity, required Object fromCode, required Object toCity, required Object toCode}) => '${fromCity} (${fromCode}) → ${toCity} (${toCode}) on Flymap ✈️';
+
 	/// en: 'Unknown'
 	String get unknownCity => 'Unknown';
 
@@ -2839,6 +2842,7 @@ extension on Translations {
 			'shareImage.exploreYourFlight' => 'Explore your flight',
 			'shareImage.countrySingle' => '1 country',
 			'shareImage.countries' => ({required Object count}) => '${count} countries',
+			'shareImage.shareText' => ({required Object fromCity, required Object fromCode, required Object toCity, required Object toCode}) => '${fromCity} (${fromCode}) → ${toCity} (${toCode}) on Flymap ✈️',
 			'shareImage.unknownCity' => 'Unknown',
 			'shareImage.durationUnavailable' => '--',
 			'shareImage.durationMinutes' => ({required Object minutes}) => '${minutes} m',

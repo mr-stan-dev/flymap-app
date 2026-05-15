@@ -180,12 +180,18 @@ class StaticRouteMap {
         _mercatorY(viewport.center.latitude) * pow(2, viewport.zoom);
 
     return unwrapped.map((point) {
-      final pointX = (_normalizeLon(point.longitude) + 180) / 360 * worldSize;
+      // Keep the unwrapped longitude for continuity across anti-meridian
+      // routes. Re-normalizing here can reintroduce cross-world jumps.
+      final pointX = (point.longitude + 180) / 360 * worldSize;
       final pointY = _mercatorY(point.latitude) * pow(2, viewport.zoom);
 
       double deltaX = pointX - centerX;
-      if (deltaX > worldSize / 2) deltaX -= worldSize;
-      if (deltaX < -worldSize / 2) deltaX += worldSize;
+      while (deltaX > worldSize / 2) {
+        deltaX -= worldSize;
+      }
+      while (deltaX < -worldSize / 2) {
+        deltaX += worldSize;
+      }
 
       return ProjectedPoint(
         x: viewport.width / 2 + deltaX,

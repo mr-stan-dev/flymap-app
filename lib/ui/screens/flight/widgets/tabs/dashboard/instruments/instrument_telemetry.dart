@@ -43,7 +43,10 @@ class InstrumentTelemetry {
 
   String get speedLabel => _roundToNearest(speedValue, 5).toString();
 
-  String get altitudeLabel => _formatNumber(altitudeValue);
+  String get altitudeLabel {
+    final step = altitudeUnit.toLowerCase() == 'm' ? 5 : 10;
+    return _formatNumber(_roundToNearest(altitudeValue, step));
+  }
 
   String get headingLabel => headingDegrees.toStringAsFixed(0).padLeft(3, '0');
 
@@ -63,7 +66,7 @@ class InstrumentTelemetry {
     return dirs[idx];
   }
 
-  static String _formatNumber(double value) {
+  static String _formatNumber(num value) {
     final rounded = value.round();
     final raw = rounded.toString();
     final buffer = StringBuffer();
@@ -75,9 +78,8 @@ class InstrumentTelemetry {
     return buffer.toString();
   }
 
-  static int _roundToNearest(double value, int nearest) {
-    return (value / nearest).round() * nearest;
-  }
+  static int _roundToNearest(double value, int nearest) =>
+      (value / nearest).round() * nearest;
 
   static double _speedKmh(SpeedValue speed) {
     switch (speed.unit.toLowerCase()) {

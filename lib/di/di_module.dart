@@ -5,6 +5,7 @@ import 'package:flymap/crashlytics/app_crashlytics_initializer.dart';
 import 'package:flymap/data/api/feedback_api.dart';
 import 'package:flymap/data/api/flight_info_api.dart';
 import 'package:flymap/data/api/flight_lookup_api.dart';
+import 'package:flymap/data/api/mapbox_env_config.dart';
 import 'package:flymap/data/api/flight_route_preview_api.dart';
 import 'package:flymap/data/api/mapbox_static_image_api.dart';
 import 'package:flymap/data/api/route_overview_api.dart';
@@ -170,12 +171,12 @@ class DiModule {
     i.registerLazySingleton<BuildFlightRoutePreviewUseCase>(
       () => BuildFlightRoutePreviewUseCase(repository: i.get()),
     );
+    i.registerLazySingleton<MapboxEnvConfig>(MapboxEnvConfig.fromEnvironment);
 
     i.registerLazySingleton<MapboxStaticImageApi>(
       () => MapboxStaticImageApi(
         httpClient: i.get(),
-        accessToken:
-            'pk.eyJ1IjoiYXBwdHJhY3RvciIsImEiOiJjbW9hN2VnbXkwM2NtMnByMGI2cGo1enVsIn0.mEqDtVKF1gb1dBimBCFt-g',
+        accessToken: i.get<MapboxEnvConfig>().trimmedAccessToken,
       ),
     );
     i.registerLazySingleton<GenerateShareImageUseCase>(
