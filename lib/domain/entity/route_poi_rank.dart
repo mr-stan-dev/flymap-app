@@ -10,6 +10,8 @@ class RoutePoiRank {
     FlightPoiType.mountain => 350,
     FlightPoiType.island => 350,
     FlightPoiType.lake => 300,
+    FlightPoiType.park => 250,
+    FlightPoiType.reserve => 225,
     FlightPoiType.desert => 200,
     FlightPoiType.bay => 150,
     FlightPoiType.sea => 100,

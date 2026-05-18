@@ -24,10 +24,12 @@ class PoiStyleConfig {
     FlightPoiType.waterfall => 8,
     FlightPoiType.glacier => 9,
     FlightPoiType.pass => 10,
-    FlightPoiType.desert => 11,
-    FlightPoiType.sea => 12,
-    FlightPoiType.region => 13,
-    FlightPoiType.unknown => 14,
+    FlightPoiType.park => 11,
+    FlightPoiType.reserve => 12,
+    FlightPoiType.desert => 13,
+    FlightPoiType.sea => 14,
+    FlightPoiType.region => 15,
+    FlightPoiType.unknown => 16,
   };
 
   static Color colorFor(FlightPoiType type) => switch (type) {
@@ -42,6 +44,8 @@ class PoiStyleConfig {
     FlightPoiType.waterfall => const Color(0xFF2D8FD6),
     FlightPoiType.glacier => const Color(0xFF3DB4C9),
     FlightPoiType.pass => const Color(0xFF7FAE3E),
+    FlightPoiType.park => const Color(0xFF3E8F4E),
+    FlightPoiType.reserve => const Color(0xFF5C8F3E),
     FlightPoiType.desert => const Color(0xFFF57C00),
     FlightPoiType.sea => const Color(0xFF2C6AA3),
     FlightPoiType.region => const Color(0xFF8E44AD),

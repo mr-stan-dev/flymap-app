@@ -16,6 +16,8 @@ class PoiTypeMarkerAsset {
     FlightPoiType.waterfall => 'assets/images/poi/waterfall.png',
     FlightPoiType.glacier => 'assets/images/poi/glacier.png',
     FlightPoiType.desert => 'assets/images/poi/desert.png',
+    FlightPoiType.park => 'assets/images/poi/park.png',
+    FlightPoiType.reserve => 'assets/images/poi/park.png',
     FlightPoiType.sea => 'assets/images/poi/sea.png',
     FlightPoiType.region => 'assets/images/poi/region.png',
     FlightPoiType.unknown => 'assets/images/poi/unknown.png',

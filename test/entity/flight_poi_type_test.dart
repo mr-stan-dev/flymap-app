@@ -10,6 +10,13 @@ void main() {
       expect(FlightPoiType.fromRaw('mountain_range'), FlightPoiType.mountain);
       expect(FlightPoiType.fromRaw('mountain range'), FlightPoiType.mountain);
       expect(FlightPoiType.fromRaw('MOUNTAIN-RANGE'), FlightPoiType.mountain);
+      expect(FlightPoiType.fromRaw('park'), FlightPoiType.park);
+      expect(FlightPoiType.fromRaw('national_park'), FlightPoiType.park);
+      expect(FlightPoiType.fromRaw('reserve'), FlightPoiType.reserve);
+      expect(
+        FlightPoiType.fromRaw('nature reserve'),
+        FlightPoiType.reserve,
+      );
     });
 
     test('falls back to unknown for unsupported values', () {

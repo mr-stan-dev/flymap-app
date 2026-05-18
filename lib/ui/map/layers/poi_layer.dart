@@ -5,6 +5,7 @@ import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/layers/map_layer.dart';
 import 'package:flymap/ui/map/layers/poi_style_config.dart';
+import 'package:flymap/ui/screens/shared/poi_type_marker_asset.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 class PoiLayer extends MapLayer {
@@ -206,7 +207,7 @@ class PoiLayer extends MapLayer {
     var failed = 0;
     for (final type in FlightPoiType.values) {
       final imageName = _iconIdForType(type);
-      final assetPath = _iconAssetPathForType(type);
+      final assetPath = PoiTypeMarkerAsset.iconPathFor(type);
       final bytes = await _loadIconBytes(assetPath);
       if (bytes == null) {
         missing++;
@@ -253,25 +254,6 @@ class PoiLayer extends MapLayer {
   String _iconIdForType(FlightPoiType type) {
     return 'poi-icon-${type.rawValue}';
   }
-
-  String _iconAssetPathForType(FlightPoiType type) => switch (type) {
-    FlightPoiType.city => 'assets/images/poi/city.png',
-    FlightPoiType.river => 'assets/images/poi/river.png',
-    FlightPoiType.island => 'assets/images/poi/island.png',
-    FlightPoiType.airport => 'assets/images/poi/airport.png',
-    FlightPoiType.mountain => 'assets/images/poi/mountain.png',
-    FlightPoiType.lake => 'assets/images/poi/lake.png',
-    FlightPoiType.volcano => 'assets/images/poi/volcano.png',
-    // Reuse mountain icon for mountain-related subtype.
-    FlightPoiType.pass => 'assets/images/poi/mountain.png',
-    FlightPoiType.bay => 'assets/images/poi/bay.png',
-    FlightPoiType.waterfall => 'assets/images/poi/waterfall.png',
-    FlightPoiType.glacier => 'assets/images/poi/glacier.png',
-    FlightPoiType.desert => 'assets/images/poi/desert.png',
-    FlightPoiType.sea => 'assets/images/poi/sea.png',
-    FlightPoiType.region => 'assets/images/poi/region.png',
-    FlightPoiType.unknown => 'assets/images/poi/unknown.png',
-  };
 
   bool _isImageAlreadyRegisteredError(Object error) {
     final text = error.toString().toLowerCase();
