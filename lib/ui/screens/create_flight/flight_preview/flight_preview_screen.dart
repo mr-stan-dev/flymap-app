@@ -440,7 +440,7 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
       context,
       flightId: flightId,
       isProSubscriber: isProSubscriber,
-      usedSingleFlightUnlock: state.hasPendingFlightUnlock && !isProSubscriber,
+      usedSingleFlightUnlock: state.usedSingleFlightUnlock && !isProSubscriber,
     );
   }
 

@@ -286,6 +286,7 @@ class PreviewDownloadState extends Equatable {
     required this.downloadWorkerCount,
     required this.downloadDone,
     required this.savedFlightId,
+    required this.usedSingleFlightUnlock,
   });
 
   const PreviewDownloadState.initial()
@@ -303,7 +304,8 @@ class PreviewDownloadState extends Equatable {
       downloadTileCount = null,
       downloadWorkerCount = null,
       downloadDone = false,
-      savedFlightId = null;
+      savedFlightId = null,
+      usedSingleFlightUnlock = false;
 
   final DownloadSectionsState downloadSections;
   final bool isDownloading;
@@ -320,6 +322,7 @@ class PreviewDownloadState extends Equatable {
   final int? downloadWorkerCount;
   final bool downloadDone;
   final String? savedFlightId;
+  final bool usedSingleFlightUnlock;
 
   PreviewDownloadState copyWith({
     DownloadSectionsState? downloadSections,
@@ -340,6 +343,8 @@ class PreviewDownloadState extends Equatable {
     bool? downloadDone,
     String? savedFlightId,
     bool clearSavedFlightId = false,
+    bool? usedSingleFlightUnlock,
+    bool clearUsedSingleFlightUnlock = false,
   }) {
     return PreviewDownloadState(
       downloadSections: downloadSections ?? this.downloadSections,
@@ -365,6 +370,9 @@ class PreviewDownloadState extends Equatable {
       savedFlightId: clearSavedFlightId
           ? null
           : savedFlightId ?? this.savedFlightId,
+      usedSingleFlightUnlock: clearUsedSingleFlightUnlock
+          ? false
+          : usedSingleFlightUnlock ?? this.usedSingleFlightUnlock,
     );
   }
 
@@ -385,6 +393,7 @@ class PreviewDownloadState extends Equatable {
     downloadWorkerCount,
     downloadDone,
     savedFlightId,
+    usedSingleFlightUnlock,
   ];
 }
 
@@ -509,6 +518,7 @@ class FlightPreviewState extends Equatable {
   int? get downloadWorkerCount => downloadState.downloadWorkerCount;
   bool get downloadDone => downloadState.downloadDone;
   String? get savedFlightId => downloadState.savedFlightId;
+  bool get usedSingleFlightUnlock => downloadState.usedSingleFlightUnlock;
 
   String? get errorMessage => messageState.errorMessage;
   String? get downloadErrorMessage => messageState.downloadErrorMessage;
@@ -559,6 +569,8 @@ class FlightPreviewState extends Equatable {
     bool? downloadDone,
     String? savedFlightId,
     bool clearSavedFlightId = false,
+    bool? usedSingleFlightUnlock,
+    bool clearUsedSingleFlightUnlock = false,
     String? errorMessage,
     bool clearErrorMessage = false,
     String? downloadErrorMessage,
@@ -615,6 +627,8 @@ class FlightPreviewState extends Equatable {
         downloadDone: downloadDone,
         savedFlightId: savedFlightId,
         clearSavedFlightId: clearSavedFlightId,
+        usedSingleFlightUnlock: usedSingleFlightUnlock,
+        clearUsedSingleFlightUnlock: clearUsedSingleFlightUnlock,
       ),
       messageState: messageState.copyWith(
         errorMessage: errorMessage,
@@ -653,6 +667,7 @@ class FlightPreviewState extends Equatable {
         'unlock:${hasPendingFlightUnlock ? 1 : 0}, '
         'loading(p:${isPreviewLoading ? 1 : 0},o:${isOverviewLoading ? 1 : 0},w:${isWikiSuggestionsLoading ? 1 : 0}), '
         'downloading:${isDownloading ? 1 : 0}/${downloadStage.name}, '
+        'downloadUnlock:${usedSingleFlightUnlock ? 1 : 0}, '
         'errors:${errorMessage != null ? 1 : 0}/${downloadErrorMessage != null ? 1 : 0}'
         ')';
   }

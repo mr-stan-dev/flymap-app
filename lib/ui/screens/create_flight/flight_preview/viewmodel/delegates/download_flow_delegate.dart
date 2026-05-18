@@ -254,6 +254,7 @@ class DownloadFlowDelegate {
         clearDownloadWorkerCount: true,
         downloadDone: false,
         clearSavedFlightId: true,
+        clearUsedSingleFlightUnlock: true,
         clearDownloadErrorMessage: true,
         clearErrorMessage: true,
       ),
@@ -692,6 +693,7 @@ class DownloadFlowDelegate {
         downloadStage: DownloadStage.completed,
         downloadDone: true,
         savedFlightId: flightId,
+        usedSingleFlightUnlock: _usedPendingFlightUnlockForCurrentDownload,
         clearDownloadErrorMessage: true,
         hasPendingFlightUnlock: false,
       ),
@@ -724,6 +726,7 @@ class DownloadFlowDelegate {
         clearErrorMessage: true,
         clearDownloadErrorMessage: true,
         clearSavedFlightId: true,
+        clearUsedSingleFlightUnlock: true,
       ),
     );
     _savedFlightIdDuringDownload = null;
