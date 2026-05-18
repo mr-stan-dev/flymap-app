@@ -32,11 +32,11 @@ class RouteTypeCard extends StatelessWidget {
 
     final imagePath = type == RouteType.basic
         ? (isDark
-            ? 'assets/images/route_approximate_dark.webp'
-            : 'assets/images/route_approximate_light.webp')
+              ? 'assets/images/route_approximate_dark.webp'
+              : 'assets/images/route_approximate_light.webp')
         : (isDark
-            ? 'assets/images/route_historical_dark.webp'
-            : 'assets/images/route_historical_light.webp');
+              ? 'assets/images/route_historical_dark.webp'
+              : 'assets/images/route_historical_light.webp');
 
     return InkWell(
       onTap: onTap,
@@ -103,12 +103,9 @@ class RouteTypeCard extends StatelessWidget {
                   opacity: isSelected ? 1 : 0,
                   child: Padding(
                     padding: const EdgeInsets.only(left: DsSpacing.sm),
-                    child: Icon(
-                      Icons.check_circle,
-                      color: colorScheme.primary,
-                    ),
+                    child: Icon(Icons.check_circle, color: colorScheme.primary),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -118,7 +115,10 @@ class RouteTypeCard extends StatelessWidget {
               right: 24,
               child: Row(
                 children: [
-                  _chipLabel(context, context.t.createFlight.routeTypeSelector.mostAccurate),
+                  _chipLabel(
+                    context,
+                    context.t.createFlight.routeTypeSelector.mostAccurate,
+                  ),
                   const SizedBox(width: 8),
                   _chipLabel(
                     context,
@@ -135,10 +135,7 @@ class RouteTypeCard extends StatelessWidget {
 
   Widget _chipLabel(BuildContext context, String text, {IconData? icon}) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
@@ -153,12 +150,7 @@ class RouteTypeCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon != null)
-            Icon(
-              icon,
-              color: Colors.white,
-              size: 12,
-            ),
+          if (icon != null) Icon(icon, color: Colors.white, size: 12),
           const SizedBox(width: 4),
           Text(
             text,

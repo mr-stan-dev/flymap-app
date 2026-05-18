@@ -5,4 +5,3 @@ abstract class FlightsDbMigration {
 
   Future<void> run(Database db);
 }
-

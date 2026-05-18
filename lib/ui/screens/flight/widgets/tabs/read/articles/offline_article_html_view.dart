@@ -21,6 +21,7 @@ class OfflineArticleHtmlView extends StatefulWidget {
   final String htmlContent;
   final String articleTitle;
   final Color backgroundColor;
+
   /// Custom gesture recognizers forwarded to [WebViewWidget].
   /// When null, an [EagerGestureRecognizer] is used (best for standalone pages).
   /// Pass an empty set to let the platform default handle gestures (best when
@@ -82,11 +83,13 @@ class _OfflineArticleHtmlViewState extends State<OfflineArticleHtmlView> {
           color: widget.backgroundColor,
           child: WebViewWidget(
             controller: _controller,
-            gestureRecognizers: widget.gestureRecognizers ?? {
-              Factory<OneSequenceGestureRecognizer>(
-                () => EagerGestureRecognizer(),
-              ),
-            },
+            gestureRecognizers:
+                widget.gestureRecognizers ??
+                {
+                  Factory<OneSequenceGestureRecognizer>(
+                    () => EagerGestureRecognizer(),
+                  ),
+                },
           ),
         );
       },

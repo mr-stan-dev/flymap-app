@@ -36,7 +36,8 @@ class HomeTabCubit extends Cubit<HomeTabState> {
        _onboardingRepository = onboardingRepository,
        _deleteFlightUseCase = deleteFlightUseCase,
        _completeFlightUseCase = completeFlightUseCase,
-       _connectivityChecker = connectivityChecker ?? const ConnectivityChecker(),
+       _connectivityChecker =
+           connectivityChecker ?? const ConnectivityChecker(),
        _unitsRepository = unitsRepository ?? MetricUnitsRepository(),
        super(const HomeTabLoading()) {
     _loadData();

@@ -9,13 +9,15 @@ import 'package:flymap/domain/usecase/build_flight_route_preview_use_case.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/rating/rate_prompt_policy_service.dart';
 import 'package:flymap/rating/rate_prompt_trigger.dart';
+import 'package:flymap/repository/flight_unlock_repository.dart';
 import 'package:flymap/repository/flight_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_repository.dart';
 import 'package:flymap/router/app_router.dart';
 import 'package:flymap/subscription/pro_limits.dart';
-import 'package:flymap/subscription/subscription_paywall_result.dart';
+import 'package:flymap/subscription/paywall_source.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/flight_preview_args.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/flight_unlock_gate_sheet.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/downloading/flight_search_downloading_view.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/flight_search_route_overview_step.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/route_not_supported/flight_search_route_not_supported_step.dart';
@@ -43,6 +45,7 @@ class FlightPreviewScreen extends StatelessWidget {
         departure: args.departure,
         arrival: args.arrival,
         flightNumber: args.flightNumber,
+        hasPendingFlightUnlock: args.hasPendingFlightUnlock,
         connectivityChecker: GetIt.I.get<ConnectivityChecker>(),
         getRouteOverviewUseCase: GetIt.I.get<GetRouteOverviewUseCase>(),
         buildFlightRoutePreviewUseCase: GetIt.I
@@ -56,6 +59,7 @@ class FlightPreviewScreen extends StatelessWidget {
         userFlightPrefsRepository: GetIt.I.get<UserFlightPrefsRepository>(),
         flightRepository: GetIt.I.get<FlightRepository>(),
         subscriptionRepository: GetIt.I.get<SubscriptionRepository>(),
+        flightUnlockRepository: GetIt.I.get<FlightUnlockRepository>(),
         deleteFlightUseCase: GetIt.I.get<DeleteFlightUseCase>(),
         analytics: GetIt.I.get<AppAnalytics>(),
         crashlytics: GetIt.I.get<AppCrashlytics>(),
@@ -137,9 +141,10 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
         }
       },
       builder: (context, state) {
-        final isProUser = context.select(
+        final isProSubscriber = context.select(
           (SubscriptionCubit cubit) => cubit.state.isPro,
         );
+        final isProUser = isProSubscriber || state.hasPendingFlightUnlock;
         final cubit = context.read<FlightPreviewCubit>();
         final subscriptionCubit = context.read<SubscriptionCubit>();
 
@@ -266,6 +271,8 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
           onPremiumGateTap: () => unawaited(
             _handleUpgradeToProFromOverview(
               context: context,
+              cubit: cubit,
+              state: state,
               subscriptionCubit: subscriptionCubit,
             ),
           ),
@@ -321,35 +328,24 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
 
   Future<void> _handleUpgradeToProFromOverview({
     required BuildContext context,
+    required FlightPreviewCubit cubit,
+    required FlightPreviewState state,
     required SubscriptionCubit subscriptionCubit,
   }) async {
     if (subscriptionCubit.state.isPro) {
       return;
     }
-    final result = await subscriptionCubit
-        .presentPaywallFromRouteOverviewGate();
-    if (!context.mounted) return;
-
-    switch (result) {
-      case SubscriptionPaywallResult.purchased:
-      case SubscriptionPaywallResult.restored:
-        await context.read<FlightPreviewCubit>().refreshPoisForPro();
-        if (!context.mounted) return;
-        _showSnackBar(context, context.t.settings.flymapProActivated);
-        return;
-      case SubscriptionPaywallResult.cancelled:
-        _showSnackBar(context, context.t.createFlight.paywall.upgradeCancelled);
-        return;
-      case SubscriptionPaywallResult.notPresented:
-        _showSnackBar(context, context.t.createFlight.paywall.noPaywall);
-        return;
-      case SubscriptionPaywallResult.error:
-        _showSnackBar(
-          context,
-          context.t.createFlight.paywall.failedOpenPaywall,
-        );
-        return;
-    }
+    await showFlightUnlockGateSheet(
+      context: context,
+      subscriptionCubit: subscriptionCubit,
+      source: PaywallSource.routeOverviewGate,
+      onUnlockActivated: () async {
+        await cubit.enablePendingFlightUnlock();
+      },
+      onProActivated: cubit.refreshPoisForPro,
+      routePreview: _routePreviewText(state),
+      presentProPaywall: subscriptionCubit.presentPaywallFromRouteOverviewGate,
+    );
   }
 
   Future<void> _handleStartDownload({
@@ -358,7 +354,8 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
     required FlightPreviewCubit cubit,
     required SubscriptionCubit subscriptionCubit,
   }) async {
-    final isProUser = subscriptionCubit.state.isPro;
+    final isProUser =
+        subscriptionCubit.state.isPro || state.hasPendingFlightUnlock;
     final selectedCount = state.selectedArticleUrls.length;
     final needsArticleTierUpgrade =
         !isProUser && selectedCount > ProLimits.freeWikiArticlesSelectionLimit;
@@ -367,27 +364,23 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
       return;
     }
 
-    final result = await subscriptionCubit.presentPaywallForCreateFlight();
-    if (!context.mounted) return;
+    await showFlightUnlockGateSheet(
+      context: context,
+      subscriptionCubit: subscriptionCubit,
+      source: PaywallSource.wikiLimit,
+      onUnlockActivated: () async {
+        await cubit.enablePendingFlightUnlock();
+      },
+      onProActivated: cubit.refreshPoisForPro,
+      routePreview: _routePreviewText(state),
+      presentProPaywall: subscriptionCubit.presentPaywallForCreateFlight,
+    );
+  }
 
-    switch (result) {
-      case SubscriptionPaywallResult.purchased:
-      case SubscriptionPaywallResult.restored:
-        _showSnackBar(context, context.t.settings.flymapProActivated);
-        return;
-      case SubscriptionPaywallResult.cancelled:
-        _showSnackBar(context, context.t.createFlight.paywall.upgradeCancelled);
-        return;
-      case SubscriptionPaywallResult.notPresented:
-        _showSnackBar(context, context.t.createFlight.paywall.noPaywall);
-        return;
-      case SubscriptionPaywallResult.error:
-        _showSnackBar(
-          context,
-          context.t.createFlight.paywall.failedOpenPaywall,
-        );
-        return;
-    }
+  String? _routePreviewText(FlightPreviewState state) {
+    final route = state.flightRoute;
+    if (route == null) return null;
+    return '${route.departure.nameShort} → ${route.arrival.nameShort}';
   }
 
   Future<void> _onBackPressed(BuildContext context) async {

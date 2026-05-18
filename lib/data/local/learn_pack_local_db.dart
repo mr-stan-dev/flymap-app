@@ -88,8 +88,7 @@ class LearnPackLocalDb {
   Future<String> _loadArticleMarkdown({
     required LearnArticleMeta articleMeta,
   }) async {
-    final flatOrderedPath =
-        '$articlesAssetDir/${articleMeta.markdownFileName}';
+    final flatOrderedPath = '$articlesAssetDir/${articleMeta.markdownFileName}';
     final orderedNestedPath =
         '$articlesAssetDir/${articleMeta.categoryFolderName}/${articleMeta.markdownFileName}';
     final canonicalNestedPath =

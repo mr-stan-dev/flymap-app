@@ -282,6 +282,7 @@ class _FakeRevenueCatClient implements RevenueCatClient {
   SubscriptionPaywallResult paywallResult =
       SubscriptionPaywallResult.notPresented;
   List<RevenueCatProductSnapshot> products = const [];
+  RevenueCatStoreProductSnapshot? nonSubscriptionProduct;
 
   @override
   Stream<RevenueCatCustomerSnapshot> get customerInfoStream =>
@@ -330,11 +331,25 @@ class _FakeRevenueCatClient implements RevenueCatClient {
   }
 
   @override
+  Future<RevenueCatStoreProductSnapshot?> getNonSubscriptionProduct({
+    required String productId,
+  }) async {
+    return nonSubscriptionProduct;
+  }
+
+  @override
   Future<RevenueCatCustomerSnapshot> purchasePackage({
     required String packageId,
   }) async {
     purchaseCalls++;
     return getCustomerInfoResult;
+  }
+
+  @override
+  Future<void> purchaseNonSubscriptionProduct({
+    required String productId,
+  }) async {
+    purchaseCalls++;
   }
 
   @override

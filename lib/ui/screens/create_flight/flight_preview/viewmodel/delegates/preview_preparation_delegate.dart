@@ -167,8 +167,7 @@ class PreviewPreparationDelegate {
             poi: overview.topPois
                 .take(
                   PoiLimitsPolicy.maxPoisForTier(
-                    isProUser:
-                        _cubit._downloadFlowDelegate.currentSubscriptionIsPro,
+                    isProUser: _cubit.hasEffectiveProAccess,
                   ),
                 )
                 .toList(growable: false),

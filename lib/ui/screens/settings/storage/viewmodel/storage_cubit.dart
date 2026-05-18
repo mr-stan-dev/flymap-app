@@ -13,7 +13,7 @@ class StorageCubit extends Cubit<StorageState> {
     required DeleteFlightUseCase deleteFlightUseCase,
   }) : _repository = repository,
        _deleteFlightUseCase = deleteFlightUseCase,
-      super(const StorageLoading()) {
+       super(const StorageLoading()) {
     load();
   }
 
@@ -67,7 +67,10 @@ class StorageCubit extends Cubit<StorageState> {
     final items = <StorageItem>[];
     for (final flight in flights) {
       if (flight.maps.isEmpty) continue;
-      final totalSize = flight.maps.fold<int>(0, (sum, map) => sum + map.sizeBytes);
+      final totalSize = flight.maps.fold<int>(
+        0,
+        (sum, map) => sum + map.sizeBytes,
+      );
       if (totalSize <= 0) continue;
       items.add(StorageItem(flight: flight, totalSizeBytes: totalSize));
     }

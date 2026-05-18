@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flymap/analytics/app_analytics.dart';
@@ -24,8 +26,11 @@ import 'package:flymap/domain/entity/user_flight_prefs.dart';
 import 'package:flymap/domain/entity/wiki_article_candidate.dart';
 import 'package:flymap/domain/policy/poi_limits_policy.dart';
 import 'package:flymap/repository/flight_repository.dart';
+import 'package:flymap/repository/flight_unlock_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_repository.dart';
+import 'package:flymap/subscription/flight_unlock_product.dart';
+import 'package:flymap/subscription/flight_unlock_purchase_result.dart';
 import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/subscription/subscription_product.dart';
 import 'package:flymap/subscription/subscription_status.dart';
@@ -48,6 +53,7 @@ void main() {
     late _FakeDownloadMapUseCase mapUseCase;
     late _FakeConnectivityChecker connectivityChecker;
     late _FakeSubscriptionRepository subscriptionRepository;
+    late _FakeFlightUnlockRepository flightUnlockRepository;
     late _FakeGetRouteOverviewUseCase routeOverviewUseCase;
     late _TestFlightPreviewCubit cubit;
 
@@ -57,6 +63,7 @@ void main() {
       mapUseCase = _FakeDownloadMapUseCase();
       connectivityChecker = _FakeConnectivityChecker();
       subscriptionRepository = _FakeSubscriptionRepository();
+      flightUnlockRepository = _FakeFlightUnlockRepository();
       final route = _route();
       routeOverviewUseCase = _FakeGetRouteOverviewUseCase(
         routeOverview: _routeOverviewFor(route),
@@ -74,6 +81,7 @@ void main() {
         userFlightPrefsRepository: _FakeUserFlightPrefsRepository(),
         flightRepository: _FakeFlightRepository(),
         subscriptionRepository: subscriptionRepository,
+        flightUnlockRepository: flightUnlockRepository,
         deleteFlightUseCase: _FakeDeleteFlightUseCase(),
         analytics: _FakeAppAnalytics(),
         crashlytics: _FakeAppCrashlytics(),
@@ -90,6 +98,7 @@ void main() {
 
     tearDown(() async {
       await cubit.close();
+      await flightUnlockRepository.close();
     });
 
     test('free user can select more than 3 articles in UI state', () {
@@ -160,6 +169,33 @@ void main() {
           _url(3),
           _url(4),
         ]);
+      },
+    );
+
+    test(
+      'startDownload with pending unlock uses pro tier and consumes balance',
+      () async {
+        subscriptionRepository.isPro = false;
+        flightUnlockRepository.unusedCount = 1;
+        cubit.setStateForTest(
+          cubit.state.copyWith(
+            selectedArticleUrls: [_url(1), _url(2), _url(3), _url(4)],
+            flightRoute: _route(),
+            hasPendingFlightUnlock: true,
+          ),
+        );
+
+        await cubit.startDownload();
+
+        expect(wikiDownloadUseCase.lastRequestedUrls, [
+          _url(1),
+          _url(2),
+          _url(3),
+          _url(4),
+        ]);
+        expect(mapUseCase.lastFlightAccessTier, Flight.accessTierPro);
+        expect(flightUnlockRepository.consumeCount, 1);
+        expect(cubit.state.hasPendingFlightUnlock, isFalse);
       },
     );
 
@@ -244,11 +280,11 @@ void main() {
         expect(cubit.state.flightRoute, longHaulRoute);
         expect(
           cubit.state.overviewWarningTitle,
-          'Approximate route may be inaccurate',
+          'This is approximate route',
         );
         expect(
           cubit.state.overviewWarningMessage,
-          'Approximate routes can be inaccurate for long-haul flights. Use a real route with a flight number instead.',
+          'Approximate routes may be inaccurate for long-haul flights. Use a real route with a flight number instead.',
         );
       },
     );
@@ -287,6 +323,41 @@ void main() {
       await cubit.refreshPoisForPro();
 
       expect(cubit.state.flightInfo.poi.length, 80);
+    });
+
+    test('preparePreview with pending unlock applies pro POI slice', () async {
+      final pois = _routePoiSummaries(120);
+      routeOverviewUseCase.routeOverview = _routeOverviewFor(_route(), topPois: pois);
+      cubit.setStateForTest(
+        FlightPreviewState.initial().copyWith(hasPendingFlightUnlock: true),
+      );
+
+      await cubit.preparePreview();
+
+      expect(
+        cubit.state.flightInfo.poi.length,
+        PoiLimitsPolicy.maxPoisForTier(isProUser: true),
+      );
+    });
+
+    test('back from wiki to overview preserves pending unlock', () async {
+      final pois = _routePoiSummaries(120);
+      cubit.setStateForTest(
+        cubit.state.copyWith(
+          step: CreateFlightStep.wikipediaArticles,
+          allRoutePois: pois,
+          flightInfo: cubit.state.flightInfo.copyWith(
+            poi: pois.take(10).toList(growable: false),
+          ),
+          hasPendingFlightUnlock: true,
+        ),
+      );
+
+      final shouldPop = await cubit.handleBackAction();
+
+      expect(shouldPop, isFalse);
+      expect(cubit.state.step, CreateFlightStep.overview);
+      expect(cubit.state.hasPendingFlightUnlock, isTrue);
     });
 
     test('pro tier POI cap uses policy max', () async {
@@ -551,10 +622,13 @@ List<LatLng> _corridorBetween(LatLng departure, LatLng arrival) {
   ];
 }
 
-RouteOverview _routeOverviewFor(FlightRoute route) {
+RouteOverview _routeOverviewFor(
+  FlightRoute route, {
+  List<RoutePoiSummary> topPois = const [],
+}) {
   return RouteOverview(
     route: route,
-    topPois: const [],
+    topPois: topPois,
     flightInfo: null,
     timeline: const RouteTimeline(
       regions: [
@@ -617,6 +691,7 @@ class _TestFlightPreviewCubit extends FlightPreviewCubit {
     required super.userFlightPrefsRepository,
     required super.flightRepository,
     required super.subscriptionRepository,
+    required super.flightUnlockRepository,
     required super.deleteFlightUseCase,
     required super.analytics,
     required super.crashlytics,
@@ -706,6 +781,7 @@ class _UnusedFlightSearchRepository implements FlightSearchRepository {
 
 class _FakeDownloadMapUseCase implements DownloadMapUseCase {
   int? lastMaxZoom;
+  String? lastFlightAccessTier;
 
   @override
   void cancel() {}
@@ -720,6 +796,7 @@ class _FakeDownloadMapUseCase implements DownloadMapUseCase {
     required int maxZoom,
   }) {
     lastMaxZoom = maxZoom;
+    lastFlightAccessTier = flightAccessTier;
     return Stream<DownloadMapEvent>.fromIterable([
       DownloadMapInitializing(),
       DownloadMapDone('/tmp/test.mbtiles', 1024),
@@ -933,4 +1010,46 @@ class _FakeSubscriptionRepository implements SubscriptionRepository {
 
   @override
   Future<void> close() async {}
+}
+
+class _FakeFlightUnlockRepository implements FlightUnlockRepository {
+  final _controller = StreamController<int>.broadcast();
+  int unusedCount = 0;
+  int consumeCount = 0;
+
+  @override
+  Stream<int> get balanceStream => _controller.stream;
+
+  @override
+  int get currentUnusedUnlockCount => unusedCount;
+
+  @override
+  Future<void> close() async {
+    await _controller.close();
+  }
+
+  @override
+  Future<int> consumeUnlock() async {
+    consumeCount++;
+    unusedCount = unusedCount > 0 ? unusedCount - 1 : 0;
+    _controller.add(unusedCount);
+    return unusedCount;
+  }
+
+  @override
+  Future<FlightUnlockProduct?> getUnlockProduct() async => null;
+
+  @override
+  Future<int> initialize() async => unusedCount;
+
+  @override
+  Future<FlightUnlockPurchaseResult> purchaseUnlock() async =>
+      const FlightUnlockPurchaseResult.cancelled();
+
+  @override
+  Future<int> restoreUnlock() async {
+    unusedCount++;
+    _controller.add(unusedCount);
+    return unusedCount;
+  }
 }

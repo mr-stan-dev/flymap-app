@@ -120,6 +120,12 @@ class _SubscriptionManagementScreenState
                 state.status?.entitlementId ?? context.t.subscription.cardTitle,
           ),
           _MetaRow(
+            label: context.t.subscription.flightUnlockBalanceLabel,
+            value: context.t.subscription.flightUnlockAvailableCount(
+              count: state.unusedFlightUnlockCount,
+            ),
+          ),
+          _MetaRow(
             label: context.t.subscription.expires,
             value:
                 _formatDateTime(state.status?.expiresAt) ??
@@ -154,6 +160,13 @@ class _SubscriptionManagementScreenState
             state.isPro
                 ? context.t.subscription.proManageHint
                 : context.t.subscription.freeUpgradeHint,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.t.subscription.flightUnlockLocalNote,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),

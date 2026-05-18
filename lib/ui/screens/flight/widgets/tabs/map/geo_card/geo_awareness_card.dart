@@ -138,20 +138,15 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
                         for (final region in currentRegions)
                           RegionInlineChip(
                             region: region,
-                            isLocked: premiumRegionIds.contains(
-                              region.qid,
-                            ),
+                            isLocked: premiumRegionIds.contains(region.qid),
                             onTap: () => _onRegionChipTap(
                               region,
-                              isLocked: premiumRegionIds.contains(
-                                region.qid,
-                              ),
+                              isLocked: premiumRegionIds.contains(region.qid),
                             ),
                           ),
                         if (nextPrimary != null)
                           InlineLabelChip(
-                            text:
-                                '${context.t.flight.route.nextRegionLabel}:',
+                            text: '${context.t.flight.route.nextRegionLabel}:',
                           ),
                         if (nextPrimary != null)
                           RegionInlineChip(

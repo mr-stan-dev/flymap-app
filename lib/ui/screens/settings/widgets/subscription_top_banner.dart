@@ -22,6 +22,13 @@ class SubscriptionTopBanner extends StatelessWidget {
   }
 }
 
+String? _unlockBalanceText(BuildContext context, SubscriptionState state) {
+  if (state.unusedFlightUnlockCount <= 0) return null;
+  return context.t.subscription.flightUnlockAvailableCount(
+    count: state.unusedFlightUnlockCount,
+  );
+}
+
 class _BannerBadge extends StatelessWidget {
   const _BannerBadge({required this.label});
 
@@ -67,6 +74,7 @@ class _UpgradeBanner extends StatelessWidget {
       SubscriptionPhase.pro => context.t.settings.proBannerSubtitleActive,
       SubscriptionPhase.free => context.t.settings.proBannerSubtitleFree,
     };
+    final unlockBalanceText = _unlockBalanceText(context, state);
     final gradientColors = PremiumSurfaceGradients.free(
       isLightTheme: isLightTheme,
     );
@@ -136,6 +144,17 @@ class _UpgradeBanner extends StatelessWidget {
                                 color: Colors.white.withValues(alpha: 0.86),
                               ),
                         ),
+                        if (unlockBalanceText != null) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            unlockBalanceText,
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -176,6 +195,7 @@ class _SubscribedBanner extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final cardRadius = BorderRadius.circular(DsRadii.xl);
+    final unlockBalanceText = _unlockBalanceText(context, state);
     final gradientColors = [
       colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
       DsBrandColors.proAmber.withValues(
@@ -222,11 +242,27 @@ class _SubscribedBanner extends StatelessWidget {
                 ),
                 const SizedBox(width: DsSpacing.sm),
                 Expanded(
-                  child: Text(
-                    context.t.settings.proBannerTitleActive,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        context.t.settings.proBannerTitleActive,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      if (unlockBalanceText != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          unlockBalanceText,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 const SizedBox(width: DsSpacing.sm),

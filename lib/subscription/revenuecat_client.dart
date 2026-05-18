@@ -54,6 +54,23 @@ class RevenueCatProductSnapshot extends Equatable {
   ];
 }
 
+class RevenueCatStoreProductSnapshot extends Equatable {
+  const RevenueCatStoreProductSnapshot({
+    required this.productId,
+    required this.title,
+    required this.priceText,
+    required this.description,
+  });
+
+  final String productId;
+  final String title;
+  final String priceText;
+  final String description;
+
+  @override
+  List<Object?> get props => [productId, title, priceText, description];
+}
+
 abstract class RevenueCatClient {
   Stream<RevenueCatCustomerSnapshot> get customerInfoStream;
 
@@ -65,9 +82,15 @@ abstract class RevenueCatClient {
 
   Future<List<RevenueCatProductSnapshot>> getCurrentOfferingProducts();
 
+  Future<RevenueCatStoreProductSnapshot?> getNonSubscriptionProduct({
+    required String productId,
+  });
+
   Future<RevenueCatCustomerSnapshot> purchasePackage({
     required String packageId,
   });
+
+  Future<void> purchaseNonSubscriptionProduct({required String productId});
 
   Future<bool> canMakePayments();
 
@@ -139,6 +162,23 @@ class PurchasesRevenueCatClient implements RevenueCatClient {
   }
 
   @override
+  Future<RevenueCatStoreProductSnapshot?> getNonSubscriptionProduct({
+    required String productId,
+  }) async {
+    final products = await Purchases.getProducts([
+      productId,
+    ], productCategory: ProductCategory.nonSubscription);
+    final product = products.firstOrNull;
+    if (product == null) return null;
+    return RevenueCatStoreProductSnapshot(
+      productId: product.identifier,
+      title: product.title,
+      priceText: product.priceString,
+      description: product.description,
+    );
+  }
+
+  @override
   Future<RevenueCatCustomerSnapshot> purchasePackage({
     required String packageId,
   }) async {
@@ -159,6 +199,20 @@ class PurchasesRevenueCatClient implements RevenueCatClient {
 
     final result = await Purchases.purchase(PurchaseParams.package(package));
     return _mapCustomerInfo(result.customerInfo);
+  }
+
+  @override
+  Future<void> purchaseNonSubscriptionProduct({
+    required String productId,
+  }) async {
+    final products = await Purchases.getProducts([
+      productId,
+    ], productCategory: ProductCategory.nonSubscription);
+    final product = products.firstOrNull;
+    if (product == null) {
+      throw StateError('Product "$productId" was not found.');
+    }
+    await Purchases.purchase(PurchaseParams.storeProduct(product));
   }
 
   @override

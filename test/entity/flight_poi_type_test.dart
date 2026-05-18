@@ -7,18 +7,9 @@ void main() {
       expect(FlightPoiType.fromRaw('city'), FlightPoiType.city);
       expect(FlightPoiType.fromRaw('river'), FlightPoiType.river);
       expect(FlightPoiType.fromRaw('region'), FlightPoiType.region);
-      expect(
-        FlightPoiType.fromRaw('mountain_range'),
-        FlightPoiType.mountain,
-      );
-      expect(
-        FlightPoiType.fromRaw('mountain range'),
-        FlightPoiType.mountain,
-      );
-      expect(
-        FlightPoiType.fromRaw('MOUNTAIN-RANGE'),
-        FlightPoiType.mountain,
-      );
+      expect(FlightPoiType.fromRaw('mountain_range'), FlightPoiType.mountain);
+      expect(FlightPoiType.fromRaw('mountain range'), FlightPoiType.mountain);
+      expect(FlightPoiType.fromRaw('MOUNTAIN-RANGE'), FlightPoiType.mountain);
     });
 
     test('falls back to unknown for unsupported values', () {

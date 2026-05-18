@@ -17,7 +17,8 @@ class DeleteFlightConfirmationDialog extends StatelessWidget {
   }) {
     return showDialog<bool>(
       context: context,
-      builder: (_) => DeleteFlightConfirmationDialog(reclaimedBytes: reclaimedBytes),
+      builder: (_) =>
+          DeleteFlightConfirmationDialog(reclaimedBytes: reclaimedBytes),
     );
   }
 

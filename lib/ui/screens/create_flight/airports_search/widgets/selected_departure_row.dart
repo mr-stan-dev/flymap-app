@@ -3,7 +3,11 @@ import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/i18n/strings.g.dart';
 
 class SelectedDepartureRow extends StatelessWidget {
-  const SelectedDepartureRow({required this.airport, required this.onEdit, super.key});
+  const SelectedDepartureRow({
+    required this.airport,
+    required this.onEdit,
+    super.key,
+  });
 
   final Airport airport;
   final VoidCallback onEdit;
@@ -54,7 +58,7 @@ class SelectedDepartureRow extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               child: Text(
-               context.t.common.edit,
+                context.t.common.edit,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w600,

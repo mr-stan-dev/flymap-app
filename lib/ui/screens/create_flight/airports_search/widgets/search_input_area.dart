@@ -32,7 +32,9 @@ class SearchInputArea extends StatelessWidget {
   Widget build(BuildContext context) {
     final gpsActiveColor = DsSemanticColors.success(context);
     final primary = selectedAirport?.primaryCode.trim().toUpperCase() ?? '';
-    final selectedAirportCode = primary.isNotEmpty ? primary : (selectedAirport?.displayCode.trim().toUpperCase() ?? '');
+    final selectedAirportCode = primary.isNotEmpty
+        ? primary
+        : (selectedAirport?.displayCode.trim().toUpperCase() ?? '');
     final isSelectedAirportHome =
         selectedAirportCode.isNotEmpty &&
         homeAirportCode.isNotEmpty &&

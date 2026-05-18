@@ -6,7 +6,8 @@ import 'package:sembast/sembast.dart';
 /// V1 -> V2:
 /// Backfill `flight_assets` from legacy embedded `flights.maps`.
 class FlightsDbMigrationV1ToV2 implements FlightsDbMigration {
-  FlightsDbMigrationV1ToV2({required AppDatabase database}) : _database = database;
+  FlightsDbMigrationV1ToV2({required AppDatabase database})
+    : _database = database;
 
   final AppDatabase _database;
   final Logger _logger = const Logger('FlightsDbMigrationV1ToV2');
@@ -72,4 +73,3 @@ class FlightsDbMigrationV1ToV2 implements FlightsDbMigration {
     return '$flightId::map::$filePath';
   }
 }
-

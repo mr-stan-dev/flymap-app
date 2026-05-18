@@ -64,7 +64,8 @@ class _StorageContent extends StatelessWidget {
               const SizedBox(height: 12),
               _StorageListHeader(
                 sort: success.sort,
-                onSortChanged: (sort) => context.read<StorageCubit>().setSort(sort),
+                onSortChanged: (sort) =>
+                    context.read<StorageCubit>().setSort(sort),
               ),
               if (success.items.isEmpty) ...[
                 const SizedBox(height: 24),
@@ -79,10 +80,8 @@ class _StorageContent extends StatelessWidget {
                   (item) => _StorageTile(
                     item: item,
                     maxSizeBytes: maxSize,
-                    onOpen: () => AppRouter.goToFlight(
-                      context,
-                      flight: item.flight,
-                    ),
+                    onOpen: () =>
+                        AppRouter.goToFlight(context, flight: item.flight),
                     onDelete: () => _deleteFlight(context, item),
                   ),
                 ),
@@ -101,7 +100,9 @@ class _StorageContent extends StatelessWidget {
     );
     if (confirmed != true || !context.mounted) return;
 
-    final deleted = await context.read<StorageCubit>().deleteFlight(item.flight.id);
+    final deleted = await context.read<StorageCubit>().deleteFlight(
+      item.flight.id,
+    );
     if (!deleted && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.t.home.failedDeleteFlight)),
@@ -168,7 +169,9 @@ class _SummaryValue extends StatelessWidget {
       children: [
         Text(
           label,
-          style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+          style: textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
@@ -181,10 +184,7 @@ class _SummaryValue extends StatelessWidget {
 }
 
 class _StorageListHeader extends StatelessWidget {
-  const _StorageListHeader({
-    required this.sort,
-    required this.onSortChanged,
-  });
+  const _StorageListHeader({required this.sort, required this.onSortChanged});
 
   final StorageSort sort;
   final ValueChanged<StorageSort> onSortChanged;
@@ -196,9 +196,9 @@ class _StorageListHeader extends StatelessWidget {
         Expanded(
           child: Text(
             context.t.settings.storageDownloadedMaps,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
         PopupMenuButton<StorageSort>(
@@ -260,7 +260,9 @@ class _StorageTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
       title: Text(
         '${RouteUtils.cityLabel(departure.city)}, ${departure.countryCode} → ${RouteUtils.cityLabel(arrival.city)}, ${arrival.countryCode}',
-        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
       ),
       trailing: PopupMenuButton<_StorageItemAction>(
         tooltip: context.t.home.flightActions,

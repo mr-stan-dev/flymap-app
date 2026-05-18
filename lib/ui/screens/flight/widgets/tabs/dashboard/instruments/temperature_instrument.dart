@@ -52,11 +52,13 @@ class TemperatureInstrument extends StatelessWidget {
             Center(
               child: Text(
                 context.t.flight.dashboard.temperatureAvailableAfter(
-                  threshold: _availabilityThresholdLabel(telemetry.altitudeUnit),
+                  threshold: _availabilityThresholdLabel(
+                    telemetry.altitudeUnit,
+                  ),
                 ),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: palette.secondaryText,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: palette.secondaryText),
               ),
             ),
             const SizedBox(height: 8),

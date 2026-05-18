@@ -82,5 +82,4 @@ class FlightRepository {
     }
     return totalDistance;
   }
-
 }

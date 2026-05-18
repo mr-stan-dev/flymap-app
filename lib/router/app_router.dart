@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/airport.dart';
@@ -75,7 +77,14 @@ class AppRouter {
         GoRoute(
           path: flightNumberSearchRoute,
           name: 'flight-number-search',
-          builder: (context, state) => const FlightNumberSearchScreen(),
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            final hasPendingFlightUnlock =
+                extra?['hasPendingFlightUnlock'] as bool? ?? false;
+            return FlightNumberSearchScreen(
+              hasPendingFlightUnlock: hasPendingFlightUnlock,
+            );
+          },
         ),
 
         GoRoute(
@@ -92,6 +101,8 @@ class AppRouter {
             final departure = extra?['departure'] as Airport?;
             final arrival = extra?['arrival'] as Airport?;
             final flightNumber = extra?['flightNumber'] as String?;
+            final hasPendingFlightUnlock =
+                extra?['hasPendingFlightUnlock'] as bool? ?? false;
             if (departure == null || arrival == null) {
               return const AirportsSearchScreen();
             }
@@ -100,6 +111,7 @@ class AppRouter {
                 departure: departure,
                 arrival: arrival,
                 flightNumber: flightNumber,
+                hasPendingFlightUnlock: hasPendingFlightUnlock,
               ),
             );
           },
@@ -208,12 +220,24 @@ class AppRouter {
     context.go(airportsSearchRoute);
   }
 
-  static void goToFlightNumberSelector(BuildContext context) {
-    context.push(flightNumberSearchRoute);
+  static void goToFlightNumberSelector(
+    BuildContext context, {
+    bool hasPendingFlightUnlock = false,
+  }) {
+    context.push(
+      flightNumberSearchRoute,
+      extra: {'hasPendingFlightUnlock': hasPendingFlightUnlock},
+    );
   }
 
   static void goToRouteTypeSelector(BuildContext context) {
     context.push(routeTypeSelectorRoute);
+  }
+
+  static void goToRouteTypeSelectorFromOnboarding(BuildContext context) {
+    final router = GoRouter.of(context);
+    router.go(homeRoute);
+    unawaited(Future<void>.microtask(() => router.push(routeTypeSelectorRoute)));
   }
 
   /// Navigate to flight screen with flight
@@ -227,8 +251,13 @@ class AppRouter {
     required Airport departure,
     required Airport arrival,
     String? flightNumber,
+    bool hasPendingFlightUnlock = false,
   }) {
-    final extra = <String, dynamic>{'departure': departure, 'arrival': arrival};
+    final extra = <String, dynamic>{
+      'departure': departure,
+      'arrival': arrival,
+      'hasPendingFlightUnlock': hasPendingFlightUnlock,
+    };
     if (flightNumber != null && flightNumber.trim().isNotEmpty) {
       extra['flightNumber'] = flightNumber;
     }

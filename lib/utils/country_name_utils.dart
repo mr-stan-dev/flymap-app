@@ -190,7 +190,9 @@ class CountryNameUtils {
     'ZW': 'Zimbabwe',
   };
 
-  static final Map<String, String> _nameToCode = _names.map((k, v) => MapEntry(v.toLowerCase(), k));
+  static final Map<String, String> _nameToCode = _names.map(
+    (k, v) => MapEntry(v.toLowerCase(), k),
+  );
 
   static String? toCode(String name) {
     final normalized = name.trim().toLowerCase();
@@ -206,7 +208,7 @@ class CountryNameUtils {
       if (entry.key.contains(normalized) || normalized.contains(entry.key)) {
         // Basic check to avoid false positives for very short names
         if (normalized.length > 3 || entry.key.length > 3) {
-           return entry.value;
+          return entry.value;
         }
       }
     }

@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/data/local/airports_database.dart';
 import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/repository/flight_unlock_repository.dart';
 import 'package:flymap/repository/metric_units_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/repository/settings_repository.dart';
@@ -45,6 +46,7 @@ class _FlymapAppState extends State<FlymapApp> {
         BlocProvider(
           create: (_) => SubscriptionCubit(
             repository: GetIt.I.get<SubscriptionRepository>(),
+            flightUnlockRepository: GetIt.I.get<FlightUnlockRepository>(),
             analytics: GetIt.I.get<AppAnalytics>(),
           )..initialize(),
         ),

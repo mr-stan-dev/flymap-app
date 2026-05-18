@@ -64,7 +64,11 @@ class FlightInfoWidget extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Icon(Icons.circle, size: 8, color: colorScheme.outline.withValues(alpha: 0.45)),
+                      child: Icon(
+                        Icons.circle,
+                        size: 8,
+                        color: colorScheme.outline.withValues(alpha: 0.45),
+                      ),
                     ),
                     Expanded(
                       child: Divider(

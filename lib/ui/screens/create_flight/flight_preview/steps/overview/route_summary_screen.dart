@@ -6,10 +6,10 @@ import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/subscription/paywall_source.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/common/route/route_places_by_type.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/flight_unlock_gate_sheet.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/region_info_screen.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_cubit.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
-import 'package:flymap/ui/screens/shared/premium/route_premium_gate_interactions.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_widget.dart';
 import 'package:flymap/utils/route_utils.dart';
@@ -35,9 +35,11 @@ class RouteSummaryScreen extends StatelessWidget {
     final previewState = context.watch<FlightPreviewCubit>().state;
     final liveRegions = previewState.routeRegions;
     final livePois = previewState.flightInfo.poi;
-    final isProUser = context.select(
-      (SubscriptionCubit cubit) => cubit.state.isPro,
-    );
+    final isProUser =
+        context.select((SubscriptionCubit cubit) => cubit.state.isPro) ||
+        previewState.hasPendingFlightUnlock;
+    final flightPreviewCubit = context.read<FlightPreviewCubit>();
+    final subscriptionCubit = context.read<SubscriptionCubit>();
     final distance = _formatDistanceKm(route);
     final duration = _formatMinutesCompact(context, totalRouteMinutes);
     final routeTitle =
@@ -110,12 +112,16 @@ class RouteSummaryScreen extends StatelessWidget {
               isProUser: isProUser,
               cruiseSpeedKmh: cruiseSpeedKmh,
               totalRouteMinutes: totalRouteMinutes,
-              onPremiumGateTap: () => RoutePremiumGateInteractions.onGateTap(
+              onPremiumGateTap: () => showFlightUnlockGateSheet(
                 context: context,
+                subscriptionCubit: subscriptionCubit,
                 source: PaywallSource.routeTimelineGate,
-                useOfflineInfoSheet: true,
-                onActivated: () =>
-                    context.read<FlightPreviewCubit>().refreshPoisForPro(),
+                onUnlockActivated: flightPreviewCubit.enablePendingFlightUnlock,
+                onProActivated: flightPreviewCubit.refreshPoisForPro,
+                routePreview:
+                    '${route.departure.nameShort} → ${route.arrival.nameShort}',
+                presentProPaywall:
+                    subscriptionCubit.presentPaywallFromRouteTimelineGate,
               ),
               onOpenRegion: (region) => _openRegionInfo(context, region),
             ),

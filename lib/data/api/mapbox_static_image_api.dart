@@ -12,8 +12,8 @@ class MapboxStaticImageApi {
   MapboxStaticImageApi({
     required http.Client httpClient,
     required String accessToken,
-  })  : _httpClient = httpClient,
-        _accessToken = accessToken;
+  }) : _httpClient = httpClient,
+       _accessToken = accessToken;
 
   final http.Client _httpClient;
   final String _accessToken;
@@ -35,13 +35,14 @@ class MapboxStaticImageApi {
     bool retina = true,
   }) async {
     final retinaStr = retina ? '@2x' : '';
-    
+
     // Format coordinates to 6 decimal places to keep URL clean
     final lonStr = center.longitude.toStringAsFixed(6);
     final latStr = center.latitude.toStringAsFixed(6);
     final zoomStr = zoom.toStringAsFixed(2);
-    
-    final url = '$_baseUrl/$_defaultStyle/static/'
+
+    final url =
+        '$_baseUrl/$_defaultStyle/static/'
         '$lonStr,$latStr,$zoomStr,0,0/'
         '${width}x$height$retinaStr'
         '?access_token=$_accessToken';
@@ -49,12 +50,12 @@ class MapboxStaticImageApi {
     _logger.log('Fetching static map image (${url.length} chars)');
 
     try {
-      final response = await _httpClient
-          .get(Uri.parse(url))
-          .timeout(_timeout);
+      final response = await _httpClient.get(Uri.parse(url)).timeout(_timeout);
 
       if (response.statusCode == 200) {
-        _logger.log('Static map image fetched (${response.bodyBytes.length} bytes)');
+        _logger.log(
+          'Static map image fetched (${response.bodyBytes.length} bytes)',
+        );
         return response.bodyBytes;
       } else {
         _logger.error(

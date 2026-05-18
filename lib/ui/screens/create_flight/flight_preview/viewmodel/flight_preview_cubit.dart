@@ -23,6 +23,7 @@ import 'package:flymap/domain/policy/route_region_premium_gate_policy.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/map_download_config.dart';
+import 'package:flymap/repository/flight_unlock_repository.dart';
 import 'package:flymap/repository/flight_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_repository.dart';
@@ -46,6 +47,7 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     required this.departure,
     required this.arrival,
     this.flightNumber,
+    bool hasPendingFlightUnlock = false,
     required ConnectivityChecker connectivityChecker,
     required GetRouteOverviewUseCase getRouteOverviewUseCase,
     required BuildFlightRoutePreviewUseCase buildFlightRoutePreviewUseCase,
@@ -57,13 +59,19 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     required UserFlightPrefsRepository userFlightPrefsRepository,
     required FlightRepository flightRepository,
     required SubscriptionRepository subscriptionRepository,
+    required FlightUnlockRepository flightUnlockRepository,
     required DeleteFlightUseCase deleteFlightUseCase,
     required AppAnalytics analytics,
     required AppCrashlytics crashlytics,
     bool autoPrepare = true,
   }) : _analytics = analytics,
        _crashlytics = crashlytics,
-       super(FlightPreviewState.initial()) {
+       _subscriptionRepository = subscriptionRepository,
+       super(
+         FlightPreviewState.initial().copyWith(
+           hasPendingFlightUnlock: hasPendingFlightUnlock,
+         ),
+       ) {
     _previewPreparationDelegate = PreviewPreparationDelegate(
       this,
       connectivityChecker: connectivityChecker,
@@ -81,6 +89,7 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
       downloadWikipediaArticlesUseCase: downloadWikipediaArticlesUseCase,
       flightRepository: flightRepository,
       subscriptionRepository: subscriptionRepository,
+      flightUnlockRepository: flightUnlockRepository,
       deleteFlightUseCase: deleteFlightUseCase,
     );
     if (autoPrepare) {
@@ -91,6 +100,7 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
   final _logger = Logger('FlightPreviewCubit');
   final AppAnalytics _analytics;
   final AppCrashlytics _crashlytics;
+  final SubscriptionRepository _subscriptionRepository;
   final Airport departure;
   final Airport arrival;
   final String? flightNumber;
@@ -139,6 +149,10 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
 
   Future<bool> handleBackAction() => _navigationDelegate.handleBackAction();
 
+  bool get hasEffectiveProAccess =>
+      _subscriptionRepository.currentStatus.isPro ||
+      state.hasPendingFlightUnlock;
+
   void _applyPoisForSubscriptionTier(
     List<RoutePoiSummary> allPois, {
     required bool isProUser,
@@ -158,6 +172,24 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
 
   Future<void> refreshPoisForPro() async {
     _applyPoisForSubscriptionTier(state.allRoutePois, isProUser: true);
+  }
+
+  Future<void> syncPoisForCurrentAccessTier() async {
+    _applyPoisForSubscriptionTier(
+      state.allRoutePois,
+      isProUser: hasEffectiveProAccess,
+    );
+  }
+
+  Future<void> enablePendingFlightUnlock() async {
+    _emitState(state.copyWith(hasPendingFlightUnlock: true));
+    await syncPoisForCurrentAccessTier();
+  }
+
+  Future<void> clearPendingFlightUnlock() async {
+    if (!state.hasPendingFlightUnlock) return;
+    _emitState(state.copyWith(hasPendingFlightUnlock: false));
+    await syncPoisForCurrentAccessTier();
   }
 
   void _emitState(FlightPreviewState nextState) {

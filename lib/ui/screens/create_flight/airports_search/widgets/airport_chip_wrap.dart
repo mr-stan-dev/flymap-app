@@ -27,7 +27,9 @@ class AirportChipWrap extends StatelessWidget {
       runSpacing: 6,
       children: airports.map((airport) {
         final primary = airport.primaryCode.trim().toUpperCase();
-        final code = primary.isNotEmpty ? primary : airport.displayCode.trim().toUpperCase();
+        final code = primary.isNotEmpty
+            ? primary
+            : airport.displayCode.trim().toUpperCase();
         final isHomeAirport =
             homeAirportCode.isNotEmpty && code == homeAirportCode;
         return SelectionChip(

@@ -1,3 +1,4 @@
+import 'package:flymap/subscription/flight_unlock_product.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flymap/subscription/subscription_product.dart';
 import 'package:flymap/subscription/subscription_status.dart';
@@ -11,6 +12,11 @@ class SubscriptionState extends Equatable {
     this.errorMessage,
     this.products = const <SubscriptionProduct>[],
     this.isProductsLoading = false,
+    this.unusedFlightUnlockCount = 0,
+    this.flightUnlockProduct,
+    this.isFlightUnlockLoading = false,
+    this.isFlightUnlockPurchaseLoading = false,
+    this.flightUnlockErrorMessage,
   });
 
   final SubscriptionPhase phase;
@@ -18,6 +24,11 @@ class SubscriptionState extends Equatable {
   final String? errorMessage;
   final List<SubscriptionProduct> products;
   final bool isProductsLoading;
+  final int unusedFlightUnlockCount;
+  final FlightUnlockProduct? flightUnlockProduct;
+  final bool isFlightUnlockLoading;
+  final bool isFlightUnlockPurchaseLoading;
+  final String? flightUnlockErrorMessage;
 
   bool get isPro => phase == SubscriptionPhase.pro;
 
@@ -32,6 +43,13 @@ class SubscriptionState extends Equatable {
     String? errorMessage,
     List<SubscriptionProduct>? products,
     bool? isProductsLoading,
+    int? unusedFlightUnlockCount,
+    FlightUnlockProduct? flightUnlockProduct,
+    bool clearFlightUnlockProduct = false,
+    bool? isFlightUnlockLoading,
+    bool? isFlightUnlockPurchaseLoading,
+    String? flightUnlockErrorMessage,
+    bool clearFlightUnlockError = false,
     bool clearError = false,
   }) {
     return SubscriptionState(
@@ -40,6 +58,18 @@ class SubscriptionState extends Equatable {
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
       products: products ?? this.products,
       isProductsLoading: isProductsLoading ?? this.isProductsLoading,
+      unusedFlightUnlockCount:
+          unusedFlightUnlockCount ?? this.unusedFlightUnlockCount,
+      flightUnlockProduct: clearFlightUnlockProduct
+          ? null
+          : flightUnlockProduct ?? this.flightUnlockProduct,
+      isFlightUnlockLoading:
+          isFlightUnlockLoading ?? this.isFlightUnlockLoading,
+      isFlightUnlockPurchaseLoading:
+          isFlightUnlockPurchaseLoading ?? this.isFlightUnlockPurchaseLoading,
+      flightUnlockErrorMessage: clearFlightUnlockError
+          ? null
+          : flightUnlockErrorMessage ?? this.flightUnlockErrorMessage,
     );
   }
 
@@ -50,5 +80,10 @@ class SubscriptionState extends Equatable {
     errorMessage,
     products,
     isProductsLoading,
+    unusedFlightUnlockCount,
+    flightUnlockProduct,
+    isFlightUnlockLoading,
+    isFlightUnlockPurchaseLoading,
+    flightUnlockErrorMessage,
   ];
 }

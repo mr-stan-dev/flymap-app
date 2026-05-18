@@ -8,11 +8,14 @@ import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/data/local/airports_database.dart';
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/repository/flight_unlock_repository.dart';
 import 'package:flymap/repository/favorite_airports_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/repository/recent_airports_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_storage.dart';
+import 'package:flymap/subscription/flight_unlock_product.dart';
+import 'package:flymap/subscription/flight_unlock_purchase_result.dart';
 import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/subscription/subscription_product.dart';
 import 'package:flymap/subscription/subscription_status.dart';
@@ -110,6 +113,7 @@ void main() {
       await _pumpUntilVisible(tester, find.text('Route type selector screen'));
 
       expect(find.text('Route type selector screen'), findsOneWidget);
+      expect(tester.state<NavigatorState>(find.byType(Navigator)).canPop(), isTrue);
 
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('onboarding.seen'), isTrue);
@@ -119,9 +123,17 @@ void main() {
 
 Widget _buildTestApp() {
   final router = GoRouter(
-    initialLocation: '/',
+    initialLocation: '/onboarding',
     routes: [
-      GoRoute(path: '/', builder: (context, state) => const OnboardingScreen()),
+      GoRoute(
+        path: '/',
+        builder: (context, state) =>
+            const Scaffold(body: Center(child: Text('Home screen'))),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
       GoRoute(
         path: '/flight-search',
         builder: (context, state) =>
@@ -140,6 +152,7 @@ Widget _buildTestApp() {
     child: BlocProvider(
       create: (_) => SubscriptionCubit(
         repository: _FakeSubscriptionRepository(),
+        flightUnlockRepository: _FakeFlightUnlockRepository(),
         analytics: const _FakeAppAnalytics(),
       ),
       child: MaterialApp.router(
@@ -213,6 +226,33 @@ class _FakeSubscriptionRepository implements SubscriptionRepository {
 
   @override
   Future<void> close() async {}
+}
+
+class _FakeFlightUnlockRepository implements FlightUnlockRepository {
+  @override
+  Stream<int> get balanceStream => const Stream<int>.empty();
+
+  @override
+  int get currentUnusedUnlockCount => 0;
+
+  @override
+  Future<void> close() async {}
+
+  @override
+  Future<int> consumeUnlock() async => 0;
+
+  @override
+  Future<FlightUnlockProduct?> getUnlockProduct() async => null;
+
+  @override
+  Future<int> initialize() async => 0;
+
+  @override
+  Future<FlightUnlockPurchaseResult> purchaseUnlock() async =>
+      const FlightUnlockPurchaseResult.cancelled();
+
+  @override
+  Future<int> restoreUnlock() async => 0;
 }
 
 class _FakeAppAnalytics implements AppAnalytics {

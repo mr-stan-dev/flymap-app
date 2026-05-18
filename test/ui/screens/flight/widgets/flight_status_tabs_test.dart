@@ -20,7 +20,10 @@ import 'package:flymap/domain/usecase/complete_flight_use_case.dart';
 import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
 import 'package:flymap/domain/usecase/start_flight_use_case.dart';
 import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/repository/flight_unlock_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
+import 'package:flymap/subscription/flight_unlock_product.dart';
+import 'package:flymap/subscription/flight_unlock_purchase_result.dart';
 import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/subscription/subscription_product.dart';
 import 'package:flymap/subscription/subscription_status.dart';
@@ -302,6 +305,7 @@ Flight _buildFlight({required FlightStatus status, FlightRoute? route}) {
 SubscriptionCubit _buildSubscriptionCubit() {
   return SubscriptionCubit(
     repository: _FakeSubscriptionRepository(),
+    flightUnlockRepository: _FakeFlightUnlockRepository(),
     analytics: _FakeAppAnalytics(),
   );
 }
@@ -376,6 +380,33 @@ class _FakeSubscriptionRepository implements SubscriptionRepository {
 
   @override
   Future<SubscriptionStatus> restorePurchases() async => _status(isPro: false);
+}
+
+class _FakeFlightUnlockRepository implements FlightUnlockRepository {
+  @override
+  Stream<int> get balanceStream => const Stream<int>.empty();
+
+  @override
+  int get currentUnusedUnlockCount => 0;
+
+  @override
+  Future<void> close() async {}
+
+  @override
+  Future<int> consumeUnlock() async => 0;
+
+  @override
+  Future<FlightUnlockProduct?> getUnlockProduct() async => null;
+
+  @override
+  Future<int> initialize() async => 0;
+
+  @override
+  Future<FlightUnlockPurchaseResult> purchaseUnlock() async =>
+      const FlightUnlockPurchaseResult.cancelled();
+
+  @override
+  Future<int> restoreUnlock() async => 0;
 }
 
 class _FakeAppAnalytics implements AppAnalytics {

@@ -195,10 +195,7 @@ class _FlightDebugTabViewState extends State<FlightDebugTabView> {
     if (!mounted) return;
     final resetGeo = _resetGeoOnNextUpdate;
     _resetGeoOnNextUpdate = false;
-    _flightCubit?.applyDebugGpsData(
-      gpsData,
-      resetGeoState: resetGeo,
-    );
+    _flightCubit?.applyDebugGpsData(gpsData, resetGeoState: resetGeo);
   }
 
   void _onSimDone() {

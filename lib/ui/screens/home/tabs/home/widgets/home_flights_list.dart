@@ -28,10 +28,7 @@ class HomeFlightsList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        HomeFlightsSectionHeader(
-          count: flights.length,
-          onViewAll: onViewAll,
-        ),
+        HomeFlightsSectionHeader(count: flights.length, onViewAll: onViewAll),
         const SizedBox(height: 12),
         _buildFlightsContent(),
       ],

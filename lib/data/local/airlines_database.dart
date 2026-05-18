@@ -60,7 +60,7 @@ class AirlinesDatabase {
       ).convert(csvData);
 
       _logger.log('Found ${rows.length} rows in airlines CSV');
-      
+
       final loadedAirlines = <Airline>[];
 
       // iata_code^icao_code^name^alias
@@ -72,11 +72,7 @@ class AirlinesDatabase {
         final icao = parts[1].toUpperCase();
         final name = parts[2];
 
-        loadedAirlines.add(Airline(
-          name: name,
-          iataCode: iata,
-          icaoCode: icao,
-        ));
+        loadedAirlines.add(Airline(name: name, iataCode: iata, icaoCode: icao));
       }
 
       _airlines

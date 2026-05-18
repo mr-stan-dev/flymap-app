@@ -22,6 +22,7 @@ import 'package:flymap/domain/entity/learn_article_progress.dart';
 import 'package:flymap/domain/entity/learn_category.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/repository/flight_repository.dart';
+import 'package:flymap/repository/flight_unlock_repository.dart';
 import 'package:flymap/repository/learn_article_progress_repository.dart';
 import 'package:flymap/repository/learn_repository.dart';
 import 'package:flymap/repository/metric_units_repository.dart';
@@ -29,6 +30,8 @@ import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/repository/settings_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_storage.dart';
+import 'package:flymap/subscription/flight_unlock_product.dart';
+import 'package:flymap/subscription/flight_unlock_purchase_result.dart';
 import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/subscription/subscription_product.dart';
 import 'package:flymap/subscription/subscription_status.dart';
@@ -203,6 +206,7 @@ Widget _testApp({HomeRootTab initialTab = HomeRootTab.flights}) {
         BlocProvider(
           create: (_) => SubscriptionCubit(
             repository: _FakeSubscriptionRepository(),
+            flightUnlockRepository: _FakeFlightUnlockRepository(),
             analytics: const _FakeAppAnalytics(),
           ),
         ),
@@ -382,6 +386,33 @@ class _FakeSubscriptionRepository implements SubscriptionRepository {
 
   @override
   Future<SubscriptionStatus> restorePurchases() async => _currentStatus;
+}
+
+class _FakeFlightUnlockRepository implements FlightUnlockRepository {
+  @override
+  Stream<int> get balanceStream => const Stream<int>.empty();
+
+  @override
+  int get currentUnusedUnlockCount => 0;
+
+  @override
+  Future<void> close() async {}
+
+  @override
+  Future<int> consumeUnlock() async => 0;
+
+  @override
+  Future<FlightUnlockProduct?> getUnlockProduct() async => null;
+
+  @override
+  Future<int> initialize() async => 0;
+
+  @override
+  Future<FlightUnlockPurchaseResult> purchaseUnlock() async =>
+      const FlightUnlockPurchaseResult.cancelled();
+
+  @override
+  Future<int> restoreUnlock() async => 0;
 }
 
 class _FakeAppAnalytics implements AppAnalytics {

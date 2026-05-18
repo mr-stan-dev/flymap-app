@@ -22,6 +22,7 @@ class MapAndStepNavigationDelegate {
     switch (_cubit.state.step) {
       case CreateFlightStep.routeNotSupported:
       case CreateFlightStep.overview:
+        await _cubit.clearPendingFlightUnlock();
         return true;
       case CreateFlightStep.wikipediaArticles:
         _cubit._emitState(

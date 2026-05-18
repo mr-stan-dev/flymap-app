@@ -69,7 +69,9 @@ class HtmlContentPage extends StatelessWidget {
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.t.settings.couldNotOpenUrl(url: source))),
+        SnackBar(
+          content: Text(context.t.settings.couldNotOpenUrl(url: source)),
+        ),
       );
     }
   }

@@ -35,6 +35,7 @@ import 'package:flymap/rating/rate_prompt_repository.dart';
 import 'package:flymap/rating/rate_review_launcher.dart';
 import 'package:flymap/rating/rate_store_launcher.dart';
 import 'package:flymap/repository/favorite_airports_repository.dart';
+import 'package:flymap/repository/flight_unlock_repository.dart';
 import 'package:flymap/repository/flight_repository.dart';
 import 'package:flymap/repository/learn_article_progress_repository.dart';
 import 'package:flymap/repository/learn_repository.dart';
@@ -317,6 +318,9 @@ class DiModule {
     );
     i.registerLazySingleton<SubscriptionStatusCache>(
       () => SharedPrefsSubscriptionStatusCache(),
+    );
+    i.registerLazySingleton<FlightUnlockRepository>(
+      () => RevenueCatFlightUnlockRepository(client: i.get(), config: i.get()),
     );
     i.registerLazySingleton<SubscriptionRepository>(
       () => RevenueCatSubscriptionRepository(

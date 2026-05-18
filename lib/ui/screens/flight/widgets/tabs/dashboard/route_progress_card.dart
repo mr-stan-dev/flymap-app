@@ -110,7 +110,6 @@ class RouteProgressCard extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class _Metric extends StatelessWidget {

@@ -10,7 +10,12 @@ import 'widgets/flight_summary_card.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 
 class FlightNumberSearchScreen extends StatefulWidget {
-  const FlightNumberSearchScreen({super.key});
+  const FlightNumberSearchScreen({
+    this.hasPendingFlightUnlock = false,
+    super.key,
+  });
+
+  final bool hasPendingFlightUnlock;
 
   @override
   State<FlightNumberSearchScreen> createState() =>
@@ -43,6 +48,7 @@ class _FlightNumberSearchScreenState extends State<FlightNumberSearchScreen> {
               departure: state.departure,
               arrival: state.arrival,
               flightNumber: state.flightNumber,
+              hasPendingFlightUnlock: widget.hasPendingFlightUnlock,
             );
           }
         },

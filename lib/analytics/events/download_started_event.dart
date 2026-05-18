@@ -8,6 +8,7 @@ class DownloadStartedEvent extends AnalyticsEvent {
     required this.mapDetail,
     required this.articlesSelectedCount,
     required this.isProUser,
+    required this.accessMode,
     required this.routeSource,
   });
 
@@ -15,6 +16,7 @@ class DownloadStartedEvent extends AnalyticsEvent {
   final MapDetailLevel mapDetail;
   final int articlesSelectedCount;
   final bool isProUser;
+  final String accessMode;
   final FlightRouteSource routeSource;
 
   @override
@@ -26,6 +28,7 @@ class DownloadStartedEvent extends AnalyticsEvent {
     'map_detail': mapDetail.name,
     'articles_selected_count': articlesSelectedCount,
     'is_pro_user': isProUser ? 1 : 0,
+    'access_mode': accessMode,
     'route_source': routeSource.rawValue,
   };
 }

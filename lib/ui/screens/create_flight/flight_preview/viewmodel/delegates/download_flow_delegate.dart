@@ -2,6 +2,9 @@ part of '../flight_preview_cubit.dart';
 
 class DownloadFlowDelegate {
   static const _regionArticleLanguageCode = 'en';
+  static const _accessModeBasic = 'basic';
+  static const _accessModeSubscription = 'subscription';
+  static const _accessModeSingleFlightUnlock = 'single_flight_unlock';
 
   DownloadFlowDelegate(
     this._cubit, {
@@ -11,12 +14,14 @@ class DownloadFlowDelegate {
     required DownloadWikipediaArticlesUseCase downloadWikipediaArticlesUseCase,
     required FlightRepository flightRepository,
     required SubscriptionRepository subscriptionRepository,
+    required FlightUnlockRepository flightUnlockRepository,
     required DeleteFlightUseCase deleteFlightUseCase,
   }) : _downloadMapUseCase = downloadMapUseCase,
        _downloadRegionWikiArticlesUseCase = downloadRegionWikiArticlesUseCase,
        _downloadWikipediaArticlesUseCase = downloadWikipediaArticlesUseCase,
        _flightRepository = flightRepository,
        _subscriptionRepository = subscriptionRepository,
+       _flightUnlockRepository = flightUnlockRepository,
        _deleteFlightUseCase = deleteFlightUseCase;
 
   final FlightPreviewCubit _cubit;
@@ -25,12 +30,15 @@ class DownloadFlowDelegate {
   final DownloadWikipediaArticlesUseCase _downloadWikipediaArticlesUseCase;
   final FlightRepository _flightRepository;
   final SubscriptionRepository _subscriptionRepository;
+  final FlightUnlockRepository _flightUnlockRepository;
   final DeleteFlightUseCase _deleteFlightUseCase;
 
   StreamSubscription? _downloadSubscription;
   bool _downloadCancelled = false;
   String? _savedFlightIdDuringDownload;
   String? _activeArticleBundleId;
+  bool _usedPendingFlightUnlockForCurrentDownload = false;
+  bool _didConsumePendingFlightUnlock = false;
 
   bool get currentSubscriptionIsPro =>
       _subscriptionRepository.currentStatus.isPro;
@@ -141,11 +149,23 @@ class DownloadFlowDelegate {
     return '${parsed.host.toLowerCase()}${parsed.path.toLowerCase()}';
   }
 
+  String _accessModeForCurrentDownload() {
+    if (currentSubscriptionIsPro) return _accessModeSubscription;
+    if (_cubit.state.hasPendingFlightUnlock) {
+      return _accessModeSingleFlightUnlock;
+    }
+    return _accessModeBasic;
+  }
+
   Future<void> startDownload() async {
     if (_cubit.state.isDownloading) return;
     final route = _cubit.state.flightRoute;
     if (route == null) return;
-    final isPro = _subscriptionRepository.currentStatus.isPro;
+    final isPro = _cubit.hasEffectiveProAccess;
+    final accessMode = _accessModeForCurrentDownload();
+    _usedPendingFlightUnlockForCurrentDownload =
+        _cubit.state.hasPendingFlightUnlock && !currentSubscriptionIsPro;
+    _didConsumePendingFlightUnlock = false;
 
     // Defensive sync: ensure Pro downloads always use Pro POI set,
     // even if upgrade happened moments before tapping Download.
@@ -245,6 +265,7 @@ class DownloadFlowDelegate {
           mapDetail: mapDetailLevel,
           articlesSelectedCount: selectedUrls.length,
           isProUser: isPro,
+          accessMode: accessMode,
           routeSource: route.source,
         ),
       ),
@@ -270,6 +291,11 @@ class DownloadFlowDelegate {
     );
     if (!mapPhase.success || _downloadCancelled || _cubit.isClosed) {
       return;
+    }
+
+    if (_usedPendingFlightUnlockForCurrentDownload) {
+      await _flightUnlockRepository.consumeUnlock();
+      _didConsumePendingFlightUnlock = true;
     }
 
     _savedFlightIdDuringDownload = flightId;
@@ -652,6 +678,7 @@ class DownloadFlowDelegate {
           routeLengthKm: routeLengthKm,
           articlesDownloadedCount: downloadedArticles.length,
           mapSizeBytes: mapPhase.fileSize,
+          accessMode: accessMode,
           routeSource: route.source,
         ),
       ),
@@ -666,6 +693,7 @@ class DownloadFlowDelegate {
         downloadDone: true,
         savedFlightId: flightId,
         clearDownloadErrorMessage: true,
+        hasPendingFlightUnlock: false,
       ),
     );
   }
@@ -716,6 +744,8 @@ class DownloadFlowDelegate {
     _downloadCancelled = true;
     _savedFlightIdDuringDownload = null;
     _activeArticleBundleId = null;
+    _usedPendingFlightUnlockForCurrentDownload = false;
+    _didConsumePendingFlightUnlock = false;
     _downloadRegionWikiArticlesUseCase.cancel();
     _downloadWikipediaArticlesUseCase.cancel();
     _downloadMapUseCase.cancel();
@@ -1022,6 +1052,10 @@ class DownloadFlowDelegate {
   }) async {
     try {
       final deleted = await _deleteFlightUseCase(flightId);
+      if (deleted && _didConsumePendingFlightUnlock) {
+        await _flightUnlockRepository.restoreUnlock();
+        _didConsumePendingFlightUnlock = false;
+      }
       if (!deleted && !_cubit.isClosed) {
         _cubit._emitState(
           _cubit.state.copyWith(

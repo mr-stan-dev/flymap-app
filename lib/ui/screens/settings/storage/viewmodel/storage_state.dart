@@ -4,10 +4,7 @@ import 'package:flymap/domain/entity/flight.dart';
 enum StorageSort { name, size }
 
 class StorageItem extends Equatable {
-  const StorageItem({
-    required this.flight,
-    required this.totalSizeBytes,
-  });
+  const StorageItem({required this.flight, required this.totalSizeBytes});
 
   final Flight flight;
   final int totalSizeBytes;

@@ -6,12 +6,14 @@ class DownloadCompletedEvent extends AnalyticsEvent {
     required this.routeLengthKm,
     required this.articlesDownloadedCount,
     required this.mapSizeBytes,
+    required this.accessMode,
     required this.routeSource,
   });
 
   final double routeLengthKm;
   final int articlesDownloadedCount;
   final int mapSizeBytes;
+  final String accessMode;
   final FlightRouteSource routeSource;
 
   @override
@@ -24,6 +26,7 @@ class DownloadCompletedEvent extends AnalyticsEvent {
     'map_size_mb': double.parse(
       (mapSizeBytes / (1024 * 1024)).toStringAsFixed(1),
     ),
+    'access_mode': accessMode,
     'route_source': routeSource.rawValue,
   };
 }

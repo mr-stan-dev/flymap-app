@@ -174,10 +174,9 @@ class _FlightPhaseChip extends StatelessWidget {
       ),
       child: Text(
         label.toUpperCase(),
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: color,
-          fontFamily: 'monospace',
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.labelSmall?.copyWith(color: color, fontFamily: 'monospace'),
       ),
     );
   }

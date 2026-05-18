@@ -14,11 +14,7 @@ class SearchResultList extends StatelessWidget {
   final String searchQuery;
   final Future<void> Function(Airport airport) onSelectAirport;
 
-  List<InlineSpan> _highlight(
-    String text,
-    String query,
-    BuildContext context,
-  ) {
+  List<InlineSpan> _highlight(String text, String query, BuildContext context) {
     if (query.isEmpty) {
       return [TextSpan(text: text)];
     }
@@ -64,18 +60,21 @@ class SearchResultList extends StatelessWidget {
       separatorBuilder: (_, __) => const Divider(height: 1, thickness: 0.5),
       itemBuilder: (context, index) {
         final airport = airports[index];
-        
+
         final subtitleParts = <String>[];
         if (airport.iataCode.isNotEmpty) subtitleParts.add(airport.iataCode);
         if (airport.icaoCode.isNotEmpty) subtitleParts.add(airport.icaoCode);
         final cityCountry = airport.cityWithCountryCode;
         if (cityCountry.isNotEmpty) subtitleParts.add(cityCountry);
-        
+
         return ListTile(
           onTap: () => onSelectAirport(airport),
           dense: true,
           visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 8,
+            vertical: 0,
+          ),
           minVerticalPadding: 0,
           leading: CountryFlag.fromCountryCode(
             airport.countryCode,
@@ -98,7 +97,11 @@ class SearchResultList extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              children: _highlight(subtitleParts.join(' • '), searchQuery, context),
+              children: _highlight(
+                subtitleParts.join(' • '),
+                searchQuery,
+                context,
+              ),
             ),
           ),
           trailing: const Icon(Icons.arrow_forward_rounded, size: 20),

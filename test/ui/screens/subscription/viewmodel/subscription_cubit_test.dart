@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flymap/analytics/app_analytics.dart';
+import 'package:flymap/repository/flight_unlock_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
+import 'package:flymap/subscription/flight_unlock_product.dart';
+import 'package:flymap/subscription/flight_unlock_purchase_result.dart';
 import 'package:flymap/subscription/paywall_source.dart';
 import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/subscription/subscription_product.dart';
@@ -13,22 +16,30 @@ import 'package:flymap/ui/screens/subscription/viewmodel/subscription_state.dart
 void main() {
   group('SubscriptionCubit', () {
     late _FakeSubscriptionRepository repository;
+    late _FakeFlightUnlockRepository flightUnlockRepository;
     late _FakeAppAnalytics analytics;
     late SubscriptionCubit cubit;
 
     setUp(() {
       repository = _FakeSubscriptionRepository();
+      flightUnlockRepository = _FakeFlightUnlockRepository();
       analytics = _FakeAppAnalytics();
-      cubit = SubscriptionCubit(repository: repository, analytics: analytics);
+      cubit = SubscriptionCubit(
+        repository: repository,
+        flightUnlockRepository: flightUnlockRepository,
+        analytics: analytics,
+      );
     });
 
     tearDown(() async {
       await cubit.close();
       await repository.close();
+      await flightUnlockRepository.close();
     });
 
     test('startup transitions unknown -> loading -> pro', () async {
       repository.initializeResult = _status(isPro: true);
+      flightUnlockRepository.unusedCount = 2;
       final emitted = <SubscriptionState>[];
       final sub = cubit.stream.listen(emitted.add);
       addTearDown(sub.cancel);
@@ -43,6 +54,31 @@ void main() {
       );
       expect(cubit.state.phase, SubscriptionPhase.pro);
       expect(cubit.state.isPro, isTrue);
+      expect(cubit.state.unusedFlightUnlockCount, 2);
+    });
+
+    test('startup silently preloads unlock product when balance is empty', () async {
+      flightUnlockRepository.product = const FlightUnlockProduct(
+        productId: 'unlock.flight',
+        title: 'Unlock Flight',
+        priceText: r'$4.99',
+      );
+
+      await cubit.initialize();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(flightUnlockRepository.getUnlockProductCallCount, 1);
+      expect(cubit.state.flightUnlockProduct?.priceText, r'$4.99');
+      expect(cubit.state.flightUnlockErrorMessage, isNull);
+    });
+
+    test('startup silent preload does not expose error when product is unavailable', () async {
+      await cubit.initialize();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(flightUnlockRepository.getUnlockProductCallCount, 1);
+      expect(cubit.state.flightUnlockProduct, isNull);
+      expect(cubit.state.flightUnlockErrorMessage, isNull);
     });
 
     test('startup failure path is non-blocking and free', () async {
@@ -101,6 +137,54 @@ void main() {
 
       expect(cubit.state.products, hasLength(1));
       expect(cubit.state.products.first.packageId, 'weekly');
+    });
+
+    test('loadFlightUnlockProduct updates unlock product state', () async {
+      flightUnlockRepository.product = const FlightUnlockProduct(
+        productId: 'unlock.flight',
+        title: 'Unlock Flight',
+        priceText: r'$4.99',
+      );
+
+      final product = await cubit.loadFlightUnlockProduct();
+
+      expect(product?.productId, 'unlock.flight');
+      expect(cubit.state.flightUnlockProduct?.priceText, r'$4.99');
+      expect(cubit.state.isFlightUnlockLoading, isFalse);
+    });
+
+    test('purchaseFlightUnlock increments local balance', () async {
+      flightUnlockRepository.purchaseResult =
+          const FlightUnlockPurchaseResult.purchased();
+
+      final result = await cubit.purchaseFlightUnlock();
+
+      expect(result.isPurchased, isTrue);
+      expect(cubit.state.unusedFlightUnlockCount, 1);
+      expect(cubit.state.flightUnlockErrorMessage, isNull);
+    });
+
+    test('purchaseFlightUnlock exposes cancelled message', () async {
+      flightUnlockRepository.purchaseResult =
+          const FlightUnlockPurchaseResult.cancelled();
+
+      final result = await cubit.purchaseFlightUnlock();
+
+      expect(result.status, FlightUnlockPurchaseStatus.cancelled);
+      expect(cubit.state.unusedFlightUnlockCount, 0);
+      expect(cubit.state.flightUnlockErrorMessage, isNotEmpty);
+    });
+
+    test('clearFlightUnlockError removes transient unlock error', () async {
+      flightUnlockRepository.purchaseResult =
+          const FlightUnlockPurchaseResult.cancelled();
+
+      await cubit.purchaseFlightUnlock();
+      expect(cubit.state.flightUnlockErrorMessage, isNotEmpty);
+
+      cubit.clearFlightUnlockError();
+
+      expect(cubit.state.flightUnlockErrorMessage, isNull);
     });
 
     test('maps create-flight source for gate', () async {
@@ -227,6 +311,62 @@ class _FakeSubscriptionRepository implements SubscriptionRepository {
 
   void emit(SubscriptionStatus status) {
     _controller.add(status);
+  }
+}
+
+class _FakeFlightUnlockRepository implements FlightUnlockRepository {
+  final _controller = StreamController<int>.broadcast();
+
+  int unusedCount = 0;
+  FlightUnlockProduct? product;
+  FlightUnlockPurchaseResult purchaseResult =
+      const FlightUnlockPurchaseResult.cancelled();
+  int getUnlockProductCallCount = 0;
+
+  @override
+  Stream<int> get balanceStream => _controller.stream;
+
+  @override
+  int get currentUnusedUnlockCount => unusedCount;
+
+  @override
+  Future<void> close() async {
+    await _controller.close();
+  }
+
+  @override
+  Future<int> consumeUnlock() async {
+    unusedCount = unusedCount > 0 ? unusedCount - 1 : 0;
+    _controller.add(unusedCount);
+    return unusedCount;
+  }
+
+  @override
+  Future<FlightUnlockProduct?> getUnlockProduct() async {
+    getUnlockProductCallCount++;
+    return product;
+  }
+
+  @override
+  Future<int> initialize() async {
+    _controller.add(unusedCount);
+    return unusedCount;
+  }
+
+  @override
+  Future<FlightUnlockPurchaseResult> purchaseUnlock() async {
+    if (purchaseResult.isPurchased) {
+      unusedCount++;
+      _controller.add(unusedCount);
+    }
+    return purchaseResult;
+  }
+
+  @override
+  Future<int> restoreUnlock() async {
+    unusedCount++;
+    _controller.add(unusedCount);
+    return unusedCount;
   }
 }
 

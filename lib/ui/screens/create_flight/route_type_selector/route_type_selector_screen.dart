@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/router/app_router.dart';
+import 'package:flymap/subscription/paywall_source.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/flight_unlock_gate_sheet.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_state.dart';
 import 'widgets/route_type_card.dart';
@@ -19,12 +21,14 @@ class FlightRouteTypeSelector extends StatefulWidget {
 
 class _FlightRouteTypeSelectorState extends State<FlightRouteTypeSelector> {
   RouteType _selectedType = RouteType.basic;
+  bool _hasPendingFlightUnlock = false;
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SubscriptionCubit, SubscriptionState>(
       builder: (context, subState) {
         final isPro = subState.isPro;
+        final hasUnlockedProRoute = isPro || _hasPendingFlightUnlock;
         final t = context.t.createFlight.routeTypeSelector;
 
         return Scaffold(
@@ -54,12 +58,13 @@ class _FlightRouteTypeSelectorState extends State<FlightRouteTypeSelector> {
                     onTap: () => setState(() => _selectedType = RouteType.pro),
                   ),
                   const Spacer(),
-                  if (_selectedType == RouteType.pro && !isPro)
+                  if (_selectedType == RouteType.pro && !hasUnlockedProRoute)
                     PremiumButton(
                       label: context.t.common.upgrade,
-                      onPressed: () => context
-                          .read<SubscriptionCubit>()
-                          .presentPaywallFromRealRouteGate(),
+                      onPressed: () => _handleUnlockRealRoute(
+                        context,
+                        subscriptionCubit: context.read<SubscriptionCubit>(),
+                      ),
                     )
                   else
                     PrimaryButton(
@@ -68,7 +73,10 @@ class _FlightRouteTypeSelectorState extends State<FlightRouteTypeSelector> {
                         if (_selectedType == RouteType.basic) {
                           AppRouter.goToFlightSearch(context);
                         } else {
-                          AppRouter.goToFlightNumberSelector(context);
+                          AppRouter.goToFlightNumberSelector(
+                            context,
+                            hasPendingFlightUnlock: _hasPendingFlightUnlock,
+                          );
                         }
                       },
                     ),
@@ -77,6 +85,24 @@ class _FlightRouteTypeSelectorState extends State<FlightRouteTypeSelector> {
             ),
           ),
         );
+      },
+    );
+  }
+
+  Future<void> _handleUnlockRealRoute(
+    BuildContext context, {
+    required SubscriptionCubit subscriptionCubit,
+  }) async {
+    await showFlightUnlockGateSheet(
+      context: context,
+      subscriptionCubit: subscriptionCubit,
+      source: PaywallSource.realRouteGate,
+      presentProPaywall: subscriptionCubit.presentPaywallFromRealRouteGate,
+      onUnlockActivated: () async {
+        if (!mounted) return;
+        setState(() {
+          _hasPendingFlightUnlock = true;
+        });
       },
     );
   }

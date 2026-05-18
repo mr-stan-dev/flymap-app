@@ -66,8 +66,7 @@ class _OnboardingFlowViewState extends State<_OnboardingFlowView> {
       [
         OnboardingStepDefinition(
           id: OnboardingStepId.welcome,
-          stepBuilder: (context, __, ___) => OnboardingWelcomeStep(
-          ),
+          stepBuilder: (context, __, ___) => OnboardingWelcomeStep(),
           primaryActionLabel: (context, _, __) =>
               context.t.onboarding.letsStart,
           canContinue: (_) => true,
@@ -348,7 +347,7 @@ class _OnboardingFlowViewState extends State<_OnboardingFlowView> {
       ),
     );
     if (!mounted) return;
-    AppRouter.goToRouteTypeSelector(context);
+    AppRouter.goToRouteTypeSelectorFromOnboarding(context);
   }
 
   Future<void> _skipCurrentStep({

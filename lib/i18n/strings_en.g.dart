@@ -596,6 +596,51 @@ class TranslationsSubscriptionEn {
 	/// en: 'Flymap Pro'
 	String get cardTitle => 'Flymap Pro';
 
+	/// en: 'Unlock Pro features'
+	String get flightUnlockSheetTitle => 'Unlock Pro features';
+
+	/// en: 'One-time purchase'
+	String get flightUnlockOptionTitle => 'One-time purchase';
+
+	/// en: 'Unlock Pro for a single flight'
+	String get flightUnlockOptionBody => 'Unlock Pro for a single flight';
+
+	/// en: 'Buy for one Flight'
+	String get flightUnlockAction => 'Buy for one Flight';
+
+	/// en: 'Use for one Flight'
+	String get flightUnlockUseAction => 'Use for one Flight';
+
+	/// en: 'Loading price...'
+	String get flightUnlockPriceLoading => 'Loading price...';
+
+	/// en: 'Flymap Pro subscription'
+	String get flightUnlockProOptionTitle => 'Flymap Pro subscription';
+
+	/// en: '$count flight unlocks available'
+	String flightUnlockAvailableCount({required Object count}) => '${count} flight unlocks available';
+
+	/// en: 'Unlock Pro for unlimited flights'
+	String get flightUnlockProOptionBody => 'Unlock Pro for unlimited flights';
+
+	/// en: 'View Pro Plans'
+	String get flightUnlockProAction => 'View Pro Plans';
+
+	/// en: 'Unused flight unlocks'
+	String get flightUnlockBalanceLabel => 'Unused flight unlocks';
+
+	/// en: 'Single-flight unlocks are stored on this device.'
+	String get flightUnlockLocalNote => 'Single-flight unlocks are stored on this device.';
+
+	/// en: 'Flight unlock is not available right now.'
+	String get flightUnlockUnavailable => 'Flight unlock is not available right now.';
+
+	/// en: 'Flight unlock purchase cancelled.'
+	String get flightUnlockPurchaseCancelled => 'Flight unlock purchase cancelled.';
+
+	/// en: 'Flight unlock purchase failed. Please try again.'
+	String get flightUnlockPurchaseFailed => 'Flight unlock purchase failed. Please try again.';
+
 	/// en: 'What Flymap Pro unlocks'
 	String get proFeaturesTitle => 'What Flymap Pro unlocks';
 
@@ -2445,6 +2490,21 @@ extension on Translations {
 			'subscription.needHelp' => 'Need help?',
 			'subscription.contactSupport' => 'Contact support',
 			'subscription.cardTitle' => 'Flymap Pro',
+			'subscription.flightUnlockSheetTitle' => 'Unlock Pro features',
+			'subscription.flightUnlockOptionTitle' => 'One-time purchase',
+			'subscription.flightUnlockOptionBody' => 'Unlock Pro for a single flight',
+			'subscription.flightUnlockAction' => 'Buy for one Flight',
+			'subscription.flightUnlockUseAction' => 'Use for one Flight',
+			'subscription.flightUnlockPriceLoading' => 'Loading price...',
+			'subscription.flightUnlockProOptionTitle' => 'Flymap Pro subscription',
+			'subscription.flightUnlockAvailableCount' => ({required Object count}) => '${count} flight unlocks available',
+			'subscription.flightUnlockProOptionBody' => 'Unlock Pro for unlimited flights',
+			'subscription.flightUnlockProAction' => 'View Pro Plans',
+			'subscription.flightUnlockBalanceLabel' => 'Unused flight unlocks',
+			'subscription.flightUnlockLocalNote' => 'Single-flight unlocks are stored on this device.',
+			'subscription.flightUnlockUnavailable' => 'Flight unlock is not available right now.',
+			'subscription.flightUnlockPurchaseCancelled' => 'Flight unlock purchase cancelled.',
+			'subscription.flightUnlockPurchaseFailed' => 'Flight unlock purchase failed. Please try again.',
 			'subscription.proFeaturesTitle' => 'What Flymap Pro unlocks',
 			'subscription.proFeatureMapsTitle' => 'Detailed offline maps',
 			'subscription.proFeatureMapsText' => 'Get higher-detail offline maps for your saved routes.',
@@ -2774,6 +2834,8 @@ extension on Translations {
 			'flight.info.showAllCount' => ({required Object count}) => 'Show all ${count}',
 			'flight.info.showLess' => 'Show less',
 			'flight.info.sortByRank' => 'By rank',
+			_ => null,
+		} ?? switch (path) {
 			'flight.info.sortByRouteProgress' => 'By route',
 			'flight.info.sortByType' => 'By type',
 			'flight.info.routeTimelineTitle' => 'Route timeline',
@@ -2789,8 +2851,6 @@ extension on Translations {
 			'flight.info.openSource' => 'Open Source',
 			'flight.info.openSourcePageTooltip' => 'Open source page',
 			'flight.info.distanceKm' => ({required Object distance}) => '${distance} km',
-			_ => null,
-		} ?? switch (path) {
 			'flight.info.speed' => 'Speed',
 			'flight.info.altitude' => 'Altitude',
 			'flight.info.copyRouteTitle' => 'Flymap Route',

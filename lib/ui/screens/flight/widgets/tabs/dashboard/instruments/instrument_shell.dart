@@ -3,10 +3,7 @@ import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/instruments/instrument_palette.dart';
 
 class InstrumentPanel extends StatelessWidget {
-  const InstrumentPanel({
-    required this.child,
-    super.key,
-  });
+  const InstrumentPanel({required this.child, super.key});
 
   final Widget child;
 

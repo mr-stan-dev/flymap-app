@@ -1,12 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:latlong2/latlong.dart';
 
-enum AirportType {
-  large,
-  medium,
-  small,
-  other,
-}
+enum AirportType { large, medium, small, other }
 
 extension AirportTypeX on AirportType {
   static AirportType fromString(String type) {

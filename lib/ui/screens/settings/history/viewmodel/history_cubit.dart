@@ -16,12 +16,11 @@ class HistoryCubit extends Cubit<HistoryState> {
     required MetricUnitsRepository unitsRepository,
     required DeleteFlightUseCase deleteFlightUseCase,
     required CompleteFlightUseCase completeFlightUseCase,
-  })
-    : _repository = repository,
-      _unitsRepository = unitsRepository,
-      _deleteFlightUseCase = deleteFlightUseCase,
-      _completeFlightUseCase = completeFlightUseCase,
-      super(const HistoryLoading()) {
+  }) : _repository = repository,
+       _unitsRepository = unitsRepository,
+       _deleteFlightUseCase = deleteFlightUseCase,
+       _completeFlightUseCase = completeFlightUseCase,
+       super(const HistoryLoading()) {
     load();
   }
 
@@ -111,7 +110,9 @@ class HistoryCubit extends Cubit<HistoryState> {
         break;
       case HistorySort.distance:
         sorted.sort(
-          (a, b) => b.flight.route.distanceInKm.compareTo(a.flight.route.distanceInKm),
+          (a, b) => b.flight.route.distanceInKm.compareTo(
+            a.flight.route.distanceInKm,
+          ),
         );
         break;
       case HistorySort.date:

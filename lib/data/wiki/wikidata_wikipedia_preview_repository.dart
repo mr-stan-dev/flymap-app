@@ -861,9 +861,7 @@ $contentBody
     // previous request started), while future callers will await the
     // newly appended delay.
     final myTurn = _nextSlot;
-    _nextSlot = myTurn.then(
-      (_) => Future<void>.delayed(_minRequestInterval),
-    );
+    _nextSlot = myTurn.then((_) => Future<void>.delayed(_minRequestInterval));
     return myTurn;
   }
 

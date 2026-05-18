@@ -449,6 +449,7 @@ class FlightPreviewState extends Equatable {
     required this.loadState,
     required this.downloadState,
     required this.messageState,
+    required this.hasPendingFlightUnlock,
   });
 
   factory FlightPreviewState.initial({
@@ -462,6 +463,7 @@ class FlightPreviewState extends Equatable {
       loadState: const PreviewLoadState.initial(),
       downloadState: const PreviewDownloadState.initial(),
       messageState: const PreviewMessageState.initial(),
+      hasPendingFlightUnlock: false,
     );
   }
 
@@ -470,6 +472,7 @@ class FlightPreviewState extends Equatable {
   final PreviewLoadState loadState;
   final PreviewDownloadState downloadState;
   final PreviewMessageState messageState;
+  final bool hasPendingFlightUnlock;
 
   FlightRoute? get flightRoute => routeState.flightRoute;
   FlightOperationalData? get flightOperationalData =>
@@ -564,6 +567,7 @@ class FlightPreviewState extends Equatable {
     bool clearOverviewWarningTitle = false,
     String? overviewWarningMessage,
     bool clearOverviewWarningMessage = false,
+    bool? hasPendingFlightUnlock,
   }) {
     return FlightPreviewState(
       step: step ?? this.step,
@@ -622,6 +626,8 @@ class FlightPreviewState extends Equatable {
         overviewWarningMessage: overviewWarningMessage,
         clearOverviewWarningMessage: clearOverviewWarningMessage,
       ),
+      hasPendingFlightUnlock:
+          hasPendingFlightUnlock ?? this.hasPendingFlightUnlock,
     );
   }
 
@@ -632,6 +638,7 @@ class FlightPreviewState extends Equatable {
     loadState,
     downloadState,
     messageState,
+    hasPendingFlightUnlock,
   ];
 
   @override
@@ -643,6 +650,7 @@ class FlightPreviewState extends Equatable {
         'poi:${flightInfo.poi.length}/${allRoutePois.length}, '
         'regions:${routeRegions.length}@${routeTotalMinutes}m, '
         'articlesSel:${selectedArticleUrls.length}, '
+        'unlock:${hasPendingFlightUnlock ? 1 : 0}, '
         'loading(p:${isPreviewLoading ? 1 : 0},o:${isOverviewLoading ? 1 : 0},w:${isWikiSuggestionsLoading ? 1 : 0}), '
         'downloading:${isDownloading ? 1 : 0}/${downloadStage.name}, '
         'errors:${errorMessage != null ? 1 : 0}/${downloadErrorMessage != null ? 1 : 0}'

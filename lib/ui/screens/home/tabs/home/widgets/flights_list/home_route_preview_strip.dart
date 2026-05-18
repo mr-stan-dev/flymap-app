@@ -23,7 +23,9 @@ class HomeRoutePreviewStrip extends StatelessWidget {
       height: 42,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final width = constraints.maxWidth.isFinite ? constraints.maxWidth : 0.0;
+          final width = constraints.maxWidth.isFinite
+              ? constraints.maxWidth
+              : 0.0;
           final poiOffsets = _poiOffsets(width);
           return Stack(
             clipBehavior: Clip.none,

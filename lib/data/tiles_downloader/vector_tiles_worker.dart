@@ -30,6 +30,7 @@ class TileData {
 }
 
 const _requestTimeout = Duration(seconds: 12);
+
 /// Up to this many **cycles** of primary → fallback (one HTTP try each per cycle).
 const _maxPrimaryFallbackCycles = 3;
 const _retryDelayBaseMs = 300;
@@ -89,7 +90,8 @@ Uri _tileUri(String template, int z, int x, int y) {
 
 /// At most [_maxPrimaryFallbackCycles] times: try primary once, then fallback once
 /// (single HTTP per URL; next cycle only if both fail).
-Future<({Uint8List? bytes, bool usedFallback})> _downloadTilePrimaryThenFallback(
+Future<({Uint8List? bytes, bool usedFallback})>
+_downloadTilePrimaryThenFallback(
   http.Client client,
   String primaryTemplate,
   String fallbackTemplate, {
@@ -164,9 +166,7 @@ Future<({Uint8List? bytes, bool usedFallback})> _downloadTilePrimaryThenFallback
     }
 
     if (cycle < _maxPrimaryFallbackCycles) {
-      await Future.delayed(
-        Duration(milliseconds: _retryDelayBaseMs * cycle),
-      );
+      await Future.delayed(Duration(milliseconds: _retryDelayBaseMs * cycle));
     }
   }
 
@@ -191,9 +191,7 @@ Future<({Uint8List? bytes, bool retryable})> _downloadTileOnce(
       if (bytes.isNotEmpty) {
         return (bytes: bytes, retryable: false);
       }
-      _isolateLog(
-        'Empty response for tile $z/$x/$y ($label $attempt/$of)',
-      );
+      _isolateLog('Empty response for tile $z/$x/$y ($label $attempt/$of)');
       return (bytes: null, retryable: true);
     } else {
       _isolateLog(
@@ -205,9 +203,7 @@ Future<({Uint8List? bytes, bool retryable})> _downloadTileOnce(
     _isolateLog('Timeout for tile $z/$x/$y ($label $attempt/$of)');
     return (bytes: null, retryable: true);
   } catch (e) {
-    _isolateLog(
-      'Error for tile $z/$x/$y ($label $attempt/$of): $e',
-    );
+    _isolateLog('Error for tile $z/$x/$y ($label $attempt/$of): $e');
     return (bytes: null, retryable: true);
   }
 }
