@@ -300,7 +300,10 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
     BuildContext context,
     FlightPreviewState state,
   ) async {
-    final isHistoricalTrack = state.flightRoute?.isHistoricalTrack ?? false;
+    final entryFlightNumber = context.read<FlightPreviewCubit>().flightNumber;
+    final isHistoricalTrack =
+        state.flightRoute?.isHistoricalTrack ??
+        (entryFlightNumber != null && entryFlightNumber.trim().isNotEmpty);
     final overviewT = context.t.createFlight.overview;
     await showDialog<void>(
       context: context,
