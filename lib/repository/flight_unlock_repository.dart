@@ -109,17 +109,23 @@ class RevenueCatFlightUnlockRepository implements FlightUnlockRepository {
     try {
       await _client.purchaseNonSubscriptionProduct(productId: productId);
       await _setBalance(_currentUnusedUnlockCount + 1);
-      return const FlightUnlockPurchaseResult.purchased();
+      return FlightUnlockPurchaseResult.purchased(productId: productId);
     } on PlatformException catch (e) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
       if (errorCode == PurchasesErrorCode.purchaseCancelledError) {
-        return const FlightUnlockPurchaseResult.cancelled();
+        return FlightUnlockPurchaseResult.cancelled(productId: productId);
       }
       _logger.error('Failed to purchase flight unlock "$productId": $e');
-      return FlightUnlockPurchaseResult.error(message: e.message);
+      return FlightUnlockPurchaseResult.error(
+        message: e.message,
+        productId: productId,
+      );
     } catch (e) {
       _logger.error('Failed to purchase flight unlock "$productId": $e');
-      return FlightUnlockPurchaseResult.error(message: e.toString());
+      return FlightUnlockPurchaseResult.error(
+        message: e.toString(),
+        productId: productId,
+      );
     }
   }
 

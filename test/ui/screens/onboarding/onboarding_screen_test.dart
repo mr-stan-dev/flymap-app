@@ -20,8 +20,10 @@ import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/subscription/subscription_product.dart';
 import 'package:flymap/subscription/subscription_status.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
+import 'package:flymap/ui/screens/create_flight/route_type_selector/route_type_selector_screen.dart';
 import 'package:flymap/ui/screens/onboarding/onboarding_screen.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
+import 'package:flymap/ui/theme/app_theme.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
@@ -97,7 +99,7 @@ void main() {
   });
 
   testWidgets(
-    'final CTA completes onboarding and routes to route type selector',
+    'final CTA completes onboarding and route selector back returns home',
     (tester) async {
       await tester.pumpWidget(_buildTestApp());
       await _pumpUntilVisible(tester, find.text('Discover what’s below'));
@@ -110,10 +112,15 @@ void main() {
       await _pumpUntilVisible(tester, find.text('Get more from every flight'));
 
       await tester.tap(find.widgetWithText(TertiaryButton, 'Continue Free'));
-      await _pumpUntilVisible(tester, find.text('Route type selector screen'));
+      await _pumpUntilVisible(tester, find.text('New flight'));
 
-      expect(find.text('Route type selector screen'), findsOneWidget);
-      expect(tester.state<NavigatorState>(find.byType(Navigator)).canPop(), isTrue);
+      expect(find.text('New flight'), findsOneWidget);
+      expect(tester.state<NavigatorState>(find.byType(Navigator)).canPop(), isFalse);
+
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      await _pumpUntilVisible(tester, find.text('Home screen'));
+
+      expect(find.text('Home screen'), findsOneWidget);
 
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('onboarding.seen'), isTrue);
@@ -141,9 +148,7 @@ Widget _buildTestApp() {
       ),
       GoRoute(
         path: '/route-type-selector',
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Route type selector screen')),
-        ),
+        builder: (context, state) => const FlightRouteTypeSelector(),
       ),
     ],
   );
@@ -157,6 +162,8 @@ Widget _buildTestApp() {
       ),
       child: MaterialApp.router(
         locale: AppLocale.en.flutterLocale,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
         supportedLocales: AppLocaleUtils.supportedLocales,
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         routerConfig: router,

@@ -65,8 +65,7 @@ Future<void> showFlightUnlockGateSheet({
                 FlightUnlockPurchaseResultEvent(
                   source: source,
                   result: purchaseResult.status,
-                  productId:
-                      subscriptionCubit.state.flightUnlockProduct?.productId ?? '',
+                  productId: purchaseResult.productId,
                   balanceAfter: subscriptionCubit.state.unusedFlightUnlockCount,
                 ),
               ),

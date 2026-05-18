@@ -54,6 +54,7 @@ void main() {
       final result = await repository.purchaseUnlock();
 
       expect(result.isPurchased, isTrue);
+      expect(result.productId, 'unlock.flight');
       expect(repository.currentUnusedUnlockCount, 1);
     });
 
@@ -63,6 +64,7 @@ void main() {
       final result = await repository.purchaseUnlock();
 
       expect(result.status, FlightUnlockPurchaseStatus.cancelled);
+      expect(result.productId, 'unlock.flight');
       expect(repository.currentUnusedUnlockCount, 0);
     });
 
@@ -72,6 +74,7 @@ void main() {
       final result = await repository.purchaseUnlock();
 
       expect(result.status, FlightUnlockPurchaseStatus.error);
+      expect(result.productId, 'unlock.flight');
       expect(repository.currentUnusedUnlockCount, 0);
     });
 

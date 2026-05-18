@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/airport.dart';
@@ -235,9 +233,7 @@ class AppRouter {
   }
 
   static void goToRouteTypeSelectorFromOnboarding(BuildContext context) {
-    final router = GoRouter.of(context);
-    router.go(homeRoute);
-    unawaited(Future<void>.microtask(() => router.push(routeTypeSelectorRoute)));
+    context.go(routeTypeSelectorRoute);
   }
 
   /// Navigate to flight screen with flight

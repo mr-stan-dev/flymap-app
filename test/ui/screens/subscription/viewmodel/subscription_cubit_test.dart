@@ -155,22 +155,26 @@ void main() {
 
     test('purchaseFlightUnlock increments local balance', () async {
       flightUnlockRepository.purchaseResult =
-          const FlightUnlockPurchaseResult.purchased();
+          const FlightUnlockPurchaseResult.purchased(productId: 'unlock.flight');
 
       final result = await cubit.purchaseFlightUnlock();
 
       expect(result.isPurchased, isTrue);
+      expect(result.productId, 'unlock.flight');
       expect(cubit.state.unusedFlightUnlockCount, 1);
       expect(cubit.state.flightUnlockErrorMessage, isNull);
     });
 
     test('purchaseFlightUnlock exposes cancelled message', () async {
       flightUnlockRepository.purchaseResult =
-          const FlightUnlockPurchaseResult.cancelled();
+          const FlightUnlockPurchaseResult.cancelled(
+            productId: 'unlock.flight',
+          );
 
       final result = await cubit.purchaseFlightUnlock();
 
       expect(result.status, FlightUnlockPurchaseStatus.cancelled);
+      expect(result.productId, 'unlock.flight');
       expect(cubit.state.unusedFlightUnlockCount, 0);
       expect(cubit.state.flightUnlockErrorMessage, isNotEmpty);
     });
