@@ -12,6 +12,7 @@ import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_widget.dart';
+import 'package:flymap/ui/widgets/pro_widgets.dart';
 import 'package:flymap/utils/route_utils.dart';
 
 class RouteSummaryScreen extends StatelessWidget {
@@ -35,9 +36,10 @@ class RouteSummaryScreen extends StatelessWidget {
     final previewState = context.watch<FlightPreviewCubit>().state;
     final liveRegions = previewState.routeRegions;
     final livePois = previewState.flightInfo.poi;
-    final isProUser =
-        context.select((SubscriptionCubit cubit) => cubit.state.isPro) ||
-        previewState.hasPendingFlightUnlock;
+    final isProSubscriber = context.select(
+      (SubscriptionCubit cubit) => cubit.state.isPro,
+    );
+    final isProUser = isProSubscriber || previewState.hasPendingFlightUnlock;
     final flightPreviewCubit = context.read<FlightPreviewCubit>();
     final subscriptionCubit = context.read<SubscriptionCubit>();
     final distance = _formatDistanceKm(route);
@@ -48,7 +50,23 @@ class RouteSummaryScreen extends StatelessWidget {
         '${RouteUtils.cityLabel(route.departure.city)} → ${RouteUtils.cityLabel(route.arrival.city)}';
 
     return Scaffold(
-      appBar: AppBar(title: Text(t.createFlight.overview.routeSummaryTitle)),
+      appBar: AppBar(
+        title: Text(t.createFlight.overview.routeSummaryTitle),
+        actions: [
+          if (isProSubscriber)
+            ProAppBarInfoButton(
+              title: t.createFlight.proAccess.subscriber,
+              message: t.createFlight.proAccess.subscriberBody,
+              tooltip: t.createFlight.proAccess.tooltip,
+            )
+          else if (previewState.hasPendingFlightUnlock)
+            ProAppBarInfoButton(
+              title: t.createFlight.proAccess.unlockedFlight,
+              message: t.createFlight.proAccess.unlockedFlightBody,
+              tooltip: t.createFlight.proAccess.tooltip,
+            ),
+        ],
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),

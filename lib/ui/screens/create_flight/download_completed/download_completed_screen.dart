@@ -6,6 +6,7 @@ import 'package:flymap/router/app_router.dart';
 import 'package:flymap/ui/screens/create_flight/download_completed/download_completed_args.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/flight_download_completion.dart';
 import 'package:flymap/ui/screens/home/tabs/home/home_tab.dart';
+import 'package:flymap/ui/widgets/pro_widgets.dart';
 
 class DownloadCompletedRouteScreen extends StatefulWidget {
   const DownloadCompletedRouteScreen({required this.args, super.key});
@@ -21,6 +22,7 @@ class _DownloadCompletedRouteScreenState
     extends State<DownloadCompletedRouteScreen> {
   @override
   Widget build(BuildContext context) {
+    final proAccessInfo = _proAccessInfo(context);
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
@@ -34,6 +36,15 @@ class _DownloadCompletedRouteScreenState
             icon: const Icon(Icons.arrow_back),
             onPressed: () => unawaited(_onHomePressed()),
           ),
+          actions: proAccessInfo == null
+              ? null
+              : [
+                  ProAppBarInfoButton(
+                    title: proAccessInfo.title,
+                    message: proAccessInfo.message,
+                    tooltip: context.t.createFlight.proAccess.tooltip,
+                  ),
+                ],
         ),
         body: DownloadCompletedScreen(
           onHomePressed: () => unawaited(_onHomePressed()),
@@ -60,6 +71,22 @@ class _DownloadCompletedRouteScreenState
     homeRefreshNotifier.value = true;
     AppRouter.goHome(context);
   }
+
+  _ProAccessInfo? _proAccessInfo(BuildContext context) {
+    if (widget.args.isProSubscriber) {
+      return _ProAccessInfo(
+        title: context.t.createFlight.proAccess.subscriber,
+        message: context.t.createFlight.proAccess.subscriberBody,
+      );
+    }
+    if (widget.args.usedSingleFlightUnlock) {
+      return _ProAccessInfo(
+        title: context.t.createFlight.proAccess.unlockedFlight,
+        message: context.t.createFlight.proAccess.unlockedFlightBody,
+      );
+    }
+    return null;
+  }
 }
 
 class DownloadCompletedScreen extends StatelessWidget {
@@ -79,4 +106,11 @@ class DownloadCompletedScreen extends StatelessWidget {
       onSharePressed: onSharePressed,
     );
   }
+}
+
+class _ProAccessInfo {
+  const _ProAccessInfo({required this.title, required this.message});
+
+  final String title;
+  final String message;
 }

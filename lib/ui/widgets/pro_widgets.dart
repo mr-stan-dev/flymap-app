@@ -105,6 +105,49 @@ class ProGradientStrip extends StatelessWidget {
   }
 }
 
+class ProAppBarInfoButton extends StatelessWidget {
+  const ProAppBarInfoButton({
+    required this.title,
+    required this.message,
+    required this.tooltip,
+    super.key,
+  });
+
+  final String title;
+  final String message;
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: () => _showDialog(context),
+      icon: const Icon(
+        Icons.workspace_premium_rounded,
+        color: DsBrandColors.proAmber,
+      ),
+    );
+  }
+
+  Future<void> _showDialog(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: MaterialLocalizations.of(context).okButtonLabel.isEmpty
+                ? const Text('OK')
+                : Text(MaterialLocalizations.of(context).okButtonLabel),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class ProActiveBlock extends StatelessWidget {
   const ProActiveBlock({
     required this.title,

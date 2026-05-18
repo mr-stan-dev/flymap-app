@@ -268,10 +268,16 @@ class AppRouter {
   static void goToDownloadCompleted(
     BuildContext context, {
     required String flightId,
+    bool isProSubscriber = false,
+    bool usedSingleFlightUnlock = false,
   }) {
     context.go(
       downloadCompletedRoute,
-      extra: DownloadCompletedArgs(flightId: flightId),
+      extra: DownloadCompletedArgs(
+        flightId: flightId,
+        isProSubscriber: isProSubscriber,
+        usedSingleFlightUnlock: usedSingleFlightUnlock,
+      ),
     );
   }
 

@@ -735,6 +735,7 @@ class TranslationsCreateFlightEn {
 	// Translations
 	late final TranslationsCreateFlightStepsEn steps = TranslationsCreateFlightStepsEn.internal(_root);
 	late final TranslationsCreateFlightRouteTypeSelectorEn routeTypeSelector = TranslationsCreateFlightRouteTypeSelectorEn.internal(_root);
+	late final TranslationsCreateFlightProAccessEn proAccess = TranslationsCreateFlightProAccessEn.internal(_root);
 	late final TranslationsCreateFlightFlightNumberSearchEn flightNumberSearch = TranslationsCreateFlightFlightNumberSearchEn.internal(_root);
 	late final TranslationsCreateFlightSearchEn search = TranslationsCreateFlightSearchEn.internal(_root);
 	late final TranslationsCreateFlightMapPreviewEn mapPreview = TranslationsCreateFlightMapPreviewEn.internal(_root);
@@ -786,8 +787,8 @@ class TranslationsPreviewEn {
 	/// en: 'Navigating to home...'
 	String get navigatingHome => 'Navigating to home...';
 
-	/// en: 'Downloading Flight Map'
-	String get downloadingMapTitle => 'Downloading Flight Map';
+	/// en: 'Downloading assets'
+	String get downloadingMapTitle => 'Downloading assets';
 
 	/// en: 'Cancel download'
 	String get cancelDownload => 'Cancel download';
@@ -1262,6 +1263,30 @@ class TranslationsCreateFlightRouteTypeSelectorEn {
 
 	/// en: 'Most accurate'
 	String get mostAccurate => 'Most accurate';
+}
+
+// Path: createFlight.proAccess
+class TranslationsCreateFlightProAccessEn {
+	TranslationsCreateFlightProAccessEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Flymap Pro'
+	String get subscriber => 'Flymap Pro';
+
+	/// en: 'This flight has full Pro access through your Flymap Pro subscription.'
+	String get subscriberBody => 'This flight has full Pro access through your Flymap Pro subscription.';
+
+	/// en: 'This flight is unlocked'
+	String get unlockedFlight => 'This flight is unlocked';
+
+	/// en: 'All Pro features are enabled for this flight.'
+	String get unlockedFlightBody => 'All Pro features are enabled for this flight.';
+
+	/// en: 'Pro access info'
+	String get tooltip => 'Pro access info';
 }
 
 // Path: createFlight.flightNumberSearch
@@ -2547,6 +2572,11 @@ extension on Translations {
 			'createFlight.routeTypeSelector.proSubtitle' => 'By flight number',
 			'createFlight.routeTypeSelector.proDescription' => 'Based on recent historical flight data',
 			'createFlight.routeTypeSelector.mostAccurate' => 'Most accurate',
+			'createFlight.proAccess.subscriber' => 'Flymap Pro',
+			'createFlight.proAccess.subscriberBody' => 'This flight has full Pro access through your Flymap Pro subscription.',
+			'createFlight.proAccess.unlockedFlight' => 'This flight is unlocked',
+			'createFlight.proAccess.unlockedFlightBody' => 'All Pro features are enabled for this flight.',
+			'createFlight.proAccess.tooltip' => 'Pro access info',
 			'createFlight.flightNumberSearch.title' => 'Flight number',
 			'createFlight.flightNumberSearch.subtitle' => 'Enter a flight number (for example BA117).',
 			'createFlight.flightNumberSearch.hint' => 'e.g. BA117',
@@ -2726,7 +2756,7 @@ extension on Translations {
 			'preview.share' => 'Share flight card',
 			'preview.home' => 'Home',
 			'preview.navigatingHome' => 'Navigating to home...',
-			'preview.downloadingMapTitle' => 'Downloading Flight Map',
+			'preview.downloadingMapTitle' => 'Downloading assets',
 			'preview.cancelDownload' => 'Cancel download',
 			'preview.download' => 'Download',
 			'preview.flightRoute' => ({required Object distance}) => 'Flight route (~ ${distance})',
@@ -2829,13 +2859,13 @@ extension on Translations {
 			'flight.info.flyOverTitle' => 'Highlights of your route',
 			'flight.info.airportsTitle' => 'Airports',
 			'flight.info.departure' => 'Departure',
+			_ => null,
+		} ?? switch (path) {
 			'flight.info.arrival' => 'Arrival',
 			'flight.info.showAll' => 'Show all',
 			'flight.info.showAllCount' => ({required Object count}) => 'Show all ${count}',
 			'flight.info.showLess' => 'Show less',
 			'flight.info.sortByRank' => 'By rank',
-			_ => null,
-		} ?? switch (path) {
 			'flight.info.sortByRouteProgress' => 'By route',
 			'flight.info.sortByType' => 'By type',
 			'flight.info.routeTimelineTitle' => 'Route timeline',

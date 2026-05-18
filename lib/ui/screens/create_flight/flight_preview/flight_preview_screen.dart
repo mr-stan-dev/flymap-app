@@ -25,6 +25,7 @@ import 'package:flymap/ui/screens/create_flight/flight_preview/steps/wikipedia_a
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_cubit.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_state.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
+import 'package:flymap/ui/widgets/pro_widgets.dart';
 import 'package:flymap/domain/usecase/download_map_use_case.dart';
 import 'package:flymap/domain/usecase/download_region_wiki_articles_use_case.dart';
 import 'package:flymap/domain/usecase/download_wikipedia_articles_use_case.dart';
@@ -145,6 +146,11 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
           (SubscriptionCubit cubit) => cubit.state.isPro,
         );
         final isProUser = isProSubscriber || state.hasPendingFlightUnlock;
+        final proAccessInfo = _proAccessInfo(
+          context,
+          isProSubscriber: isProSubscriber,
+          hasPendingFlightUnlock: state.hasPendingFlightUnlock,
+        );
         final cubit = context.read<FlightPreviewCubit>();
         final subscriptionCubit = context.read<SubscriptionCubit>();
 
@@ -164,16 +170,11 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
                 onPressed: () => _onBackPressed(context),
               ),
               title: Text(_titleForState(context, state)),
-              actions: state.step == CreateFlightStep.overview
-                  ? [
-                      IconButton(
-                        tooltip:
-                            context.t.createFlight.overview.routeNoteTooltip,
-                        onPressed: () => _showRouteNoteDialog(context, state),
-                        icon: const Icon(Icons.info_outline_rounded),
-                      ),
-                    ]
-                  : null,
+              actions: _buildAppBarActions(
+                context,
+                state: state,
+                proAccessInfo: proAccessInfo,
+              ),
             ),
             body: SafeArea(
               top: false,
@@ -431,7 +432,13 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
       AppRouter.goHome(context);
       return;
     }
-    AppRouter.goToDownloadCompleted(context, flightId: flightId);
+    final isProSubscriber = context.read<SubscriptionCubit>().state.isPro;
+    AppRouter.goToDownloadCompleted(
+      context,
+      flightId: flightId,
+      isProSubscriber: isProSubscriber,
+      usedSingleFlightUnlock: state.hasPendingFlightUnlock && !isProSubscriber,
+    );
   }
 
   int _stepIndex(CreateFlightStep step) {
@@ -440,6 +447,48 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
       CreateFlightStep.overview => 0,
       CreateFlightStep.wikipediaArticles => 1,
     };
+  }
+
+  List<Widget>? _buildAppBarActions(
+    BuildContext context, {
+    required FlightPreviewState state,
+    required _ProAccessInfo? proAccessInfo,
+  }) {
+    final actions = <Widget>[
+      if (proAccessInfo != null)
+        ProAppBarInfoButton(
+          title: proAccessInfo.title,
+          message: proAccessInfo.message,
+          tooltip: context.t.createFlight.proAccess.tooltip,
+        ),
+      if (state.step == CreateFlightStep.overview)
+        IconButton(
+          tooltip: context.t.createFlight.overview.routeNoteTooltip,
+          onPressed: () => _showRouteNoteDialog(context, state),
+          icon: const Icon(Icons.info_outline_rounded),
+        ),
+    ];
+    return actions.isEmpty ? null : actions;
+  }
+
+  _ProAccessInfo? _proAccessInfo(
+    BuildContext context, {
+    required bool isProSubscriber,
+    required bool hasPendingFlightUnlock,
+  }) {
+    if (isProSubscriber) {
+      return _ProAccessInfo(
+        title: context.t.createFlight.proAccess.subscriber,
+        message: context.t.createFlight.proAccess.subscriberBody,
+      );
+    }
+    if (hasPendingFlightUnlock) {
+      return _ProAccessInfo(
+        title: context.t.createFlight.proAccess.unlockedFlight,
+        message: context.t.createFlight.proAccess.unlockedFlightBody,
+      );
+    }
+    return null;
   }
 
   String _titleForState(BuildContext context, FlightPreviewState state) {
@@ -461,4 +510,11 @@ class _FlightPreviewBodyState extends State<_FlightPreviewBody> {
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
   }
+}
+
+class _ProAccessInfo {
+  const _ProAccessInfo({required this.title, required this.message});
+
+  final String title;
+  final String message;
 }

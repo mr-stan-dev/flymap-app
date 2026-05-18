@@ -241,6 +241,13 @@
       "proDescription": "Based on recent historical flight data",
       "mostAccurate": "Most accurate"
     },
+    "proAccess": {
+      "subscriber": "Flymap Pro",
+      "subscriberBody": "This flight has full Pro access through your Flymap Pro subscription.",
+      "unlockedFlight": "This flight is unlocked",
+      "unlockedFlightBody": "All Pro features are enabled for this flight.",
+      "tooltip": "Pro access info"
+    },
     "flightNumberSearch": {
       "title": "Flight number",
       "subtitle": "Enter a flight number (for example BA117).",
@@ -446,7 +453,7 @@
     "share": "Share flight card",
     "home": "Home",
     "navigatingHome": "Navigating to home...",
-    "downloadingMapTitle": "Downloading Flight Map",
+    "downloadingMapTitle": "Downloading assets",
     "cancelDownload": "Cancel download",
     "download": "Download",
     "flightRoute": "Flight route (~ $distance)"
