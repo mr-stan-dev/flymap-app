@@ -6,7 +6,7 @@ import 'package:flymap/rating/rate_prompt_trigger.dart';
 void main() {
   group('DefaultRatePromptPolicyService', () {
     test(
-      'does not show before fifth trigger and shows on fifth trigger',
+      'does not show until min counts and first-seen age are satisfied',
       () async {
         final repository = _InMemoryRatePromptRepository();
         final service = DefaultRatePromptPolicyService(
@@ -14,17 +14,20 @@ void main() {
           nowProvider: () => DateTime.utc(2026, 4, 9),
         );
 
-        final results = <bool>[];
-        for (var i = 0; i < 5; i++) {
-          results.add(
-            await service.registerTriggerAndShouldShow(
-              RatePromptTrigger.flightMapDownloadSuccess,
-            ),
-          );
-        }
+        await service.registerTrigger(RatePromptTrigger.flightMapDownloadSuccess);
+        expect(await service.shouldShowPromptNow(), isFalse);
 
-        expect(results.sublist(0, 4), everyElement(isFalse));
-        expect(results.last, isTrue);
+        await service.registerTrigger(RatePromptTrigger.flightMapDownloadSuccess);
+        expect(await service.shouldShowPromptNow(), isFalse);
+
+        await service.registerTrigger(RatePromptTrigger.flightMapDownloadSuccess);
+        expect(await service.shouldShowPromptNow(), isFalse);
+
+        await service.registerTrigger(RatePromptTrigger.shareCardShared);
+        expect(await service.shouldShowPromptNow(), isFalse);
+
+        repository.firstSeenAt = DateTime.utc(2026, 4, 1);
+        expect(await service.shouldShowPromptNow(), isTrue);
       },
     );
 
@@ -34,24 +37,22 @@ void main() {
       final service = DefaultRatePromptPolicyService(
         repository: repository,
         nowProvider: () => now,
+        firstSeenMinAge: Duration.zero,
       );
 
-      for (var i = 0; i < 5; i++) {
-        await service.registerTriggerAndShouldShow(
-          RatePromptTrigger.flightMapDownloadSuccess,
-        );
+      expect(await service.shouldShowPromptNow(), isFalse);
+      for (var i = 0; i < 3; i++) {
+        await service.registerTrigger(RatePromptTrigger.flightMapDownloadSuccess);
       }
+      await service.registerTrigger(RatePromptTrigger.shareCardShared);
+      expect(await service.shouldShowPromptNow(), isTrue);
       await service.recordDeclined();
 
-      final whileSnoozed = await service.registerTriggerAndShouldShow(
-        RatePromptTrigger.flightMapDownloadSuccess,
-      );
+      final whileSnoozed = await service.shouldShowPromptNow();
       expect(whileSnoozed, isFalse);
 
       now = now.add(const Duration(days: 31));
-      final afterSnooze = await service.registerTriggerAndShouldShow(
-        RatePromptTrigger.flightMapDownloadSuccess,
-      );
+      final afterSnooze = await service.shouldShowPromptNow();
       expect(afterSnooze, isTrue);
     });
 
@@ -60,21 +61,21 @@ void main() {
       final service = DefaultRatePromptPolicyService(
         repository: repository,
         nowProvider: () => DateTime.utc(2026, 4, 9),
+        firstSeenMinAge: Duration.zero,
       );
 
-      for (var i = 0; i < 5; i++) {
-        await service.registerTriggerAndShouldShow(
-          RatePromptTrigger.flightMapDownloadSuccess,
-        );
+      expect(await service.shouldShowPromptNow(), isFalse);
+      for (var i = 0; i < 3; i++) {
+        await service.registerTrigger(RatePromptTrigger.flightMapDownloadSuccess);
       }
+      await service.registerTrigger(RatePromptTrigger.shareCardShared);
+      expect(await service.shouldShowPromptNow(), isTrue);
       await service.recordAccepted();
 
-      final third = await service.registerTriggerAndShouldShow(
-        RatePromptTrigger.flightMapDownloadSuccess,
-      );
-      final fourth = await service.registerTriggerAndShouldShow(
-        RatePromptTrigger.flightMapDownloadSuccess,
-      );
+      await service.registerTrigger(RatePromptTrigger.flightMapDownloadSuccess);
+      await service.registerTrigger(RatePromptTrigger.shareCardShared);
+      final third = await service.shouldShowPromptNow();
+      final fourth = await service.shouldShowPromptNow();
 
       expect(third, isFalse);
       expect(fourth, isFalse);
@@ -85,6 +86,7 @@ void main() {
 class _InMemoryRatePromptRepository implements RatePromptRepository {
   bool _completed = false;
   DateTime? _snoozedUntil;
+  DateTime? firstSeenAt;
   final Map<RatePromptTrigger, int> _counts = {};
 
   @override
@@ -111,5 +113,13 @@ class _InMemoryRatePromptRepository implements RatePromptRepository {
   @override
   Future<void> setSnoozedUntil(DateTime? value) async {
     _snoozedUntil = value;
+  }
+
+  @override
+  Future<DateTime?> getFirstSeenAt() async => firstSeenAt;
+
+  @override
+  Future<void> setFirstSeenAt(DateTime value) async {
+    firstSeenAt = value;
   }
 }
