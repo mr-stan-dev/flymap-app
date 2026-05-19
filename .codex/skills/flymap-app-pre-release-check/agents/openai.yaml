@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flymap App Pre-Release Check"
+  short_description: "Review Flymap app changes for release risk"
+  default_prompt: "Use $flymap-app-pre-release-check to review flymap-app changes since the last tag and produce a brief release-risk report."
