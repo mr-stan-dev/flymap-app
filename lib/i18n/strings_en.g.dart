@@ -1766,6 +1766,18 @@ class TranslationsFlightMapEn {
 	/// en: 'Could not load offline map style.'
 	String get loadStyleFailed => 'Could not load offline map style.';
 
+	/// en: 'Show day-night layer'
+	String get showDayNight => 'Show day-night layer';
+
+	/// en: 'Hide day-night layer'
+	String get hideDayNight => 'Hide day-night layer';
+
+	/// en: 'Sunrise in $minutes min'
+	String sunriseInMinutes({required Object minutes}) => 'Sunrise in ${minutes} min';
+
+	/// en: 'Sunset in $minutes min'
+	String sunsetInMinutes({required Object minutes}) => 'Sunset in ${minutes} min';
+
 	/// en: 'Switch to 2D'
 	String get switchTo2D => 'Switch to 2D';
 
@@ -2816,6 +2828,10 @@ extension on Translations {
 			'flight.map.offlineMissing' => 'Offline map file is missing. Please re-download this route.',
 			'flight.map.validationFailed' => 'Offline map validation failed. Please re-download this route.',
 			'flight.map.loadStyleFailed' => 'Could not load offline map style.',
+			'flight.map.showDayNight' => 'Show day-night layer',
+			'flight.map.hideDayNight' => 'Hide day-night layer',
+			'flight.map.sunriseInMinutes' => ({required Object minutes}) => 'Sunrise in ${minutes} min',
+			'flight.map.sunsetInMinutes' => ({required Object minutes}) => 'Sunset in ${minutes} min',
 			'flight.map.switchTo2D' => 'Switch to 2D',
 			'flight.map.switchTo3D' => 'Switch to 3D',
 			'flight.map.uncenterMap' => 'Uncenter map',
@@ -2888,12 +2904,12 @@ extension on Translations {
 			'flight.dashboard.heading' => ({required Object heading}) => 'Heading ${heading}',
 			'flight.dashboard.routeProgress' => 'Route progress',
 			'flight.dashboard.covered' => 'Covered',
+			_ => null,
+		} ?? switch (path) {
 			'flight.dashboard.remaining' => 'Remaining',
 			'flight.dashboard.total' => 'Total',
 			'flight.upcoming.mapTitle' => 'Begin your flight journey',
 			'flight.upcoming.mapSubtitle' => 'Start live tracking once your flight begins',
-			_ => null,
-		} ?? switch (path) {
 			'flight.upcoming.dashboardTitle' => 'Begin your flight journey',
 			'flight.upcoming.dashboardSubtitle' => 'Start to see your live dashboard',
 			'flight.upcoming.checkInButton' => 'Start',
