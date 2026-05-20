@@ -29,8 +29,9 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 
 class FlightMap extends StatefulWidget {
   final Flight flight;
+  final VoidCallback? onGpsHelpTap;
 
-  const FlightMap({super.key, required this.flight});
+  const FlightMap({super.key, required this.flight, this.onGpsHelpTap});
 
   @override
   State<FlightMap> createState() => _FlightMapState();
@@ -101,6 +102,17 @@ class _FlightMapState extends State<FlightMap> {
     );
     _loadStyle();
     _scheduleControlsAutoHide();
+  }
+
+  bool _showGpsHelpAction(FlightGpsState gps) {
+    if (gps.status == GpsStatus.searching || gps.status == GpsStatus.off) {
+      return true;
+    }
+    if (gps.status != GpsStatus.gpsActive && gps.status != GpsStatus.weakSignal) {
+      return false;
+    }
+    final accuracy = gps.data?.accuracy;
+    return accuracy == null || accuracy > 15;
   }
 
   /// Load style from assets and replace URL with local mbtiles path
@@ -576,8 +588,8 @@ class _FlightMapState extends State<FlightMap> {
       listener: (context, state) {
         if (state is FlightScreenLoaded) {
           _routeRegions = state.routeRegions;
-          if (state.gpsData != null) {
-            _updateUserLocation(state.gpsData!);
+          if (state.gps.data != null) {
+            _updateUserLocation(state.gps.data!);
           }
         }
       },
@@ -612,9 +624,9 @@ class _FlightMapState extends State<FlightMap> {
               buildWhen: (previous, current) {
                 if (previous is FlightScreenLoaded &&
                     current is FlightScreenLoaded) {
-                  return previous.gpsStatus != current.gpsStatus ||
-                      previous.gpsUpdateTick != current.gpsUpdateTick ||
-                      previous.gpsData?.accuracy != current.gpsData?.accuracy;
+                  return previous.gps.status != current.gps.status ||
+                      previous.gps.updateTick != current.gps.updateTick ||
+                      previous.gps.data?.accuracy != current.gps.data?.accuracy;
                 }
                 return previous.runtimeType != current.runtimeType;
               },
@@ -623,8 +635,11 @@ class _FlightMapState extends State<FlightMap> {
                   return const SizedBox.shrink();
                 }
                 return MapGpsStatusBadge(
-                  gpsStatus: state.gpsStatus,
-                  gpsData: state.gpsData,
+                  gpsStatus: state.gps.status,
+                  gpsData: state.gps.data,
+                  onHelpTap: _showGpsHelpAction(state.gps)
+                      ? widget.onGpsHelpTap
+                      : null,
                 );
               },
             ),

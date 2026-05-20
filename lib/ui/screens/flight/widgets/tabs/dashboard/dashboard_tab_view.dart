@@ -11,11 +11,13 @@ class FlightDashboardTabView extends StatelessWidget {
   const FlightDashboardTabView({
     required this.state,
     required this.topPadding,
+    this.onGpsHelpTap,
     super.key,
   });
 
   final FlightScreenState state;
   final double topPadding;
+  final VoidCallback? onGpsHelpTap;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +25,7 @@ class FlightDashboardTabView extends StatelessWidget {
       return _LoadedDashboardTab(
         state: state as FlightScreenLoaded,
         topPadding: topPadding,
+        onGpsHelpTap: onGpsHelpTap,
       );
     }
 
@@ -41,16 +44,33 @@ class FlightDashboardTabView extends StatelessWidget {
 }
 
 class _LoadedDashboardTab extends StatelessWidget {
-  const _LoadedDashboardTab({required this.state, required this.topPadding});
+  const _LoadedDashboardTab({
+    required this.state,
+    required this.topPadding,
+    this.onGpsHelpTap,
+  });
 
   final FlightScreenLoaded state;
   final double topPadding;
+  final VoidCallback? onGpsHelpTap;
 
   bool get _hasLiveTelemetry =>
-      state.gpsStatus == GpsStatus.gpsActive ||
-      state.gpsStatus == GpsStatus.weakSignal;
-  bool get _isSearching => state.gpsStatus == GpsStatus.searching;
+      state.gps.status == GpsStatus.gpsActive ||
+      state.gps.status == GpsStatus.weakSignal;
+  bool get _isSearching => state.gps.status == GpsStatus.searching;
   bool get _showTelemetryCards => _hasLiveTelemetry || _isSearching;
+  bool get _showGpsHelpAction {
+    if (state.gps.status == GpsStatus.searching ||
+        state.gps.status == GpsStatus.off) {
+      return true;
+    }
+    if (state.gps.status != GpsStatus.gpsActive &&
+        state.gps.status != GpsStatus.weakSignal) {
+      return false;
+    }
+    final accuracy = state.gps.data?.accuracy;
+    return accuracy == null || accuracy > 15;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,14 +86,15 @@ class _LoadedDashboardTab extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             GpsLiveStatusCard(
-              gpsStatus: state.gpsStatus,
-              gpsData: state.gpsData,
-              gpsUpdateTick: state.gpsUpdateTick,
+              gpsStatus: state.gps.status,
+              gpsData: state.gps.data,
+              gpsLastFixAt: state.gps.lastFixAt,
+              onHelpTap: _showGpsHelpAction ? onGpsHelpTap : null,
             ),
             const SizedBox(height: 12),
             if (_showTelemetryCards)
               TelemetrySearchingOverlay(
-                enabled: _isSearching,
+                enabled: _isSearching && state.gps.lastFixAt == null,
                 child: FlightDashboardPanel(state: state),
               )
             else

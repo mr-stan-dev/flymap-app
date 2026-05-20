@@ -29,9 +29,12 @@ import 'package:flymap/subscription/subscription_product.dart';
 import 'package:flymap/subscription/subscription_status.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
+import 'package:flymap/ui/screens/flight/widgets/gps_signal_help_sheet.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/dashboard_panel.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/dashboard_tab_view.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/dashboard/gps_live_status_card.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/geo_awareness_card.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_gps_status_badge.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/widgets/map_bottom_status_card.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/route/flight_route_tab_view.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
@@ -69,6 +72,7 @@ void main() {
       completeFlightUseCase: _NoopCompleteFlightUseCase(),
       startFlightUseCase: _FakeStartFlightUseCase(result: true),
       gpsProvider: _FakeGpsDataProvider(),
+      enableGpsCheckTimer: false,
     );
 
     await tester.pumpWidget(
@@ -226,6 +230,125 @@ void main() {
 
     expect(find.text('Route progress'), findsOneWidget);
   });
+
+  testWidgets('dashboard GPS card shows stale age and manual help in searching', (
+    tester,
+  ) async {
+    var helpTapped = false;
+
+    await tester.pumpWidget(
+      _testApp(
+        child: GpsLiveStatusCard(
+          gpsStatus: GpsStatus.searching,
+          gpsData: const GpsData(latitude: 51, longitude: 0.1, accuracy: 12),
+          gpsLastFixAt: DateTime.now().subtract(const Duration(seconds: 30)),
+          onHelpTap: () => helpTapped = true,
+        ),
+      ),
+    );
+
+    expect(find.text('Searching for GPS'), findsOneWidget);
+    expect(find.textContaining('Last fix'), findsOneWidget);
+    expect(find.byIcon(Icons.help_outline_rounded), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.help_outline_rounded));
+    await tester.pump();
+
+    expect(helpTapped, isTrue);
+  });
+
+  testWidgets('map GPS badge shows help affordance only when enabled', (
+    tester,
+  ) async {
+    var helpTapped = false;
+
+    await tester.pumpWidget(
+      _testApp(
+        child: Column(
+          children: [
+            MapGpsStatusBadge(
+              gpsStatus: GpsStatus.searching,
+              gpsData: null,
+              onHelpTap: () => helpTapped = true,
+            ),
+            const SizedBox(height: 12),
+            const MapGpsStatusBadge(
+              gpsStatus: GpsStatus.gpsActive,
+              gpsData: GpsData(latitude: 51, longitude: 0.1, accuracy: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('?'), findsOneWidget);
+    await tester.tap(find.text('?').first);
+    await tester.pump();
+    expect(helpTapped, isTrue);
+  });
+
+  testWidgets('route tab keeps stale region/progress content visible while searching', (
+    tester,
+  ) async {
+    final subscriptionCubit = _buildSubscriptionCubit();
+    addTearDown(subscriptionCubit.close);
+
+    await tester.pumpWidget(
+      _testApp(
+        child: BlocProvider.value(
+          value: subscriptionCubit,
+          child: FlightRouteTabView(
+            state: _loadedState(
+              status: FlightStatus.inProgress,
+              gpsStatus: GpsStatus.searching,
+              gpsData: const GpsData(latitude: 50.0, longitude: 10.0),
+              gpsLastFixAt: DateTime.now().subtract(const Duration(seconds: 25)),
+            ),
+            topPadding: 0,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Route progress'), findsOneWidget);
+    expect(find.text('Showing last known data'), findsOneWidget);
+  });
+
+  testWidgets('GPS help sheet shows recovery tips', (tester) async {
+    await tester.pumpWidget(
+      _testApp(
+        child: Builder(
+          builder: (context) => FilledButton(
+            onPressed: () => showGpsSignalHelpSheet(context),
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(find.text('GPS troubleshooting'), findsOneWidget);
+    expect(
+      find.text(
+        'If Flymap cannot lock onto your position during a flight, try the steps below.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Try this'), findsOneWidget);
+    expect(find.text('Make sure Location Services are on'), findsOneWidget);
+    expect(find.text('Sit near window'), findsOneWidget);
+    expect(
+      find.text('Remove a thick phone case or metal accessory'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Hold phone flat and keep it still for a moment'),
+      findsOneWidget,
+    );
+  });
 }
 
 Widget _testApp({required Widget child}) {
@@ -243,15 +366,22 @@ Widget _testApp({required Widget child}) {
 
 FlightScreenLoaded _loadedState({
   required FlightStatus status,
+  GpsStatus? gpsStatus,
   GpsData? gpsData,
+  DateTime? gpsLastFixAt,
   FlightRoute? route,
 }) {
   final flight = _buildFlight(status: status, route: route);
   return FlightScreenLoaded(
     flight: flight,
     routeRegions: flight.info.routeRegions,
-    gpsData: gpsData,
-    gpsStatus: gpsData == null ? GpsStatus.searching : GpsStatus.gpsActive,
+    gps: FlightGpsState(
+      data: gpsData,
+      status:
+          gpsStatus ??
+          (gpsData == null ? GpsStatus.searching : GpsStatus.gpsActive),
+      lastFixAt: gpsLastFixAt,
+    ),
   );
 }
 

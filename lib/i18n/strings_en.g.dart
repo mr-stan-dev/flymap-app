@@ -1835,6 +1835,9 @@ class TranslationsFlightDashboardEn {
 	/// en: 'Looking for a reliable signal'
 	String get gpsSearchingHint => 'Looking for a reliable signal';
 
+	/// en: 'Looking for GPS. Last fix $age.'
+	String gpsSearchingHintWithAge({required Object age}) => 'Looking for GPS. Last fix ${age}.';
+
 	/// en: 'Weak GPS signal'
 	String get gpsWeak => 'Weak GPS signal';
 
@@ -1852,6 +1855,36 @@ class TranslationsFlightDashboardEn {
 
 	/// en: 'Last GPS update $age.'
 	String gpsActiveHintWithAge({required Object age}) => 'Last GPS update ${age}.';
+
+	/// en: 'Showing last known data'
+	String get gpsShowingLastKnownData => 'Showing last known data';
+
+	/// en: 'GPS troubleshooting'
+	String get gpsHelpTooltip => 'GPS troubleshooting';
+
+	/// en: 'GPS troubleshooting'
+	String get gpsHelpTitle => 'GPS troubleshooting';
+
+	/// en: 'Looks like GPS signal is not reliable on your phone.'
+	String get gpsHelpBody => 'Looks like GPS signal is not reliable on your phone.';
+
+	/// en: 'Try this'
+	String get gpsHelpStepsTitle => 'Try this';
+
+	/// en: 'Make sure Location Services are on'
+	String get gpsHelpTipLocation => 'Make sure Location Services are on';
+
+	/// en: 'Move your phone closer to the window'
+	String get gpsHelpTipWindow => 'Move your phone closer to the window';
+
+	/// en: 'Remove thick cases or metal accessories'
+	String get gpsHelpTipCase => 'Remove thick cases or metal accessories';
+
+	/// en: 'Hold your phone still for a few moments'
+	String get gpsHelpTipFlat => 'Hold your phone still for a few moments';
+
+	/// en: 'Live tracking resumes automatically once the signal stabilizes.'
+	String get gpsHelpFooter => 'Live tracking resumes automatically once the signal stabilizes.';
 
 	/// en: 'just now'
 	String get ageJustNow => 'just now';
@@ -2803,12 +2836,23 @@ extension on Translations {
 			'flight.dashboard.gpsPermissionHint' => 'Grant permission to access live flight telemetry.',
 			'flight.dashboard.gpsSearching' => 'Searching for GPS',
 			'flight.dashboard.gpsSearchingHint' => 'Looking for a reliable signal',
+			'flight.dashboard.gpsSearchingHintWithAge' => ({required Object age}) => 'Looking for GPS. Last fix ${age}.',
 			'flight.dashboard.gpsWeak' => 'Weak GPS signal',
 			'flight.dashboard.gpsWeakHint' => 'Signal is unstable. Keep device in open sky.',
 			'flight.dashboard.gpsWeakHintWithAge' => ({required Object age}) => 'Signal unstable. Last fix ${age}.',
 			'flight.dashboard.gpsActive' => 'GPS active',
 			'flight.dashboard.gpsActiveHint' => 'Receiving live telemetry.',
 			'flight.dashboard.gpsActiveHintWithAge' => ({required Object age}) => 'Last GPS update ${age}.',
+			'flight.dashboard.gpsShowingLastKnownData' => 'Showing last known data',
+			'flight.dashboard.gpsHelpTooltip' => 'GPS troubleshooting',
+			'flight.dashboard.gpsHelpTitle' => 'GPS troubleshooting',
+			'flight.dashboard.gpsHelpBody' => 'Looks like GPS signal is not reliable on your phone.',
+			'flight.dashboard.gpsHelpStepsTitle' => 'Try this',
+			'flight.dashboard.gpsHelpTipLocation' => 'Make sure Location Services are on',
+			'flight.dashboard.gpsHelpTipWindow' => 'Move your phone closer to the window',
+			'flight.dashboard.gpsHelpTipCase' => 'Remove thick cases or metal accessories',
+			'flight.dashboard.gpsHelpTipFlat' => 'Hold your phone still for a few moments',
+			'flight.dashboard.gpsHelpFooter' => 'Live tracking resumes automatically once the signal stabilizes.',
 			'flight.dashboard.ageJustNow' => 'just now',
 			'flight.dashboard.ageSeconds' => ({required Object seconds}) => '${seconds} s ago',
 			'flight.dashboard.ageMinutes' => ({required Object minutes}) => '${minutes} m ago',
@@ -2848,6 +2892,8 @@ extension on Translations {
 			'flight.dashboard.total' => 'Total',
 			'flight.upcoming.mapTitle' => 'Begin your flight journey',
 			'flight.upcoming.mapSubtitle' => 'Start live tracking once your flight begins',
+			_ => null,
+		} ?? switch (path) {
 			'flight.upcoming.dashboardTitle' => 'Begin your flight journey',
 			'flight.upcoming.dashboardSubtitle' => 'Start to see your live dashboard',
 			'flight.upcoming.checkInButton' => 'Start',
@@ -2859,8 +2905,6 @@ extension on Translations {
 			'flight.info.flyOverTitle' => 'Highlights of your route',
 			'flight.info.airportsTitle' => 'Airports',
 			'flight.info.departure' => 'Departure',
-			_ => null,
-		} ?? switch (path) {
 			'flight.info.arrival' => 'Arrival',
 			'flight.info.showAll' => 'Show all',
 			'flight.info.showAllCount' => ({required Object count}) => 'Show all ${count}',

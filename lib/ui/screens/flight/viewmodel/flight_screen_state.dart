@@ -19,12 +19,47 @@ final class FlightScreenLoading extends FlightScreenState {
   String toString() => 'FlightScreenLoading()';
 }
 
+final class FlightGpsState extends Equatable {
+  final GpsStatus status;
+  final GpsData? data;
+  final int updateTick;
+  final DateTime? lastFixAt;
+
+  const FlightGpsState({
+    this.status = GpsStatus.off,
+    this.data,
+    this.updateTick = 0,
+    this.lastFixAt,
+  });
+
+  FlightGpsState copyWith({
+    GpsStatus? status,
+    GpsData? data,
+    bool preserveData = true,
+    bool clearData = false,
+    int? updateTick,
+    DateTime? lastFixAt,
+    bool preserveLastFixAt = true,
+    bool clearLastFixAt = false,
+  }) {
+    return FlightGpsState(
+      status: status ?? this.status,
+      data: clearData ? null : data ?? (preserveData ? this.data : null),
+      updateTick: updateTick ?? this.updateTick,
+      lastFixAt: clearLastFixAt
+          ? null
+          : lastFixAt ?? (preserveLastFixAt ? this.lastFixAt : null),
+    );
+  }
+
+  @override
+  List<Object?> get props => [status, data, updateTick, lastFixAt];
+}
+
 /// Flight in progress state
 final class FlightScreenLoaded extends FlightScreenState {
   final Flight flight;
-  final GpsStatus gpsStatus;
-  final GpsData? gpsData;
-  final int gpsUpdateTick;
+  final FlightGpsState gps;
   final List<RouteRegion> routeRegions;
   final String? lastVisitedRegionId;
   final List<String> currentRegionIds;
@@ -33,9 +68,7 @@ final class FlightScreenLoaded extends FlightScreenState {
 
   const FlightScreenLoaded({
     required this.flight,
-    this.gpsStatus = GpsStatus.off,
-    this.gpsData,
-    this.gpsUpdateTick = 0,
+    this.gps = const FlightGpsState(),
     required this.routeRegions,
     this.lastVisitedRegionId,
     this.currentRegionIds = const [],
@@ -45,9 +78,7 @@ final class FlightScreenLoaded extends FlightScreenState {
 
   FlightScreenLoaded copyWith({
     Flight? flight,
-    GpsStatus? gpsStatus,
-    GpsData? gpsData,
-    int? gpsUpdateTick,
+    FlightGpsState? gps,
     List<RouteRegion>? routeRegions,
     String? lastVisitedRegionId,
     bool clearLastVisitedRegionId = false,
@@ -59,9 +90,7 @@ final class FlightScreenLoaded extends FlightScreenState {
   }) {
     return FlightScreenLoaded(
       flight: flight ?? this.flight,
-      gpsStatus: gpsStatus ?? this.gpsStatus,
-      gpsData: gpsData ?? this.gpsData,
-      gpsUpdateTick: gpsUpdateTick ?? this.gpsUpdateTick,
+      gps: gps ?? this.gps,
       routeRegions: routeRegions ?? this.routeRegions,
       lastVisitedRegionId: clearLastVisitedRegionId
           ? null
@@ -79,9 +108,7 @@ final class FlightScreenLoaded extends FlightScreenState {
   @override
   List<Object?> get props => [
     flight,
-    gpsStatus,
-    gpsData,
-    gpsUpdateTick,
+    gps,
     routeRegions,
     lastVisitedRegionId,
     currentRegionIds,
@@ -93,10 +120,11 @@ final class FlightScreenLoaded extends FlightScreenState {
   String toString() {
     return 'FlightScreenLoaded('
         'flightId:${flight.id}, '
-        'gpsStatus:${gpsStatus.name}, '
-        'hasGpsData:${gpsData != null ? 1 : 0}, '
+        'gpsStatus:${gps.status.name}, '
+        'hasGpsData:${gps.data != null ? 1 : 0}, '
+        'lastFix:${gps.lastFixAt?.toIso8601String() ?? '-'}, '
         'lastVisitedRegionId:${lastVisitedRegionId ?? '-'}, '
-        'tick:$gpsUpdateTick, '
+        'tick:${gps.updateTick}, '
         'currentRegionCount:${currentRegionIds.length}, '
         'hasNext:${nextRegionId != null ? 1 : 0}, '
         'eta:${nextRegionEtaMinutes ?? '-'}'

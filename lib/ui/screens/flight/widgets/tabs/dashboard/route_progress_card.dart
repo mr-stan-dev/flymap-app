@@ -8,11 +8,13 @@ class RouteProgressCard extends StatelessWidget {
   const RouteProgressCard({
     required this.route,
     required this.gpsData,
+    this.isStale = false,
     super.key,
   });
 
   final FlightRoute route;
   final GpsData? gpsData;
+  final bool isStale;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +50,16 @@ class RouteProgressCard extends StatelessWidget {
               Text('${(progress * 100).toStringAsFixed(0)}%'),
             ],
           ),
+          if (isStale) ...[
+            const SizedBox(height: 6),
+            Text(
+              context.t.flight.dashboard.gpsShowingLastKnownData,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           Row(
             children: [

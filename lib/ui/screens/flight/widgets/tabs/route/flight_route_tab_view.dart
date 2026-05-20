@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/domain/entity/flight_article.dart';
+import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/domain/entity/flight_status.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
@@ -120,7 +121,9 @@ class _LoadedRouteTab extends StatelessWidget {
 
     final isUpcoming = state.flight.status == FlightStatus.upcoming;
     final hasGpsFix =
-        state.gpsData?.latitude != null && state.gpsData?.longitude != null;
+        state.gps.data?.latitude != null && state.gps.data?.longitude != null;
+    final isGpsStale =
+        state.gps.status == GpsStatus.searching && state.gps.lastFixAt != null;
 
     return SafeArea(
       top: false,
@@ -135,7 +138,11 @@ class _LoadedRouteTab extends StatelessWidget {
                 totalMinutes: timelineTotalMinutes,
               ),
             if (!isUpcoming && hasGpsFix)
-              RouteProgressCard(route: route, gpsData: state.gpsData),
+              RouteProgressCard(
+                route: route,
+                gpsData: state.gps.data,
+                isStale: isGpsStale,
+              ),
             if (isUpcoming || (!isUpcoming && hasGpsFix))
               const SizedBox(height: DsSpacing.sm),
             if (groups.isEmpty)

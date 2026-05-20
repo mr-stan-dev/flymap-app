@@ -13,7 +13,7 @@ class FlightDashboardPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (state.gpsStatus) {
+    switch (state.gps.status) {
       case GpsStatus.off:
         return const SectionCard(child: GpsOffState());
       case GpsStatus.permissionsNotGranted:
@@ -21,7 +21,7 @@ class FlightDashboardPanel extends StatelessWidget {
       case GpsStatus.searching:
       case GpsStatus.gpsActive:
       case GpsStatus.weakSignal:
-        return FlightInstrumentCluster(gpsData: state.gpsData);
+        return FlightInstrumentCluster(gpsData: state.gps.data);
     }
   }
 }

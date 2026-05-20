@@ -60,7 +60,8 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
           return previous.currentRegionIds != current.currentRegionIds ||
               previous.nextRegionId != current.nextRegionId ||
               previous.nextRegionEtaMinutes != current.nextRegionEtaMinutes ||
-              previous.gpsStatus != current.gpsStatus ||
+              previous.gps.status != current.gps.status ||
+              previous.gps.lastFixAt != current.gps.lastFixAt ||
               previous.routeRegions != current.routeRegions;
         }
         return previous.runtimeType != current.runtimeType;
@@ -97,8 +98,11 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
         if (!hasRegionContent) {
           return const SizedBox.shrink();
         }
-        final isGpsSearching = state.gpsStatus == GpsStatus.searching;
-        final showBlockingOverlay = isGpsSearching;
+        final isGpsSearching = state.gps.status == GpsStatus.searching;
+        final showBlockingOverlay =
+            isGpsSearching && state.gps.lastFixAt == null;
+        final showStaleHint =
+            isGpsSearching && state.gps.lastFixAt != null;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -120,6 +124,16 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                  if (showStaleHint) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      context.t.flight.dashboard.gpsShowingLastKnownData,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   GeoAwarenessBlockingOverlay(
                     enabled: showBlockingOverlay,

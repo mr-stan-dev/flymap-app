@@ -7,53 +7,83 @@ class MapGpsStatusBadge extends StatelessWidget {
   const MapGpsStatusBadge({
     required this.gpsStatus,
     required this.gpsData,
+    this.onHelpTap,
     super.key,
   });
 
   final GpsStatus gpsStatus;
   final GpsData? gpsData;
+  final VoidCallback? onHelpTap;
 
   @override
   Widget build(BuildContext context) {
     final view = _statusView(context);
 
-    return IgnorePointer(
-      child: AnimatedContainer(
-        duration: DsMotion.normal,
-        curve: DsMotion.fastInOut,
-        padding: const EdgeInsets.symmetric(
-          horizontal: DsSpacing.sm,
-          vertical: 7,
-        ),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
-          borderRadius: BorderRadius.circular(DsRadii.pill),
-          border: Border.all(color: view.color.withValues(alpha: 0.35)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (view.searching)
-              SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 1.8,
-                  valueColor: AlwaysStoppedAnimation<Color>(view.color),
-                ),
-              )
-            else
-              Icon(view.icon, size: 14, color: view.color),
+    return AnimatedContainer(
+      duration: DsMotion.normal,
+      curve: DsMotion.fastInOut,
+      padding: const EdgeInsets.symmetric(
+        horizontal: DsSpacing.sm,
+        vertical: 7,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(DsRadii.pill),
+        border: Border.all(color: view.color.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (view.searching)
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 1.8,
+                valueColor: AlwaysStoppedAnimation<Color>(view.color),
+              ),
+            )
+          else
+            Icon(view.icon, size: 14, color: view.color),
+          const SizedBox(width: DsSpacing.xxs),
+          Text(
+            view.label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: view.color,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          if (onHelpTap != null) ...[
             const SizedBox(width: DsSpacing.xxs),
-            Text(
-              view.label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: view.color,
-                fontWeight: FontWeight.w700,
+            Tooltip(
+              message: context.t.flight.dashboard.gpsHelpTooltip,
+              child: InkWell(
+                onTap: onHelpTap,
+                borderRadius: BorderRadius.circular(DsRadii.pill),
+                child: Semantics(
+                  button: true,
+                  label: context.t.flight.dashboard.gpsHelpTooltip,
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: view.color.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '?',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: view.color,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
-        ),
+        ],
       ),
     );
   }

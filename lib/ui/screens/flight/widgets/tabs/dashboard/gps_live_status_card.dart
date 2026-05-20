@@ -9,40 +9,29 @@ class GpsLiveStatusCard extends StatefulWidget {
   const GpsLiveStatusCard({
     required this.gpsStatus,
     required this.gpsData,
-    required this.gpsUpdateTick,
+    required this.gpsLastFixAt,
+    this.onHelpTap,
     super.key,
   });
 
   final GpsStatus gpsStatus;
   final GpsData? gpsData;
-  final int gpsUpdateTick;
+  final DateTime? gpsLastFixAt;
+  final VoidCallback? onHelpTap;
 
   @override
   State<GpsLiveStatusCard> createState() => _GpsLiveStatusCardState();
 }
 
 class _GpsLiveStatusCardState extends State<GpsLiveStatusCard> {
-  DateTime? _lastFixAt;
   Timer? _ticker;
 
   @override
   void initState() {
     super.initState();
-    if (widget.gpsData != null) {
-      _lastFixAt = DateTime.now();
-    }
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
-  }
-
-  @override
-  void didUpdateWidget(covariant GpsLiveStatusCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.gpsData != null &&
-        oldWidget.gpsUpdateTick != widget.gpsUpdateTick) {
-      _lastFixAt = DateTime.now();
-    }
   }
 
   @override
@@ -54,7 +43,9 @@ class _GpsLiveStatusCardState extends State<GpsLiveStatusCard> {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final age = _lastFixAt == null ? null : now.difference(_lastFixAt!);
+    final age = widget.gpsLastFixAt == null
+        ? null
+        : now.difference(widget.gpsLastFixAt!);
     final view = _statusData(context, age);
 
     return Container(
@@ -100,6 +91,20 @@ class _GpsLiveStatusCardState extends State<GpsLiveStatusCard> {
               ],
             ),
           ),
+          if (widget.onHelpTap != null) ...[
+            const SizedBox(width: 8),
+            Tooltip(
+              message: context.t.flight.dashboard.gpsHelpTooltip,
+              child: IconButton(
+                onPressed: widget.onHelpTap,
+                tooltip: context.t.flight.dashboard.gpsHelpTooltip,
+                visualDensity: VisualDensity.compact,
+                iconSize: 18,
+                color: view.color,
+                icon: const Icon(Icons.help_outline_rounded),
+              ),
+            ),
+          ],
           if (_showSignalStrength)
             _SignalStrengthBadge(
               quality: _signalQuality(
@@ -154,7 +159,11 @@ class _GpsLiveStatusCardState extends State<GpsLiveStatusCard> {
           color: infoColor,
           icon: Icons.gps_not_fixed_rounded,
           title: context.t.flight.dashboard.gpsSearching,
-          subtitle: context.t.flight.dashboard.gpsSearchingHint,
+          subtitle: age == null
+              ? context.t.flight.dashboard.gpsSearchingHint
+              : context.t.flight.dashboard.gpsSearchingHintWithAge(
+                  age: _ageLabel(age),
+                ),
         );
       case GpsStatus.weakSignal:
         return _GpsStatusViewData(
