@@ -6,8 +6,13 @@ import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_tab_loading.dart';
 
 class FlightMapTabView extends StatelessWidget {
-  const FlightMapTabView({this.onGpsHelpTap, super.key});
+  const FlightMapTabView({
+    required this.topPadding,
+    this.onGpsHelpTap,
+    super.key,
+  });
 
+  final double topPadding;
   final VoidCallback? onGpsHelpTap;
 
   @override
@@ -18,7 +23,11 @@ class FlightMapTabView extends StatelessWidget {
           case FlightScreenLoading():
             return const FlightMapTabLoading();
           case FlightScreenLoaded():
-            return FlightMap(flight: state.flight, onGpsHelpTap: onGpsHelpTap);
+            return FlightMap(
+              flight: state.flight,
+              topPadding: topPadding,
+              onGpsHelpTap: onGpsHelpTap,
+            );
           case FlightScreenError():
             return const FlightMapTabLoading();
           case FlightScreenDeleted():

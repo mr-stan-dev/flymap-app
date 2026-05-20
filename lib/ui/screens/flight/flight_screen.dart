@@ -115,7 +115,10 @@ class _FlightScreenViewState extends State<_FlightScreenView> {
                 child: IndexedStack(
                   index: _tabIndex,
                   children: [
-                    FlightMapTabView(onGpsHelpTap: _openGpsSignalHelpSheet),
+                    FlightMapTabView(
+                      topPadding: _tabTopPadding(context),
+                      onGpsHelpTap: _openGpsSignalHelpSheet,
+                    ),
                     FlightDashboardTabView(
                       state: state,
                       topPadding: _tabTopPadding(context),

@@ -29,9 +29,15 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 
 class FlightMap extends StatefulWidget {
   final Flight flight;
+  final double topPadding;
   final VoidCallback? onGpsHelpTap;
 
-  const FlightMap({super.key, required this.flight, this.onGpsHelpTap});
+  const FlightMap({
+    super.key,
+    required this.flight,
+    required this.topPadding,
+    this.onGpsHelpTap,
+  });
 
   @override
   State<FlightMap> createState() => _FlightMapState();
@@ -582,7 +588,7 @@ class _FlightMapState extends State<FlightMap> {
     }
 
     final initialZoom = _initialZoom();
-    final double controlsTopOffset = 2 * kToolbarHeight;
+    final double controlsTopOffset = widget.topPadding;
 
     return BlocListener<FlightScreenCubit, FlightScreenState>(
       listener: (context, state) {
@@ -618,7 +624,7 @@ class _FlightMapState extends State<FlightMap> {
           ),
           // GPS badge — top-right, just below the app bar
           Positioned(
-            top: controlsTopOffset + 12,
+            top: controlsTopOffset,
             left: 16,
             child: BlocBuilder<FlightScreenCubit, FlightScreenState>(
               buildWhen: (previous, current) {
@@ -646,7 +652,7 @@ class _FlightMapState extends State<FlightMap> {
           ),
           // Map controls (3D / follow) — pushed below GPS badge
           FlightMapControls(
-            topOffset: controlsTopOffset + 12,
+            topOffset: controlsTopOffset + 4,
             visible: _showControls || _followUser,
             is3D: _is3D,
             followUser: _followUser,
