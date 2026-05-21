@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flutter Safe Upgrade"
+  short_description: "Perform a conservative Flutter SDK and dependency upgrade"
+  default_prompt: "Use $flutter-safe-upgrade on this Flutter project to upgrade to the safest compatible stable Flutter version and validate the result."

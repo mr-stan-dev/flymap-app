@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flutter Dependency Audit"
+  short_description: "Audit Flutter upgrade readiness and blockers"
+  default_prompt: "Use $flutter-dependency-audit to audit this Flutter project for migration to the latest stable Flutter and produce an upgrade plan."
