@@ -193,23 +193,38 @@ class CountryNameUtils {
   ];
 
   static final Translations _englishTranslations = AppLocale.en.buildSync();
-  static final Map<String, String> _nameToCode = {
+  static final Map<String, String> _englishNameToCode = {
     for (final code in _countryCodes)
-      _englishNameForCode(code).toLowerCase(): code,
+      _normalizeCountryName(_englishNameForCode(code)): code,
   };
+  static final Map<String, Map<String, String>> _localizedNameToCodeCache = {};
 
-  static String? toCode(String name) {
-    final normalized = name.trim().toLowerCase();
+  static String? toCode(String name, {String? languageCode}) {
+    final normalized = _normalizeCountryName(name);
     if (normalized.isEmpty) return null;
 
-    if (_nameToCode.containsKey(normalized)) {
-      return _nameToCode[normalized];
+    final requestedLanguageCode =
+        (languageCode ?? LocaleSettings.currentLocale.languageCode)
+            .trim()
+            .toLowerCase();
+    final candidateMaps = <Map<String, String>>[
+      if (requestedLanguageCode != 'en')
+        _localizedNameToCode(requestedLanguageCode),
+      _englishNameToCode,
+    ];
+
+    for (final nameToCode in candidateMaps) {
+      if (nameToCode.containsKey(normalized)) {
+        return nameToCode[normalized];
+      }
     }
 
-    for (final entry in _nameToCode.entries) {
-      if (entry.key.contains(normalized) || normalized.contains(entry.key)) {
-        if (normalized.length > 3 || entry.key.length > 3) {
-          return entry.value;
+    for (final nameToCode in candidateMaps) {
+      for (final entry in nameToCode.entries) {
+        if (entry.key.contains(normalized) || normalized.contains(entry.key)) {
+          if (normalized.length > 3 || entry.key.length > 3) {
+            return entry.value;
+          }
         }
       }
     }
@@ -244,5 +259,63 @@ class CountryNameUtils {
       return translated;
     }
     return code;
+  }
+
+  static Map<String, String> _localizedNameToCode(String languageCode) {
+    if (languageCode == 'en') return _englishNameToCode;
+    final cached = _localizedNameToCodeCache[languageCode];
+    if (cached != null) return cached;
+
+    final currentLanguageCode = LocaleSettings.currentLocale.languageCode
+        .trim()
+        .toLowerCase();
+    if (currentLanguageCode != languageCode) {
+      return const <String, String>{};
+    }
+
+    final translations = LocaleSettings.instance.currentTranslations;
+    final localized = <String, String>{};
+    for (final code in _countryCodes) {
+      final translated = translations['countries.$code'];
+      if (translated is! String) continue;
+      final normalized = _normalizeCountryName(translated);
+      if (normalized.isEmpty) continue;
+      localized[normalized] = code;
+    }
+    _localizedNameToCodeCache[languageCode] = localized;
+    return localized;
+  }
+
+  static String _normalizeCountryName(String value) {
+    return value
+        .trim()
+        .toLowerCase()
+        .replaceAll('á', 'a')
+        .replaceAll('à', 'a')
+        .replaceAll('ä', 'a')
+        .replaceAll('â', 'a')
+        .replaceAll('ã', 'a')
+        .replaceAll('å', 'a')
+        .replaceAll('ç', 'c')
+        .replaceAll('é', 'e')
+        .replaceAll('è', 'e')
+        .replaceAll('ë', 'e')
+        .replaceAll('ê', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ì', 'i')
+        .replaceAll('ï', 'i')
+        .replaceAll('î', 'i')
+        .replaceAll('ñ', 'n')
+        .replaceAll('ó', 'o')
+        .replaceAll('ò', 'o')
+        .replaceAll('ö', 'o')
+        .replaceAll('ô', 'o')
+        .replaceAll('õ', 'o')
+        .replaceAll('ú', 'u')
+        .replaceAll('ù', 'u')
+        .replaceAll('ü', 'u')
+        .replaceAll('û', 'u')
+        .replaceAll('ý', 'y')
+        .replaceAll('ÿ', 'y');
   }
 }

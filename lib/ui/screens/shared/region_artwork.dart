@@ -1,6 +1,7 @@
 import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/route_region_type.dart';
+import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/utils/country_name_utils.dart';
 
 class RegionArtwork extends StatelessWidget {
@@ -37,7 +38,10 @@ class RegionArtwork extends StatelessWidget {
 
   Widget _buildArtwork(BuildContext context, String? assetPath) {
     if (regionType == RouteRegionType.country) {
-      final countryCode = CountryNameUtils.toCode(regionName);
+      final countryCode = CountryNameUtils.toCode(
+        regionName,
+        languageCode: LocaleSettings.currentLocale.languageCode,
+      );
       if (countryCode != null) {
         return Center(
           child: Opacity(

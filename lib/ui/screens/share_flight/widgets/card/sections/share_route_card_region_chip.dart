@@ -43,6 +43,18 @@ class ShareRouteCardRegionChip extends StatelessWidget {
             else
               const Icon(Icons.circle, color: Color(0xFFBEEFFF), size: 10),
             const SizedBox(width: 4),
+          ] else if ((regionType == RouteRegionType.country) &&
+              code.length == 2) ...[
+            Opacity(
+              opacity: 0.7,
+              child: CountryFlag.fromCountryCode(
+                code,
+                width: 12,
+                height: 12,
+                shape: const Circle(),
+              ),
+            ),
+            const SizedBox(width: 4),
           ] else if (showRegionIcon) ...[
             RegionArtwork(
               regionName: chip.label,

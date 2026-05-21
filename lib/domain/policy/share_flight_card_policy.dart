@@ -125,7 +125,10 @@ class ShareFlightCardPolicy {
     final filteredRegions = regions
         .where((region) {
           if (region.regionType != RouteRegionType.country) return true;
-          final regionCountryCode = CountryNameUtils.toCode(region.name);
+          final regionCountryCode = CountryNameUtils.toCode(
+            region.name,
+            languageCode: LocaleSettings.currentLocale.languageCode,
+          );
           if (regionCountryCode == null) return true;
           return !excludedCountryCodes.contains(
             regionCountryCode.toUpperCase(),
@@ -194,16 +197,23 @@ class ShareFlightCardPolicy {
     // Always return middle chips in real route timeline order.
     selected.sort(_compareByRouteOrder);
     return selected
-        .map(
-          (region) => ShareFlightCardChip(
-            kind: region.regionType == RouteRegionType.country
+        .map((region) {
+          final isCountry = region.regionType == RouteRegionType.country;
+          return ShareFlightCardChip(
+            kind: isCountry
                 ? ShareFlightCardChipKind.country
                 : ShareFlightCardChipKind.region,
             label: region.name,
             regionType: region.regionType,
             routeOrder: region.pathFirstEncounterKm,
-          ),
-        )
+            countryCode: isCountry
+                ? CountryNameUtils.toCode(
+                    region.name,
+                    languageCode: LocaleSettings.currentLocale.languageCode,
+                  )
+                : null,
+          );
+        })
         .toList(growable: false);
   }
 
