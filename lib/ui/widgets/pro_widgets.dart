@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/tokens/ds_brand_colors.dart';
 import 'package:flymap/ui/widgets/premium_surface_effects.dart';
 
@@ -139,7 +140,7 @@ class ProAppBarInfoButton extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: MaterialLocalizations.of(context).okButtonLabel.isEmpty
-                ? const Text('OK')
+                ? Text(context.t.common.ok)
                 : Text(MaterialLocalizations.of(context).okButtonLabel),
           ),
         ],

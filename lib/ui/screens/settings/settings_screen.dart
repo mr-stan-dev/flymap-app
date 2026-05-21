@@ -15,6 +15,7 @@ import 'widgets/rate_us_setting_item.dart';
 import 'widgets/setting_item.dart';
 import 'widgets/settings_group_card.dart';
 import 'widgets/subscription_top_banner.dart';
+import 'widgets/language_setting_item.dart';
 import 'widgets/theme_setting_item.dart';
 import 'widgets/units_setting_item.dart';
 import 'viewmodel/settings_cubit.dart';
@@ -83,7 +84,10 @@ class SettingsContent extends StatelessWidget {
                 const SizedBox(height: 12),
                 SettingsGroupCard(
                   title: context.t.settings.appearance,
-                  children: [ThemeSettingItem(state: state)],
+                  children: [
+                    LanguageSettingItem(state: state),
+                    ThemeSettingItem(state: state),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 SettingsGroupCard(

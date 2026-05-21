@@ -10,6 +10,7 @@ class SettingsState extends Equatable {
   final String distanceUnit; // 'km' | 'mi'
   final String dateDisplayFormat; // 'MM/DD/YYYY' | 'DD/MM/YYYY'
   final String temperatureUnit; // '°C' | '°F'
+  final String localeSetting; // 'system' | 'en' | 'es'
   final UserProfile profile;
   final String? homeAirportDisplayCode;
   final bool isLoading;
@@ -22,6 +23,7 @@ class SettingsState extends Equatable {
     this.distanceUnit = 'km',
     this.dateDisplayFormat = 'MM/DD/YYYY',
     this.temperatureUnit = '°C',
+    this.localeSetting = 'system',
     this.profile = const UserProfile.empty(),
     this.homeAirportDisplayCode,
     this.isLoading = true,
@@ -35,6 +37,7 @@ class SettingsState extends Equatable {
     String? distanceUnit,
     String? dateDisplayFormat,
     String? temperatureUnit,
+    String? localeSetting,
     UserProfile? profile,
     String? homeAirportDisplayCode,
     bool clearHomeAirportDisplayCode = false,
@@ -48,6 +51,7 @@ class SettingsState extends Equatable {
       distanceUnit: distanceUnit ?? this.distanceUnit,
       dateDisplayFormat: dateDisplayFormat ?? this.dateDisplayFormat,
       temperatureUnit: temperatureUnit ?? this.temperatureUnit,
+      localeSetting: localeSetting ?? this.localeSetting,
       profile: profile ?? this.profile,
       homeAirportDisplayCode: clearHomeAirportDisplayCode
           ? null
@@ -65,6 +69,7 @@ class SettingsState extends Equatable {
     distanceUnit,
     dateDisplayFormat,
     temperatureUnit,
+    localeSetting,
     profile,
     homeAirportDisplayCode,
     isLoading,

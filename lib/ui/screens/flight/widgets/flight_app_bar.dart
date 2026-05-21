@@ -85,7 +85,7 @@ class FlightAppBar extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              RouteUtils.routeCountries(flight.route),
+                              RouteUtils.routeCountries(context, flight.route),
                               style: context.textTheme.caption14Regular
                                   .copyWith(
                                     color: context.colorTheme.textSecondary,

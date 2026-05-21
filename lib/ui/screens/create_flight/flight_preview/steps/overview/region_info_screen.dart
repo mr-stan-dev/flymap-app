@@ -113,6 +113,7 @@ class _RegionInfoScreenState extends State<RegionInfoScreen> {
     final articleHtml = hasHtml
         ? composeScrollableHtml(
             article: article,
+            openSourcePageLabel: context.t.flight.info.openSourcePage,
             backgroundColor: pageBackground,
             textColor: colorScheme.onSurface,
             mutedTextColor: colorScheme.onSurfaceVariant,
@@ -121,6 +122,7 @@ class _RegionInfoScreenState extends State<RegionInfoScreen> {
           )
         : _wrapPlainTextArticleAsHtml(
             article: article,
+            openSourcePageLabel: context.t.flight.info.openSourcePage,
             backgroundColor: pageBackground,
             textColor: colorScheme.onSurface,
             mutedTextColor: colorScheme.onSurfaceVariant,
@@ -171,6 +173,7 @@ class _RegionInfoScreenState extends State<RegionInfoScreen> {
 
   String _wrapPlainTextArticleAsHtml({
     required FlightArticle article,
+    required String openSourcePageLabel,
     required Color backgroundColor,
     required Color textColor,
     required Color mutedTextColor,
@@ -205,6 +208,7 @@ class _RegionInfoScreenState extends State<RegionInfoScreen> {
 
     return composeScrollableHtml(
       article: fallbackArticle,
+      openSourcePageLabel: openSourcePageLabel,
       backgroundColor: backgroundColor,
       textColor: textColor,
       mutedTextColor: mutedTextColor,

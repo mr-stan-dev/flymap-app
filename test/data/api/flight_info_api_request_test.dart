@@ -16,6 +16,7 @@ void main() {
       );
 
       expect(request['user_preferences'], isA<Map<String, dynamic>>());
+      expect(request['lang'], 'en');
       final prefs = request['user_preferences']! as Map<String, dynamic>;
       expect(prefs['interests'], ['Cities & regions', 'Volcanoes & geology']);
     },

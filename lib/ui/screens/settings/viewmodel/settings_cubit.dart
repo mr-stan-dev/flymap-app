@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/data/local/airports_database.dart';
 import 'package:flymap/domain/entity/user_profile.dart';
+import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/domain/entity/units.dart';
 import 'package:flymap/repository/metric_units_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
@@ -35,6 +36,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     final distance = await _unitsRepo.getDistanceUnit();
     final dateDisplay = await _unitsRepo.getDateDisplayFormat();
     final temperature = await _unitsRepo.getTemperatureUnit();
+    final localeSetting = await _settingsRepo.getLocaleSetting();
     final profile = await _onboardingRepository.getProfile();
     await _airportsDb.initialize();
     final homeAirportDisplayCode = _resolveHomeAirportDisplayCode(profile);
@@ -48,6 +50,7 @@ class SettingsCubit extends Cubit<SettingsState> {
         distanceUnit: _formatDistance(distance),
         dateDisplayFormat: _formatDateDisplay(dateDisplay),
         temperatureUnit: _formatTemperature(temperature),
+        localeSetting: localeSetting,
         profile: profile,
         homeAirportDisplayCode: homeAirportDisplayCode,
         isLoading: false,
@@ -102,6 +105,16 @@ class SettingsCubit extends Cubit<SettingsState> {
         : TemperatureUnit.celsius;
     emit(state.copyWith(temperatureUnit: unit));
     await _unitsRepo.setTemperatureUnit(enumUnit);
+  }
+
+  Future<void> setLocaleSetting(String setting) async {
+    emit(state.copyWith(localeSetting: setting));
+    await _settingsRepo.setLocaleSetting(setting);
+    if (setting == SettingsRepository.localeSystem) {
+      await LocaleSettings.useDeviceLocale();
+      return;
+    }
+    await LocaleSettings.setLocaleRaw(setting);
   }
 
   String _formatAltitude(AltitudeUnit u) => UnitFormatUtils.formatAltitude(u);

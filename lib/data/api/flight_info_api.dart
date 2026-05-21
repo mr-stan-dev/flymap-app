@@ -6,6 +6,7 @@ import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/domain/entity/user_profile.dart';
 import 'package:flymap/domain/entity/user_interests_payload.dart';
 import 'package:flymap/domain/entity/wiki_article_candidate.dart';
+import 'package:flymap/i18n/app_localization.dart';
 import 'package:flymap/logger.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -22,9 +23,11 @@ Map<String, dynamic> buildFlightInfoFunctionRequest({
   required String airportArrival,
   required List<LatLng> waypoints,
   required int promptVersion,
+  String languageCode = 'en',
   List<UsersInterests>? interests,
   int maxWaypoints = flightInfoRequestMaxWaypoints,
 }) {
+  final normalizedLanguageCode = languageCode.trim();
   final sampledWaypoints = sampleWaypointsForFlightRequest(
     waypoints,
     maxWaypoints: maxWaypoints,
@@ -47,6 +50,9 @@ Map<String, dynamic> buildFlightInfoFunctionRequest({
     'airport_departure': airportDeparture,
     'airport_arrival': airportArrival,
     'prompt_version': promptVersion.toString(),
+    'lang': normalizedLanguageCode.isEmpty
+        ? 'en'
+        : normalizedLanguageCode.toLowerCase(),
   };
   final preferenceInterests = interests
       ?.map((interest) => interest.payloadValue)
@@ -99,7 +105,7 @@ class FlightInfoApi {
   final functions = FirebaseFunctions.instance;
   static const _overviewPromptVersion = 3;
   static const _getOverviewFunction = 'get_flight_overview';
-  static const _wikiArticlesPromptVersion = 4;
+  static const _wikiArticlesPromptVersion = 7;
   static const _getWikiArticlesFunction = 'get_flight_wiki_articles';
   final _logger = Logger('FlightInfoApi');
 
@@ -202,6 +208,7 @@ class FlightInfoApi {
       airportArrival: airportArrival,
       waypoints: waypoints,
       promptVersion: promptVersion,
+      languageCode: AppLocalization.currentLanguageCode,
       interests: interests,
       maxWaypoints: maxWaypoints,
     );

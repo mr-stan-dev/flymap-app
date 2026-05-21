@@ -14,6 +14,7 @@ import 'package:flymap/data/local/app_database.dart';
 import 'package:flymap/data/local/migrations/flights_db_migration_runner.dart';
 import 'package:flymap/domain/usecase/auto_complete_stale_in_progress_flights_use_case.dart';
 import 'package:flymap/firebase_options.dart';
+import 'package:flymap/i18n/app_localization.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:get_it/get_it.dart';
@@ -41,10 +42,10 @@ void main() async {
       await GetIt.I<FlightsDbMigrationRunner>().migrateIfNeeded();
       await GetIt.I<AutoCompleteStaleInProgressFlightsUseCase>().call();
 
+      await AppLocalization.initLocalization(settingsRepository: GetIt.I());
       final hasSeenOnboarding = await GetIt.I<OnboardingRepository>()
           .hasSeenOnboarding();
       Bloc.observer = CubitStateObserver.create();
-      LocaleSettings.setLocaleSync(AppLocale.en);
 
       runApp(
         TranslationProvider(

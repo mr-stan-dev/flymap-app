@@ -161,7 +161,7 @@ class _SettingsProfileContent extends StatelessWidget {
               ),
             ],
             decoration: InputDecoration(
-              hintText: 'Alex',
+              hintText: context.t.onboarding.nameExample,
               prefixIcon: const Icon(Icons.person_outline_rounded),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),

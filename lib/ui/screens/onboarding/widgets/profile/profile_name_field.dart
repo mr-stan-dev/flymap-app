@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flymap/domain/entity/user_profile.dart';
+import 'package:flymap/i18n/strings.g.dart';
 
 class ProfileNameField extends StatefulWidget {
   const ProfileNameField({
@@ -49,7 +50,7 @@ class _ProfileNameFieldState extends State<ProfileNameField> {
       ],
       onChanged: widget.onChanged,
       decoration: InputDecoration(
-        hintText: 'Your name',
+        hintText: context.t.onboarding.nameHint,
         prefixIcon: const Icon(Icons.person_outline_rounded),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
       ),

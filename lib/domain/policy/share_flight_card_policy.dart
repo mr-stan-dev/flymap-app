@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/entity/route_region_type.dart';
+import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/utils/country_name_utils.dart';
 
 enum ShareFlightCardChipKind { airport, country, region }
@@ -222,7 +223,10 @@ class ShareFlightCardPolicy {
     if (normalized.isEmpty) return null;
     return ShareFlightCardChip(
       kind: ShareFlightCardChipKind.country,
-      label: CountryNameUtils.fromCode(normalized),
+      label: CountryNameUtils.fromCode(
+        normalized,
+        languageCode: LocaleSettings.currentLocale.languageCode,
+      ),
       routeOrder: isStart ? -1 : double.maxFinite,
       countryCode: normalized,
       regionType: RouteRegionType.country,

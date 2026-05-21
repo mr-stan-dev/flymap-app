@@ -24,7 +24,10 @@ class FlightScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (cubit != null) {
-      return BlocProvider.value(value: cubit!, child: const _FlightScreenView());
+      return BlocProvider.value(
+        value: cubit!,
+        child: const _FlightScreenView(),
+      );
     }
     return BlocProvider(
       create: (context) => FlightScreenCubit(flight: flight),
@@ -81,13 +84,13 @@ class _FlightScreenViewState extends State<_FlightScreenView> {
           BottomNavigationBarItem(
             icon: const Icon(Icons.article_outlined),
             activeIcon: const Icon(Icons.article),
-            label: 'Read',
+            label: t.flight.tabRead,
           ),
           if (kDebugMode)
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Icon(Icons.bug_report_outlined),
               activeIcon: Icon(Icons.bug_report),
-              label: 'Debug',
+              label: t.common.debug,
             ),
         ],
       ),

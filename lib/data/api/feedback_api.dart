@@ -1,6 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flymap/domain/entity/feedback_category.dart';
+import 'package:flymap/i18n/app_localization.dart';
 import 'package:flymap/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -49,13 +50,12 @@ class FeedbackApi {
       _logger.log('could not read package info: $e');
     }
 
-    final localeTag = PlatformDispatcher.instance.locale.toLanguageTag();
     return <String, dynamic>{
       'source': source.trim(),
       'platform': defaultTargetPlatform.name,
       'app_version': appVersion,
       'build_number': buildNumber,
-      'locale': localeTag.isEmpty ? null : localeTag,
+      'locale': AppLocalization.currentLocaleTag,
       'is_pro': isPro,
     };
   }

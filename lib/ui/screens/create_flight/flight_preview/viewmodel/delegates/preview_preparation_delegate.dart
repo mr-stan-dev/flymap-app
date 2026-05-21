@@ -46,12 +46,11 @@ class PreviewPreparationDelegate {
       final RouteOverview overview;
       FlightOperationalData? operationalData;
       if (flightNumber != null && flightNumber.trim().isNotEmpty) {
-        final lang = PlatformDispatcher.instance.locale.languageCode.trim();
         final result = await _buildFlightRoutePreviewUseCase.call(
           flightNumber: flightNumber,
           origCode: departure.icaoCode,
           destCode: arrival.icaoCode,
-          lang: lang.isEmpty ? 'en' : lang.toLowerCase(),
+          lang: AppLocalization.currentLanguageCode,
         );
         overview = _getRouteOverviewUseCase.fromPayload(
           payload: result.payload,

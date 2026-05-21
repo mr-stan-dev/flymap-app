@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/utils/country_name_utils.dart';
 
@@ -13,12 +14,13 @@ class RouteUtils {
     return '${cityLabel(route.departure.city)} • ${cityLabel(route.arrival.city)}';
   }
 
-  static String routeCountries(FlightRoute route) {
+  static String routeCountries(BuildContext context, FlightRoute route) {
+    final languageCode = Localizations.localeOf(context).languageCode;
     final depCode = route.departure.countryCode;
     final arrCode = route.arrival.countryCode;
     if (depCode == arrCode) {
-      return CountryNameUtils.fromCode(depCode);
+      return CountryNameUtils.fromCode(depCode, languageCode: languageCode);
     }
-    return '${CountryNameUtils.fromCode(depCode)} • ${CountryNameUtils.fromCode(arrCode)}';
+    return '${CountryNameUtils.fromCode(depCode, languageCode: languageCode)} • ${CountryNameUtils.fromCode(arrCode, languageCode: languageCode)}';
   }
 }

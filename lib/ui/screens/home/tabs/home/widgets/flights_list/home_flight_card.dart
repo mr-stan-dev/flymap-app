@@ -85,7 +85,7 @@ class HomeFlightCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        RouteUtils.routeCountries(route),
+                        RouteUtils.routeCountries(context, route),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),

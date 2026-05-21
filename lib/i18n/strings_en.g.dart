@@ -56,6 +56,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final TranslationsShareImageEn shareImage = TranslationsShareImageEn.internal(_root);
 	late final TranslationsAboutEn about = TranslationsAboutEn.internal(_root);
 	late final TranslationsOnboardingEn onboarding = TranslationsOnboardingEn.internal(_root);
+	late final TranslationsCountriesEn countries = TranslationsCountriesEn.internal(_root);
 }
 
 // Path: common
@@ -101,6 +102,9 @@ class TranslationsCommonEn {
 
 	/// en: 'Search'
 	String get search => 'Search';
+
+	/// en: 'Debug'
+	String get debug => 'Debug';
 }
 
 // Path: home
@@ -382,6 +386,24 @@ class TranslationsSettingsEn {
 
 	/// en: 'Appearance'
 	String get appearance => 'Appearance';
+
+	/// en: 'Language'
+	String get language => 'Language';
+
+	/// en: 'App language'
+	String get languageSubtitle => 'App language';
+
+	/// en: 'System'
+	String get languageSystem => 'System';
+
+	/// en: '${language} (System)'
+	String languageSystemFormat({required Object language}) => '${language} (System)';
+
+	/// en: 'English'
+	String get languageEnglish => 'English';
+
+	/// en: 'Español'
+	String get languageSpanish => 'Español';
 
 	/// en: 'Theme'
 	String get theme => 'Theme';
@@ -817,6 +839,9 @@ class TranslationsFlightEn {
 	/// en: 'Route'
 	String get tabRoute => 'Route';
 
+	/// en: 'Read'
+	String get tabRead => 'Read';
+
 	/// en: 'Info'
 	String get tabInfo => 'Info';
 
@@ -1078,6 +1103,12 @@ class TranslationsOnboardingEn {
 	/// en: 'Make discovery personal. You can change it anytime.'
 	String get nameSubtitle => 'Make discovery personal. You can change it anytime.';
 
+	/// en: 'Your name'
+	String get nameHint => 'Your name';
+
+	/// en: 'Alex'
+	String get nameExample => 'Alex';
+
 	/// en: 'How often do you fly?'
 	String get frequencyTitle => 'How often do you fly?';
 
@@ -1185,6 +1216,573 @@ class TranslationsOnboardingEn {
 
 	/// en: 'Failed to load your profile.'
 	String get failedLoadProfile => 'Failed to load your profile.';
+}
+
+// Path: countries
+class TranslationsCountriesEn {
+	TranslationsCountriesEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'United Arab Emirates'
+	String get AE => 'United Arab Emirates';
+
+	/// en: 'Afghanistan'
+	String get AF => 'Afghanistan';
+
+	/// en: 'Antigua and Barbuda'
+	String get AG => 'Antigua and Barbuda';
+
+	/// en: 'Albania'
+	String get AL => 'Albania';
+
+	/// en: 'Armenia'
+	String get AM => 'Armenia';
+
+	/// en: 'Angola'
+	String get AO => 'Angola';
+
+	/// en: 'Argentina'
+	String get AR => 'Argentina';
+
+	/// en: 'Austria'
+	String get AT => 'Austria';
+
+	/// en: 'Australia'
+	String get AU => 'Australia';
+
+	/// en: 'Azerbaijan'
+	String get AZ => 'Azerbaijan';
+
+	/// en: 'Bosnia and Herzegovina'
+	String get BA => 'Bosnia and Herzegovina';
+
+	/// en: 'Barbados'
+	String get BB => 'Barbados';
+
+	/// en: 'Bangladesh'
+	String get BD => 'Bangladesh';
+
+	/// en: 'Belgium'
+	String get BE => 'Belgium';
+
+	/// en: 'Burkina Faso'
+	String get BF => 'Burkina Faso';
+
+	/// en: 'Bulgaria'
+	String get BG => 'Bulgaria';
+
+	/// en: 'Bahrain'
+	String get BH => 'Bahrain';
+
+	/// en: 'Burundi'
+	String get BI => 'Burundi';
+
+	/// en: 'Benin'
+	String get BJ => 'Benin';
+
+	/// en: 'Brunei Darussalam'
+	String get BN => 'Brunei Darussalam';
+
+	/// en: 'Bolivia'
+	String get BO => 'Bolivia';
+
+	/// en: 'Brazil'
+	String get BR => 'Brazil';
+
+	/// en: 'Bahamas'
+	String get BS => 'Bahamas';
+
+	/// en: 'Bhutan'
+	String get BT => 'Bhutan';
+
+	/// en: 'Botswana'
+	String get BW => 'Botswana';
+
+	/// en: 'Belarus'
+	String get BY => 'Belarus';
+
+	/// en: 'Belize'
+	String get BZ => 'Belize';
+
+	/// en: 'Canada'
+	String get CA => 'Canada';
+
+	/// en: 'Congo, Democratic Republic of the'
+	String get CD => 'Congo, Democratic Republic of the';
+
+	/// en: 'Central African Republic'
+	String get CF => 'Central African Republic';
+
+	/// en: 'Congo'
+	String get CG => 'Congo';
+
+	/// en: 'Switzerland'
+	String get CH => 'Switzerland';
+
+	/// en: 'Côte d'Ivoire'
+	String get CI => 'Côte d\'Ivoire';
+
+	/// en: 'Chile'
+	String get CL => 'Chile';
+
+	/// en: 'Cameroon'
+	String get CM => 'Cameroon';
+
+	/// en: 'China'
+	String get CN => 'China';
+
+	/// en: 'Colombia'
+	String get CO => 'Colombia';
+
+	/// en: 'Costa Rica'
+	String get CR => 'Costa Rica';
+
+	/// en: 'Cuba'
+	String get CU => 'Cuba';
+
+	/// en: 'Cape Verde'
+	String get CV => 'Cape Verde';
+
+	/// en: 'Cyprus'
+	String get CY => 'Cyprus';
+
+	/// en: 'Czech Republic'
+	String get CZ => 'Czech Republic';
+
+	/// en: 'Germany'
+	String get DE => 'Germany';
+
+	/// en: 'Djibouti'
+	String get DJ => 'Djibouti';
+
+	/// en: 'Denmark'
+	String get DK => 'Denmark';
+
+	/// en: 'Dominican Republic'
+	String get DO => 'Dominican Republic';
+
+	/// en: 'Algeria'
+	String get DZ => 'Algeria';
+
+	/// en: 'Ecuador'
+	String get EC => 'Ecuador';
+
+	/// en: 'Estonia'
+	String get EE => 'Estonia';
+
+	/// en: 'Egypt'
+	String get EG => 'Egypt';
+
+	/// en: 'Western Sahara'
+	String get EH => 'Western Sahara';
+
+	/// en: 'Eritrea'
+	String get ER => 'Eritrea';
+
+	/// en: 'Spain'
+	String get ES => 'Spain';
+
+	/// en: 'Ethiopia'
+	String get ET => 'Ethiopia';
+
+	/// en: 'Finland'
+	String get FI => 'Finland';
+
+	/// en: 'Fiji'
+	String get FJ => 'Fiji';
+
+	/// en: 'France'
+	String get FR => 'France';
+
+	/// en: 'Gabon'
+	String get GA => 'Gabon';
+
+	/// en: 'United Kingdom'
+	String get GB => 'United Kingdom';
+
+	/// en: 'Georgia'
+	String get GE => 'Georgia';
+
+	/// en: 'French Guiana'
+	String get GF => 'French Guiana';
+
+	/// en: 'Ghana'
+	String get GH => 'Ghana';
+
+	/// en: 'Gambia'
+	String get GM => 'Gambia';
+
+	/// en: 'Guinea'
+	String get GN => 'Guinea';
+
+	/// en: 'Guadeloupe'
+	String get GP => 'Guadeloupe';
+
+	/// en: 'Equatorial Guinea'
+	String get GQ => 'Equatorial Guinea';
+
+	/// en: 'Greece'
+	String get GR => 'Greece';
+
+	/// en: 'Guatemala'
+	String get GT => 'Guatemala';
+
+	/// en: 'Guinea-Bissau'
+	String get GW => 'Guinea-Bissau';
+
+	/// en: 'Guyana'
+	String get GY => 'Guyana';
+
+	/// en: 'Hong Kong, China'
+	String get HK => 'Hong Kong, China';
+
+	/// en: 'Honduras'
+	String get HN => 'Honduras';
+
+	/// en: 'Croatia'
+	String get HR => 'Croatia';
+
+	/// en: 'Haiti'
+	String get HT => 'Haiti';
+
+	/// en: 'Hungary'
+	String get HU => 'Hungary';
+
+	/// en: 'Indonesia'
+	String get ID => 'Indonesia';
+
+	/// en: 'Ireland'
+	String get IE => 'Ireland';
+
+	/// en: 'Israel'
+	String get IL => 'Israel';
+
+	/// en: 'India'
+	String get IN => 'India';
+
+	/// en: 'Iraq'
+	String get IQ => 'Iraq';
+
+	/// en: 'Iran, Islamic Rep. of'
+	String get IR => 'Iran, Islamic Rep. of';
+
+	/// en: 'Iceland'
+	String get IS => 'Iceland';
+
+	/// en: 'Italy'
+	String get IT => 'Italy';
+
+	/// en: 'Jamaica'
+	String get JM => 'Jamaica';
+
+	/// en: 'Jordan'
+	String get JO => 'Jordan';
+
+	/// en: 'Japan'
+	String get JP => 'Japan';
+
+	/// en: 'Kenya'
+	String get KE => 'Kenya';
+
+	/// en: 'Kyrgyzstan'
+	String get KG => 'Kyrgyzstan';
+
+	/// en: 'Cambodia'
+	String get KH => 'Cambodia';
+
+	/// en: 'Comoros'
+	String get KM => 'Comoros';
+
+	/// en: 'Korea, Dem. People's Rep. of'
+	String get KP => 'Korea, Dem. People\'s Rep. of';
+
+	/// en: 'Korea, Republic of'
+	String get KR => 'Korea, Republic of';
+
+	/// en: 'Kuwait'
+	String get KW => 'Kuwait';
+
+	/// en: 'Kazakhstan'
+	String get KZ => 'Kazakhstan';
+
+	/// en: 'Lao People's Dem. Rep.'
+	String get LA => 'Lao People\'s Dem. Rep.';
+
+	/// en: 'Lebanon'
+	String get LB => 'Lebanon';
+
+	/// en: 'Sri Lanka'
+	String get LK => 'Sri Lanka';
+
+	/// en: 'Liberia'
+	String get LR => 'Liberia';
+
+	/// en: 'Lesotho'
+	String get LS => 'Lesotho';
+
+	/// en: 'Lithuania'
+	String get LT => 'Lithuania';
+
+	/// en: 'Luxembourg'
+	String get LU => 'Luxembourg';
+
+	/// en: 'Latvia'
+	String get LV => 'Latvia';
+
+	/// en: 'Libyan Arab Jamahiriya'
+	String get LY => 'Libyan Arab Jamahiriya';
+
+	/// en: 'Morocco'
+	String get MA => 'Morocco';
+
+	/// en: 'Moldova, Republic of'
+	String get MD => 'Moldova, Republic of';
+
+	/// en: 'Montenegro'
+	String get ME => 'Montenegro';
+
+	/// en: 'Madagascar'
+	String get MG => 'Madagascar';
+
+	/// en: 'Macedonia, The former Yugoslav Rep. of'
+	String get MK => 'Macedonia, The former Yugoslav Rep. of';
+
+	/// en: 'Mali'
+	String get ML => 'Mali';
+
+	/// en: 'Myanmar'
+	String get MM => 'Myanmar';
+
+	/// en: 'Mongolia'
+	String get MN => 'Mongolia';
+
+	/// en: 'Macau, China'
+	String get MO => 'Macau, China';
+
+	/// en: 'Martinique'
+	String get MQ => 'Martinique';
+
+	/// en: 'Mauritania'
+	String get MR => 'Mauritania';
+
+	/// en: 'Mauritius'
+	String get MU => 'Mauritius';
+
+	/// en: 'Maldives'
+	String get MV => 'Maldives';
+
+	/// en: 'Malawi'
+	String get MW => 'Malawi';
+
+	/// en: 'Malta'
+	String get MT => 'Malta';
+
+	/// en: 'Mexico'
+	String get MX => 'Mexico';
+
+	/// en: 'Malaysia'
+	String get MY => 'Malaysia';
+
+	/// en: 'Mozambique'
+	String get MZ => 'Mozambique';
+
+	/// en: 'Namibia'
+	String get NA => 'Namibia';
+
+	/// en: 'New Caledonia'
+	String get NC => 'New Caledonia';
+
+	/// en: 'Niger'
+	String get NE => 'Niger';
+
+	/// en: 'Nigeria'
+	String get NG => 'Nigeria';
+
+	/// en: 'Nicaragua'
+	String get NI => 'Nicaragua';
+
+	/// en: 'Netherlands'
+	String get NL => 'Netherlands';
+
+	/// en: 'Norway'
+	String get NO => 'Norway';
+
+	/// en: 'Nepal'
+	String get NP => 'Nepal';
+
+	/// en: 'New Zealand'
+	String get NZ => 'New Zealand';
+
+	/// en: 'Oman'
+	String get OM => 'Oman';
+
+	/// en: 'Panama'
+	String get PA => 'Panama';
+
+	/// en: 'Peru'
+	String get PE => 'Peru';
+
+	/// en: 'Papua New Guinea'
+	String get PG => 'Papua New Guinea';
+
+	/// en: 'Philippines'
+	String get PH => 'Philippines';
+
+	/// en: 'Pakistan'
+	String get PK => 'Pakistan';
+
+	/// en: 'Poland'
+	String get PL => 'Poland';
+
+	/// en: 'Puerto Rico'
+	String get PR => 'Puerto Rico';
+
+	/// en: 'West Bank and Gaza Strip'
+	String get PS => 'West Bank and Gaza Strip';
+
+	/// en: 'Portugal'
+	String get PT => 'Portugal';
+
+	/// en: 'Paraguay'
+	String get PY => 'Paraguay';
+
+	/// en: 'Qatar'
+	String get QA => 'Qatar';
+
+	/// en: 'Réunion'
+	String get RE => 'Réunion';
+
+	/// en: 'Romania'
+	String get RO => 'Romania';
+
+	/// en: 'Serbia'
+	String get RS => 'Serbia';
+
+	/// en: 'Russian Federation'
+	String get RU => 'Russian Federation';
+
+	/// en: 'Rwanda'
+	String get RW => 'Rwanda';
+
+	/// en: 'Saudi Arabia'
+	String get SA => 'Saudi Arabia';
+
+	/// en: 'Solomon Islands'
+	String get SB => 'Solomon Islands';
+
+	/// en: 'Sudan, The Republic of'
+	String get SD => 'Sudan, The Republic of';
+
+	/// en: 'Sweden'
+	String get SE => 'Sweden';
+
+	/// en: 'Singapore'
+	String get SG => 'Singapore';
+
+	/// en: 'Slovenia'
+	String get SI => 'Slovenia';
+
+	/// en: 'Slovakia'
+	String get SK => 'Slovakia';
+
+	/// en: 'Sierra Leone'
+	String get SL => 'Sierra Leone';
+
+	/// en: 'Senegal'
+	String get SN => 'Senegal';
+
+	/// en: 'Somalia'
+	String get SO => 'Somalia';
+
+	/// en: 'Suriname'
+	String get SR => 'Suriname';
+
+	/// en: 'South Sudan, The Republic of'
+	String get SS => 'South Sudan, The Republic of';
+
+	/// en: 'Sao Tome and Principe'
+	String get ST => 'Sao Tome and Principe';
+
+	/// en: 'El Salvador'
+	String get SV => 'El Salvador';
+
+	/// en: 'Syrian Arab Republic'
+	String get SY => 'Syrian Arab Republic';
+
+	/// en: 'Swaziland'
+	String get SZ => 'Swaziland';
+
+	/// en: 'Chad'
+	String get TD => 'Chad';
+
+	/// en: 'Togo'
+	String get TG => 'Togo';
+
+	/// en: 'Thailand'
+	String get TH => 'Thailand';
+
+	/// en: 'Tajikistan'
+	String get TJ => 'Tajikistan';
+
+	/// en: 'Timor-Leste'
+	String get TL => 'Timor-Leste';
+
+	/// en: 'Turkmenistan'
+	String get TM => 'Turkmenistan';
+
+	/// en: 'Tunisia'
+	String get TN => 'Tunisia';
+
+	/// en: 'Turkey'
+	String get TR => 'Turkey';
+
+	/// en: 'Trinidad and Tobago'
+	String get TT => 'Trinidad and Tobago';
+
+	/// en: 'Taiwan, China'
+	String get TW => 'Taiwan, China';
+
+	/// en: 'Tanzania, United Republic of'
+	String get TZ => 'Tanzania, United Republic of';
+
+	/// en: 'Ukraine'
+	String get UA => 'Ukraine';
+
+	/// en: 'Uganda'
+	String get UG => 'Uganda';
+
+	/// en: 'United States'
+	String get US => 'United States';
+
+	/// en: 'Uruguay'
+	String get UY => 'Uruguay';
+
+	/// en: 'Uzbekistan'
+	String get UZ => 'Uzbekistan';
+
+	/// en: 'Venezuela, Bolivarian Rep. of'
+	String get VE => 'Venezuela, Bolivarian Rep. of';
+
+	/// en: 'Virgin Islands (US)'
+	String get VI => 'Virgin Islands (US)';
+
+	/// en: 'Viet Nam'
+	String get VN => 'Viet Nam';
+
+	/// en: 'Yemen'
+	String get YE => 'Yemen';
+
+	/// en: 'South Africa'
+	String get ZA => 'South Africa';
+
+	/// en: 'Zambia'
+	String get ZM => 'Zambia';
+
+	/// en: 'Zimbabwe'
+	String get ZW => 'Zimbabwe';
 }
 
 // Path: home.sort
@@ -2121,6 +2719,9 @@ class TranslationsFlightInfoEn {
 	String get openSource => 'Open Source';
 
 	/// en: 'Open source page'
+	String get openSourcePage => 'Open source page';
+
+	/// en: 'Open source page'
 	String get openSourcePageTooltip => 'Open source page';
 
 	/// en: '$distance km'
@@ -2405,6 +3006,7 @@ extension on Translations {
 			'common.readMore' => 'Read more',
 			'common.pro' => 'PRO',
 			'common.search' => 'Search',
+			'common.debug' => 'Debug',
 			'home.title' => 'Home',
 			'home.aboutTooltip' => 'About',
 			'home.settingsTooltip' => 'Settings',
@@ -2492,6 +3094,12 @@ extension on Translations {
 			'settings.historyNoResults' => 'No matching flights found.',
 			'settings.historyDeleteOfflineData' => 'Delete map only',
 			'settings.appearance' => 'Appearance',
+			'settings.language' => 'Language',
+			'settings.languageSubtitle' => 'App language',
+			'settings.languageSystem' => 'System',
+			'settings.languageSystemFormat' => ({required Object language}) => '${language} (System)',
+			'settings.languageEnglish' => 'English',
+			'settings.languageSpanish' => 'Español',
 			'settings.theme' => 'Theme',
 			'settings.system' => 'System',
 			'settings.dark' => 'Dark',
@@ -2808,6 +3416,7 @@ extension on Translations {
 			'flight.tabMap' => 'Map',
 			'flight.tabDashboard' => 'Dashboard',
 			'flight.tabRoute' => 'Route',
+			'flight.tabRead' => 'Read',
 			'flight.tabInfo' => 'Info',
 			'flight.completeDialogTitle' => 'Complete flight?',
 			'flight.completeDialogBody' => 'This marks your flight as completed.',
@@ -2896,6 +3505,8 @@ extension on Translations {
 			'flight.dashboard.flightPhaseAscending' => 'Ascending',
 			'flight.dashboard.flightPhaseCruising' => 'Cruising',
 			'flight.dashboard.flightPhaseDescending' => 'Descending',
+			_ => null,
+		} ?? switch (path) {
 			'flight.dashboard.acquiringGpsSignal' => 'Acquiring GPS signal',
 			'flight.dashboard.acquiringGpsHint' => 'Keep the device steady and in open sky for a reliable fix.',
 			'flight.dashboard.weakSignalBanner' => 'Weak GPS signal. Values may drift until accuracy improves.',
@@ -2904,8 +3515,6 @@ extension on Translations {
 			'flight.dashboard.heading' => ({required Object heading}) => 'Heading ${heading}',
 			'flight.dashboard.routeProgress' => 'Route progress',
 			'flight.dashboard.covered' => 'Covered',
-			_ => null,
-		} ?? switch (path) {
 			'flight.dashboard.remaining' => 'Remaining',
 			'flight.dashboard.total' => 'Total',
 			'flight.upcoming.mapTitle' => 'Begin your flight journey',
@@ -2939,6 +3548,7 @@ extension on Translations {
 			'flight.info.otherArticlesTitle' => 'Other articles',
 			'flight.info.noOfflineArticles' => 'No offline articles downloaded.',
 			'flight.info.openSource' => 'Open Source',
+			'flight.info.openSourcePage' => 'Open source page',
 			'flight.info.openSourcePageTooltip' => 'Open source page',
 			'flight.info.distanceKm' => ({required Object distance}) => '${distance} km',
 			'flight.info.speed' => 'Speed',
@@ -3027,6 +3637,8 @@ extension on Translations {
 			'onboarding.welcomeSubtitle' => 'shows you offline maps and interesting places along your flight',
 			'onboarding.nameTitle' => 'Pick a username',
 			'onboarding.nameSubtitle' => 'Make discovery personal. You can change it anytime.',
+			'onboarding.nameHint' => 'Your name',
+			'onboarding.nameExample' => 'Alex',
 			'onboarding.frequencyTitle' => 'How often do you fly?',
 			'onboarding.frequencySubtitle' => 'Flymap will personalize your experience and make suggestions more relevant',
 			'onboarding.frequencyFirstFlight' => 'This is my first flight',
@@ -3063,6 +3675,192 @@ extension on Translations {
 			'onboarding.planFirstFlight' => 'Start my first flight',
 			'onboarding.planFirstFlightPro' => 'Plan my first detailed flight',
 			'onboarding.failedLoadProfile' => 'Failed to load your profile.',
+			'countries.AE' => 'United Arab Emirates',
+			'countries.AF' => 'Afghanistan',
+			'countries.AG' => 'Antigua and Barbuda',
+			'countries.AL' => 'Albania',
+			'countries.AM' => 'Armenia',
+			'countries.AO' => 'Angola',
+			'countries.AR' => 'Argentina',
+			'countries.AT' => 'Austria',
+			'countries.AU' => 'Australia',
+			'countries.AZ' => 'Azerbaijan',
+			'countries.BA' => 'Bosnia and Herzegovina',
+			'countries.BB' => 'Barbados',
+			'countries.BD' => 'Bangladesh',
+			'countries.BE' => 'Belgium',
+			'countries.BF' => 'Burkina Faso',
+			'countries.BG' => 'Bulgaria',
+			'countries.BH' => 'Bahrain',
+			'countries.BI' => 'Burundi',
+			'countries.BJ' => 'Benin',
+			'countries.BN' => 'Brunei Darussalam',
+			'countries.BO' => 'Bolivia',
+			'countries.BR' => 'Brazil',
+			'countries.BS' => 'Bahamas',
+			'countries.BT' => 'Bhutan',
+			'countries.BW' => 'Botswana',
+			'countries.BY' => 'Belarus',
+			'countries.BZ' => 'Belize',
+			'countries.CA' => 'Canada',
+			'countries.CD' => 'Congo, Democratic Republic of the',
+			'countries.CF' => 'Central African Republic',
+			'countries.CG' => 'Congo',
+			'countries.CH' => 'Switzerland',
+			'countries.CI' => 'Côte d\'Ivoire',
+			'countries.CL' => 'Chile',
+			'countries.CM' => 'Cameroon',
+			'countries.CN' => 'China',
+			'countries.CO' => 'Colombia',
+			'countries.CR' => 'Costa Rica',
+			'countries.CU' => 'Cuba',
+			'countries.CV' => 'Cape Verde',
+			'countries.CY' => 'Cyprus',
+			'countries.CZ' => 'Czech Republic',
+			'countries.DE' => 'Germany',
+			'countries.DJ' => 'Djibouti',
+			'countries.DK' => 'Denmark',
+			'countries.DO' => 'Dominican Republic',
+			'countries.DZ' => 'Algeria',
+			'countries.EC' => 'Ecuador',
+			'countries.EE' => 'Estonia',
+			'countries.EG' => 'Egypt',
+			'countries.EH' => 'Western Sahara',
+			'countries.ER' => 'Eritrea',
+			'countries.ES' => 'Spain',
+			'countries.ET' => 'Ethiopia',
+			'countries.FI' => 'Finland',
+			'countries.FJ' => 'Fiji',
+			'countries.FR' => 'France',
+			'countries.GA' => 'Gabon',
+			'countries.GB' => 'United Kingdom',
+			'countries.GE' => 'Georgia',
+			'countries.GF' => 'French Guiana',
+			'countries.GH' => 'Ghana',
+			'countries.GM' => 'Gambia',
+			'countries.GN' => 'Guinea',
+			'countries.GP' => 'Guadeloupe',
+			'countries.GQ' => 'Equatorial Guinea',
+			'countries.GR' => 'Greece',
+			'countries.GT' => 'Guatemala',
+			'countries.GW' => 'Guinea-Bissau',
+			'countries.GY' => 'Guyana',
+			'countries.HK' => 'Hong Kong, China',
+			'countries.HN' => 'Honduras',
+			'countries.HR' => 'Croatia',
+			'countries.HT' => 'Haiti',
+			'countries.HU' => 'Hungary',
+			'countries.ID' => 'Indonesia',
+			'countries.IE' => 'Ireland',
+			'countries.IL' => 'Israel',
+			'countries.IN' => 'India',
+			'countries.IQ' => 'Iraq',
+			'countries.IR' => 'Iran, Islamic Rep. of',
+			'countries.IS' => 'Iceland',
+			'countries.IT' => 'Italy',
+			'countries.JM' => 'Jamaica',
+			'countries.JO' => 'Jordan',
+			'countries.JP' => 'Japan',
+			'countries.KE' => 'Kenya',
+			'countries.KG' => 'Kyrgyzstan',
+			'countries.KH' => 'Cambodia',
+			'countries.KM' => 'Comoros',
+			'countries.KP' => 'Korea, Dem. People\'s Rep. of',
+			'countries.KR' => 'Korea, Republic of',
+			'countries.KW' => 'Kuwait',
+			'countries.KZ' => 'Kazakhstan',
+			'countries.LA' => 'Lao People\'s Dem. Rep.',
+			'countries.LB' => 'Lebanon',
+			'countries.LK' => 'Sri Lanka',
+			'countries.LR' => 'Liberia',
+			'countries.LS' => 'Lesotho',
+			'countries.LT' => 'Lithuania',
+			'countries.LU' => 'Luxembourg',
+			'countries.LV' => 'Latvia',
+			'countries.LY' => 'Libyan Arab Jamahiriya',
+			'countries.MA' => 'Morocco',
+			'countries.MD' => 'Moldova, Republic of',
+			'countries.ME' => 'Montenegro',
+			'countries.MG' => 'Madagascar',
+			'countries.MK' => 'Macedonia, The former Yugoslav Rep. of',
+			'countries.ML' => 'Mali',
+			'countries.MM' => 'Myanmar',
+			'countries.MN' => 'Mongolia',
+			'countries.MO' => 'Macau, China',
+			'countries.MQ' => 'Martinique',
+			'countries.MR' => 'Mauritania',
+			'countries.MU' => 'Mauritius',
+			'countries.MV' => 'Maldives',
+			'countries.MW' => 'Malawi',
+			'countries.MT' => 'Malta',
+			'countries.MX' => 'Mexico',
+			'countries.MY' => 'Malaysia',
+			'countries.MZ' => 'Mozambique',
+			'countries.NA' => 'Namibia',
+			'countries.NC' => 'New Caledonia',
+			'countries.NE' => 'Niger',
+			'countries.NG' => 'Nigeria',
+			'countries.NI' => 'Nicaragua',
+			'countries.NL' => 'Netherlands',
+			'countries.NO' => 'Norway',
+			'countries.NP' => 'Nepal',
+			'countries.NZ' => 'New Zealand',
+			'countries.OM' => 'Oman',
+			'countries.PA' => 'Panama',
+			'countries.PE' => 'Peru',
+			'countries.PG' => 'Papua New Guinea',
+			'countries.PH' => 'Philippines',
+			'countries.PK' => 'Pakistan',
+			'countries.PL' => 'Poland',
+			'countries.PR' => 'Puerto Rico',
+			'countries.PS' => 'West Bank and Gaza Strip',
+			'countries.PT' => 'Portugal',
+			'countries.PY' => 'Paraguay',
+			'countries.QA' => 'Qatar',
+			'countries.RE' => 'Réunion',
+			'countries.RO' => 'Romania',
+			'countries.RS' => 'Serbia',
+			'countries.RU' => 'Russian Federation',
+			'countries.RW' => 'Rwanda',
+			'countries.SA' => 'Saudi Arabia',
+			'countries.SB' => 'Solomon Islands',
+			'countries.SD' => 'Sudan, The Republic of',
+			'countries.SE' => 'Sweden',
+			'countries.SG' => 'Singapore',
+			'countries.SI' => 'Slovenia',
+			'countries.SK' => 'Slovakia',
+			'countries.SL' => 'Sierra Leone',
+			'countries.SN' => 'Senegal',
+			'countries.SO' => 'Somalia',
+			'countries.SR' => 'Suriname',
+			'countries.SS' => 'South Sudan, The Republic of',
+			'countries.ST' => 'Sao Tome and Principe',
+			'countries.SV' => 'El Salvador',
+			'countries.SY' => 'Syrian Arab Republic',
+			'countries.SZ' => 'Swaziland',
+			'countries.TD' => 'Chad',
+			'countries.TG' => 'Togo',
+			'countries.TH' => 'Thailand',
+			'countries.TJ' => 'Tajikistan',
+			'countries.TL' => 'Timor-Leste',
+			'countries.TM' => 'Turkmenistan',
+			'countries.TN' => 'Tunisia',
+			'countries.TR' => 'Turkey',
+			'countries.TT' => 'Trinidad and Tobago',
+			'countries.TW' => 'Taiwan, China',
+			'countries.TZ' => 'Tanzania, United Republic of',
+			'countries.UA' => 'Ukraine',
+			'countries.UG' => 'Uganda',
+			'countries.US' => 'United States',
+			'countries.UY' => 'Uruguay',
+			'countries.UZ' => 'Uzbekistan',
+			'countries.VE' => 'Venezuela, Bolivarian Rep. of',
+			'countries.VI' => 'Virgin Islands (US)',
+			'countries.VN' => 'Viet Nam',
+			'countries.YE' => 'Yemen',
+			'countries.ZA' => 'South Africa',
+			'countries.ZM' => 'Zambia',
+			'countries.ZW' => 'Zimbabwe',
 			_ => null,
 		};
 	}

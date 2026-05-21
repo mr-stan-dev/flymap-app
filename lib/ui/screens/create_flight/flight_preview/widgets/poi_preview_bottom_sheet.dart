@@ -125,7 +125,14 @@ class _PoiPreviewBottomSheetState extends State<PoiPreviewBottomSheet> {
                           context: context,
                           sourceUrl: sourceUrl,
                         ),
-                        child: Text('${context.t.home.open} Wikipedia'),
+                        child: Text(
+                          context
+                              .t
+                              .createFlight
+                              .overview
+                              .regionInfo
+                              .openWikipedia,
+                        ),
                       ),
                   ],
                 ),

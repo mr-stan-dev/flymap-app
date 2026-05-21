@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:flymap/data/api/api_config.dart';
 import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/i18n/app_localization.dart';
 import 'package:http/http.dart' as http;
 
 class RouteOverviewApi {
@@ -27,7 +27,7 @@ class RouteOverviewApi {
             'toCountryCode': arrival.countryCode,
             'placesLimit': placesLimit.toString(),
             'regionsLimit': regionsLimit.toString(),
-            'lang': _preferredLanguageCode(),
+            'lang': AppLocalization.currentLanguageCode,
           },
         );
     final response = await _httpClient
@@ -54,11 +54,5 @@ class RouteOverviewApi {
     final oneLine = raw.replaceAll(RegExp(r'\s+'), ' ').trim();
     if (oneLine.length <= 220) return oneLine;
     return '${oneLine.substring(0, 220)}...';
-  }
-
-  String _preferredLanguageCode() {
-    final lang = PlatformDispatcher.instance.locale.languageCode.trim();
-    if (lang.isEmpty) return 'en';
-    return lang.toLowerCase();
   }
 }

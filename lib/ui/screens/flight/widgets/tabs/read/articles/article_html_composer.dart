@@ -3,6 +3,7 @@ import 'package:flymap/domain/entity/flight_article.dart';
 
 String composeScrollableHtml({
   required FlightArticle article,
+  required String openSourcePageLabel,
   required Color backgroundColor,
   required Color textColor,
   required Color mutedTextColor,
@@ -102,7 +103,7 @@ String composeScrollableHtml({
 <hr />
 <p class="offline-meta">${_escapeHtml(article.attributionText)}</p>
 <p class="offline-meta">${_escapeHtml(article.licenseText)}</p>
-<p class="offline-meta"><a href="${_escapeAttr(article.sourceUrl)}">Open source page</a> • ${_escapeHtml(article.languageCode.toUpperCase())}</p>
+<p class="offline-meta"><a href="${_escapeAttr(article.sourceUrl)}">${_escapeHtml(openSourcePageLabel)}</a> • ${_escapeHtml(article.languageCode.toUpperCase())}</p>
 ''';
 
   var html = article.contentHtml;

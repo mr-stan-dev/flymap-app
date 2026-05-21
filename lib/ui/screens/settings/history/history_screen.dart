@@ -426,7 +426,7 @@ class _HistoryTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${RouteUtils.routeCountries(route)} • $distanceLabel',
+            '${RouteUtils.routeCountries(context, route)} • $distanceLabel',
             style: theme.textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),

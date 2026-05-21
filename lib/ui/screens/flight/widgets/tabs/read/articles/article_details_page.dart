@@ -21,6 +21,7 @@ class ArticleDetailsPage extends StatelessWidget {
     final htmlContent = hasHtml
         ? composeScrollableHtml(
             article: article,
+            openSourcePageLabel: context.t.flight.info.openSourcePage,
             backgroundColor: pageBackground,
             textColor: colorScheme.onSurface,
             mutedTextColor: colorScheme.onSurfaceVariant,

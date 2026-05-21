@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/analytics/app_analytics.dart';
@@ -20,6 +19,7 @@ import 'package:flymap/domain/entity/user_flight_prefs.dart';
 import 'package:flymap/domain/entity/wiki_article_candidate.dart';
 import 'package:flymap/domain/policy/poi_limits_policy.dart';
 import 'package:flymap/domain/policy/route_region_premium_gate_policy.dart';
+import 'package:flymap/i18n/app_localization.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/map_download_config.dart';
