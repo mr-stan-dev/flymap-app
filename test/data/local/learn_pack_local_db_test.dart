@@ -182,6 +182,100 @@ void main() {
     final content = await db.getArticleContent(articleId: 'a1');
     expect(content.markdown, '# Article One');
   });
+
+  test('loads localized pack and localized article markdown', () async {
+    final loader = _MapAssetLoader({
+      LearnPackLocalDb.packAssetPath: '''
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "general_basic",
+      "title": "English Category",
+      "description": "English description",
+      "articles": [
+        {
+          "id": "a1",
+          "title": "English Article"
+        }
+      ]
+    }
+  ]
+}
+''',
+      LearnPackLocalDb.packAssetPathForLanguageCode('es'): '''
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "general_basic",
+      "title": "Categoria en espanol",
+      "description": "Descripcion en espanol",
+      "articles": [
+        {
+          "id": "a1",
+          "title": "Articulo en espanol"
+        }
+      ]
+    }
+  ]
+}
+''',
+      '${LearnPackLocalDb.articlesAssetDirForLanguageCode('es')}/a1.md':
+          '# Articulo en espanol',
+    });
+    final db = LearnPackLocalDb(
+      assetStringLoader: loader.load,
+      localeCodeProvider: () => 'es',
+    );
+
+    final categories = await db.getCategories();
+    expect(categories.single.title, 'Categoria en espanol');
+    expect(categories.single.description, 'Descripcion en espanol');
+    expect(categories.single.articles.single.title, 'Articulo en espanol');
+
+    final content = await db.getArticleContent(articleId: 'a1');
+    expect(content.title, 'Articulo en espanol');
+    expect(content.markdown, '# Articulo en espanol');
+  });
+
+  test(
+    'falls back to English pack and article when locale asset is missing',
+    () async {
+      final loader = _MapAssetLoader({
+        LearnPackLocalDb.packAssetPath: '''
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "general_basic",
+      "title": "English Category",
+      "description": "English description",
+      "articles": [
+        {
+          "id": "a1",
+          "title": "English Article"
+        }
+      ]
+    }
+  ]
+}
+''',
+        '${LearnPackLocalDb.articlesAssetDir}/a1.md': '# English Article',
+      });
+      final db = LearnPackLocalDb(
+        assetStringLoader: loader.load,
+        localeCodeProvider: () => 'fr',
+      );
+
+      final categories = await db.getCategories();
+      expect(categories.single.title, 'English Category');
+      expect(categories.single.articles.single.title, 'English Article');
+
+      final content = await db.getArticleContent(articleId: 'a1');
+      expect(content.markdown, '# English Article');
+    },
+  );
 }
 
 class _MapAssetLoader {

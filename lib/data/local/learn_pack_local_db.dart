@@ -5,19 +5,31 @@ import 'package:flymap/domain/entity/learn_access.dart';
 import 'package:flymap/domain/entity/learn_article_content.dart';
 import 'package:flymap/domain/entity/learn_article_meta.dart';
 import 'package:flymap/domain/entity/learn_category.dart';
+import 'package:flymap/i18n/app_localization.dart';
 import 'package:flymap/logger.dart';
 
 typedef LearnAssetStringLoader = Future<String> Function(String assetPath);
+typedef LearnLocaleCodeProvider = String Function();
 
 class LearnPackLocalDb {
-  LearnPackLocalDb({LearnAssetStringLoader? assetStringLoader})
-    : _assetStringLoader = assetStringLoader ?? rootBundle.loadString;
+  LearnPackLocalDb({
+    LearnAssetStringLoader? assetStringLoader,
+    LearnLocaleCodeProvider? localeCodeProvider,
+  }) : _assetStringLoader = assetStringLoader ?? rootBundle.loadString,
+       _localeCodeProvider =
+           localeCodeProvider ?? (() => AppLocalization.currentLanguageCode);
 
   static const String packAssetPath =
       'assets/data/learn/knowledge_pack.en.json';
   static const String articlesAssetDir = 'assets/data/learn/articles';
   static const String _categoryImagesAssetDir =
       'assets/images/learn/categories';
+  static const Set<String> _supportedLocaleCodes = <String>{
+    'en',
+    'es',
+    'fr',
+    'de',
+  };
   static const Map<String, String> _categoryImageAssetById = {
     'general_basic': '$_categoryImagesAssetDir/basics.webp',
     'clouds_and_weather': '$_categoryImagesAssetDir/clouds.webp',
@@ -32,20 +44,22 @@ class LearnPackLocalDb {
   };
 
   final LearnAssetStringLoader _assetStringLoader;
+  final LearnLocaleCodeProvider _localeCodeProvider;
   final Logger _logger = const Logger('LearnPackLocalDb');
 
-  _LearnPackCache? _cache;
-  final Map<String, String> _articleMarkdownById = <String, String>{};
+  final Map<String, _LearnPackCache> _cacheByLocale =
+      <String, _LearnPackCache>{};
+  final Map<String, String> _articleMarkdownByLocaleAndId = <String, String>{};
 
   Future<List<LearnCategory>> getCategories() async {
-    final cache = await _loadCache();
+    final cache = await _loadCache(localeCode: _currentLocaleCode);
     return cache.categories;
   }
 
   Future<List<LearnArticleMeta>> getArticles({
     required String categoryId,
   }) async {
-    final cache = await _loadCache();
+    final cache = await _loadCache(localeCode: _currentLocaleCode);
     final category = cache.categoryById[categoryId];
     if (category == null) {
       throw StateError('Unknown learn category id: "$categoryId"');
@@ -56,13 +70,15 @@ class LearnPackLocalDb {
   Future<LearnArticleContent> getArticleContent({
     required String articleId,
   }) async {
-    final cache = await _loadCache();
+    final localeCode = _currentLocaleCode;
+    final cache = await _loadCache(localeCode: localeCode);
     final articleMeta = cache.articleById[articleId];
     if (articleMeta == null) {
       throw StateError('Unknown learn article id: "$articleId"');
     }
 
-    final cachedMarkdown = _articleMarkdownById[articleId];
+    final markdownCacheKey = '$localeCode::$articleId';
+    final cachedMarkdown = _articleMarkdownByLocaleAndId[markdownCacheKey];
     if (cachedMarkdown != null) {
       return LearnArticleContent(
         id: articleMeta.id,
@@ -73,9 +89,12 @@ class LearnPackLocalDb {
       );
     }
 
-    final markdown = await _loadArticleMarkdown(articleMeta: articleMeta);
+    final markdown = await _loadArticleMarkdown(
+      articleMeta: articleMeta,
+      localeCode: localeCode,
+    );
     final normalized = markdown.trim();
-    _articleMarkdownById[articleId] = normalized;
+    _articleMarkdownByLocaleAndId[markdownCacheKey] = normalized;
     return LearnArticleContent(
       id: articleMeta.id,
       title: articleMeta.title,
@@ -87,12 +106,37 @@ class LearnPackLocalDb {
 
   Future<String> _loadArticleMarkdown({
     required LearnArticleMeta articleMeta,
+    required String localeCode,
   }) async {
-    final flatOrderedPath = '$articlesAssetDir/${articleMeta.markdownFileName}';
+    final localizedArticlesDir = articlesAssetDirForLanguageCode(localeCode);
+    if (localizedArticlesDir != articlesAssetDir) {
+      try {
+        return await _loadArticleMarkdownFromDir(
+          articleMeta: articleMeta,
+          articlesDir: localizedArticlesDir,
+        );
+      } catch (_) {
+        _logger.log(
+          'Learn article "${articleMeta.id}" not found for locale '
+          '"$localeCode". Falling back to English assets.',
+        );
+      }
+    }
+    return _loadArticleMarkdownFromDir(
+      articleMeta: articleMeta,
+      articlesDir: articlesAssetDir,
+    );
+  }
+
+  Future<String> _loadArticleMarkdownFromDir({
+    required LearnArticleMeta articleMeta,
+    required String articlesDir,
+  }) async {
+    final flatOrderedPath = '$articlesDir/${articleMeta.markdownFileName}';
     final orderedNestedPath =
-        '$articlesAssetDir/${articleMeta.categoryFolderName}/${articleMeta.markdownFileName}';
+        '$articlesDir/${articleMeta.categoryFolderName}/${articleMeta.markdownFileName}';
     final canonicalNestedPath =
-        '$articlesAssetDir/${articleMeta.categoryId}/${articleMeta.id}.md';
+        '$articlesDir/${articleMeta.categoryId}/${articleMeta.id}.md';
     try {
       return await _assetStringLoader(flatOrderedPath);
     } catch (error) {
@@ -107,7 +151,7 @@ class LearnPackLocalDb {
         return await _assetStringLoader(orderedNestedPath);
       } catch (_) {}
       if (triedCanonical) {
-        final legacyPath = '$articlesAssetDir/${articleMeta.id}.md';
+        final legacyPath = '$articlesDir/${articleMeta.id}.md';
         _logger.log(
           'Learn article not found at path "$flatOrderedPath". '
           'Trying legacy flat path "$legacyPath".',
@@ -121,7 +165,7 @@ class LearnPackLocalDb {
         );
         return await _assetStringLoader(canonicalNestedPath);
       } catch (canonicalError) {
-        final legacyPath = '$articlesAssetDir/${articleMeta.id}.md';
+        final legacyPath = '$articlesDir/${articleMeta.id}.md';
         try {
           _logger.log(
             'Learn article not found at canonical nested path '
@@ -135,11 +179,11 @@ class LearnPackLocalDb {
     }
   }
 
-  Future<_LearnPackCache> _loadCache() async {
-    final existing = _cache;
+  Future<_LearnPackCache> _loadCache({required String localeCode}) async {
+    final existing = _cacheByLocale[localeCode];
     if (existing != null) return existing;
 
-    final raw = await _assetStringLoader(packAssetPath);
+    final raw = await _loadPackJson(localeCode: localeCode);
     final dynamic decoded = jsonDecode(raw);
     if (decoded is! Map) {
       throw const FormatException('Learn pack must be a JSON object.');
@@ -261,12 +305,51 @@ class LearnPackLocalDb {
       categoryById: categoryById,
       articleById: articleById,
     );
-    _cache = cache;
+    _cacheByLocale[localeCode] = cache;
     _logger.log(
-      'Learn pack loaded: categories=${categories.length} '
-      'articles=${articleById.length}',
+      'Learn pack loaded for locale "$localeCode": '
+      'categories=${categories.length} articles=${articleById.length}',
     );
     return cache;
+  }
+
+  Future<String> _loadPackJson({required String localeCode}) async {
+    final localizedPackPath = packAssetPathForLanguageCode(localeCode);
+    if (localizedPackPath != packAssetPath) {
+      try {
+        return await _assetStringLoader(localizedPackPath);
+      } catch (_) {
+        _logger.log(
+          'Learn pack not found for locale "$localeCode" at '
+          '"$localizedPackPath". Falling back to English pack.',
+        );
+      }
+    }
+    return _assetStringLoader(packAssetPath);
+  }
+
+  String get _currentLocaleCode {
+    final rawLocaleCode = _localeCodeProvider().trim().toLowerCase();
+    if (_supportedLocaleCodes.contains(rawLocaleCode)) {
+      return rawLocaleCode;
+    }
+    return 'en';
+  }
+
+  static String packAssetPathForLanguageCode(String languageCode) {
+    final normalizedLanguageCode = languageCode.trim().toLowerCase();
+    if (normalizedLanguageCode.isEmpty || normalizedLanguageCode == 'en') {
+      return packAssetPath;
+    }
+    return 'assets/data/learn/knowledge_pack.$normalizedLanguageCode.json';
+  }
+
+  static String articlesAssetDirForLanguageCode(String languageCode) {
+    final normalizedLanguageCode = languageCode.trim().toLowerCase();
+    if (normalizedLanguageCode.isEmpty || normalizedLanguageCode == 'en') {
+      return articlesAssetDir;
+    }
+    return 'assets/data/learn/articles_$normalizedLanguageCode';
   }
 
   static int _readInt(Object? value) {

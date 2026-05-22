@@ -1,0 +1,765 @@
+{
+  "version": 1,
+  "app": "Flymap Knowledge Pack",
+  "defaultLanguage": "es",
+  "categories": [
+    {
+      "id": "general_basic",
+      "title": "Conceptos basicos de aviacion",
+      "description": "Articulos introductorios gratuitos que explican de forma sencilla los fundamentos del vuelo, el cielo y la experiencia a bordo.",
+      "articles": [
+        {
+          "id": "what_happens_during_takeoff",
+          "title": "Qué ocurre durante el despegue",
+          "premium": false,
+          "order": 1
+        },
+        {
+          "id": "what_happens_during_landing",
+          "title": "Qué ocurre durante el aterrizaje",
+          "premium": false,
+          "order": 2
+        },
+        {
+          "id": "why_planes_stay_in_the_air",
+          "title": "Por qué los aviones se mantienen en el aire",
+          "premium": false,
+          "order": 3
+        },
+        {
+          "id": "why_your_ears_pop",
+          "title": "Por qué se te tapan o destapan los oídos en un vuelo",
+          "premium": false,
+          "order": 4
+        },
+        {
+          "id": "why_the_sky_looks_different_from_above",
+          "title": "Por qué el cielo se ve diferente desde arriba",
+          "premium": false,
+          "order": 5
+        },
+        {
+          "id": "how_high_commercial_planes_fly",
+          "title": "A qué altura vuelan los aviones comerciales",
+          "premium": false,
+          "order": 6
+        },
+        {
+          "id": "why_flight_paths_look_curved",
+          "title": "Por qué las rutas de vuelo parecen curvas",
+          "premium": false,
+          "order": 7
+        },
+        {
+          "id": "what_autopilot_actually_does",
+          "title": "Qué hace realmente el piloto automático",
+          "premium": false,
+          "order": 8
+        },
+        {
+          "id": "why_airplane_windows_are_round",
+          "title": "Por qué las ventanillas de los aviones son redondeadas",
+          "premium": false,
+          "order": 9
+        },
+        {
+          "id": "what_happens_during_taxiing",
+          "title": "Qué ocurre durante el rodaje",
+          "premium": false,
+          "order": 10
+        },
+        {
+          "id": "why_cabin_lights_dim_for_takeoff_and_landing",
+          "title": "Por qué atenúan las luces de cabina para el despegue y el aterrizaje",
+          "premium": false,
+          "order": 11
+        },
+        {
+          "id": "what_happens_after_touchdown",
+          "title": "Qué pasa después del toque",
+          "premium": false,
+          "order": 12
+        }
+      ],
+      "order": 1
+    },
+    {
+      "id": "clouds_and_weather",
+      "title": "Nubes y tiempo",
+      "description": "Aprende como se forman las nubes, por que las tormentas importan para los vuelos y como el tiempo influye en lo que ves desde la ventana.",
+      "articles": [
+        {
+          "id": "cloud_families_explained",
+          "title": "Las familias de nubes, explicadas de forma sencilla",
+          "premium": false,
+          "order": 1
+        },
+        {
+          "id": "why_the_sky_turns_darker_at_altitude",
+          "title": "Por qué el cielo se vuelve más oscuro en altitud",
+          "premium": false,
+          "order": 2
+        },
+        {
+          "id": "cumulonimbus_giant_of_the_sky",
+          "title": "Cumulonimbo: el gigante del cielo",
+          "premium": true,
+          "order": 3
+        },
+        {
+          "id": "cirrus_the_high_icy_clouds",
+          "title": "Cirros: las nubes altas de hielo",
+          "premium": true,
+          "order": 4
+        },
+        {
+          "id": "why_clouds_form_in_layers",
+          "title": "Por qué las nubes se forman en capas",
+          "premium": true,
+          "order": 5
+        },
+        {
+          "id": "how_thunderstorms_grow",
+          "title": "Cómo crecen las tormentas eléctricas",
+          "premium": true,
+          "order": 6
+        },
+        {
+          "id": "what_makes_clear_air_turbulence",
+          "title": "Qué provoca la turbulencia en aire claro",
+          "premium": true,
+          "order": 7
+        },
+        {
+          "id": "jet_streams_and_fast_moving_air",
+          "title": "Corrientes en chorro y aire que se mueve muy rápido",
+          "premium": true,
+          "order": 8
+        },
+        {
+          "id": "why_sunsets_are_so_intense_from_planes",
+          "title": "Por qué los atardeceres se ven tan intensos desde los aviones",
+          "premium": true,
+          "order": 9
+        },
+        {
+          "id": "how_weather_radars_help_pilots",
+          "title": "Cómo ayuda el radar meteorológico a los pilotos",
+          "premium": true,
+          "order": 10
+        },
+        {
+          "id": "why_some_clouds_look_flat_and_others_look_puffy",
+          "title": "Por qué algunas nubes se ven planas y otras esponjosas",
+          "premium": true,
+          "order": 11
+        },
+        {
+          "id": "why_temperature_drops_so_much_at_high_altitude",
+          "title": "Por qué la temperatura baja tanto a gran altitud",
+          "premium": true,
+          "order": 12
+        },
+        {
+          "id": "what_fog_means_for_flying",
+          "title": "Qué significa la niebla para volar",
+          "premium": true,
+          "order": 13
+        },
+        {
+          "id": "why_airplanes_avoid_storm_clouds_by_so_much",
+          "title": "Por qué los aviones evitan tanto las nubes de tormenta",
+          "premium": true,
+          "order": 14
+        },
+        {
+          "id": "how_ice_forms_on_aircraft_and_how_it_is_prevented",
+          "title": "Cómo se forma el hielo en las aeronaves y cómo se evita",
+          "premium": true,
+          "order": 15
+        }
+      ],
+      "order": 2
+    },
+    {
+      "id": "flight_physics",
+      "title": "Fisica del vuelo",
+      "description": "Explicaciones sobre sustentacion, resistencia, velocidad, presion y las fuerzas fisicas que hacen posible el vuelo.",
+      "articles": [
+        {
+          "id": "the_four_forces_of_flight",
+          "title": "Las cuatro fuerzas del vuelo",
+          "premium": false,
+          "order": 1
+        },
+        {
+          "id": "how_lift_really_works",
+          "title": "Cómo funciona realmente la sustentación",
+          "premium": false,
+          "order": 2
+        },
+        {
+          "id": "what_drag_does_to_an_aircraft",
+          "title": "Qué le hace la resistencia a una aeronave",
+          "premium": true,
+          "order": 3
+        },
+        {
+          "id": "why_wings_have_their_shape",
+          "title": "Por qué las alas tienen su forma",
+          "premium": true,
+          "order": 4
+        },
+        {
+          "id": "angle_of_attack_without_the_jargon",
+          "title": "El ángulo de ataque sin jerga",
+          "premium": true,
+          "order": 5
+        },
+        {
+          "id": "air_pressure_and_altitude",
+          "title": "Presión del aire y altitud",
+          "premium": true,
+          "order": 6
+        },
+        {
+          "id": "why_thin_air_changes_everything",
+          "title": "Por qué el aire tenue lo cambia todo",
+          "premium": true,
+          "order": 7
+        },
+        {
+          "id": "how_speed_is_measured_in_aviation",
+          "title": "Cómo se mide la velocidad en aviación",
+          "premium": true,
+          "order": 8
+        },
+        {
+          "id": "why_stalls_happen",
+          "title": "Por qué ocurren las pérdidas",
+          "premium": true,
+          "order": 9
+        },
+        {
+          "id": "winglets_small_tips_big_effect",
+          "title": "Winglets: pequeñas puntas, gran efecto",
+          "premium": true,
+          "order": 10
+        },
+        {
+          "id": "why_weight_and_balance_matter",
+          "title": "Por qué importan el peso y el centrado",
+          "premium": true,
+          "order": 11
+        },
+        {
+          "id": "how_turning_changes_lift",
+          "title": "Cómo cambia la sustentación al girar",
+          "premium": true,
+          "order": 12
+        },
+        {
+          "id": "why_hot_days_make_takeoff_harder",
+          "title": "Por qué los días calurosos hacen más difícil el despegue",
+          "premium": true,
+          "order": 13
+        }
+      ],
+      "order": 3
+    },
+    {
+      "id": "aircraft_and_systems",
+      "title": "Avion y sistemas",
+      "description": "Entiende que hacen las distintas partes del avion y los sistemas de a bordo, desde los motores hasta la presion de cabina.",
+      "articles": [
+        {
+          "id": "parts_of_an_airplane",
+          "title": "Las partes principales de un avión",
+          "premium": false,
+          "order": 1
+        },
+        {
+          "id": "how_jet_engines_work",
+          "title": "Cómo funcionan los motores a reacción",
+          "premium": false,
+          "order": 2
+        },
+        {
+          "id": "jet_vs_turboprop",
+          "title": "Reactor frente a turbohélice",
+          "premium": true,
+          "order": 3
+        },
+        {
+          "id": "what_flaps_and_slats_do",
+          "title": "Qué hacen los flaps y los slats",
+          "premium": true,
+          "order": 4
+        },
+        {
+          "id": "how_landing_gear_works",
+          "title": "Cómo funciona el tren de aterrizaje",
+          "premium": true,
+          "order": 5
+        },
+        {
+          "id": "why_cabin_pressure_matters",
+          "title": "Por qué importa la presión de cabina",
+          "premium": true,
+          "order": 6
+        },
+        {
+          "id": "how_airplane_air_conditioning_works",
+          "title": "Cómo funciona el aire acondicionado de un avión",
+          "premium": true,
+          "order": 7
+        },
+        {
+          "id": "what_the_black_box_really_is",
+          "title": "Qué es realmente la caja negra",
+          "premium": true,
+          "order": 8
+        },
+        {
+          "id": "why_planes_are_usually_white",
+          "title": "Por qué los aviones suelen ser blancos",
+          "premium": true,
+          "order": 9
+        },
+        {
+          "id": "how_airplane_lights_help_at_night",
+          "title": "Cómo ayudan las luces del avión por la noche",
+          "premium": true,
+          "order": 10
+        },
+        {
+          "id": "how_spoilers_work",
+          "title": "Cómo funcionan los spoilers",
+          "premium": true,
+          "order": 11
+        },
+        {
+          "id": "how_reverse_thrust_works",
+          "title": "Cómo funciona el empuje inverso",
+          "premium": true,
+          "order": 12
+        },
+        {
+          "id": "what_the_apu_does",
+          "title": "Qué hace el APU",
+          "premium": true,
+          "order": 13
+        }
+      ],
+      "order": 4
+    },
+    {
+      "id": "navigation_and_routes",
+      "title": "Navegacion y rutas",
+      "description": "Descubre como navegan los pilotos, por que se eligen ciertas rutas y que significan los niveles de vuelo y los waypoints.",
+      "articles": [
+        {
+          "id": "how_pilots_navigate",
+          "title": "Cómo navegan los pilotos por el mundo",
+          "premium": false,
+          "order": 1
+        },
+        {
+          "id": "what_flight_levels_mean",
+          "title": "Qué significan los niveles de vuelo",
+          "premium": false,
+          "order": 2
+        },
+        {
+          "id": "what_a_waypoint_is",
+          "title": "Qué es un punto de paso",
+          "premium": true,
+          "order": 3
+        },
+        {
+          "id": "why_planes_do_not_fly_straight_lines",
+          "title": "Por qué los aviones no vuelan en líneas rectas",
+          "premium": true,
+          "order": 4
+        },
+        {
+          "id": "how_gps_helps_airliners",
+          "title": "Cómo ayuda el GPS a los aviones comerciales",
+          "premium": true,
+          "order": 5
+        },
+        {
+          "id": "why_planes_hold_before_landing",
+          "title": "Por qué los aviones esperan antes de aterrizar",
+          "premium": true,
+          "order": 6
+        },
+        {
+          "id": "how_air_traffic_control_guides_flights",
+          "title": "Cómo el control de tráfico aéreo guía los vuelos",
+          "premium": true,
+          "order": 7
+        },
+        {
+          "id": "polar_routes_explained",
+          "title": "Rutas polares, explicadas",
+          "premium": true,
+          "order": 8
+        },
+        {
+          "id": "why_headwinds_and_tailwinds_matter",
+          "title": "Por qué importan los vientos de cara y de cola",
+          "premium": true,
+          "order": 9
+        },
+        {
+          "id": "how_a_flight_plan_is_built",
+          "title": "Cómo se construye un plan de vuelo",
+          "premium": true,
+          "order": 10
+        },
+        {
+          "id": "why_runways_have_numbers",
+          "title": "Por qué las pistas tienen números",
+          "premium": true,
+          "order": 11
+        },
+        {
+          "id": "what_sids_and_stars_are",
+          "title": "Qué son los SID y los STAR",
+          "premium": true,
+          "order": 12
+        },
+        {
+          "id": "why_flights_sometimes_take_longer_routes_on_purpose",
+          "title": "Por qué los vuelos a veces toman rutas más largas a propósito",
+          "premium": true,
+          "order": 13
+        }
+      ],
+      "order": 5
+    },
+    {
+      "id": "turbulence_and_airflows",
+      "title": "Turbulencia y corrientes de aire",
+      "description": "Entiende por que ocurre la turbulencia, como la gestionan los pilotos y por que los vuelos movidos suelen ser mucho mas seguros de lo que parecen.",
+      "articles": [
+        {
+          "id": "what_turbulence_really_is_simple_explanation",
+          "title": "Qué es realmente la turbulencia (explicación sencilla)",
+          "premium": false,
+          "order": 1
+        },
+        {
+          "id": "is_turbulence_dangerous_the_honest_answer",
+          "title": "¿Es peligrosa la turbulencia? (La respuesta honesta)",
+          "premium": false,
+          "order": 2
+        },
+        {
+          "id": "what_causes_that_drop_feeling",
+          "title": "Qué causa esa sensación de “caída”",
+          "premium": true,
+          "order": 3
+        },
+        {
+          "id": "the_main_types_of_turbulence_explained",
+          "title": "Los principales tipos de turbulencia, explicados",
+          "premium": true,
+          "order": 4
+        },
+        {
+          "id": "clear_air_turbulence_the_invisible_kind",
+          "title": "Turbulencia en aire claro: la clase invisible",
+          "premium": true,
+          "order": 5
+        },
+        {
+          "id": "mountain_waves_why_flying_over_mountains_gets_bumpy",
+          "title": "Ondas de montaña: por qué volar sobre montañas se vuelve movido",
+          "premium": true,
+          "order": 6
+        },
+        {
+          "id": "jet_streams_fast_rivers_in_the_sky",
+          "title": "Corrientes en chorro: ríos rápidos en el cielo",
+          "premium": true,
+          "order": 7
+        },
+        {
+          "id": "why_planes_do_not_fall_in_turbulence",
+          "title": "Por qué los aviones no caen con la turbulencia",
+          "premium": true,
+          "order": 8
+        },
+        {
+          "id": "how_much_turbulence_can_a_plane_handle",
+          "title": "Cuánta turbulencia puede soportar un avión",
+          "premium": true,
+          "order": 9
+        },
+        {
+          "id": "why_turbulence_feels_worse_than_it_is",
+          "title": "Por qué la turbulencia se siente peor de lo que es",
+          "premium": true,
+          "order": 10
+        },
+        {
+          "id": "how_pilots_avoid_turbulence",
+          "title": "Cómo evitan la turbulencia los pilotos",
+          "premium": true,
+          "order": 11
+        },
+        {
+          "id": "why_turbulence_cannot_always_be_avoided",
+          "title": "Por qué la turbulencia no siempre puede evitarse",
+          "premium": true,
+          "order": 12
+        },
+        {
+          "id": "where_to_sit_for_the_smoothest_ride",
+          "title": "Dónde sentarse para un vuelo más suave",
+          "premium": true,
+          "order": 13
+        },
+        {
+          "id": "when_turbulence_is_most_likely_during_a_flight",
+          "title": "Cuándo es más probable la turbulencia durante un vuelo",
+          "premium": true,
+          "order": 14
+        },
+        {
+          "id": "why_the_air_is_not_actually_empty",
+          "title": "Por qué el aire no está realmente vacío",
+          "premium": true,
+          "order": 15
+        }
+      ],
+      "order": 6
+    },
+    {
+      "id": "in_flight_experience",
+      "title": "Experiencia a bordo",
+      "description": "Entiende lo que sientes, oyes, saboreas y notas en la cabina durante un vuelo, y por que ocurre.",
+      "articles": [
+        {
+          "id": "why_cabins_feel_so_dry_on_airplanes",
+          "title": "Por qué las cabinas se sienten tan secas en los aviones",
+          "premium": false,
+          "order": 1
+        },
+        {
+          "id": "why_food_tastes_different_in_the_air",
+          "title": "Por qué la comida sabe diferente en el aire",
+          "premium": false,
+          "order": 2
+        },
+        {
+          "id": "why_you_feel_tired_after_flying",
+          "title": "Por qué te sientes cansado después de volar",
+          "premium": true,
+          "order": 3
+        },
+        {
+          "id": "why_airplane_bathrooms_work_differently",
+          "title": "Por qué los baños de los aviones funcionan de forma diferente",
+          "premium": true,
+          "order": 4
+        },
+        {
+          "id": "what_that_engine_sound_change_means",
+          "title": "Qué significa ese cambio en el sonido del motor",
+          "premium": true,
+          "order": 5
+        },
+        {
+          "id": "why_window_shades_matter_during_flight",
+          "title": "Por qué importan las persianas de las ventanillas durante el vuelo",
+          "premium": true,
+          "order": 6
+        },
+        {
+          "id": "why_the_cabin_gets_quiet_and_loud_at_different_times",
+          "title": "Por qué la cabina se vuelve silenciosa y ruidosa en distintos momentos",
+          "premium": true,
+          "order": 7
+        },
+        {
+          "id": "why_the_seat_belt_sign_turns_on_when_it_feels_smooth",
+          "title": "Por qué se enciende la señal del cinturón cuando el vuelo parece suave",
+          "premium": true,
+          "order": 8
+        }
+      ],
+      "order": 7
+    },
+    {
+      "id": "airport_and_flight_operations",
+      "title": "Aeropuerto y operaciones de vuelo",
+      "description": "Aprende que sucede alrededor del avion en tierra, desde la asignacion de puertas hasta el flujo en pista y el trabajo de escala.",
+      "articles": [
+        {
+          "id": "why_planes_queue_before_takeoff",
+          "title": "Por qué los aviones hacen cola antes de despegar",
+          "premium": false,
+          "order": 1
+        },
+        {
+          "id": "how_gates_are_assigned",
+          "title": "Cómo se asignan las puertas de embarque",
+          "premium": false,
+          "order": 2
+        },
+        {
+          "id": "what_ground_crew_are_signaling",
+          "title": "Qué están señalando los equipos de tierra",
+          "premium": true,
+          "order": 3
+        },
+        {
+          "id": "why_bags_sometimes_arrive_late",
+          "title": "Por qué a veces las maletas llegan tarde",
+          "premium": true,
+          "order": 4
+        },
+        {
+          "id": "how_airports_keep_runways_safe",
+          "title": "Cómo mantienen los aeropuertos seguras las pistas",
+          "premium": true,
+          "order": 5
+        },
+        {
+          "id": "why_flights_sometimes_wait_for_a_gate",
+          "title": "Por qué los vuelos a veces esperan una puerta",
+          "premium": true,
+          "order": 6
+        },
+        {
+          "id": "how_deicing_works_before_takeoff",
+          "title": "Cómo funciona el deshielo antes del despegue",
+          "premium": true,
+          "order": 7
+        },
+        {
+          "id": "what_happens_between_arrival_and_the_next_departure",
+          "title": "Qué ocurre entre la llegada y la siguiente salida",
+          "premium": true,
+          "order": 8
+        }
+      ],
+      "order": 8
+    },
+    {
+      "id": "views_from_the_window",
+      "title": "Vistas desde la ventana",
+      "description": "Explora por que el mundo se ve tan distinto desde el aire, desde costas y ciudades hasta sombras de nubes y luces nocturnas.",
+      "articles": [
+        {
+          "id": "how_cities_look_different_from_the_air",
+          "title": "Cómo se ven las ciudades de forma distinta desde el aire",
+          "premium": false,
+          "order": 1
+        },
+        {
+          "id": "why_rivers_and_roads_twist_the_way_they_do",
+          "title": "Por qué los ríos y las carreteras se retuercen como lo hacen",
+          "premium": false,
+          "order": 2
+        },
+        {
+          "id": "why_mountains_look_smaller_from_above",
+          "title": "Por qué las montañas parecen más pequeñas desde arriba",
+          "premium": true,
+          "order": 3
+        },
+        {
+          "id": "how_coastlines_change_shape_from_altitude",
+          "title": "Cómo cambian de forma las costas desde la altitud",
+          "premium": true,
+          "order": 4
+        },
+        {
+          "id": "why_night_flights_look_so_different",
+          "title": "Por qué los vuelos nocturnos se ven tan diferentes",
+          "premium": true,
+          "order": 5
+        },
+        {
+          "id": "what_you_can_learn_from_looking_at_clouds",
+          "title": "Qué puedes aprender observando las nubes",
+          "premium": true,
+          "order": 6
+        },
+        {
+          "id": "why_snow_water_and_land_reflect_light_differently",
+          "title": "Por qué la nieve, el agua y la tierra reflejan la luz de forma diferente",
+          "premium": true,
+          "order": 7
+        },
+        {
+          "id": "why_some_landscapes_look_like_patterns_from_above",
+          "title": "Por qué algunos paisajes parecen patrones desde arriba",
+          "premium": true,
+          "order": 8
+        }
+      ],
+      "order": 9
+    },
+    {
+      "id": "aviation_myths",
+      "title": "Mitos de la aviacion",
+      "description": "Explicaciones claras sobre mitos comunes del vuelo, malentendidos y preguntas que muchos pasajeros suelen hacerse.",
+      "articles": [
+        {
+          "id": "do_pilots_sleep_on_long_flights",
+          "title": "¿Los pilotos duermen en vuelos largos?",
+          "premium": false,
+          "order": 1
+        },
+        {
+          "id": "why_flights_leave_late_but_arrive_on_time",
+          "title": "Por qué los vuelos salen tarde pero llegan puntuales",
+          "premium": false,
+          "order": 2
+        },
+        {
+          "id": "why_planes_sometimes_wait_with_the_door_closed",
+          "title": "Por qué los aviones a veces esperan con la puerta cerrada",
+          "premium": true,
+          "order": 3
+        },
+        {
+          "id": "what_happens_if_someone_gets_sick_on_board",
+          "title": "Qué pasa si alguien se pone enfermo a bordo",
+          "premium": true,
+          "order": 4
+        },
+        {
+          "id": "are_airplane_doors_really_impossible_to_open_in_flight",
+          "title": "¿De verdad es imposible abrir las puertas de un avión en vuelo?",
+          "premium": true,
+          "order": 5
+        },
+        {
+          "id": "can_lightning_hit_an_airplane",
+          "title": "¿Puede un rayo impactar a un avión?",
+          "premium": true,
+          "order": 6
+        },
+        {
+          "id": "is_the_air_on_planes_really_recycled",
+          "title": "¿El aire en los aviones está realmente reciclado?",
+          "premium": true,
+          "order": 7
+        },
+        {
+          "id": "can_a_plane_fly_on_one_engine",
+          "title": "¿Puede un avión volar con un solo motor?",
+          "premium": true,
+          "order": 8
+        }
+      ],
+      "order": 10
+    }
+  ]
+}
