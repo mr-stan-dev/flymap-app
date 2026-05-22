@@ -2,6 +2,7 @@ import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/i18n/app_localization.dart';
+import 'package:flymap/i18n/supported_locale.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/repository/settings_repository.dart';
 import 'package:flymap/ui/screens/settings/viewmodel/settings_cubit.dart';
@@ -122,16 +123,7 @@ String _languageLabel(BuildContext context, LocaleSetting setting) {
       AppLocalization.deviceSupportedLocaleSetting,
     );
   }
-  return switch (setting) {
-    LocaleSetting.english => context.t.settings.languageEnglish,
-    LocaleSetting.spanish => context.t.settings.languageSpanish,
-    LocaleSetting.french => context.t.settings.languageFrench,
-    LocaleSetting.german => context.t.settings.languageGerman,
-    LocaleSetting.system => _systemLanguageLabel(
-      context,
-      AppLocalization.deviceSupportedLocaleSetting,
-    ),
-  };
+  return _localizedLanguageName(context, setting.supportedLocale!);
 }
 
 List<_LanguageChoiceOption> _buildLanguageOptions(
@@ -139,34 +131,14 @@ List<_LanguageChoiceOption> _buildLanguageOptions(
   LocaleSetting deviceLocaleSetting,
 ) {
   return [
-    _LanguageChoiceOption(
-      localeSetting: LocaleSetting.english,
-      label: deviceLocaleSetting == LocaleSetting.english
-          ? _systemLanguageLabel(context, LocaleSetting.english)
-          : context.t.settings.languageEnglish,
-      flagCountryCode: 'GB',
-    ),
-    _LanguageChoiceOption(
-      localeSetting: LocaleSetting.spanish,
-      label: deviceLocaleSetting == LocaleSetting.spanish
-          ? _systemLanguageLabel(context, LocaleSetting.spanish)
-          : context.t.settings.languageSpanish,
-      flagCountryCode: 'ES',
-    ),
-    _LanguageChoiceOption(
-      localeSetting: LocaleSetting.french,
-      label: deviceLocaleSetting == LocaleSetting.french
-          ? _systemLanguageLabel(context, LocaleSetting.french)
-          : context.t.settings.languageFrench,
-      flagCountryCode: 'FR',
-    ),
-    _LanguageChoiceOption(
-      localeSetting: LocaleSetting.german,
-      label: deviceLocaleSetting == LocaleSetting.german
-          ? _systemLanguageLabel(context, LocaleSetting.german)
-          : context.t.settings.languageGerman,
-      flagCountryCode: 'DE',
-    ),
+    for (final locale in SupportedLocale.values)
+      _LanguageChoiceOption(
+        localeSetting: locale.localeSetting,
+        label: deviceLocaleSetting == locale.localeSetting
+            ? _systemLanguageLabel(context, locale.localeSetting)
+            : _localizedLanguageName(context, locale),
+        flagCountryCode: locale.flagCountryCode,
+      ),
   ];
 }
 
@@ -199,13 +171,20 @@ LocaleSetting _effectiveLanguageSetting({
 }
 
 String _systemLanguageLabel(BuildContext context, LocaleSetting localeSetting) {
-  final languageLabel = switch (localeSetting) {
-    LocaleSetting.spanish => context.t.settings.languageSpanish,
-    LocaleSetting.french => context.t.settings.languageFrench,
-    LocaleSetting.german => context.t.settings.languageGerman,
-    _ => context.t.settings.languageEnglish,
-  };
+  final languageLabel = _localizedLanguageName(
+    context,
+    localeSetting.supportedLocale ?? SupportedLocale.english,
+  );
   return context.t.settings.languageSystemFormat(language: languageLabel);
+}
+
+String _localizedLanguageName(BuildContext context, SupportedLocale locale) {
+  return switch (locale) {
+    SupportedLocale.english => context.t.settings.languageEnglish,
+    SupportedLocale.spanish => context.t.settings.languageSpanish,
+    SupportedLocale.french => context.t.settings.languageFrench,
+    SupportedLocale.german => context.t.settings.languageGerman,
+  };
 }
 
 class _LanguageChoiceOption {

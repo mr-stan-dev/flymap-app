@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flymap/i18n/supported_locale.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/repository/settings_repository.dart';
 
@@ -13,13 +14,17 @@ class AppLocalization {
     if (localeSetting == LocaleSetting.system) {
       return LocaleSettings.useDeviceLocale();
     }
-    return LocaleSettings.setLocaleRaw(localeSetting.localeCode!);
+    return LocaleSettings.setLocale(localeSetting.supportedLocale!.appLocale);
   }
 
   static String get currentLanguageCode {
-    final languageCode = LocaleSettings.currentLocale.languageCode.trim();
-    if (languageCode.isEmpty) return AppLocale.en.languageCode;
-    return languageCode.toLowerCase();
+    return currentSupportedLocale.languageCode;
+  }
+
+  static SupportedLocale get currentSupportedLocale {
+    return SupportedLocale.englishFallback(
+      LocaleSettings.currentLocale.languageCode,
+    );
   }
 
   static String get currentLocaleTag {
@@ -33,17 +38,11 @@ class AppLocalization {
   }
 
   static LocaleSetting get deviceSupportedLocaleSetting {
-    final languageCode = PlatformDispatcher.instance.locale.languageCode.trim();
+    final languageCode = PlatformDispatcher.instance.locale.languageCode;
     return resolveSupportedLocaleSetting(languageCode);
   }
 
   static LocaleSetting resolveSupportedLocaleSetting(String languageCode) {
-    final normalizedLanguageCode = languageCode.trim().toLowerCase();
-    return switch (normalizedLanguageCode) {
-      'es' => LocaleSetting.spanish,
-      'fr' => LocaleSetting.french,
-      'de' => LocaleSetting.german,
-      _ => LocaleSetting.english,
-    };
+    return SupportedLocale.englishFallback(languageCode).localeSetting;
   }
 }

@@ -6,6 +6,7 @@ import 'package:flymap/domain/entity/learn_article_content.dart';
 import 'package:flymap/domain/entity/learn_article_meta.dart';
 import 'package:flymap/domain/entity/learn_category.dart';
 import 'package:flymap/i18n/app_localization.dart';
+import 'package:flymap/i18n/supported_locale.dart';
 import 'package:flymap/logger.dart';
 
 typedef LearnAssetStringLoader = Future<String> Function(String assetPath);
@@ -24,12 +25,6 @@ class LearnPackLocalDb {
   static const String articlesAssetDir = 'assets/data/learn/articles';
   static const String _categoryImagesAssetDir =
       'assets/images/learn/categories';
-  static const Set<String> _supportedLocaleCodes = <String>{
-    'en',
-    'es',
-    'fr',
-    'de',
-  };
   static const Map<String, String> _categoryImageAssetById = {
     'general_basic': '$_categoryImagesAssetDir/basics.webp',
     'clouds_and_weather': '$_categoryImagesAssetDir/clouds.webp',
@@ -329,27 +324,23 @@ class LearnPackLocalDb {
   }
 
   String get _currentLocaleCode {
-    final rawLocaleCode = _localeCodeProvider().trim().toLowerCase();
-    if (_supportedLocaleCodes.contains(rawLocaleCode)) {
-      return rawLocaleCode;
-    }
-    return 'en';
+    return SupportedLocale.englishFallback(_localeCodeProvider()).languageCode;
   }
 
   static String packAssetPathForLanguageCode(String languageCode) {
-    final normalizedLanguageCode = languageCode.trim().toLowerCase();
-    if (normalizedLanguageCode.isEmpty || normalizedLanguageCode == 'en') {
+    final locale = SupportedLocale.fromLanguageCode(languageCode);
+    if (locale == null || locale == SupportedLocale.english) {
       return packAssetPath;
     }
-    return 'assets/data/learn/knowledge_pack.$normalizedLanguageCode.json';
+    return 'assets/data/learn/knowledge_pack.${locale.languageCode}.json';
   }
 
   static String articlesAssetDirForLanguageCode(String languageCode) {
-    final normalizedLanguageCode = languageCode.trim().toLowerCase();
-    if (normalizedLanguageCode.isEmpty || normalizedLanguageCode == 'en') {
+    final locale = SupportedLocale.fromLanguageCode(languageCode);
+    if (locale == null || locale == SupportedLocale.english) {
       return articlesAssetDir;
     }
-    return 'assets/data/learn/articles_$normalizedLanguageCode';
+    return 'assets/data/learn/articles_${locale.languageCode}';
   }
 
   static int _readInt(Object? value) {

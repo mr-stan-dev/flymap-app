@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flymap/i18n/supported_locale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum LocaleSetting { system, english, spanish, french, german }
 
 extension LocaleSettingX on LocaleSetting {
-  String? get localeCode => switch (this) {
+  SupportedLocale? get supportedLocale => switch (this) {
     LocaleSetting.system => null,
-    LocaleSetting.english => 'en',
-    LocaleSetting.spanish => 'es',
-    LocaleSetting.french => 'fr',
-    LocaleSetting.german => 'de',
+    LocaleSetting.english => SupportedLocale.english,
+    LocaleSetting.spanish => SupportedLocale.spanish,
+    LocaleSetting.french => SupportedLocale.french,
+    LocaleSetting.german => SupportedLocale.german,
+  };
+
+  String? get localeCode => supportedLocale?.languageCode;
+}
+
+extension SupportedLocaleSettingX on SupportedLocale {
+  LocaleSetting get localeSetting => switch (this) {
+    SupportedLocale.english => LocaleSetting.english,
+    SupportedLocale.spanish => LocaleSetting.spanish,
+    SupportedLocale.french => LocaleSetting.french,
+    SupportedLocale.german => LocaleSetting.german,
   };
 }
 
@@ -43,13 +55,8 @@ class SettingsRepository {
   Future<LocaleSetting> getLocaleSetting() async {
     final prefs = await SharedPreferences.getInstance();
     final value = prefs.getString(_kLocale);
-    return switch (value) {
-      'en' => LocaleSetting.english,
-      'es' => LocaleSetting.spanish,
-      'fr' => LocaleSetting.french,
-      'de' => LocaleSetting.german,
-      _ => LocaleSetting.system,
-    };
+    return SupportedLocale.fromLanguageCode(value)?.localeSetting ??
+        LocaleSetting.system;
   }
 
   Future<void> setLocaleSetting(LocaleSetting value) async {
