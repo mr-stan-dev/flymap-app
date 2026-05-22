@@ -10,10 +10,10 @@ class AppLocalization {
     required SettingsRepository settingsRepository,
   }) async {
     final localeSetting = await settingsRepository.getLocaleSetting();
-    if (localeSetting == SettingsRepository.localeSystem) {
+    if (localeSetting == LocaleSetting.system) {
       return LocaleSettings.useDeviceLocale();
     }
-    return LocaleSettings.setLocaleRaw(localeSetting);
+    return LocaleSettings.setLocaleRaw(localeSetting.localeCode!);
   }
 
   static String get currentLanguageCode {
@@ -32,16 +32,18 @@ class AppLocalization {
     return localeTag;
   }
 
-  static String get deviceSupportedLanguageCode {
+  static LocaleSetting get deviceSupportedLocaleSetting {
     final languageCode = PlatformDispatcher.instance.locale.languageCode.trim();
-    return resolveSupportedLanguageCode(languageCode);
+    return resolveSupportedLocaleSetting(languageCode);
   }
 
-  static String resolveSupportedLanguageCode(String languageCode) {
+  static LocaleSetting resolveSupportedLocaleSetting(String languageCode) {
     final normalizedLanguageCode = languageCode.trim().toLowerCase();
     return switch (normalizedLanguageCode) {
-      'es' => AppLocale.es.languageCode,
-      _ => AppLocale.en.languageCode,
+      'es' => LocaleSetting.spanish,
+      'fr' => LocaleSetting.french,
+      'de' => LocaleSetting.german,
+      _ => LocaleSetting.english,
     };
   }
 }

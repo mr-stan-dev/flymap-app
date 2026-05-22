@@ -107,14 +107,14 @@ class SettingsCubit extends Cubit<SettingsState> {
     await _unitsRepo.setTemperatureUnit(enumUnit);
   }
 
-  Future<void> setLocaleSetting(String setting) async {
+  Future<void> setLocaleSetting(LocaleSetting setting) async {
     emit(state.copyWith(localeSetting: setting));
     await _settingsRepo.setLocaleSetting(setting);
-    if (setting == SettingsRepository.localeSystem) {
+    if (setting == LocaleSetting.system) {
       await LocaleSettings.useDeviceLocale();
       return;
     }
-    await LocaleSettings.setLocaleRaw(setting);
+    await LocaleSettings.setLocaleRaw(setting.localeCode!);
   }
 
   String _formatAltitude(AltitudeUnit u) => UnitFormatUtils.formatAltitude(u);

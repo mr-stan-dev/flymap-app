@@ -193,6 +193,8 @@ class _TranslationsSettingsEs extends TranslationsSettingsEn {
 	@override String languageSystemFormat({required Object language}) => '${language} (Sistema)';
 	@override String get languageEnglish => 'English';
 	@override String get languageSpanish => 'Español';
+	@override String get languageFrench => 'Français';
+	@override String get languageGerman => 'Deutsch';
 	@override String get theme => 'Tema';
 	@override String get system => 'Sistema';
 	@override String get dark => 'Oscuro';
@@ -1362,6 +1364,8 @@ extension on TranslationsEs {
 			'settings.languageSystemFormat' => ({required Object language}) => '${language} (Sistema)',
 			'settings.languageEnglish' => 'English',
 			'settings.languageSpanish' => 'Español',
+			'settings.languageFrench' => 'Français',
+			'settings.languageGerman' => 'Deutsch',
 			'settings.theme' => 'Tema',
 			'settings.system' => 'Sistema',
 			'settings.dark' => 'Oscuro',
@@ -1765,10 +1769,10 @@ extension on TranslationsEs {
 			'flight.dashboard.flightPhaseTakeoffRoll' => 'Carrera de despegue',
 			'flight.dashboard.flightPhaseLandingRoll' => 'Carrera de aterrizaje',
 			'flight.dashboard.flightPhaseAscending' => 'Ascendiendo',
-			'flight.dashboard.flightPhaseCruising' => 'Crucero',
-			'flight.dashboard.flightPhaseDescending' => 'Descendiendo',
 			_ => null,
 		} ?? switch (path) {
+			'flight.dashboard.flightPhaseCruising' => 'Crucero',
+			'flight.dashboard.flightPhaseDescending' => 'Descendiendo',
 			'flight.dashboard.acquiringGpsSignal' => 'Adquiriendo señal GPS',
 			'flight.dashboard.acquiringGpsHint' => 'Mantén el dispositivo estable y con cielo abierto para obtener una posición fiable.',
 			'flight.dashboard.weakSignalBanner' => 'Señal GPS débil. Los valores pueden desviarse hasta que mejore la precisión.',

@@ -405,6 +405,12 @@ class TranslationsSettingsEn {
 	/// en: 'Español'
 	String get languageSpanish => 'Español';
 
+	/// en: 'Français'
+	String get languageFrench => 'Français';
+
+	/// en: 'Deutsch'
+	String get languageGerman => 'Deutsch';
+
 	/// en: 'Theme'
 	String get theme => 'Theme';
 
@@ -3100,6 +3106,8 @@ extension on Translations {
 			'settings.languageSystemFormat' => ({required Object language}) => '${language} (System)',
 			'settings.languageEnglish' => 'English',
 			'settings.languageSpanish' => 'Español',
+			'settings.languageFrench' => 'Français',
+			'settings.languageGerman' => 'Deutsch',
 			'settings.theme' => 'Theme',
 			'settings.system' => 'System',
 			'settings.dark' => 'Dark',
@@ -3503,10 +3511,10 @@ extension on Translations {
 			'flight.dashboard.flightPhaseTakeoffRoll' => 'Takeoff roll',
 			'flight.dashboard.flightPhaseLandingRoll' => 'Landing roll',
 			'flight.dashboard.flightPhaseAscending' => 'Ascending',
-			'flight.dashboard.flightPhaseCruising' => 'Cruising',
-			'flight.dashboard.flightPhaseDescending' => 'Descending',
 			_ => null,
 		} ?? switch (path) {
+			'flight.dashboard.flightPhaseCruising' => 'Cruising',
+			'flight.dashboard.flightPhaseDescending' => 'Descending',
 			'flight.dashboard.acquiringGpsSignal' => 'Acquiring GPS signal',
 			'flight.dashboard.acquiringGpsHint' => 'Keep the device steady and in open sky for a reliable fix.',
 			'flight.dashboard.weakSignalBanner' => 'Weak GPS signal. Values may drift until accuracy improves.',

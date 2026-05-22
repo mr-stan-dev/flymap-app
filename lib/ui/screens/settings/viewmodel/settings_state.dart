@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flymap/domain/entity/user_profile.dart';
 import 'package:flutter/material.dart';
+import 'package:flymap/repository/settings_repository.dart';
 
 class SettingsState extends Equatable {
   final ThemeMode themeMode; // System / Dark / Light
@@ -10,7 +11,7 @@ class SettingsState extends Equatable {
   final String distanceUnit; // 'km' | 'mi'
   final String dateDisplayFormat; // 'MM/DD/YYYY' | 'DD/MM/YYYY'
   final String temperatureUnit; // '°C' | '°F'
-  final String localeSetting; // 'system' | 'en' | 'es'
+  final LocaleSetting localeSetting;
   final UserProfile profile;
   final String? homeAirportDisplayCode;
   final bool isLoading;
@@ -23,7 +24,7 @@ class SettingsState extends Equatable {
     this.distanceUnit = 'km',
     this.dateDisplayFormat = 'MM/DD/YYYY',
     this.temperatureUnit = '°C',
-    this.localeSetting = 'system',
+    this.localeSetting = LocaleSetting.system,
     this.profile = const UserProfile.empty(),
     this.homeAirportDisplayCode,
     this.isLoading = true,
@@ -37,7 +38,7 @@ class SettingsState extends Equatable {
     String? distanceUnit,
     String? dateDisplayFormat,
     String? temperatureUnit,
-    String? localeSetting,
+    LocaleSetting? localeSetting,
     UserProfile? profile,
     String? homeAirportDisplayCode,
     bool clearHomeAirportDisplayCode = false,

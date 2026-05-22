@@ -115,6 +115,8 @@
     "languageSystemFormat": "${language} (System)",
     "languageEnglish": "English",
     "languageSpanish": "Español",
+    "languageFrench": "Français",
+    "languageGerman": "Deutsch",
     "theme": "Theme",
     "system": "System",
     "dark": "Dark",

@@ -29,16 +29,16 @@ class LanguageSettingItem extends StatelessWidget {
 
 Future<void> showLanguageSheet(
   BuildContext context, {
-  required String initialSetting,
+  required LocaleSetting initialSetting,
 }) async {
   final cubit = context.read<SettingsCubit>();
-  final deviceLanguageCode = AppLocalization.deviceSupportedLanguageCode;
-  final options = _buildLanguageOptions(context, deviceLanguageCode);
-  final initialLanguageCode = _effectiveLanguageCode(
+  final deviceLocaleSetting = AppLocalization.deviceSupportedLocaleSetting;
+  final options = _buildLanguageOptions(context, deviceLocaleSetting);
+  final initialLanguageSetting = _effectiveLanguageSetting(
     setting: initialSetting,
-    deviceLanguageCode: deviceLanguageCode,
+    deviceLocaleSetting: deviceLocaleSetting,
   );
-  var selectedLanguageCode = initialLanguageCode;
+  var selectedLanguageSetting = initialLanguageSetting;
 
   await showModalBottomSheet<void>(
     context: context,
@@ -53,9 +53,9 @@ Future<void> showLanguageSheet(
             onConfirm: () async {
               final resolvedSetting = _resolveLocaleSettingForSelection(
                 initialSetting: initialSetting,
-                initialLanguageCode: initialLanguageCode,
-                selectedLanguageCode: selectedLanguageCode,
-                deviceLanguageCode: deviceLanguageCode,
+                initialLanguageSetting: initialLanguageSetting,
+                selectedLanguageSetting: selectedLanguageSetting,
+                deviceLocaleSetting: deviceLocaleSetting,
               );
               if (resolvedSetting != initialSetting) {
                 await cubit.setLocaleSetting(resolvedSetting);
@@ -68,7 +68,8 @@ Future<void> showLanguageSheet(
               spacing: 8,
               runSpacing: 8,
               children: options.map((option) {
-                final isSelected = option.languageCode == selectedLanguageCode;
+                final isSelected =
+                    option.localeSetting == selectedLanguageSetting;
                 final theme = Theme.of(context);
                 final colorScheme = theme.colorScheme;
                 return ChoiceChip(
@@ -101,7 +102,7 @@ Future<void> showLanguageSheet(
                   showCheckmark: false,
                   onSelected: (_) {
                     setModalState(() {
-                      selectedLanguageCode = option.languageCode;
+                      selectedLanguageSetting = option.localeSetting;
                     });
                   },
                 );
@@ -114,74 +115,94 @@ Future<void> showLanguageSheet(
   );
 }
 
-String _languageLabel(BuildContext context, String setting) {
-  if (setting == SettingsRepository.localeSystem) {
+String _languageLabel(BuildContext context, LocaleSetting setting) {
+  if (setting == LocaleSetting.system) {
     return _systemLanguageLabel(
       context,
-      AppLocalization.deviceSupportedLanguageCode,
+      AppLocalization.deviceSupportedLocaleSetting,
     );
   }
   return switch (setting) {
-    SettingsRepository.localeEnglish => context.t.settings.languageEnglish,
-    SettingsRepository.localeSpanish => context.t.settings.languageSpanish,
-    _ => _systemLanguageLabel(
+    LocaleSetting.english => context.t.settings.languageEnglish,
+    LocaleSetting.spanish => context.t.settings.languageSpanish,
+    LocaleSetting.french => context.t.settings.languageFrench,
+    LocaleSetting.german => context.t.settings.languageGerman,
+    LocaleSetting.system => _systemLanguageLabel(
       context,
-      AppLocalization.deviceSupportedLanguageCode,
+      AppLocalization.deviceSupportedLocaleSetting,
     ),
   };
 }
 
 List<_LanguageChoiceOption> _buildLanguageOptions(
   BuildContext context,
-  String deviceLanguageCode,
+  LocaleSetting deviceLocaleSetting,
 ) {
   return [
     _LanguageChoiceOption(
-      languageCode: SettingsRepository.localeEnglish,
-      label: deviceLanguageCode == SettingsRepository.localeEnglish
-          ? _systemLanguageLabel(context, SettingsRepository.localeEnglish)
+      localeSetting: LocaleSetting.english,
+      label: deviceLocaleSetting == LocaleSetting.english
+          ? _systemLanguageLabel(context, LocaleSetting.english)
           : context.t.settings.languageEnglish,
       flagCountryCode: 'GB',
     ),
     _LanguageChoiceOption(
-      languageCode: SettingsRepository.localeSpanish,
-      label: deviceLanguageCode == SettingsRepository.localeSpanish
-          ? _systemLanguageLabel(context, SettingsRepository.localeSpanish)
+      localeSetting: LocaleSetting.spanish,
+      label: deviceLocaleSetting == LocaleSetting.spanish
+          ? _systemLanguageLabel(context, LocaleSetting.spanish)
           : context.t.settings.languageSpanish,
       flagCountryCode: 'ES',
+    ),
+    _LanguageChoiceOption(
+      localeSetting: LocaleSetting.french,
+      label: deviceLocaleSetting == LocaleSetting.french
+          ? _systemLanguageLabel(context, LocaleSetting.french)
+          : context.t.settings.languageFrench,
+      flagCountryCode: 'FR',
+    ),
+    _LanguageChoiceOption(
+      localeSetting: LocaleSetting.german,
+      label: deviceLocaleSetting == LocaleSetting.german
+          ? _systemLanguageLabel(context, LocaleSetting.german)
+          : context.t.settings.languageGerman,
+      flagCountryCode: 'DE',
     ),
   ];
 }
 
-String _resolveLocaleSettingForSelection({
-  required String initialSetting,
-  required String initialLanguageCode,
-  required String selectedLanguageCode,
-  required String deviceLanguageCode,
+LocaleSetting _resolveLocaleSettingForSelection({
+  required LocaleSetting initialSetting,
+  required LocaleSetting initialLanguageSetting,
+  required LocaleSetting selectedLanguageSetting,
+  required LocaleSetting deviceLocaleSetting,
 }) {
-  if (selectedLanguageCode == initialLanguageCode) {
+  if (selectedLanguageSetting == initialLanguageSetting) {
     return initialSetting;
   }
-  if (selectedLanguageCode == deviceLanguageCode) {
-    return SettingsRepository.localeSystem;
+  if (selectedLanguageSetting == deviceLocaleSetting) {
+    return LocaleSetting.system;
   }
-  return selectedLanguageCode;
+  return selectedLanguageSetting;
 }
 
-String _effectiveLanguageCode({
-  required String setting,
-  required String deviceLanguageCode,
+LocaleSetting _effectiveLanguageSetting({
+  required LocaleSetting setting,
+  required LocaleSetting deviceLocaleSetting,
 }) {
   return switch (setting) {
-    SettingsRepository.localeSpanish => SettingsRepository.localeSpanish,
-    SettingsRepository.localeEnglish => SettingsRepository.localeEnglish,
-    _ => deviceLanguageCode,
+    LocaleSetting.system => deviceLocaleSetting,
+    LocaleSetting.english => LocaleSetting.english,
+    LocaleSetting.spanish => LocaleSetting.spanish,
+    LocaleSetting.french => LocaleSetting.french,
+    LocaleSetting.german => LocaleSetting.german,
   };
 }
 
-String _systemLanguageLabel(BuildContext context, String languageCode) {
-  final languageLabel = switch (languageCode) {
-    SettingsRepository.localeSpanish => context.t.settings.languageSpanish,
+String _systemLanguageLabel(BuildContext context, LocaleSetting localeSetting) {
+  final languageLabel = switch (localeSetting) {
+    LocaleSetting.spanish => context.t.settings.languageSpanish,
+    LocaleSetting.french => context.t.settings.languageFrench,
+    LocaleSetting.german => context.t.settings.languageGerman,
     _ => context.t.settings.languageEnglish,
   };
   return context.t.settings.languageSystemFormat(language: languageLabel);
@@ -189,12 +210,12 @@ String _systemLanguageLabel(BuildContext context, String languageCode) {
 
 class _LanguageChoiceOption {
   const _LanguageChoiceOption({
-    required this.languageCode,
+    required this.localeSetting,
     required this.label,
     required this.flagCountryCode,
   });
 
-  final String languageCode;
+  final LocaleSetting localeSetting;
   final String label;
   final String flagCountryCode;
 }

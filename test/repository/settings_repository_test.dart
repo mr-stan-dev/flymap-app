@@ -12,24 +12,15 @@ void main() {
   });
 
   test('defaults locale setting to system', () async {
-    expect(
-      await repository.getLocaleSetting(),
-      SettingsRepository.localeSystem,
-    );
+    expect(await repository.getLocaleSetting(), LocaleSetting.system);
   });
 
   test('persists locale setting and clears system override', () async {
-    await repository.setLocaleSetting(SettingsRepository.localeSpanish);
-    expect(
-      await repository.getLocaleSetting(),
-      SettingsRepository.localeSpanish,
-    );
+    await repository.setLocaleSetting(LocaleSetting.spanish);
+    expect(await repository.getLocaleSetting(), LocaleSetting.spanish);
 
-    await repository.setLocaleSetting(SettingsRepository.localeSystem);
-    expect(
-      await repository.getLocaleSetting(),
-      SettingsRepository.localeSystem,
-    );
+    await repository.setLocaleSetting(LocaleSetting.system);
+    expect(await repository.getLocaleSetting(), LocaleSetting.system);
   });
 
   test('theme mode persistence still works', () async {
