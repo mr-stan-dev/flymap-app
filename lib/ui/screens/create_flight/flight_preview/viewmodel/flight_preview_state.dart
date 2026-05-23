@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/domain/entity/flight_operational_data.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
-import 'package:flymap/domain/entity/map_detail_level.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/domain/entity/wiki_article_candidate.dart';
@@ -135,24 +134,21 @@ class RoutePreviewState extends Equatable {
     required this.routeCruiseSpeedKmh,
     required this.flightInfo,
     required this.proPoiCount,
-    required this.selectedMapDetailLevel,
     required this.articleCandidates,
     required this.selectedArticleUrls,
   });
 
-  const RoutePreviewState.initial({
-    MapDetailLevel initialSelectedMapDetailLevel = MapDetailLevel.basic,
-  }) : flightRoute = null,
-       flightOperationalData = null,
-       allRoutePois = const [],
-       routeRegions = const [],
-       routeTotalMinutes = 0,
-       routeCruiseSpeedKmh = 850,
-       flightInfo = FlightInfo.empty,
-       proPoiCount = null,
-       selectedMapDetailLevel = initialSelectedMapDetailLevel,
-       articleCandidates = const [],
-       selectedArticleUrls = const [];
+  const RoutePreviewState.initial()
+    : flightRoute = null,
+      flightOperationalData = null,
+      allRoutePois = const [],
+      routeRegions = const [],
+      routeTotalMinutes = 0,
+      routeCruiseSpeedKmh = 850,
+      flightInfo = FlightInfo.empty,
+      proPoiCount = null,
+      articleCandidates = const [],
+      selectedArticleUrls = const [];
 
   final FlightRoute? flightRoute;
   final FlightOperationalData? flightOperationalData;
@@ -162,7 +158,6 @@ class RoutePreviewState extends Equatable {
   final int routeCruiseSpeedKmh;
   final FlightInfo flightInfo;
   final int? proPoiCount;
-  final MapDetailLevel selectedMapDetailLevel;
   final List<WikiArticleCandidate> articleCandidates;
   final List<String> selectedArticleUrls;
 
@@ -180,7 +175,6 @@ class RoutePreviewState extends Equatable {
     FlightInfo? flightInfo,
     int? proPoiCount,
     bool clearProPoiCount = false,
-    MapDetailLevel? selectedMapDetailLevel,
     List<WikiArticleCandidate>? articleCandidates,
     List<String>? selectedArticleUrls,
     bool clearSelectedArticleUrls = false,
@@ -200,8 +194,6 @@ class RoutePreviewState extends Equatable {
       routeCruiseSpeedKmh: routeCruiseSpeedKmh ?? this.routeCruiseSpeedKmh,
       flightInfo: flightInfo ?? this.flightInfo,
       proPoiCount: clearProPoiCount ? null : proPoiCount ?? this.proPoiCount,
-      selectedMapDetailLevel:
-          selectedMapDetailLevel ?? this.selectedMapDetailLevel,
       articleCandidates: articleCandidates ?? this.articleCandidates,
       selectedArticleUrls: clearSelectedArticleUrls
           ? const []
@@ -219,7 +211,6 @@ class RoutePreviewState extends Equatable {
     routeCruiseSpeedKmh,
     flightInfo,
     proPoiCount,
-    selectedMapDetailLevel,
     articleCandidates,
     selectedArticleUrls,
   ];
@@ -461,14 +452,10 @@ class FlightPreviewState extends Equatable {
     required this.hasPendingFlightUnlock,
   });
 
-  factory FlightPreviewState.initial({
-    MapDetailLevel selectedMapDetailLevel = MapDetailLevel.basic,
-  }) {
+  factory FlightPreviewState.initial() {
     return FlightPreviewState(
       step: CreateFlightStep.overview,
-      routeState: RoutePreviewState.initial(
-        initialSelectedMapDetailLevel: selectedMapDetailLevel,
-      ),
+      routeState: const RoutePreviewState.initial(),
       loadState: const PreviewLoadState.initial(),
       downloadState: const PreviewDownloadState.initial(),
       messageState: const PreviewMessageState.initial(),
@@ -492,8 +479,6 @@ class FlightPreviewState extends Equatable {
   int get routeCruiseSpeedKmh => routeState.routeCruiseSpeedKmh;
   FlightInfo get flightInfo => routeState.flightInfo;
   int? get proPoiCount => routeState.proPoiCount;
-  MapDetailLevel get selectedMapDetailLevel =>
-      routeState.selectedMapDetailLevel;
   List<WikiArticleCandidate> get articleCandidates =>
       routeState.articleCandidates;
   List<String> get selectedArticleUrls => routeState.selectedArticleUrls;
@@ -543,7 +528,6 @@ class FlightPreviewState extends Equatable {
     FlightInfo? flightInfo,
     int? proPoiCount,
     bool clearProPoiCount = false,
-    MapDetailLevel? selectedMapDetailLevel,
     List<WikiArticleCandidate>? articleCandidates,
     List<String>? selectedArticleUrls,
     bool clearSelectedArticleUrls = false,
@@ -597,7 +581,6 @@ class FlightPreviewState extends Equatable {
         flightInfo: flightInfo,
         proPoiCount: proPoiCount,
         clearProPoiCount: clearProPoiCount,
-        selectedMapDetailLevel: selectedMapDetailLevel,
         articleCandidates: articleCandidates,
         selectedArticleUrls: selectedArticleUrls,
         clearSelectedArticleUrls: clearSelectedArticleUrls,
@@ -660,7 +643,6 @@ class FlightPreviewState extends Equatable {
     return 'FlightPreviewState('
         'step:${step.name}, '
         'route:${flightRoute?.routeCode ?? 'none'}, '
-        'detail:${selectedMapDetailLevel.name}, '
         'poi:${flightInfo.poi.length}/${allRoutePois.length}, '
         'regions:${routeRegions.length}@${routeTotalMinutes}m, '
         'articlesSel:${selectedArticleUrls.length}, '

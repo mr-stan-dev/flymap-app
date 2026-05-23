@@ -75,12 +75,15 @@ class PreviewPreparationDelegate {
       final routeLength = MapDownloadConfig.resolveRouteLength(
         route.distanceInKm,
       );
+      final effectiveMapDetail = _cubit.hasEffectiveProAccess
+          ? MapDetailLevel.pro
+          : MapDetailLevel.basic;
       unawaited(
         _cubit._analytics.log(
           SearchRoutePreparedEvent(
             routeLengthKm: route.distanceInKm,
             routeLength: routeLength,
-            mapDetail: _cubit.state.selectedMapDetailLevel,
+            mapDetail: effectiveMapDetail,
             routeSource: route.source,
           ),
         ),
@@ -89,7 +92,7 @@ class PreviewPreparationDelegate {
         _cubit._crashlytics.setContext(
           screen: 'create_flight_map_preview',
           routeLengthKm: route.distanceInKm.round(),
-          mapDetail: _cubit.state.selectedMapDetailLevel.name,
+          mapDetail: effectiveMapDetail.name,
         ),
       );
       if (_isAntimeridianRoute(route)) {
