@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/logger.dart';
-import 'package:flymap/repository/map_preferences_repository.dart';
 import 'package:flymap/ui/map/map_style_safety.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/day_night/day_night_overlay_controller.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/day_night/route_sun_event_forecast.dart';
@@ -17,23 +16,18 @@ class FlightMapDayNightController extends ChangeNotifier {
   FlightMapDayNightController({
     required FlightRoute route,
     required Logger logger,
-    MapPreferencesRepository? mapPreferencesRepository,
     DayNightOverlayController? overlayController,
     RouteSunEventForecastService? forecastService,
   }) : _route = route,
        _logger = logger,
-       _mapPreferencesRepository =
-           mapPreferencesRepository ?? MapPreferencesRepository(),
        _overlayController = overlayController ?? DayNightOverlayController(),
        _forecastService = forecastService ?? RouteSunEventForecastService();
 
   final FlightRoute _route;
   final Logger _logger;
-  final MapPreferencesRepository _mapPreferencesRepository;
   final DayNightOverlayController _overlayController;
   final RouteSunEventForecastService _forecastService;
 
-  bool _enabled = false;
   GpsStatus _latestGpsStatus = GpsStatus.off;
   GpsData? _latestGpsData;
   RouteSunEventForecast? _sunEventForecast;
@@ -43,11 +37,10 @@ class FlightMapDayNightController extends ChangeNotifier {
   Timer? _overlayRefreshTimer;
   Timer? _forecastRefreshTimer;
 
-  bool get enabled => _enabled;
+  bool get enabled => true;
   RouteSunEventForecast? get sunEventForecast => _sunEventForecast;
 
   Future<void> init() async {
-    _enabled = await _mapPreferencesRepository.getDayNightEnabled();
     _syncTimers();
     await _syncOverlay();
     _refreshForecast();
@@ -79,24 +72,9 @@ class FlightMapDayNightController extends ChangeNotifier {
     _refreshForecast();
   }
 
-  Future<void> toggle() async {
-    _enabled = !_enabled;
-    if (!_enabled) {
-      _sunEventForecast = null;
-    }
-    notifyListeners();
-    _syncTimers();
-    await _mapPreferencesRepository.setDayNightEnabled(_enabled);
-    await _syncOverlay();
-    _refreshForecast();
-  }
-
   void _syncTimers() {
     _overlayRefreshTimer?.cancel();
     _forecastRefreshTimer?.cancel();
-    if (!_enabled) {
-      return;
-    }
     _overlayRefreshTimer = Timer.periodic(const Duration(minutes: 5), (_) {
       unawaited(_syncOverlay());
     });
@@ -110,14 +88,14 @@ class FlightMapDayNightController extends ChangeNotifier {
     if (controller == null) {
       return;
     }
-    if (_enabled && !_routeLayersAdded) {
+    if (!_routeLayersAdded) {
       return;
     }
 
     try {
       await _overlayController.sync(
         controller: controller,
-        enabled: _enabled,
+        enabled: true,
         dateTimeUtc: DateTime.now().toUtc(),
         belowLayerId: _belowLayerId,
       );
@@ -131,14 +109,6 @@ class FlightMapDayNightController extends ChangeNotifier {
   }
 
   void _refreshForecast() {
-    if (!_enabled) {
-      if (_sunEventForecast != null) {
-        _sunEventForecast = null;
-        notifyListeners();
-      }
-      return;
-    }
-
     final nextForecast = _forecastService.compute(
       route: _route,
       gpsData: _latestGpsData,

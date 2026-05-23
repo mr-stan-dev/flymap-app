@@ -992,8 +992,6 @@ class _TranslationsFlightMapDe extends TranslationsFlightMapEn {
 	@override String get offlineMissing => 'Offline-Kartendatei fehlt. Bitte lade diese Route erneut herunter.';
 	@override String get validationFailed => 'Validierung der Offline-Karte fehlgeschlagen. Bitte lade diese Route erneut herunter.';
 	@override String get loadStyleFailed => 'Offline-Kartenstil konnte nicht geladen werden.';
-	@override String get showDayNight => 'Tag-Nacht-Ebene anzeigen';
-	@override String get hideDayNight => 'Tag-Nacht-Ebene ausblenden';
 	@override String sunriseInMinutes({required Object minutes}) => 'Sonnenaufgang in ${minutes} Min';
 	@override String sunsetInMinutes({required Object minutes}) => 'Sonnenuntergang in ${minutes} Min';
 	@override String get switchTo2D => 'Zu 2D wechseln';
@@ -1705,8 +1703,6 @@ extension on TranslationsDe {
 			'flight.map.offlineMissing' => 'Offline-Kartendatei fehlt. Bitte lade diese Route erneut herunter.',
 			'flight.map.validationFailed' => 'Validierung der Offline-Karte fehlgeschlagen. Bitte lade diese Route erneut herunter.',
 			'flight.map.loadStyleFailed' => 'Offline-Kartenstil konnte nicht geladen werden.',
-			'flight.map.showDayNight' => 'Tag-Nacht-Ebene anzeigen',
-			'flight.map.hideDayNight' => 'Tag-Nacht-Ebene ausblenden',
 			'flight.map.sunriseInMinutes' => ({required Object minutes}) => 'Sonnenaufgang in ${minutes} Min',
 			'flight.map.sunsetInMinutes' => ({required Object minutes}) => 'Sonnenuntergang in ${minutes} Min',
 			'flight.map.switchTo2D' => 'Zu 2D wechseln',
@@ -1771,10 +1767,10 @@ extension on TranslationsDe {
 			'flight.dashboard.flightPhaseTaxi' => 'Rollen',
 			'flight.dashboard.flightPhaseGroundRoll' => 'Bodenlauf',
 			'flight.dashboard.flightPhaseTakeoffRoll' => 'Startlauf',
-			_ => null,
-		} ?? switch (path) {
 			'flight.dashboard.flightPhaseLandingRoll' => 'Landelauf',
 			'flight.dashboard.flightPhaseAscending' => 'Steigend',
+			_ => null,
+		} ?? switch (path) {
 			'flight.dashboard.flightPhaseCruising' => 'Reiseflug',
 			'flight.dashboard.flightPhaseDescending' => 'Sinkend',
 			'flight.dashboard.acquiringGpsSignal' => 'GPS-Signal wird erfasst',

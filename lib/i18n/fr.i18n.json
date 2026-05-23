@@ -493,8 +493,6 @@
       "offlineMissing": "Le fichier de carte hors ligne est manquant. Veuillez retélécharger cet itinéraire.",
       "validationFailed": "La validation de la carte hors ligne a échoué. Veuillez retélécharger cet itinéraire.",
       "loadStyleFailed": "Impossible de charger le style de la carte hors ligne.",
-      "showDayNight": "Afficher la couche jour-nuit",
-      "hideDayNight": "Masquer la couche jour-nuit",
       "sunriseInMinutes": "Lever du soleil dans $minutes min",
       "sunsetInMinutes": "Coucher du soleil dans $minutes min",
       "switchTo2D": "Passer en 2D",

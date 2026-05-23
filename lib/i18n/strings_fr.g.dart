@@ -992,8 +992,6 @@ class _TranslationsFlightMapFr extends TranslationsFlightMapEn {
 	@override String get offlineMissing => 'Le fichier de carte hors ligne est manquant. Veuillez retélécharger cet itinéraire.';
 	@override String get validationFailed => 'La validation de la carte hors ligne a échoué. Veuillez retélécharger cet itinéraire.';
 	@override String get loadStyleFailed => 'Impossible de charger le style de la carte hors ligne.';
-	@override String get showDayNight => 'Afficher la couche jour-nuit';
-	@override String get hideDayNight => 'Masquer la couche jour-nuit';
 	@override String sunriseInMinutes({required Object minutes}) => 'Lever du soleil dans ${minutes} min';
 	@override String sunsetInMinutes({required Object minutes}) => 'Coucher du soleil dans ${minutes} min';
 	@override String get switchTo2D => 'Passer en 2D';
@@ -1705,8 +1703,6 @@ extension on TranslationsFr {
 			'flight.map.offlineMissing' => 'Le fichier de carte hors ligne est manquant. Veuillez retélécharger cet itinéraire.',
 			'flight.map.validationFailed' => 'La validation de la carte hors ligne a échoué. Veuillez retélécharger cet itinéraire.',
 			'flight.map.loadStyleFailed' => 'Impossible de charger le style de la carte hors ligne.',
-			'flight.map.showDayNight' => 'Afficher la couche jour-nuit',
-			'flight.map.hideDayNight' => 'Masquer la couche jour-nuit',
 			'flight.map.sunriseInMinutes' => ({required Object minutes}) => 'Lever du soleil dans ${minutes} min',
 			'flight.map.sunsetInMinutes' => ({required Object minutes}) => 'Coucher du soleil dans ${minutes} min',
 			'flight.map.switchTo2D' => 'Passer en 2D',
@@ -1771,10 +1767,10 @@ extension on TranslationsFr {
 			'flight.dashboard.flightPhaseTaxi' => 'Roulage',
 			'flight.dashboard.flightPhaseGroundRoll' => 'Course au sol',
 			'flight.dashboard.flightPhaseTakeoffRoll' => 'Course de décollage',
-			_ => null,
-		} ?? switch (path) {
 			'flight.dashboard.flightPhaseLandingRoll' => 'Course d’atterrissage',
 			'flight.dashboard.flightPhaseAscending' => 'Montée',
+			_ => null,
+		} ?? switch (path) {
 			'flight.dashboard.flightPhaseCruising' => 'Croisière',
 			'flight.dashboard.flightPhaseDescending' => 'Descente',
 			'flight.dashboard.acquiringGpsSignal' => 'Acquisition du signal GPS',

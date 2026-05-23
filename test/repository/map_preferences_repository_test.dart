@@ -8,16 +8,6 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
-  test('day-night preference defaults to disabled and persists', () async {
-    final repository = MapPreferencesRepository();
-
-    expect(await repository.getDayNightEnabled(), isFalse);
-
-    await repository.setDayNightEnabled(true);
-
-    expect(await repository.getDayNightEnabled(), isTrue);
-  });
-
   test('offline map style defaults to liberty and persists', () async {
     final repository = MapPreferencesRepository();
 

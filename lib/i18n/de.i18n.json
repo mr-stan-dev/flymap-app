@@ -493,8 +493,6 @@
       "offlineMissing": "Offline-Kartendatei fehlt. Bitte lade diese Route erneut herunter.",
       "validationFailed": "Validierung der Offline-Karte fehlgeschlagen. Bitte lade diese Route erneut herunter.",
       "loadStyleFailed": "Offline-Kartenstil konnte nicht geladen werden.",
-      "showDayNight": "Tag-Nacht-Ebene anzeigen",
-      "hideDayNight": "Tag-Nacht-Ebene ausblenden",
       "sunriseInMinutes": "Sonnenaufgang in $minutes Min",
       "sunsetInMinutes": "Sonnenuntergang in $minutes Min",
       "switchTo2D": "Zu 2D wechseln",

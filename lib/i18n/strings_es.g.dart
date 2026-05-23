@@ -992,8 +992,6 @@ class _TranslationsFlightMapEs extends TranslationsFlightMapEn {
 	@override String get offlineMissing => 'Falta el archivo del mapa offline. Vuelve a descargar esta ruta.';
 	@override String get validationFailed => 'La validación del mapa offline falló. Vuelve a descargar esta ruta.';
 	@override String get loadStyleFailed => 'No se pudo cargar el estilo del mapa offline.';
-	@override String get showDayNight => 'Mostrar capa día/noche';
-	@override String get hideDayNight => 'Ocultar capa día/noche';
 	@override String sunriseInMinutes({required Object minutes}) => 'Amanecer en ${minutes} min';
 	@override String sunsetInMinutes({required Object minutes}) => 'Atardecer en ${minutes} min';
 	@override String get switchTo2D => 'Cambiar a 2D';
@@ -1705,8 +1703,6 @@ extension on TranslationsEs {
 			'flight.map.offlineMissing' => 'Falta el archivo del mapa offline. Vuelve a descargar esta ruta.',
 			'flight.map.validationFailed' => 'La validación del mapa offline falló. Vuelve a descargar esta ruta.',
 			'flight.map.loadStyleFailed' => 'No se pudo cargar el estilo del mapa offline.',
-			'flight.map.showDayNight' => 'Mostrar capa día/noche',
-			'flight.map.hideDayNight' => 'Ocultar capa día/noche',
 			'flight.map.sunriseInMinutes' => ({required Object minutes}) => 'Amanecer en ${minutes} min',
 			'flight.map.sunsetInMinutes' => ({required Object minutes}) => 'Atardecer en ${minutes} min',
 			'flight.map.switchTo2D' => 'Cambiar a 2D',
@@ -1771,10 +1767,10 @@ extension on TranslationsEs {
 			'flight.dashboard.flightPhaseTaxi' => 'Rodaje',
 			'flight.dashboard.flightPhaseGroundRoll' => 'Carrera en tierra',
 			'flight.dashboard.flightPhaseTakeoffRoll' => 'Carrera de despegue',
-			_ => null,
-		} ?? switch (path) {
 			'flight.dashboard.flightPhaseLandingRoll' => 'Carrera de aterrizaje',
 			'flight.dashboard.flightPhaseAscending' => 'Ascendiendo',
+			_ => null,
+		} ?? switch (path) {
 			'flight.dashboard.flightPhaseCruising' => 'Crucero',
 			'flight.dashboard.flightPhaseDescending' => 'Descendiendo',
 			'flight.dashboard.acquiringGpsSignal' => 'Adquiriendo señal GPS',

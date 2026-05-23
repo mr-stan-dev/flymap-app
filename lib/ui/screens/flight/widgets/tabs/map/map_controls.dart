@@ -9,13 +9,11 @@ class FlightMapControls extends StatefulWidget {
     required this.visible,
     required this.offlineMapStyle,
     required this.mapStyleLoading,
-    required this.dayNightEnabled,
     required this.is3D,
     required this.followUser,
     required this.showResetNorth,
     required this.mapBearingDegrees,
     required this.onToggleMapStyle,
-    required this.onToggleDayNight,
     required this.onToggle3D,
     required this.onToggleFollowUser,
     required this.onResetNorth,
@@ -26,13 +24,11 @@ class FlightMapControls extends StatefulWidget {
   final bool visible;
   final OfflineMapStyle offlineMapStyle;
   final bool mapStyleLoading;
-  final bool dayNightEnabled;
   final bool is3D;
   final bool followUser;
   final bool showResetNorth;
   final double mapBearingDegrees;
   final Future<void> Function() onToggleMapStyle;
-  final Future<void> Function() onToggleDayNight;
   final Future<void> Function() onToggle3D;
   final Future<void> Function() onToggleFollowUser;
   final Future<void> Function() onResetNorth;
@@ -131,26 +127,6 @@ class _FlightMapControlsState extends State<FlightMapControls>
                             ? Icons.dark_mode_rounded
                             : Icons.light_mode_rounded,
                       ),
-              ),
-              const SizedBox(height: 8),
-              FloatingActionButton(
-                heroTag: 'flight_map_day_night_fab',
-                backgroundColor: widget.dayNightEnabled
-                    ? colorScheme.primary.withValues(alpha: 0.82)
-                    : buttonBg,
-                foregroundColor: widget.dayNightEnabled
-                    ? colorScheme.onPrimary
-                    : colorScheme.onSurface,
-                mini: true,
-                tooltip: widget.dayNightEnabled
-                    ? context.t.flight.map.hideDayNight
-                    : context.t.flight.map.showDayNight,
-                onPressed: widget.onToggleDayNight,
-                child: Icon(
-                  widget.dayNightEnabled
-                      ? Icons.dark_mode_rounded
-                      : Icons.dark_mode_outlined,
-                ),
               ),
               const SizedBox(height: 8),
               FloatingActionButton(

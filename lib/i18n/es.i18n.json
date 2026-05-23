@@ -493,8 +493,6 @@
       "offlineMissing": "Falta el archivo del mapa offline. Vuelve a descargar esta ruta.",
       "validationFailed": "La validación del mapa offline falló. Vuelve a descargar esta ruta.",
       "loadStyleFailed": "No se pudo cargar el estilo del mapa offline.",
-      "showDayNight": "Mostrar capa día/noche",
-      "hideDayNight": "Ocultar capa día/noche",
       "sunriseInMinutes": "Amanecer en $minutes min",
       "sunsetInMinutes": "Atardecer en $minutes min",
       "switchTo2D": "Cambiar a 2D",

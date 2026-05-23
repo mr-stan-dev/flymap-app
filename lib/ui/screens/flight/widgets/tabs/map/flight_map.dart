@@ -425,9 +425,7 @@ class _FlightMapState extends State<FlightMap> {
           ),
           FlightMapSunEventHintOverlay(
             topOffset: controlsTopOffset,
-            forecast: _dayNightController.enabled
-                ? _dayNightController.sunEventForecast
-                : null,
+            forecast: _dayNightController.sunEventForecast,
           ),
           FlightMapControls(
             topOffset: controlsTopOffset + 4,
@@ -435,13 +433,11 @@ class _FlightMapState extends State<FlightMap> {
                 _cameraController.showControls || _cameraController.followUser,
             offlineMapStyle: _styleController.style,
             mapStyleLoading: _styleTransitionController.isLoading,
-            dayNightEnabled: _dayNightController.enabled,
             is3D: _cameraController.is3D,
             followUser: _cameraController.followUser,
             showResetNorth: _cameraController.showResetNorth,
             mapBearingDegrees: _cameraController.mapBearingDegrees,
             onToggleMapStyle: _toggleMapStyle,
-            onToggleDayNight: _dayNightController.toggle,
             onToggle3D: _toggle3D,
             onToggleFollowUser: _toggleUserFollow,
             onResetNorth: _resetNorth,

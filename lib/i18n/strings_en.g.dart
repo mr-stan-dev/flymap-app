@@ -2370,12 +2370,6 @@ class TranslationsFlightMapEn {
 	/// en: 'Could not load offline map style.'
 	String get loadStyleFailed => 'Could not load offline map style.';
 
-	/// en: 'Show day-night layer'
-	String get showDayNight => 'Show day-night layer';
-
-	/// en: 'Hide day-night layer'
-	String get hideDayNight => 'Hide day-night layer';
-
 	/// en: 'Sunrise in $minutes min'
 	String sunriseInMinutes({required Object minutes}) => 'Sunrise in ${minutes} min';
 
@@ -3451,8 +3445,6 @@ extension on Translations {
 			'flight.map.offlineMissing' => 'Offline map file is missing. Please re-download this route.',
 			'flight.map.validationFailed' => 'Offline map validation failed. Please re-download this route.',
 			'flight.map.loadStyleFailed' => 'Could not load offline map style.',
-			'flight.map.showDayNight' => 'Show day-night layer',
-			'flight.map.hideDayNight' => 'Hide day-night layer',
 			'flight.map.sunriseInMinutes' => ({required Object minutes}) => 'Sunrise in ${minutes} min',
 			'flight.map.sunsetInMinutes' => ({required Object minutes}) => 'Sunset in ${minutes} min',
 			'flight.map.switchTo2D' => 'Switch to 2D',
@@ -3517,10 +3509,10 @@ extension on Translations {
 			'flight.dashboard.flightPhaseTaxi' => 'Taxi',
 			'flight.dashboard.flightPhaseGroundRoll' => 'Ground roll',
 			'flight.dashboard.flightPhaseTakeoffRoll' => 'Takeoff roll',
-			_ => null,
-		} ?? switch (path) {
 			'flight.dashboard.flightPhaseLandingRoll' => 'Landing roll',
 			'flight.dashboard.flightPhaseAscending' => 'Ascending',
+			_ => null,
+		} ?? switch (path) {
 			'flight.dashboard.flightPhaseCruising' => 'Cruising',
 			'flight.dashboard.flightPhaseDescending' => 'Descending',
 			'flight.dashboard.acquiringGpsSignal' => 'Acquiring GPS signal',

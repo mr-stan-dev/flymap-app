@@ -493,8 +493,6 @@
       "offlineMissing": "Offline map file is missing. Please re-download this route.",
       "validationFailed": "Offline map validation failed. Please re-download this route.",
       "loadStyleFailed": "Could not load offline map style.",
-      "showDayNight": "Show day-night layer",
-      "hideDayNight": "Hide day-night layer",
       "sunriseInMinutes": "Sunrise in $minutes min",
       "sunsetInMinutes": "Sunset in $minutes min",
       "switchTo2D": "Switch to 2D",

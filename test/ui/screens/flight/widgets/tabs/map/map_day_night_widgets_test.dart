@@ -14,7 +14,7 @@ void main() {
     LocaleSettings.setLocaleSync(AppLocale.en);
   });
 
-  testWidgets('map controls render day-night toggle state', (tester) async {
+  testWidgets('map controls render style toggle state', (tester) async {
     await tester.pumpWidget(
       _testApp(
         child: Stack(
@@ -24,13 +24,11 @@ void main() {
               visible: true,
               offlineMapStyle: OfflineMapStyle.liberty,
               mapStyleLoading: false,
-              dayNightEnabled: true,
               is3D: false,
               followUser: false,
               showResetNorth: false,
               mapBearingDegrees: 0,
               onToggleMapStyle: () async {},
-              onToggleDayNight: () async {},
               onToggle3D: () async {},
               onToggleFollowUser: () async {},
               onResetNorth: () async {},
@@ -40,7 +38,9 @@ void main() {
       ),
     );
 
-    expect(find.byIcon(Icons.dark_mode_rounded), findsOneWidget);
+    expect(find.byTooltip('Switch to dark map style'), findsOneWidget);
+    expect(find.byTooltip('Show day-night layer'), findsNothing);
+    expect(find.byTooltip('Hide day-night layer'), findsNothing);
   });
 
   testWidgets('map controls render style toggle state and loading spinner', (
@@ -55,13 +55,11 @@ void main() {
               visible: true,
               offlineMapStyle: OfflineMapStyle.fiord,
               mapStyleLoading: true,
-              dayNightEnabled: false,
               is3D: false,
               followUser: false,
               showResetNorth: false,
               mapBearingDegrees: 0,
               onToggleMapStyle: () async {},
-              onToggleDayNight: () async {},
               onToggle3D: () async {},
               onToggleFollowUser: () async {},
               onResetNorth: () async {},
