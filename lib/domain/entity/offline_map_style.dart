@@ -1,0 +1,1 @@
+enum OfflineMapStyle { liberty, fiord }

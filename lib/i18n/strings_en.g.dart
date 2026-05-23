@@ -2388,6 +2388,12 @@ class TranslationsFlightMapEn {
 	/// en: 'Switch to 3D'
 	String get switchTo3D => 'Switch to 3D';
 
+	/// en: 'Switch to light map style'
+	String get switchToLightMapStyle => 'Switch to light map style';
+
+	/// en: 'Switch to dark map style'
+	String get switchToDarkMapStyle => 'Switch to dark map style';
+
 	/// en: 'Uncenter map'
 	String get uncenterMap => 'Uncenter map';
 
@@ -3451,6 +3457,8 @@ extension on Translations {
 			'flight.map.sunsetInMinutes' => ({required Object minutes}) => 'Sunset in ${minutes} min',
 			'flight.map.switchTo2D' => 'Switch to 2D',
 			'flight.map.switchTo3D' => 'Switch to 3D',
+			'flight.map.switchToLightMapStyle' => 'Switch to light map style',
+			'flight.map.switchToDarkMapStyle' => 'Switch to dark map style',
 			'flight.map.uncenterMap' => 'Uncenter map',
 			'flight.map.centerOnMe' => 'Center on me',
 			'flight.dashboard.gpsOffTitle' => 'Location services are off',
@@ -3509,10 +3517,10 @@ extension on Translations {
 			'flight.dashboard.flightPhaseTaxi' => 'Taxi',
 			'flight.dashboard.flightPhaseGroundRoll' => 'Ground roll',
 			'flight.dashboard.flightPhaseTakeoffRoll' => 'Takeoff roll',
-			'flight.dashboard.flightPhaseLandingRoll' => 'Landing roll',
-			'flight.dashboard.flightPhaseAscending' => 'Ascending',
 			_ => null,
 		} ?? switch (path) {
+			'flight.dashboard.flightPhaseLandingRoll' => 'Landing roll',
+			'flight.dashboard.flightPhaseAscending' => 'Ascending',
 			'flight.dashboard.flightPhaseCruising' => 'Cruising',
 			'flight.dashboard.flightPhaseDescending' => 'Descending',
 			'flight.dashboard.acquiringGpsSignal' => 'Acquiring GPS signal',

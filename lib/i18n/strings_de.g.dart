@@ -998,6 +998,8 @@ class _TranslationsFlightMapDe extends TranslationsFlightMapEn {
 	@override String sunsetInMinutes({required Object minutes}) => 'Sonnenuntergang in ${minutes} Min';
 	@override String get switchTo2D => 'Zu 2D wechseln';
 	@override String get switchTo3D => 'Zu 3D wechseln';
+	@override String get switchToLightMapStyle => 'Zum hellen Kartenstil wechseln';
+	@override String get switchToDarkMapStyle => 'Zum dunklen Kartenstil wechseln';
 	@override String get uncenterMap => 'Karte nicht zentrieren';
 	@override String get centerOnMe => 'Auf mich zentrieren';
 }
@@ -1709,6 +1711,8 @@ extension on TranslationsDe {
 			'flight.map.sunsetInMinutes' => ({required Object minutes}) => 'Sonnenuntergang in ${minutes} Min',
 			'flight.map.switchTo2D' => 'Zu 2D wechseln',
 			'flight.map.switchTo3D' => 'Zu 3D wechseln',
+			'flight.map.switchToLightMapStyle' => 'Zum hellen Kartenstil wechseln',
+			'flight.map.switchToDarkMapStyle' => 'Zum dunklen Kartenstil wechseln',
 			'flight.map.uncenterMap' => 'Karte nicht zentrieren',
 			'flight.map.centerOnMe' => 'Auf mich zentrieren',
 			'flight.dashboard.gpsOffTitle' => 'Standortdienste sind deaktiviert',
@@ -1767,10 +1771,10 @@ extension on TranslationsDe {
 			'flight.dashboard.flightPhaseTaxi' => 'Rollen',
 			'flight.dashboard.flightPhaseGroundRoll' => 'Bodenlauf',
 			'flight.dashboard.flightPhaseTakeoffRoll' => 'Startlauf',
-			'flight.dashboard.flightPhaseLandingRoll' => 'Landelauf',
-			'flight.dashboard.flightPhaseAscending' => 'Steigend',
 			_ => null,
 		} ?? switch (path) {
+			'flight.dashboard.flightPhaseLandingRoll' => 'Landelauf',
+			'flight.dashboard.flightPhaseAscending' => 'Steigend',
 			'flight.dashboard.flightPhaseCruising' => 'Reiseflug',
 			'flight.dashboard.flightPhaseDescending' => 'Sinkend',
 			'flight.dashboard.acquiringGpsSignal' => 'GPS-Signal wird erfasst',

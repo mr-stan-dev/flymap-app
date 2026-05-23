@@ -30,8 +30,19 @@ class FlightMapDbMapper {
 }
 
 class FlightMapStyleMapper {
-  /// Injects an mbtiles URL into the style JSON for the 'openmaptiles' source.
-  /// Also updates sprite and glyph paths to point to the current cache directory.
+  static const _localSpritePath = 'assets/sprites/sprite';
+  static const _localGlyphsPath = 'assets/glyphs/{fontstack}/{range}.pbf';
+  static const _knownBasemapHosts = <String>{
+    '__TILEJSON_DOMAIN__',
+    'tiles.openfreemap.org',
+    'tiles.flymap.app',
+  };
+  static const _basemapTileJsonPath = '/planet';
+
+  /// Injects an mbtiles URL into the style JSON for known OpenFreeMap/Flymap
+  /// basemap sources.
+  /// Also updates sprite and glyph paths to point to the current cache
+  /// directory, and strips unsupported remote raster sources for offline use.
   /// Returns the updated JSON string; if not applicable, returns the original.
   String mapStyleWithMbtiles(
     String styleJson,
@@ -40,18 +51,125 @@ class FlightMapStyleMapper {
   }) {
     try {
       final style = jsonDecode(styleJson) as Map<String, dynamic>;
-      final sources = style['sources'];
-      if (sources is Map && sources['openmaptiles'] is Map) {
-        (sources['openmaptiles'] as Map)['url'] =
-            'mbtiles://$absoluteMbtilesPath';
-      }
+      final removedSourceIds = _rewriteSources(
+        style['sources'],
+        absoluteMbtilesPath,
+      );
+      _removeLayersForRemovedSources(style['layers'], removedSourceIds);
+
       // Fix sprite/glyph paths to point to the current platform cache directory
-      style['sprite'] = 'file://$cacheDir/assets/sprites/sprite';
-      style['glyphs'] =
-          'file://$cacheDir/assets/glyphs/{fontstack}/{range}.pbf';
+      style['sprite'] = 'file://$cacheDir/$_localSpritePath';
+      style['glyphs'] = 'file://$cacheDir/$_localGlyphsPath';
       return jsonEncode(style);
     } catch (_) {
       return styleJson;
     }
+  }
+
+  Set<String> _rewriteSources(dynamic rawSources, String absoluteMbtilesPath) {
+    if (rawSources is! Map) return const <String>{};
+
+    final removedSourceIds = <String>{};
+    for (final entry in rawSources.entries.toList()) {
+      final sourceId = entry.key.toString();
+      final source = entry.value;
+      if (source is! Map) continue;
+
+      if (_isOfflineVectorBasemapSource(source)) {
+        source
+          ..remove('tiles')
+          ..['url'] = 'mbtiles://$absoluteMbtilesPath';
+        continue;
+      }
+
+      if (_isUnsupportedOfflineRemoteSource(source)) {
+        removedSourceIds.add(sourceId);
+      }
+    }
+
+    for (final sourceId in removedSourceIds) {
+      rawSources.remove(sourceId);
+    }
+
+    return removedSourceIds;
+  }
+
+  bool _isOfflineVectorBasemapSource(Map source) {
+    if (source['type']?.toString() != 'vector') return false;
+
+    final url = source['url']?.toString() ?? '';
+    if (_isKnownBasemapUrl(url)) {
+      return true;
+    }
+
+    final tiles = source['tiles'];
+    if (tiles is! List) return false;
+    return tiles.any((tile) => _isKnownBasemapTileUrl(tile.toString()));
+  }
+
+  bool _isKnownBasemapUrl(String value) {
+    if (value.isEmpty) return false;
+    if (value.contains('__TILEJSON_DOMAIN__/planet')) {
+      return true;
+    }
+
+    final uri = Uri.tryParse(value);
+    if (uri == null) return false;
+
+    return _knownBasemapHosts.contains(uri.host) &&
+        uri.path == _basemapTileJsonPath;
+  }
+
+  bool _isKnownBasemapTileUrl(String value) {
+    if (value.isEmpty) return false;
+    if (value.contains('__TILEJSON_DOMAIN__/planet/')) {
+      return true;
+    }
+
+    final uri = Uri.tryParse(value);
+    if (uri == null) return false;
+    if (!_knownBasemapHosts.contains(uri.host)) {
+      return false;
+    }
+
+    final segments = uri.pathSegments;
+    return segments.isNotEmpty && segments.first == 'planet';
+  }
+
+  bool _isUnsupportedOfflineRemoteSource(Map source) {
+    final type = source['type']?.toString() ?? '';
+    if (type != 'raster' && type != 'raster-dem') {
+      return false;
+    }
+
+    final url = source['url']?.toString() ?? '';
+    if (_isRemoteReference(url)) {
+      return true;
+    }
+
+    final tiles = source['tiles'];
+    if (tiles is List) {
+      return tiles.any((tile) => _isRemoteReference(tile.toString()));
+    }
+    return false;
+  }
+
+  bool _isRemoteReference(String value) {
+    return value.startsWith('http://') ||
+        value.startsWith('https://') ||
+        value.contains('__TILEJSON_DOMAIN__');
+  }
+
+  void _removeLayersForRemovedSources(
+    dynamic rawLayers,
+    Set<String> removedSourceIds,
+  ) {
+    if (rawLayers is! List || removedSourceIds.isEmpty) return;
+
+    rawLayers.removeWhere((layer) {
+      if (layer is! Map) return false;
+      final sourceId = layer['source']?.toString();
+      return sourceId != null && removedSourceIds.contains(sourceId);
+    });
   }
 }

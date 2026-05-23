@@ -998,6 +998,8 @@ class _TranslationsFlightMapFr extends TranslationsFlightMapEn {
 	@override String sunsetInMinutes({required Object minutes}) => 'Coucher du soleil dans ${minutes} min';
 	@override String get switchTo2D => 'Passer en 2D';
 	@override String get switchTo3D => 'Passer en 3D';
+	@override String get switchToLightMapStyle => 'Passer au style de carte clair';
+	@override String get switchToDarkMapStyle => 'Passer au style de carte sombre';
 	@override String get uncenterMap => 'Décentrer la carte';
 	@override String get centerOnMe => 'Me centrer';
 }
@@ -1709,6 +1711,8 @@ extension on TranslationsFr {
 			'flight.map.sunsetInMinutes' => ({required Object minutes}) => 'Coucher du soleil dans ${minutes} min',
 			'flight.map.switchTo2D' => 'Passer en 2D',
 			'flight.map.switchTo3D' => 'Passer en 3D',
+			'flight.map.switchToLightMapStyle' => 'Passer au style de carte clair',
+			'flight.map.switchToDarkMapStyle' => 'Passer au style de carte sombre',
 			'flight.map.uncenterMap' => 'Décentrer la carte',
 			'flight.map.centerOnMe' => 'Me centrer',
 			'flight.dashboard.gpsOffTitle' => 'Les services de localisation sont désactivés',
@@ -1767,10 +1771,10 @@ extension on TranslationsFr {
 			'flight.dashboard.flightPhaseTaxi' => 'Roulage',
 			'flight.dashboard.flightPhaseGroundRoll' => 'Course au sol',
 			'flight.dashboard.flightPhaseTakeoffRoll' => 'Course de décollage',
-			'flight.dashboard.flightPhaseLandingRoll' => 'Course d’atterrissage',
-			'flight.dashboard.flightPhaseAscending' => 'Montée',
 			_ => null,
 		} ?? switch (path) {
+			'flight.dashboard.flightPhaseLandingRoll' => 'Course d’atterrissage',
+			'flight.dashboard.flightPhaseAscending' => 'Montée',
 			'flight.dashboard.flightPhaseCruising' => 'Croisière',
 			'flight.dashboard.flightPhaseDescending' => 'Descente',
 			'flight.dashboard.acquiringGpsSignal' => 'Acquisition du signal GPS',

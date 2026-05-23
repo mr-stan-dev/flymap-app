@@ -40,7 +40,7 @@ class FlightMapUserLocationController {
   Future<void> updateUserLocation(
     GpsData data, {
     required MapLibreMapController? controller,
-    required bool isReady,
+    required bool Function() isReady,
     required bool Function() shouldFollowUser,
     required bool Function() shouldFollowHeadingUp,
     required double Function() followZoomProvider,
@@ -48,7 +48,7 @@ class FlightMapUserLocationController {
   }) async {
     _pendingGpsData = data;
 
-    if (controller == null || !isReady) return;
+    if (controller == null || !isReady()) return;
     if (_isApplyingUserLocation) return;
 
     _isApplyingUserLocation = true;
@@ -74,13 +74,13 @@ class FlightMapUserLocationController {
   Future<void> _applyUserLocation(
     GpsData data, {
     required MapLibreMapController controller,
-    required bool isReady,
+    required bool Function() isReady,
     required bool Function() shouldFollowUser,
     required bool Function() shouldFollowHeadingUp,
     required double Function() followZoomProvider,
     required double Function() followTiltProvider,
   }) async {
-    if (!isReady) return;
+    if (!isReady()) return;
     final lat = data.latitude;
     final lon = data.longitude;
     _logger.log('updateUserLocation lat: $lat, lon: $lon');
@@ -91,12 +91,14 @@ class FlightMapUserLocationController {
       fallbackHeading: data.course ?? _renderedHeading,
     );
     final showCircle = _shouldShowStationaryCircle(data.speed);
+    var createdCircle = false;
 
     try {
       if (_userCircle == null) {
         _userCircle = await controller.addCircle(
           UserLayer.markerCircle(pos, visible: showCircle),
         );
+        createdCircle = true;
       } else {
         final reachedTarget = await _animateMarkerTransition(
           controller: controller,
@@ -113,7 +115,7 @@ class FlightMapUserLocationController {
         }
       }
 
-      if (_renderedPosition == null) {
+      if (createdCircle || _renderedPosition == null) {
         await _updateRenderedMarker(
           controller: controller,
           position: pos,
@@ -123,11 +125,14 @@ class FlightMapUserLocationController {
       }
     } catch (error) {
       _logger.error('Failed to apply user location marker: $error');
+      if (_isStyleBoundAnnotationError(error)) {
+        invalidateStyle(keepRenderedPosition: true);
+      }
       _pendingGpsData = data;
-      if (isReady) {
+      if (isReady()) {
         Future.delayed(const Duration(milliseconds: 250), () {
           final pending = _pendingGpsData;
-          if (pending != null) {
+          if (pending != null && isReady()) {
             unawaited(
               updateUserLocation(
                 pending,
@@ -589,7 +594,7 @@ class FlightMapUserLocationController {
 
   Future<void> flushPendingGpsData({
     required MapLibreMapController? controller,
-    required bool isReady,
+    required bool Function() isReady,
     required bool Function() shouldFollowUser,
     required bool Function() shouldFollowHeadingUp,
     required double Function() followZoomProvider,
@@ -608,14 +613,26 @@ class FlightMapUserLocationController {
     );
   }
 
-  void dispose() {
+  void invalidateStyle({bool keepRenderedPosition = true}) {
     _animationGeneration++;
     _userCircle = null;
-    _pendingGpsData = null;
     _isApplyingUserLocation = false;
     _isPlaneLayerReady = false;
-    _renderedPosition = null;
-    _renderedHeading = 0;
-    _lastAppliedFixAt = null;
+    if (!keepRenderedPosition) {
+      _renderedPosition = null;
+      _renderedHeading = 0;
+      _lastAppliedFixAt = null;
+    }
+  }
+
+  bool _isStyleBoundAnnotationError(Object error) {
+    final message = error.toString();
+    return message.contains('you can only set existing annotations') ||
+        message.contains('This Annotation Manager has not been initialized');
+  }
+
+  void dispose() {
+    invalidateStyle(keepRenderedPosition: false);
+    _pendingGpsData = null;
   }
 }

@@ -33,6 +33,13 @@ class FlightMapSessionController {
   bool get isReadyForUserLocation =>
       _mapReady && _controller != null && _isMapInitialized;
 
+  void beginStyleReload({VoidCallback? onStateChanged}) {
+    if (!_mapReady) return;
+    _invalidateStyleState();
+    _isMapInitialized = false;
+    onStateChanged?.call();
+  }
+
   void onMapCreated(
     MapLibreMapController controller, {
     VoidCallback? onStateChanged,

@@ -6,14 +6,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/data/local/mappers/flight_map_mapper.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/gps_data.dart';
+import 'package:flymap/domain/entity/offline_map_style.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
+import 'package:flymap/repository/map_preferences_repository.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/controllers/flight_map_camera_controller.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/controllers/flight_map_day_night_controller.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/map/controllers/flight_map_style_controller.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/map/controllers/flight_map_style_transition_controller.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/controllers/selected_region_overlay_controller.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_poi_controller.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/flight_map_session_controller.dart';
@@ -51,6 +55,7 @@ class _FlightMapState extends State<FlightMap> {
   final _logger = const Logger('FlightMapLoaded');
   String? _mapLoadError;
   bool _featureTapListenerAttached = false;
+  int _styleLoadRequestId = 0;
   late final FlightMapSessionController _mapSession;
   late final FlightMapCameraController _cameraController =
       FlightMapCameraController(logger: _logger);
@@ -63,6 +68,14 @@ class _FlightMapState extends State<FlightMap> {
       );
   late final FlightMapDayNightController _dayNightController =
       FlightMapDayNightController(route: widget.flight.route, logger: _logger);
+  late final MapPreferencesRepository _mapPreferencesRepository =
+      MapPreferencesRepository();
+  late final FlightMapStyleController _styleController =
+      FlightMapStyleController(
+        mapPreferencesRepository: _mapPreferencesRepository,
+      );
+  late final FlightMapStyleTransitionController _styleTransitionController =
+      FlightMapStyleTransitionController();
   late final FlightMapPoiController _poiController = FlightMapPoiController(
     logger: _logger,
     flight: widget.flight,
@@ -105,28 +118,59 @@ class _FlightMapState extends State<FlightMap> {
     );
     _cameraController.addListener(_onControllerChanged);
     _dayNightController.addListener(_onControllerChanged);
-    _loadStyle();
+    _styleController.addListener(_onControllerChanged);
+    _styleTransitionController.addListener(_onControllerChanged);
+    unawaited(_loadInitialStyle());
     _cameraController.start(initialZoom: initialZoom);
     unawaited(_dayNightController.init());
   }
 
-  /// Load style from assets and replace URL with local mbtiles path
-  Future<void> _loadStyle() async {
-    final result = await _styleLoader.load(widget.flight);
-    if (!mounted) return;
-    if (!result.isSuccess) {
-      _setMapLoadError(result.errorMessage!);
-      return;
+  Future<void> _loadInitialStyle() async {
+    await _styleController.init();
+    await _loadStyle(style: _styleController.style);
+  }
+
+  /// Load style from assets and replace URL with local mbtiles path.
+  Future<bool> _loadStyle({required OfflineMapStyle style}) async {
+    final requestId = ++_styleLoadRequestId;
+    _styleTransitionController.beginPreparing();
+    if (mounted) {
+      setState(() {
+        if (_styleString == null) {
+          _mapLoadError = null;
+        }
+      });
     }
 
+    final result = await _styleLoader.load(widget.flight, style: style);
+    if (!mounted) return false;
+    if (requestId != _styleLoadRequestId) {
+      _styleTransitionController.fail();
+      return false;
+    }
+
+    if (!result.isSuccess) {
+      _styleTransitionController.fail();
+      if (_styleString == null) {
+        _setMapLoadError(result.errorMessage!);
+      } else {
+        _showMapErrorToast(result.errorMessage!);
+      }
+      return false;
+    }
+
+    _beginStyleSwap();
+    _styleTransitionController.beginApplying();
     setState(() {
       _styleString = result.styleString;
       _mapLoadError = null;
     });
+    return true;
   }
 
   void _setMapLoadError(String message) {
     if (!mounted) return;
+    _styleTransitionController.fail();
     setState(() {
       _styleString = null;
       _mapLoadError = message;
@@ -159,8 +203,31 @@ class _FlightMapState extends State<FlightMap> {
     await _cameraController.toggle3D(_mapSession.controller);
   }
 
+  Future<void> _toggleMapStyle() async {
+    if (_styleTransitionController.isLoading) {
+      return;
+    }
+
+    final nextStyle = _styleController.nextStyle;
+    final loaded = await _loadStyle(style: nextStyle);
+    if (!loaded) {
+      return;
+    }
+    await _styleController.setStyle(nextStyle);
+  }
+
   void _onMapCreated(MapLibreMapController controller) {
-    _dayNightController.invalidateStyle();
+    final previousController = _mapSession.controller;
+    if (previousController != null &&
+        !identical(previousController, controller)) {
+      previousController.onSymbolTapped.remove(_onSymbolTapped);
+      if (_featureTapListenerAttached) {
+        previousController.onFeatureTapped.remove(_onFeatureTapped);
+        _featureTapListenerAttached = false;
+      }
+    }
+
+    _invalidateStyleBoundControllers();
     _dayNightController.updateMapContext(
       controller: controller,
       routeLayersAdded: _mapSession.routeLayersAdded,
@@ -168,11 +235,7 @@ class _FlightMapState extends State<FlightMap> {
     );
     _mapSession.onMapCreated(
       controller,
-      onStateChanged: () {
-        if (mounted) {
-          setState(() {});
-        }
-      },
+      onStateChanged: _handleMapSessionStateChanged,
     );
 
     controller.onSymbolTapped.add(_onSymbolTapped);
@@ -191,32 +254,51 @@ class _FlightMapState extends State<FlightMap> {
   }
 
   void _onStyleLoaded() {
-    _dayNightController.invalidateStyle();
+    _invalidateStyleBoundControllers();
     _mapSession.onStyleLoaded(
-      onStateChanged: () {
-        if (mounted) {
-          setState(() {});
-          if (_mapSession.routeLayersAdded) {
-            _selectedRegionOverlayController.updateRouteRegions(
-              widget.flight.info.routeRegions,
-            );
-            unawaited(
-              _selectedRegionOverlayController.sync(
-                _mapSession.controller,
-                routeLayersAdded: _mapSession.routeLayersAdded,
-              ),
-            );
-            _dayNightController.updateMapContext(
-              controller: _mapSession.controller,
-              routeLayersAdded: _mapSession.routeLayersAdded,
-              belowLayerId: _routePathLayerId,
-            );
-            unawaited(_dayNightController.handleMapReady());
-          }
-        }
-      },
+      onStateChanged: _handleMapSessionStateChanged,
       flushPendingGpsData: _flushPendingGpsData,
     );
+  }
+
+  void _beginStyleSwap() {
+    _mapSession.beginStyleReload(onStateChanged: _handleMapSessionStateChanged);
+    _invalidateStyleBoundControllers();
+  }
+
+  void _invalidateStyleBoundControllers() {
+    _userLocationController.invalidateStyle();
+    _dayNightController.invalidateStyle();
+  }
+
+  void _handleMapSessionStateChanged() {
+    if (!mounted) {
+      return;
+    }
+
+    if (_mapSession.routeLayersAdded) {
+      _selectedRegionOverlayController.updateRouteRegions(
+        widget.flight.info.routeRegions,
+      );
+      unawaited(
+        _selectedRegionOverlayController.sync(
+          _mapSession.controller,
+          routeLayersAdded: _mapSession.routeLayersAdded,
+        ),
+      );
+      _dayNightController.updateMapContext(
+        controller: _mapSession.controller,
+        routeLayersAdded: _mapSession.routeLayersAdded,
+        belowLayerId: _routePathLayerId,
+      );
+      unawaited(_dayNightController.handleMapReady());
+    }
+
+    if (_mapSession.isMapInitialized) {
+      _styleTransitionController.complete();
+    }
+
+    setState(() {});
   }
 
   void _onFeatureTapped(
@@ -259,7 +341,7 @@ class _FlightMapState extends State<FlightMap> {
     await _userLocationController.updateUserLocation(
       data,
       controller: _mapSession.controller,
-      isReady: _mapSession.isReadyForUserLocation,
+      isReady: () => _mapSession.isReadyForUserLocation,
       shouldFollowUser: () => _cameraController.followUser,
       shouldFollowHeadingUp: () => _cameraController.followUser,
       followZoomProvider: () => _cameraController.cameraZoom,
@@ -270,7 +352,7 @@ class _FlightMapState extends State<FlightMap> {
   Future<void> _flushPendingGpsData() async {
     await _userLocationController.flushPendingGpsData(
       controller: _mapSession.controller,
-      isReady: _mapSession.isReadyForUserLocation,
+      isReady: () => _mapSession.isReadyForUserLocation,
       shouldFollowUser: () => _cameraController.followUser,
       shouldFollowHeadingUp: () => _cameraController.followUser,
       followZoomProvider: () => _cameraController.cameraZoom,
@@ -351,11 +433,14 @@ class _FlightMapState extends State<FlightMap> {
             topOffset: controlsTopOffset + 4,
             visible:
                 _cameraController.showControls || _cameraController.followUser,
+            offlineMapStyle: _styleController.style,
+            mapStyleLoading: _styleTransitionController.isLoading,
             dayNightEnabled: _dayNightController.enabled,
             is3D: _cameraController.is3D,
             followUser: _cameraController.followUser,
             showResetNorth: _cameraController.showResetNorth,
             mapBearingDegrees: _cameraController.mapBearingDegrees,
+            onToggleMapStyle: _toggleMapStyle,
             onToggleDayNight: _dayNightController.toggle,
             onToggle3D: _toggle3D,
             onToggleFollowUser: _toggleUserFollow,
@@ -375,6 +460,8 @@ class _FlightMapState extends State<FlightMap> {
   void dispose() {
     _cameraController.removeListener(_onControllerChanged);
     _dayNightController.removeListener(_onControllerChanged);
+    _styleController.removeListener(_onControllerChanged);
+    _styleTransitionController.removeListener(_onControllerChanged);
     _mapSession.controller?.onSymbolTapped.remove(_onSymbolTapped);
     if (_featureTapListenerAttached) {
       _mapSession.controller?.onFeatureTapped.remove(_onFeatureTapped);
@@ -382,6 +469,8 @@ class _FlightMapState extends State<FlightMap> {
     }
     _cameraController.dispose();
     _dayNightController.dispose();
+    _styleController.dispose();
+    _styleTransitionController.dispose();
     _userLocationController.dispose();
     _mapSession.dispose();
     super.dispose();

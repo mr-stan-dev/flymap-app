@@ -499,6 +499,8 @@
       "sunsetInMinutes": "Atardecer en $minutes min",
       "switchTo2D": "Cambiar a 2D",
       "switchTo3D": "Cambiar a 3D",
+      "switchToLightMapStyle": "Cambiar al estilo de mapa claro",
+      "switchToDarkMapStyle": "Cambiar al estilo de mapa oscuro",
       "uncenterMap": "Descentrar mapa",
       "centerOnMe": "Centrar en mí"
     },

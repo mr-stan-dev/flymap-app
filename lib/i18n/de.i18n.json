@@ -499,6 +499,8 @@
       "sunsetInMinutes": "Sonnenuntergang in $minutes Min",
       "switchTo2D": "Zu 2D wechseln",
       "switchTo3D": "Zu 3D wechseln",
+      "switchToLightMapStyle": "Zum hellen Kartenstil wechseln",
+      "switchToDarkMapStyle": "Zum dunklen Kartenstil wechseln",
       "uncenterMap": "Karte nicht zentrieren",
       "centerOnMe": "Auf mich zentrieren"
     },

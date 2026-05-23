@@ -6,6 +6,7 @@ import 'package:flymap/data/local/mappers/flight_map_mapper.dart';
 import 'package:flymap/data/map_asset_cache_service.dart';
 import 'package:flymap/data/tiles_downloader/mbtiles_validator.dart';
 import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/offline_map_style.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/map_download_config.dart';
@@ -39,19 +40,38 @@ class FlightMapStyleLoadResult {
 }
 
 class FlightMapStyleLoader {
-  const FlightMapStyleLoader({
+  FlightMapStyleLoader({
     required this.logger,
     required this.styleMapper,
     required this.mapAssetCacheService,
     required this.crashlytics,
-  });
+    Future<String> Function(String assetPath)? assetStyleLoader,
+    Future<Directory> Function()? cacheDirectoryProvider,
+    Future<MbtilesValidationResult> Function(String path, Logger logger)?
+    mbtilesValidator,
+  }) : _assetStyleLoader = assetStyleLoader ?? rootBundle.loadString,
+       _cacheDirectoryProvider =
+           cacheDirectoryProvider ?? getApplicationCacheDirectory,
+       _mbtilesValidator = mbtilesValidator ?? _defaultMbtilesValidator;
 
   final Logger logger;
   final FlightMapStyleMapper styleMapper;
   final MapAssetCacheService mapAssetCacheService;
   final AppCrashlytics crashlytics;
+  final Future<String> Function(String assetPath) _assetStyleLoader;
+  final Future<Directory> Function() _cacheDirectoryProvider;
+  final Future<MbtilesValidationResult> Function(String path, Logger logger)
+  _mbtilesValidator;
 
-  Future<FlightMapStyleLoadResult> load(Flight flight) async {
+  static const String _libertyAssetPath =
+      'assets/styles/openfreemap_offline_style.json';
+  static const String _fiordAssetPath =
+      'assets/styles/openfreemap_offline_fiord_style.json';
+
+  Future<FlightMapStyleLoadResult> load(
+    Flight flight, {
+    required OfflineMapStyle style,
+  }) async {
     final storedPath = flight.flightMap?.filePath ?? '';
     if (storedPath.isEmpty) {
       logger.log('No MBTiles file path found');
@@ -59,7 +79,7 @@ class FlightMapStyleLoader {
     }
 
     final fileName = p.basename(storedPath);
-    final appDir = await getApplicationCacheDirectory();
+    final appDir = await _cacheDirectoryProvider();
     final resolvedPath = p.join(
       appDir.path,
       MapDownloadConfig.mbtilesDirectoryName,
@@ -75,9 +95,9 @@ class FlightMapStyleLoader {
     logger.log('Loading mbtiles: $fileName');
     logger.log('Resolved MBTiles path: ${file.absolute.path}');
 
-    final validationResult = await MbtilesValidator.validate(
+    final validationResult = await _mbtilesValidator(
       file.absolute.path,
-      logger: logger,
+      logger,
     );
     if (!validationResult.isValid) {
       logger.error(
@@ -92,10 +112,8 @@ class FlightMapStyleLoader {
     try {
       mapAssetCacheService.ensureReadyInBackground();
 
-      final styleString = await rootBundle.loadString(
-        'assets/styles/openfreemap_offline_style.json',
-      );
-      final cacheDir = (await getApplicationCacheDirectory()).path;
+      final styleString = await _assetStyleLoader(_assetPathFor(style));
+      final cacheDir = appDir.path;
       final updated = styleMapper.mapStyleWithMbtiles(
         styleString,
         file.absolute.path,
@@ -112,5 +130,19 @@ class FlightMapStyleLoader {
       );
       return FlightMapStyleLoadResult.failure(t.flight.map.loadStyleFailed);
     }
+  }
+
+  String _assetPathFor(OfflineMapStyle style) {
+    return switch (style) {
+      OfflineMapStyle.liberty => _libertyAssetPath,
+      OfflineMapStyle.fiord => _fiordAssetPath,
+    };
+  }
+
+  static Future<MbtilesValidationResult> _defaultMbtilesValidator(
+    String path,
+    Logger logger,
+  ) {
+    return MbtilesValidator.validate(path, logger: logger);
   }
 }

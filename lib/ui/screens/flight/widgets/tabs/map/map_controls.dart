@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flymap/domain/entity/offline_map_style.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 
@@ -6,11 +7,14 @@ class FlightMapControls extends StatefulWidget {
   const FlightMapControls({
     required this.topOffset,
     required this.visible,
+    required this.offlineMapStyle,
+    required this.mapStyleLoading,
     required this.dayNightEnabled,
     required this.is3D,
     required this.followUser,
     required this.showResetNorth,
     required this.mapBearingDegrees,
+    required this.onToggleMapStyle,
     required this.onToggleDayNight,
     required this.onToggle3D,
     required this.onToggleFollowUser,
@@ -20,11 +24,14 @@ class FlightMapControls extends StatefulWidget {
 
   final double topOffset;
   final bool visible;
+  final OfflineMapStyle offlineMapStyle;
+  final bool mapStyleLoading;
   final bool dayNightEnabled;
   final bool is3D;
   final bool followUser;
   final bool showResetNorth;
   final double mapBearingDegrees;
+  final Future<void> Function() onToggleMapStyle;
   final Future<void> Function() onToggleDayNight;
   final Future<void> Function() onToggle3D;
   final Future<void> Function() onToggleFollowUser;
@@ -91,6 +98,41 @@ class _FlightMapControlsState extends State<FlightMapControls>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              FloatingActionButton(
+                heroTag: 'flight_map_style_fab',
+                backgroundColor: widget.offlineMapStyle == OfflineMapStyle.fiord
+                    ? colorScheme.primary.withValues(alpha: 0.82)
+                    : buttonBg,
+                foregroundColor: widget.offlineMapStyle == OfflineMapStyle.fiord
+                    ? colorScheme.onPrimary
+                    : colorScheme.onSurface,
+                mini: true,
+                tooltip: widget.offlineMapStyle == OfflineMapStyle.fiord
+                    ? context.t.flight.map.switchToLightMapStyle
+                    : context.t.flight.map.switchToDarkMapStyle,
+                onPressed: widget.mapStyleLoading
+                    ? null
+                    : widget.onToggleMapStyle,
+                child: widget.mapStyleLoading
+                    ? SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            widget.offlineMapStyle == OfflineMapStyle.fiord
+                                ? colorScheme.onPrimary
+                                : colorScheme.onSurface,
+                          ),
+                        ),
+                      )
+                    : Icon(
+                        widget.offlineMapStyle == OfflineMapStyle.fiord
+                            ? Icons.dark_mode_rounded
+                            : Icons.light_mode_rounded,
+                      ),
+              ),
+              const SizedBox(height: 8),
               FloatingActionButton(
                 heroTag: 'flight_map_day_night_fab',
                 backgroundColor: widget.dayNightEnabled

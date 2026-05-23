@@ -499,6 +499,8 @@
       "sunsetInMinutes": "Sunset in $minutes min",
       "switchTo2D": "Switch to 2D",
       "switchTo3D": "Switch to 3D",
+      "switchToLightMapStyle": "Switch to light map style",
+      "switchToDarkMapStyle": "Switch to dark map style",
       "uncenterMap": "Uncenter map",
       "centerOnMe": "Center on me"
     },

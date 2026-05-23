@@ -3,11 +3,11 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "https://tiles.openfreemap.org/planet"
+      "url": "https://__TILEJSON_DOMAIN__/planet"
     }
   },
-  "sprite": "file://data/user/0/app.flymap/cache/assets/sprites/sprite",
-  "glyphs": "file://data/user/0/app.flymap/cache/assets/glyphs/{fontstack}/{range}.pbf",
+  "sprite": "https://__TILEJSON_DOMAIN__/sprites/ofm_f384/ofm",
+  "glyphs": "https://__TILEJSON_DOMAIN__/fonts/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "background",

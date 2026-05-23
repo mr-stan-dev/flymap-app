@@ -69,6 +69,7 @@ flutter:
     - assets/data/learn/articles/
     - assets/data/ne_50m_land.geojson
     - assets/styles/openfreemap_offline_style.json
+    - assets/styles/openfreemap_offline_fiord_style.json
     - assets/sprites/
     - assets/glyphs/Noto Sans Italic/
     - assets/glyphs/Noto Sans Regular/
