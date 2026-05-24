@@ -518,7 +518,7 @@ class _TranslationsOnboardingFr extends TranslationsOnboardingEn {
 	@override String get proFeaturePlaces => '10x plus de lieux le long de l’itinéraire';
 	@override String get proFeatureTimeline => 'Une chronologie détaillée de tout votre vol';
 	@override String get proFeatureArticles => 'Pack complet d’articles hors ligne';
-	@override String get unlockPro => 'Débloquer Pro';
+	@override String get unlockPro => 'Passer à Pro';
 	@override String get continueFree => 'Continuer gratuitement';
 	@override String get proActiveTitle => 'Félicitations !';
 	@override String get proActiveSubtitle => 'Vous avez maintenant un accès complet aux cartes détaillées, à tous les lieux et aux packs d’articles.';
@@ -1193,7 +1193,7 @@ class _TranslationsFlightRouteFr extends TranslationsFlightRouteEn {
 	@override String get premiumGateTitle => 'Débloquez la chronologie complète de l’itinéraire';
 	@override String get premiumGateBody => 'Passez à Pro pour voir toutes les régions le long de votre itinéraire et les détails de la chronologie.';
 	@override String premiumGateBodyWithCount({required Object count}) => 'Débloquez les ${count} régions de cet itinéraire avec Premium.';
-	@override String get premiumGateCta => 'S’abonner à Premium';
+	@override String get premiumGateCta => 'Passer à Pro';
 	@override String get premiumOfflineTitle => 'Internet requis pour la mise à niveau';
 	@override String get premiumOfflineBody => 'Vous êtes actuellement hors ligne. Connectez-vous à Internet pour passer à la version supérieure et débloquer la vue complète de l’itinéraire.';
 	@override String nextHintLabel({required Object region, required Object eta}) => 'Suivant : ${region} (${eta})';
@@ -1891,7 +1891,7 @@ extension on TranslationsFr {
 			'flight.route.premiumGateTitle' => 'Débloquez la chronologie complète de l’itinéraire',
 			'flight.route.premiumGateBody' => 'Passez à Pro pour voir toutes les régions le long de votre itinéraire et les détails de la chronologie.',
 			'flight.route.premiumGateBodyWithCount' => ({required Object count}) => 'Débloquez les ${count} régions de cet itinéraire avec Premium.',
-			'flight.route.premiumGateCta' => 'S’abonner à Premium',
+			'flight.route.premiumGateCta' => 'Passer à Pro',
 			'flight.route.premiumOfflineTitle' => 'Internet requis pour la mise à niveau',
 			'flight.route.premiumOfflineBody' => 'Vous êtes actuellement hors ligne. Connectez-vous à Internet pour passer à la version supérieure et débloquer la vue complète de l’itinéraire.',
 			'flight.route.nextHintLabel' => ({required Object region, required Object eta}) => 'Suivant : ${region} (${eta})',
@@ -1986,7 +1986,7 @@ extension on TranslationsFr {
 			'onboarding.proFeaturePlaces' => '10x plus de lieux le long de l’itinéraire',
 			'onboarding.proFeatureTimeline' => 'Une chronologie détaillée de tout votre vol',
 			'onboarding.proFeatureArticles' => 'Pack complet d’articles hors ligne',
-			'onboarding.unlockPro' => 'Débloquer Pro',
+			'onboarding.unlockPro' => 'Passer à Pro',
 			'onboarding.continueFree' => 'Continuer gratuitement',
 			'onboarding.proActiveTitle' => 'Félicitations !',
 			'onboarding.proActiveSubtitle' => 'Vous avez maintenant un accès complet aux cartes détaillées, à tous les lieux et aux packs d’articles.',

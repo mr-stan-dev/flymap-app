@@ -179,7 +179,7 @@ class FlightSearchWikipediaArticlesStep extends StatelessWidget {
                 height: 52,
                 child: !isProUser && isFreeOverLimit
                     ? PremiumButton(
-                        label: context.t.subscription.flightUnlockAction,
+                        label: context.t.common.upgrade,
                         icon: Icons.workspace_premium_rounded,
                         onPressed: isLoading ? null : onStartDownload,
                       )

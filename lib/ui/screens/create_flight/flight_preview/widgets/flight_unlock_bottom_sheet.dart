@@ -19,7 +19,6 @@ class FlightUnlockBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final routeText = routePreview?.trim() ?? '';
     return BlocBuilder<SubscriptionCubit, SubscriptionState>(
       builder: (context, state) {
         final unlockCount = state.unusedFlightUnlockCount;
@@ -53,16 +52,6 @@ class FlightUnlockBottomSheet extends StatelessWidget {
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
-                if (routeText.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    routeText,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
                 const SizedBox(height: 16),
                 _UnlockOptionCard(
                   title: context.t.subscription.flightUnlockOptionTitle,

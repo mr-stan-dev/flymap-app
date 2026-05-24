@@ -88,8 +88,8 @@ class TranslationsCommonEn {
 	/// en: 'Edit'
 	String get edit => 'Edit';
 
-	/// en: 'Upgrade'
-	String get upgrade => 'Upgrade';
+	/// en: 'Upgrade to Pro'
+	String get upgrade => 'Upgrade to Pro';
 
 	/// en: 'Loading...'
 	String get loading => 'Loading...';
@@ -1203,8 +1203,8 @@ class TranslationsOnboardingEn {
 	/// en: 'Complete pack of offline articles'
 	String get proFeatureArticles => 'Complete pack of offline articles';
 
-	/// en: 'Unlock Pro'
-	String get unlockPro => 'Unlock Pro';
+	/// en: 'Upgrade to Pro'
+	String get unlockPro => 'Upgrade to Pro';
 
 	/// en: 'Continue Free'
 	String get continueFree => 'Continue Free';
@@ -2881,8 +2881,8 @@ class TranslationsFlightRouteEn {
 	/// en: 'Unlock all $count regions on this route with Premium.'
 	String premiumGateBodyWithCount({required Object count}) => 'Unlock all ${count} regions on this route with Premium.';
 
-	/// en: 'Subscribe to Premium'
-	String get premiumGateCta => 'Subscribe to Premium';
+	/// en: 'Upgrade to Pro'
+	String get premiumGateCta => 'Upgrade to Pro';
 
 	/// en: 'Internet needed to upgrade'
 	String get premiumOfflineTitle => 'Internet needed to upgrade';
@@ -3080,7 +3080,7 @@ extension on Translations {
 			'common.retry' => 'Retry',
 			'common.manage' => 'Manage',
 			'common.edit' => 'Edit',
-			'common.upgrade' => 'Upgrade',
+			'common.upgrade' => 'Upgrade to Pro',
 			'common.loading' => 'Loading...',
 			'common.readMore' => 'Read more',
 			'common.pro' => 'PRO',
@@ -3675,7 +3675,7 @@ extension on Translations {
 			'flight.route.premiumGateTitle' => 'Unlock full route timeline',
 			'flight.route.premiumGateBody' => 'Upgrade to Pro to see all regions along your route and timeline details.',
 			'flight.route.premiumGateBodyWithCount' => ({required Object count}) => 'Unlock all ${count} regions on this route with Premium.',
-			'flight.route.premiumGateCta' => 'Subscribe to Premium',
+			'flight.route.premiumGateCta' => 'Upgrade to Pro',
 			'flight.route.premiumOfflineTitle' => 'Internet needed to upgrade',
 			'flight.route.premiumOfflineBody' => 'You are offline right now. Connect to the internet to upgrade and unlock the full route view.',
 			'flight.route.nextHintLabel' => ({required Object region, required Object eta}) => 'Next: ${region} (${eta})',
@@ -3770,7 +3770,7 @@ extension on Translations {
 			'onboarding.proFeaturePlaces' => '10x more places along the route',
 			'onboarding.proFeatureTimeline' => 'A detailed timeline of your entire flight',
 			'onboarding.proFeatureArticles' => 'Complete pack of offline articles',
-			'onboarding.unlockPro' => 'Unlock Pro',
+			'onboarding.unlockPro' => 'Upgrade to Pro',
 			'onboarding.continueFree' => 'Continue Free',
 			'onboarding.proActiveTitle' => 'Congratulations!',
 			'onboarding.proActiveSubtitle' => 'You now have full access to detailed maps, all places, and article packs.',

@@ -69,7 +69,7 @@ class _TranslationsCommonEs extends TranslationsCommonEn {
 	@override String get retry => 'Reintentar';
 	@override String get manage => 'Gestionar';
 	@override String get edit => 'Editar';
-	@override String get upgrade => 'Mejorar';
+	@override String get upgrade => 'Pasar a Pro';
 	@override String get loading => 'Cargando...';
 	@override String get readMore => 'Leer más';
 	@override String get pro => 'PRO';
@@ -518,7 +518,7 @@ class _TranslationsOnboardingEs extends TranslationsOnboardingEn {
 	@override String get proFeaturePlaces => '10 veces más lugares a lo largo de la ruta';
 	@override String get proFeatureTimeline => 'Una cronología detallada de todo tu vuelo';
 	@override String get proFeatureArticles => 'Paquete completo de artículos offline';
-	@override String get unlockPro => 'Desbloquear Pro';
+	@override String get unlockPro => 'Pasar a Pro';
 	@override String get continueFree => 'Seguir gratis';
 	@override String get proActiveTitle => '¡Enhorabuena!';
 	@override String get proActiveSubtitle => 'Ahora tienes acceso completo a mapas detallados, todos los lugares y paquetes de artículos.';
@@ -1193,7 +1193,7 @@ class _TranslationsFlightRouteEs extends TranslationsFlightRouteEn {
 	@override String get premiumGateTitle => 'Desbloquear cronología completa de la ruta';
 	@override String get premiumGateBody => 'Pásate a Pro para ver todas las regiones de tu ruta y los detalles de la cronología.';
 	@override String premiumGateBodyWithCount({required Object count}) => 'Desbloquea las ${count} regiones de esta ruta con Premium.';
-	@override String get premiumGateCta => 'Suscribirse a Premium';
+	@override String get premiumGateCta => 'Pasar a Pro';
 	@override String get premiumOfflineTitle => 'Se necesita internet para mejorar';
 	@override String get premiumOfflineBody => 'Ahora mismo estás offline. Conéctate a internet para mejorar y desbloquear la vista completa de la ruta.';
 	@override String nextHintLabel({required Object region, required Object eta}) => 'Siguiente: ${region} (${eta})';
@@ -1296,7 +1296,7 @@ extension on TranslationsEs {
 			'common.retry' => 'Reintentar',
 			'common.manage' => 'Gestionar',
 			'common.edit' => 'Editar',
-			'common.upgrade' => 'Mejorar',
+			'common.upgrade' => 'Pasar a Pro',
 			'common.loading' => 'Cargando...',
 			'common.readMore' => 'Leer más',
 			'common.pro' => 'PRO',
@@ -1891,7 +1891,7 @@ extension on TranslationsEs {
 			'flight.route.premiumGateTitle' => 'Desbloquear cronología completa de la ruta',
 			'flight.route.premiumGateBody' => 'Pásate a Pro para ver todas las regiones de tu ruta y los detalles de la cronología.',
 			'flight.route.premiumGateBodyWithCount' => ({required Object count}) => 'Desbloquea las ${count} regiones de esta ruta con Premium.',
-			'flight.route.premiumGateCta' => 'Suscribirse a Premium',
+			'flight.route.premiumGateCta' => 'Pasar a Pro',
 			'flight.route.premiumOfflineTitle' => 'Se necesita internet para mejorar',
 			'flight.route.premiumOfflineBody' => 'Ahora mismo estás offline. Conéctate a internet para mejorar y desbloquear la vista completa de la ruta.',
 			'flight.route.nextHintLabel' => ({required Object region, required Object eta}) => 'Siguiente: ${region} (${eta})',
@@ -1986,7 +1986,7 @@ extension on TranslationsEs {
 			'onboarding.proFeaturePlaces' => '10 veces más lugares a lo largo de la ruta',
 			'onboarding.proFeatureTimeline' => 'Una cronología detallada de todo tu vuelo',
 			'onboarding.proFeatureArticles' => 'Paquete completo de artículos offline',
-			'onboarding.unlockPro' => 'Desbloquear Pro',
+			'onboarding.unlockPro' => 'Pasar a Pro',
 			'onboarding.continueFree' => 'Seguir gratis',
 			'onboarding.proActiveTitle' => '¡Enhorabuena!',
 			'onboarding.proActiveSubtitle' => 'Ahora tienes acceso completo a mapas detallados, todos los lugares y paquetes de artículos.',

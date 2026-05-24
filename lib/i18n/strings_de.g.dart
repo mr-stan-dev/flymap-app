@@ -69,7 +69,7 @@ class _TranslationsCommonDe extends TranslationsCommonEn {
 	@override String get retry => 'Erneut versuchen';
 	@override String get manage => 'Verwalten';
 	@override String get edit => 'Bearbeiten';
-	@override String get upgrade => 'Upgrade';
+	@override String get upgrade => 'Zu Pro upgraden';
 	@override String get loading => 'Wird geladen...';
 	@override String get readMore => 'Mehr lesen';
 	@override String get pro => 'PRO';
@@ -518,7 +518,7 @@ class _TranslationsOnboardingDe extends TranslationsOnboardingEn {
 	@override String get proFeaturePlaces => '10x mehr Orte entlang der Route';
 	@override String get proFeatureTimeline => 'Eine detaillierte Zeitachse deines gesamten Flugs';
 	@override String get proFeatureArticles => 'Vollständiges Paket mit Offline-Artikeln';
-	@override String get unlockPro => 'Pro freischalten';
+	@override String get unlockPro => 'Zu Pro upgraden';
 	@override String get continueFree => 'Kostenlos fortfahren';
 	@override String get proActiveTitle => 'Glückwunsch!';
 	@override String get proActiveSubtitle => 'Du hast jetzt vollen Zugriff auf detaillierte Karten, alle Orte und Artikelpakete.';
@@ -1193,7 +1193,7 @@ class _TranslationsFlightRouteDe extends TranslationsFlightRouteEn {
 	@override String get premiumGateTitle => 'Vollständige Routen-Zeitachse freischalten';
 	@override String get premiumGateBody => 'Upgrade auf Pro, um alle Regionen entlang deiner Route und Details der Zeitachse zu sehen.';
 	@override String premiumGateBodyWithCount({required Object count}) => 'Schalte alle ${count} Regionen dieser Route mit Premium frei.';
-	@override String get premiumGateCta => 'Premium abonnieren';
+	@override String get premiumGateCta => 'Zu Pro upgraden';
 	@override String get premiumOfflineTitle => 'Internet für Upgrade erforderlich';
 	@override String get premiumOfflineBody => 'Du bist gerade offline. Stelle eine Internetverbindung her, um upzugraden und die vollständige Routenansicht freizuschalten.';
 	@override String nextHintLabel({required Object region, required Object eta}) => 'Als Nächstes: ${region} (${eta})';
@@ -1296,7 +1296,7 @@ extension on TranslationsDe {
 			'common.retry' => 'Erneut versuchen',
 			'common.manage' => 'Verwalten',
 			'common.edit' => 'Bearbeiten',
-			'common.upgrade' => 'Upgrade',
+			'common.upgrade' => 'Zu Pro upgraden',
 			'common.loading' => 'Wird geladen...',
 			'common.readMore' => 'Mehr lesen',
 			'common.pro' => 'PRO',
@@ -1891,7 +1891,7 @@ extension on TranslationsDe {
 			'flight.route.premiumGateTitle' => 'Vollständige Routen-Zeitachse freischalten',
 			'flight.route.premiumGateBody' => 'Upgrade auf Pro, um alle Regionen entlang deiner Route und Details der Zeitachse zu sehen.',
 			'flight.route.premiumGateBodyWithCount' => ({required Object count}) => 'Schalte alle ${count} Regionen dieser Route mit Premium frei.',
-			'flight.route.premiumGateCta' => 'Premium abonnieren',
+			'flight.route.premiumGateCta' => 'Zu Pro upgraden',
 			'flight.route.premiumOfflineTitle' => 'Internet für Upgrade erforderlich',
 			'flight.route.premiumOfflineBody' => 'Du bist gerade offline. Stelle eine Internetverbindung her, um upzugraden und die vollständige Routenansicht freizuschalten.',
 			'flight.route.nextHintLabel' => ({required Object region, required Object eta}) => 'Als Nächstes: ${region} (${eta})',
@@ -1986,7 +1986,7 @@ extension on TranslationsDe {
 			'onboarding.proFeaturePlaces' => '10x mehr Orte entlang der Route',
 			'onboarding.proFeatureTimeline' => 'Eine detaillierte Zeitachse deines gesamten Flugs',
 			'onboarding.proFeatureArticles' => 'Vollständiges Paket mit Offline-Artikeln',
-			'onboarding.unlockPro' => 'Pro freischalten',
+			'onboarding.unlockPro' => 'Zu Pro upgraden',
 			'onboarding.continueFree' => 'Kostenlos fortfahren',
 			'onboarding.proActiveTitle' => 'Glückwunsch!',
 			'onboarding.proActiveSubtitle' => 'Du hast jetzt vollen Zugriff auf detaillierte Karten, alle Orte und Artikelpakete.',
