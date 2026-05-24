@@ -1,17 +1,30 @@
 import 'package:flymap/data/api/flight_lookup_api.dart';
+import 'package:flymap/data/api/flight_number_search_api.dart';
 import 'package:flymap/data/api/flight_route_preview_api.dart';
+import 'package:flymap/data/api/flight_route_search_api.dart';
 import 'package:flymap/data/local/airlines_database.dart';
 import 'package:flymap/data/local/airports_database.dart';
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight_summary.dart';
+import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:latlong2/latlong.dart';
 
 abstract interface class FlightSearchRepository {
   Future<FlightSummary> lookupFlightByNumber(String flightNumber);
 
+  Future<List<FlightSummary>> searchFlightsByNumber(String flightNumber);
+
+  Future<List<FlightSummary>> searchFlightsByRoute({
+    required String departureCode,
+    required String arrivalCode,
+  });
+
   Future<Map<String, dynamic>> buildFlightRoutePreview({
     required String flightNumber,
+    String? fr24Id,
+    String? origCode,
+    String? destCode,
     required int placesLimit,
     required int regionsLimit,
     String lang = 'en',
@@ -29,18 +42,25 @@ abstract interface class FlightSearchRepository {
 class ApiFlightSearchRepository implements FlightSearchRepository {
   ApiFlightSearchRepository({
     required FlightLookupApi lookupApi,
+    required FlightNumberSearchApi numberSearchApi,
+    required FlightRouteSearchApi routeSearchApi,
     required FlightRoutePreviewApi routePreviewApi,
     required AirportsDatabase airportsDb,
     required AirlinesDatabase airlinesDb,
   }) : _lookupApi = lookupApi,
+       _numberSearchApi = numberSearchApi,
+       _routeSearchApi = routeSearchApi,
        _routePreviewApi = routePreviewApi,
        _airportsDb = airportsDb,
        _airlinesDb = airlinesDb;
 
   final FlightLookupApi _lookupApi;
+  final FlightNumberSearchApi _numberSearchApi;
+  final FlightRouteSearchApi _routeSearchApi;
   final FlightRoutePreviewApi _routePreviewApi;
   final AirportsDatabase _airportsDb;
   final AirlinesDatabase _airlinesDb;
+  final _logger = const Logger('FlightSearchRepository');
 
   @override
   Future<FlightSummary> lookupFlightByNumber(String flightNumber) async {
@@ -49,14 +69,39 @@ class ApiFlightSearchRepository implements FlightSearchRepository {
   }
 
   @override
+  Future<List<FlightSummary>> searchFlightsByNumber(String flightNumber) async {
+    final flights = await _numberSearchApi.searchFlightsByNumber(flightNumber);
+    return _enrichFlightSummaries(flights, logPrefix: 'numberMatch');
+  }
+
+  @override
+  Future<List<FlightSummary>> searchFlightsByRoute({
+    required String departureCode,
+    required String arrivalCode,
+  }) async {
+    final flights = await _routeSearchApi.searchFlightsByRoute(
+      departureCode: departureCode,
+      arrivalCode: arrivalCode,
+    );
+
+    return _enrichFlightSummaries(flights, logPrefix: 'routeMatch');
+  }
+
+  @override
   Future<Map<String, dynamic>> buildFlightRoutePreview({
     required String flightNumber,
+    String? fr24Id,
+    String? origCode,
+    String? destCode,
     required int placesLimit,
     required int regionsLimit,
     String lang = 'en',
   }) async {
     return await _routePreviewApi.buildFlightRoutePreview(
       flightNumber: flightNumber,
+      fr24Id: fr24Id,
+      origCode: origCode,
+      destCode: destCode,
       placesLimit: placesLimit,
       regionsLimit: regionsLimit,
       lang: lang,
@@ -129,5 +174,40 @@ class ApiFlightSearchRepository implements FlightSearchRepository {
 
     await _airlinesDb.initialize();
     return _airlinesDb.findNameByCode(normalizedCode);
+  }
+
+  Future<List<FlightSummary>> _enrichFlightSummaries(
+    List<Map<String, dynamic>> flights, {
+    required String logPrefix,
+  }) async {
+    final summaries = <FlightSummary>[];
+    for (final flight in flights) {
+      final fallbackFlightNumber = _normalizeCode(flight['flightNumber']);
+      if (fallbackFlightNumber == null) {
+        continue;
+      }
+      final summary = FlightSummary.fromApi(flight, fallbackFlightNumber);
+      final departure = await resolveAirport(
+        code: summary.origIcao ?? _normalizeCode(flight['origIata']),
+        fallbackName: 'Departure',
+      );
+      final arrival = await resolveAirport(
+        code: summary.destIcao ?? _normalizeCode(flight['destIata']),
+        fallbackName: 'Arrival',
+      );
+      final airlineName = await resolveAirlineNameByCode(summary.airlineCode);
+      _logger.log(
+        '$logPrefix flightNumber=${summary.flightNumber ?? "-"} fr24Id=${summary.fr24Id ?? "-"} airlineCode=${summary.airlineCode ?? "-"} airlineName=${airlineName ?? summary.airlineName ?? "-"} departure=${departure.displayCode} arrival=${arrival.displayCode}',
+      );
+
+      summaries.add(
+        summary.copyWith(
+          departure: departure,
+          arrival: arrival,
+          airlineName: airlineName ?? summary.airlineName ?? '',
+        ),
+      );
+    }
+    return summaries;
   }
 }

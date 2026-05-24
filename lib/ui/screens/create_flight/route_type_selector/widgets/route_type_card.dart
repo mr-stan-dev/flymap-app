@@ -46,7 +46,7 @@ class RouteTypeCard extends StatelessWidget {
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.all(DsSpacing.lg),
+            padding: const EdgeInsets.all(DsSpacing.md),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(DsRadii.lg),
               border: Border.all(

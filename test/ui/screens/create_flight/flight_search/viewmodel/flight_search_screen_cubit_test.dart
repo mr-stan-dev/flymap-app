@@ -278,10 +278,7 @@ void main() {
 
         expect(cubit.state.step, CreateFlightStep.overview);
         expect(cubit.state.flightRoute, longHaulRoute);
-        expect(
-          cubit.state.overviewWarningTitle,
-          'This is approximate route',
-        );
+        expect(cubit.state.overviewWarningTitle, 'This is approximate route');
         expect(
           cubit.state.overviewWarningMessage,
           'Approximate routes may be inaccurate for long-haul flights. Use a real route with a flight number instead.',
@@ -327,7 +324,10 @@ void main() {
 
     test('preparePreview with pending unlock applies pro POI slice', () async {
       final pois = _routePoiSummaries(120);
-      routeOverviewUseCase.routeOverview = _routeOverviewFor(_route(), topPois: pois);
+      routeOverviewUseCase.routeOverview = _routeOverviewFor(
+        _route(),
+        topPois: pois,
+      );
       cubit.setStateForTest(
         FlightPreviewState.initial().copyWith(hasPendingFlightUnlock: true),
       );
@@ -740,6 +740,7 @@ class _FakeBuildFlightRoutePreviewUseCase
   @override
   Future<FlightRoutePreviewResult> call({
     required String flightNumber,
+    String? fr24Id,
     String? origCode,
     String? destCode,
     required String lang,
@@ -752,6 +753,9 @@ class _UnusedFlightSearchRepository implements FlightSearchRepository {
   @override
   Future<Map<String, dynamic>> buildFlightRoutePreview({
     required String flightNumber,
+    String? fr24Id,
+    String? origCode,
+    String? destCode,
     required int placesLimit,
     required int regionsLimit,
     String lang = 'en',
@@ -761,6 +765,11 @@ class _UnusedFlightSearchRepository implements FlightSearchRepository {
 
   @override
   Future<FlightSummary> lookupFlightByNumber(String flightNumber) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<FlightSummary>> searchFlightsByNumber(String flightNumber) {
     throw UnimplementedError();
   }
 
@@ -775,6 +784,14 @@ class _UnusedFlightSearchRepository implements FlightSearchRepository {
 
   @override
   Future<String?> resolveAirlineNameByCode(String? code) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<FlightSummary>> searchFlightsByRoute({
+    required String departureCode,
+    required String arrivalCode,
+  }) {
     throw UnimplementedError();
   }
 }

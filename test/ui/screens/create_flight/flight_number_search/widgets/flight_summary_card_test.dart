@@ -11,9 +11,7 @@ void main() {
     LocaleSettings.setLocaleSync(AppLocale.en);
   });
 
-  testWidgets('prefers actual FR24 distance and duration when available', (
-    tester,
-  ) async {
+  testWidgets('shows route endpoints without metrics footer', (tester) async {
     const departure = Airport(
       name: 'Abu Dhabi International Airport',
       city: 'Abu Dhabi',
@@ -45,14 +43,15 @@ void main() {
 
     await tester.pumpWidget(_testApp(summary: summary));
 
-    expect(find.text('11120 km'), findsOneWidget);
-    expect(find.text('13h 45m'), findsOneWidget);
-    expect(find.textContaining('Based on same flight on'), findsOneWidget);
+    expect(find.text('EY22'), findsOneWidget);
+    expect(find.text('AUH'), findsOneWidget);
+    expect(find.text('JFK'), findsOneWidget);
+    expect(find.text('11120 km'), findsNothing);
+    expect(find.text('13h 45m'), findsNothing);
+    expect(find.textContaining('Based on same flight on'), findsNothing);
   });
 
-  testWidgets('falls back to estimated values when actual metrics are absent', (
-    tester,
-  ) async {
+  testWidgets('stays compact when no metrics are present', (tester) async {
     const departure = Airport(
       name: 'Heathrow Airport',
       city: 'London',
@@ -81,8 +80,45 @@ void main() {
 
     await tester.pumpWidget(_testApp(summary: summary));
 
-    expect(find.text('347 km'), findsOneWidget);
-    expect(find.text('54m'), findsOneWidget);
+    expect(find.text('BA304'), findsOneWidget);
+    expect(find.text('LHR'), findsOneWidget);
+    expect(find.text('CDG'), findsOneWidget);
+    expect(find.text('347 km'), findsNothing);
+    expect(find.text('54m'), findsNothing);
+  });
+
+  testWidgets('shows airline code when airline name is missing', (tester) async {
+    const departure = Airport(
+      name: 'London Luton Airport',
+      city: 'London',
+      countryCode: 'GB',
+      latLon: LatLng(51.8747, -0.3683),
+      iataCode: 'LTN',
+      icaoCode: 'EGGW',
+      wikipediaUrl: '',
+    );
+    const arrival = Airport(
+      name: 'Leonardo da Vinci International Airport',
+      city: 'Rome',
+      countryCode: 'IT',
+      latLon: LatLng(41.8003, 12.2389),
+      iataCode: 'FCO',
+      icaoCode: 'LIRF',
+      wikipediaUrl: '',
+    );
+    const summary = FlightSummary(
+      flightNumber: 'W46004',
+      airlineCode: 'WMT',
+      origIcao: 'EGGW',
+      destIcao: 'LIRF',
+      departure: departure,
+      arrival: arrival,
+    );
+
+    await tester.pumpWidget(_testApp(summary: summary));
+
+    expect(find.text('WMT'), findsOneWidget);
+    expect(find.text('W46004'), findsOneWidget);
   });
 }
 

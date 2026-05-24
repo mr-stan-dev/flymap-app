@@ -22,6 +22,10 @@ class AirlinesDatabase {
   Future<void>? _initializing;
 
   AirlinesDatabase._();
+  AirlinesDatabase.test({Iterable<Airline> seedAirlines = const []}) {
+    _airlines.addAll(seedAirlines);
+    _isInitialized = true;
+  }
 
   /// Get singleton instance
   static AirlinesDatabase get instance {

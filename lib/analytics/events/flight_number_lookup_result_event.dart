@@ -4,6 +4,13 @@ enum FlightNumberLookupResult {
   success('success'),
   notFound('not_found'),
   providerUnavailable('provider_unavailable'),
+  providerTimeout('provider_timeout'),
+  providerInvalidResponse('provider_invalid_response'),
+  invalidArgument('invalid_argument'),
+  permissionDenied('permission_denied'),
+  resourceExhausted('resource_exhausted'),
+  deadlineExceeded('deadline_exceeded'),
+  internal('internal'),
   failed('failed');
 
   const FlightNumberLookupResult(this.analyticsValue);

@@ -46,6 +46,7 @@ class FlightPreviewScreen extends StatelessWidget {
         departure: args.departure,
         arrival: args.arrival,
         flightNumber: args.flightNumber,
+        fr24Id: args.fr24Id,
         hasPendingFlightUnlock: args.hasPendingFlightUnlock,
         connectivityChecker: GetIt.I.get<ConnectivityChecker>(),
         getRouteOverviewUseCase: GetIt.I.get<GetRouteOverviewUseCase>(),

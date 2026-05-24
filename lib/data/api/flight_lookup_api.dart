@@ -4,12 +4,11 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flymap/logger.dart';
 
 class FlightLookupApi {
-  FlightLookupApi({FirebaseFunctions? functions})
-    : _functions = functions ?? FirebaseFunctions.instance;
+  FlightLookupApi({FirebaseFunctions? functions}) : _functions = functions;
 
   static const _function = 'lookup_flight_by_number';
 
-  final FirebaseFunctions _functions;
+  final FirebaseFunctions? _functions;
   final _logger = const Logger('FlightLookupApi');
 
   Future<Map<String, dynamic>> lookupFlightByNumber(String flightNumber) async {
@@ -19,7 +18,8 @@ class FlightLookupApi {
     }
     _logger.log('callable=$_function flightNumber=$normalizedFlightNumber');
     try {
-      final result = await _functions.httpsCallable(_function).call({
+      final functions = _functions ?? FirebaseFunctions.instance;
+      final result = await functions.httpsCallable(_function).call({
         'flightNumber': normalizedFlightNumber,
       });
       final decoded = _decodeFunctionData(result.data);

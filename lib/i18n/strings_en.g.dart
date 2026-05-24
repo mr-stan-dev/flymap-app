@@ -765,6 +765,7 @@ class TranslationsCreateFlightEn {
 	late final TranslationsCreateFlightRouteTypeSelectorEn routeTypeSelector = TranslationsCreateFlightRouteTypeSelectorEn.internal(_root);
 	late final TranslationsCreateFlightProAccessEn proAccess = TranslationsCreateFlightProAccessEn.internal(_root);
 	late final TranslationsCreateFlightFlightNumberSearchEn flightNumberSearch = TranslationsCreateFlightFlightNumberSearchEn.internal(_root);
+	late final TranslationsCreateFlightRealRouteAirportSearchEn realRouteAirportSearch = TranslationsCreateFlightRealRouteAirportSearchEn.internal(_root);
 	late final TranslationsCreateFlightSearchEn search = TranslationsCreateFlightSearchEn.internal(_root);
 	late final TranslationsCreateFlightMapPreviewEn mapPreview = TranslationsCreateFlightMapPreviewEn.internal(_root);
 	late final TranslationsCreateFlightOverviewEn overview = TranslationsCreateFlightOverviewEn.internal(_root);
@@ -1850,20 +1851,20 @@ class TranslationsCreateFlightRouteTypeSelectorEn {
 	/// en: 'Approximate route'
 	String get basicTitle => 'Approximate route';
 
-	/// en: 'By airports'
-	String get basicSubtitle => 'By airports';
+	/// en: 'From airports'
+	String get basicSubtitle => 'From airports';
 
-	/// en: 'Works well for short and mid-haul flights.'
-	String get basicDescription => 'Works well for short and mid-haul flights.';
+	/// en: 'Works well for short and many mid-haul flights.'
+	String get basicDescription => 'Works well for short and many mid-haul flights.';
 
 	/// en: 'Real route'
 	String get proTitle => 'Real route';
 
-	/// en: 'By flight number'
-	String get proSubtitle => 'By flight number';
+	/// en: 'From recent flights'
+	String get proSubtitle => 'From recent flights';
 
-	/// en: 'Based on recent historical flight data'
-	String get proDescription => 'Based on recent historical flight data';
+	/// en: 'Built from the most recently recorded route for the same flight.'
+	String get proDescription => 'Built from the most recently recorded route for the same flight.';
 
 	/// en: 'Most accurate'
 	String get mostAccurate => 'Most accurate';
@@ -1913,11 +1914,26 @@ class TranslationsCreateFlightFlightNumberSearchEn {
 	/// en: 'Searching your flight'
 	String get loading => 'Searching your flight';
 
-	/// en: 'We couldn't find your flight. Edit number or find by airports'
-	String get error => 'We couldn\'t find your flight. Edit number or find by airports';
+	/// en: 'Enter a valid flight number like BA117.'
+	String get invalidFormatError => 'Enter a valid flight number like BA117.';
 
-	/// en: 'Find by Airports'
-	String get findByAirports => 'Find by Airports';
+	/// en: 'We couldn't find that flight number. Make sure it is the same as on your tickets and try again, or find by airports.'
+	String get notFoundError => 'We couldn\'t find that flight number. Make sure it is the same as on your tickets and try again, or find by airports.';
+
+	/// en: 'Too many flight lookups right now. Please try again in a moment, or find by airports.'
+	String get rateLimitedError => 'Too many flight lookups right now. Please try again in a moment, or find by airports.';
+
+	/// en: 'Flight data is temporarily unavailable. Please try again in a moment, or find by airports.'
+	String get providerUnavailableError => 'Flight data is temporarily unavailable. Please try again in a moment, or find by airports.';
+
+	/// en: 'Something went wrong while looking up this flight. Please try again, or find by airports.'
+	String get unexpectedError => 'Something went wrong while looking up this flight. Please try again, or find by airports.';
+
+	/// en: 'Or enter Airports'
+	String get findByAirports => 'Or enter Airports';
+
+	/// en: 'Find by airports'
+	String get airportsFallbackButton => 'Find by airports';
 
 	/// en: 'Confirm flight'
 	String get confirmTitle => 'Confirm flight';
@@ -1927,6 +1943,60 @@ class TranslationsCreateFlightFlightNumberSearchEn {
 
 	/// en: '* Based on the most recent recorded route for the same flight'
 	String get basedOnSameFlightOn => '* Based on the most recent recorded route for the same flight';
+}
+
+// Path: createFlight.realRouteAirportSearch
+class TranslationsCreateFlightRealRouteAirportSearchEn {
+	TranslationsCreateFlightRealRouteAirportSearchEn.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Flight by airports'
+	String get title => 'Flight by airports';
+
+	/// en: 'Choose departure and arrival airports to look up recent real flights on this route.'
+	String get subtitle => 'Choose departure and arrival airports to look up recent real flights on this route.';
+
+	/// en: 'Search recent flights'
+	String get searchAction => 'Search recent flights';
+
+	/// en: 'Looking up recent real flights'
+	String get loading => 'Looking up recent real flights';
+
+	/// en: 'This can take a few seconds while we check recent route history.'
+	String get loadingHint => 'This can take a few seconds while we check recent route history.';
+
+	/// en: 'Sorry, we couldn't find any flights from $departure to $arrival.'
+	String sorryNoFlightFromTo({required Object departure, required Object arrival}) => 'Sorry, we couldn\'t find any flights from ${departure} to ${arrival}.';
+
+	/// en: 'We couldn't find recent flights between these airports'
+	String get emptyTitle => 'We couldn\'t find recent flights between these airports';
+
+	/// en: 'Make sure you selected the same departure and arrival airports as on your flight ticket.'
+	String get emptyResults => 'Make sure you selected the same departure and arrival airports as on your flight ticket.';
+
+	/// en: 'Too many flight searches right now. Please try again in a moment.'
+	String get rateLimitedError => 'Too many flight searches right now. Please try again in a moment.';
+
+	/// en: 'Real-flight data is temporarily unavailable. Please try again in a moment.'
+	String get providerUnavailableError => 'Real-flight data is temporarily unavailable. Please try again in a moment.';
+
+	/// en: 'Something went wrong while searching this route. Please try again.'
+	String get unexpectedError => 'Something went wrong while searching this route. Please try again.';
+
+	/// en: 'Found 1 flight'
+	String get foundOneTitle => 'Found 1 flight';
+
+	/// en: 'Found $count flights'
+	String foundManyTitle({required Object count}) => 'Found ${count} flights';
+
+	/// en: 'Make sure these match the airports on your flight ticket.'
+	String get ticketMatchHint => 'Make sure these match the airports on your flight ticket.';
+
+	/// en: 'Find by flight number'
+	String get findByFlightNumber => 'Find by flight number';
 }
 
 // Path: createFlight.search
@@ -3227,11 +3297,11 @@ extension on Translations {
 			'createFlight.steps.wikipediaTitle' => 'Wikipedia articles',
 			'createFlight.routeTypeSelector.title' => 'New flight',
 			'createFlight.routeTypeSelector.basicTitle' => 'Approximate route',
-			'createFlight.routeTypeSelector.basicSubtitle' => 'By airports',
-			'createFlight.routeTypeSelector.basicDescription' => 'Works well for short and mid-haul flights.',
+			'createFlight.routeTypeSelector.basicSubtitle' => 'From airports',
+			'createFlight.routeTypeSelector.basicDescription' => 'Works well for short and many mid-haul flights.',
 			'createFlight.routeTypeSelector.proTitle' => 'Real route',
-			'createFlight.routeTypeSelector.proSubtitle' => 'By flight number',
-			'createFlight.routeTypeSelector.proDescription' => 'Based on recent historical flight data',
+			'createFlight.routeTypeSelector.proSubtitle' => 'From recent flights',
+			'createFlight.routeTypeSelector.proDescription' => 'Built from the most recently recorded route for the same flight.',
 			'createFlight.routeTypeSelector.mostAccurate' => 'Most accurate',
 			'createFlight.proAccess.subscriber' => 'Flymap Pro',
 			'createFlight.proAccess.subscriberBody' => 'This flight has full Pro access through your Flymap Pro subscription.',
@@ -3242,11 +3312,31 @@ extension on Translations {
 			'createFlight.flightNumberSearch.subtitle' => 'Enter a flight number (for example BA117).',
 			'createFlight.flightNumberSearch.hint' => 'e.g. BA117',
 			'createFlight.flightNumberSearch.loading' => 'Searching your flight',
-			'createFlight.flightNumberSearch.error' => 'We couldn\'t find your flight. Edit number or find by airports',
-			'createFlight.flightNumberSearch.findByAirports' => 'Find by Airports',
+			'createFlight.flightNumberSearch.invalidFormatError' => 'Enter a valid flight number like BA117.',
+			'createFlight.flightNumberSearch.notFoundError' => 'We couldn\'t find that flight number. Make sure it is the same as on your tickets and try again, or find by airports.',
+			'createFlight.flightNumberSearch.rateLimitedError' => 'Too many flight lookups right now. Please try again in a moment, or find by airports.',
+			'createFlight.flightNumberSearch.providerUnavailableError' => 'Flight data is temporarily unavailable. Please try again in a moment, or find by airports.',
+			'createFlight.flightNumberSearch.unexpectedError' => 'Something went wrong while looking up this flight. Please try again, or find by airports.',
+			'createFlight.flightNumberSearch.findByAirports' => 'Or enter Airports',
+			'createFlight.flightNumberSearch.airportsFallbackButton' => 'Find by airports',
 			'createFlight.flightNumberSearch.confirmTitle' => 'Confirm flight',
 			'createFlight.flightNumberSearch.foundTitle' => 'We found your flight',
 			'createFlight.flightNumberSearch.basedOnSameFlightOn' => '* Based on the most recent recorded route for the same flight',
+			'createFlight.realRouteAirportSearch.title' => 'Flight by airports',
+			'createFlight.realRouteAirportSearch.subtitle' => 'Choose departure and arrival airports to look up recent real flights on this route.',
+			'createFlight.realRouteAirportSearch.searchAction' => 'Search recent flights',
+			'createFlight.realRouteAirportSearch.loading' => 'Looking up recent real flights',
+			'createFlight.realRouteAirportSearch.loadingHint' => 'This can take a few seconds while we check recent route history.',
+			'createFlight.realRouteAirportSearch.sorryNoFlightFromTo' => ({required Object departure, required Object arrival}) => 'Sorry, we couldn\'t find any flights from ${departure} to ${arrival}.',
+			'createFlight.realRouteAirportSearch.emptyTitle' => 'We couldn\'t find recent flights between these airports',
+			'createFlight.realRouteAirportSearch.emptyResults' => 'Make sure you selected the same departure and arrival airports as on your flight ticket.',
+			'createFlight.realRouteAirportSearch.rateLimitedError' => 'Too many flight searches right now. Please try again in a moment.',
+			'createFlight.realRouteAirportSearch.providerUnavailableError' => 'Real-flight data is temporarily unavailable. Please try again in a moment.',
+			'createFlight.realRouteAirportSearch.unexpectedError' => 'Something went wrong while searching this route. Please try again.',
+			'createFlight.realRouteAirportSearch.foundOneTitle' => 'Found 1 flight',
+			'createFlight.realRouteAirportSearch.foundManyTitle' => ({required Object count}) => 'Found ${count} flights',
+			'createFlight.realRouteAirportSearch.ticketMatchHint' => 'Make sure these match the airports on your flight ticket.',
+			'createFlight.realRouteAirportSearch.findByFlightNumber' => 'Find by flight number',
 			'createFlight.search.departureHint' => 'Search departure airport',
 			'createFlight.search.arrivalHint' => 'Search arrival airport',
 			'createFlight.search.removeFavorite' => 'Remove favorite',
@@ -3491,6 +3581,8 @@ extension on Translations {
 			'flight.dashboard.ageMinutes' => ({required Object minutes}) => '${minutes} m ago',
 			'flight.dashboard.signalGood' => 'Good',
 			'flight.dashboard.signalPoor' => 'Poor',
+			_ => null,
+		} ?? switch (path) {
 			'flight.dashboard.signalBad' => 'Bad',
 			'flight.dashboard.signalSearching' => 'Searching',
 			'flight.dashboard.gpsQuality' => ({required Object quality}) => 'GPS ${quality}',
@@ -3511,8 +3603,6 @@ extension on Translations {
 			'flight.dashboard.flightPhaseTakeoffRoll' => 'Takeoff roll',
 			'flight.dashboard.flightPhaseLandingRoll' => 'Landing roll',
 			'flight.dashboard.flightPhaseAscending' => 'Ascending',
-			_ => null,
-		} ?? switch (path) {
 			'flight.dashboard.flightPhaseCruising' => 'Cruising',
 			'flight.dashboard.flightPhaseDescending' => 'Descending',
 			'flight.dashboard.acquiringGpsSignal' => 'Acquiring GPS signal',

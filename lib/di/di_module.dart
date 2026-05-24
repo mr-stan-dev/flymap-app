@@ -5,8 +5,10 @@ import 'package:flymap/crashlytics/app_crashlytics_initializer.dart';
 import 'package:flymap/data/api/feedback_api.dart';
 import 'package:flymap/data/api/flight_info_api.dart';
 import 'package:flymap/data/api/flight_lookup_api.dart';
+import 'package:flymap/data/api/flight_number_search_api.dart';
 import 'package:flymap/data/api/mapbox_env_config.dart';
 import 'package:flymap/data/api/flight_route_preview_api.dart';
+import 'package:flymap/data/api/flight_route_search_api.dart';
 import 'package:flymap/data/api/mapbox_static_image_api.dart';
 import 'package:flymap/data/api/route_overview_api.dart';
 import 'package:flymap/data/api/route_places_api.dart';
@@ -64,8 +66,10 @@ import 'package:flymap/domain/usecase/download_region_wiki_articles_use_case.dar
 import 'package:flymap/domain/usecase/download_wikipedia_articles_use_case.dart';
 import 'package:flymap/domain/usecase/get_flight_info_use_case.dart';
 import 'package:flymap/domain/usecase/lookup_flight_by_number_use_case.dart';
+import 'package:flymap/domain/usecase/search_flights_by_number_use_case.dart';
 import 'package:flymap/domain/usecase/build_flight_route_preview_use_case.dart';
 import 'package:flymap/domain/usecase/generate_share_image_use_case.dart';
+import 'package:flymap/domain/usecase/search_flights_by_route_use_case.dart';
 
 import 'package:flymap/domain/usecase/get_place_info_use_case.dart';
 import 'package:flymap/domain/usecase/get_route_preview_use_case.dart';
@@ -131,6 +135,8 @@ class DiModule {
       () => RouteOverviewApi(httpClient: i.get()),
     );
     i.registerLazySingleton<FlightLookupApi>(() => FlightLookupApi());
+    i.registerLazySingleton<FlightNumberSearchApi>(() => FlightNumberSearchApi());
+    i.registerLazySingleton<FlightRouteSearchApi>(() => FlightRouteSearchApi());
     i.registerLazySingleton<FlightRoutePreviewApi>(
       () => FlightRoutePreviewApi(),
     );
@@ -161,6 +167,8 @@ class DiModule {
     i.registerLazySingleton<FlightSearchRepository>(
       () => ApiFlightSearchRepository(
         lookupApi: i.get(),
+        numberSearchApi: i.get(),
+        routeSearchApi: i.get(),
         routePreviewApi: i.get(),
         airportsDb: i.get(),
         airlinesDb: i.get(),
@@ -169,8 +177,14 @@ class DiModule {
     i.registerLazySingleton<LookupFlightByNumberUseCase>(
       () => LookupFlightByNumberUseCase(repository: i.get()),
     );
+    i.registerLazySingleton<SearchFlightsByNumberUseCase>(
+      () => SearchFlightsByNumberUseCase(repository: i.get()),
+    );
     i.registerLazySingleton<BuildFlightRoutePreviewUseCase>(
       () => BuildFlightRoutePreviewUseCase(repository: i.get()),
+    );
+    i.registerLazySingleton<SearchFlightsByRouteUseCase>(
+      () => SearchFlightsByRouteUseCase(repository: i.get()),
     );
     i.registerLazySingleton<MapboxEnvConfig>(MapboxEnvConfig.fromEnvironment);
 

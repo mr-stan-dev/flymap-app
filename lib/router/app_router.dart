@@ -9,6 +9,7 @@ import 'package:flymap/ui/screens/create_flight/airports_search/airports_search_
 import 'package:flymap/ui/screens/create_flight/flight_number_search/flight_number_search_screen.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/flight_preview_args.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/flight_preview_screen.dart';
+import 'package:flymap/ui/screens/create_flight/real_route_airport_search/real_route_airport_search_screen.dart';
 import 'package:flymap/ui/screens/create_flight/route_type_selector/route_type_selector_screen.dart';
 import 'package:flymap/ui/screens/feedback/feedback_screen.dart';
 import 'package:flymap/ui/screens/feedback/feedback_screen_args.dart';
@@ -30,6 +31,8 @@ class AppRouter {
   static const String airportsSearchRoute = '/flight-search';
   static const String routeTypeSelectorRoute = '/route-type-selector';
   static const String flightNumberSearchRoute = '/flight-number-selector';
+  static const String realRouteAirportSearchRoute =
+      '/real-route-airport-search';
   static const String flightPreviewRoute = '/flight-preview';
   static const String flightRoute = '/flight';
   static const String shareImageRoute = '/share-image';
@@ -86,6 +89,19 @@ class AppRouter {
         ),
 
         GoRoute(
+          path: realRouteAirportSearchRoute,
+          name: 'real-route-airport-search',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            final hasPendingFlightUnlock =
+                extra?['hasPendingFlightUnlock'] as bool? ?? false;
+            return RealRouteAirportSearchScreen(
+              hasPendingFlightUnlock: hasPendingFlightUnlock,
+            );
+          },
+        ),
+
+        GoRoute(
           path: routeTypeSelectorRoute,
           name: 'route-type-selector',
           builder: (context, state) => const FlightRouteTypeSelector(),
@@ -99,6 +115,7 @@ class AppRouter {
             final departure = extra?['departure'] as Airport?;
             final arrival = extra?['arrival'] as Airport?;
             final flightNumber = extra?['flightNumber'] as String?;
+            final fr24Id = extra?['fr24Id'] as String?;
             final hasPendingFlightUnlock =
                 extra?['hasPendingFlightUnlock'] as bool? ?? false;
             if (departure == null || arrival == null) {
@@ -109,6 +126,7 @@ class AppRouter {
                 departure: departure,
                 arrival: arrival,
                 flightNumber: flightNumber,
+                fr24Id: fr24Id,
                 hasPendingFlightUnlock: hasPendingFlightUnlock,
               ),
             );
@@ -228,8 +246,28 @@ class AppRouter {
     );
   }
 
+  static void replaceWithFlightNumberSelector(
+    BuildContext context, {
+    bool hasPendingFlightUnlock = false,
+  }) {
+    context.pushReplacement(
+      flightNumberSearchRoute,
+      extra: {'hasPendingFlightUnlock': hasPendingFlightUnlock},
+    );
+  }
+
   static void goToRouteTypeSelector(BuildContext context) {
     context.push(routeTypeSelectorRoute);
+  }
+
+  static void goToRealRouteAirportSearch(
+    BuildContext context, {
+    bool hasPendingFlightUnlock = false,
+  }) {
+    context.push(
+      realRouteAirportSearchRoute,
+      extra: {'hasPendingFlightUnlock': hasPendingFlightUnlock},
+    );
   }
 
   static void goToRouteTypeSelectorFromOnboarding(BuildContext context) {
@@ -247,6 +285,7 @@ class AppRouter {
     required Airport departure,
     required Airport arrival,
     String? flightNumber,
+    String? fr24Id,
     bool hasPendingFlightUnlock = false,
   }) {
     final extra = <String, dynamic>{
@@ -256,6 +295,9 @@ class AppRouter {
     };
     if (flightNumber != null && flightNumber.trim().isNotEmpty) {
       extra['flightNumber'] = flightNumber;
+    }
+    if (fr24Id != null && fr24Id.trim().isNotEmpty) {
+      extra['fr24Id'] = fr24Id;
     }
     context.push(flightPreviewRoute, extra: extra);
   }

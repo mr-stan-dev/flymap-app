@@ -25,12 +25,16 @@ class BuildFlightRoutePreviewUseCase {
 
   Future<FlightRoutePreviewResult> call({
     required String flightNumber,
+    String? fr24Id,
     String? origCode,
     String? destCode,
     required String lang,
   }) async {
     final payload = await _repository.buildFlightRoutePreview(
       flightNumber: flightNumber,
+      fr24Id: fr24Id,
+      origCode: origCode,
+      destCode: destCode,
       placesLimit: placesLimit,
       regionsLimit: regionsLimit,
       lang: lang,

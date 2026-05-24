@@ -4,26 +4,25 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/crashlytics/app_crashlytics.dart';
-import 'package:flymap/domain/usecase/lookup_flight_by_number_use_case.dart';
+import 'package:flymap/domain/entity/flight_summary.dart';
+import 'package:flymap/domain/usecase/search_flights_by_number_use_case.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/repository/flight_search_repository.dart';
 
 import 'flight_number_search_state.dart';
+import 'flight_number_validator.dart';
 
 class FlightNumberSearchCubit extends Cubit<FlightNumberSearchState> {
   FlightNumberSearchCubit({
-    required LookupFlightByNumberUseCase lookupFlightByNumberUseCase,
-    required FlightSearchRepository flightSearchRepository,
+    required SearchFlightsByNumberUseCase searchFlightsByNumberUseCase,
     required AppAnalytics analytics,
     required AppCrashlytics crashlytics,
-  }) : _lookupFlightByNumberUseCase = lookupFlightByNumberUseCase,
-       _flightSearchRepository = flightSearchRepository,
+  }) : _searchFlightsByNumberUseCase = searchFlightsByNumberUseCase,
        _analytics = analytics,
        _crashlytics = crashlytics,
        super(const FlightNumberSearchInitial());
 
-  final LookupFlightByNumberUseCase _lookupFlightByNumberUseCase;
-  final FlightSearchRepository _flightSearchRepository;
+  final SearchFlightsByNumberUseCase _searchFlightsByNumberUseCase;
   final AppAnalytics _analytics;
   final AppCrashlytics _crashlytics;
 
@@ -34,27 +33,12 @@ class FlightNumberSearchCubit extends Cubit<FlightNumberSearchState> {
     emit(const FlightNumberSearchLoading());
 
     try {
-      final summary = await _lookupFlightByNumberUseCase(normalized);
+      final candidates = await _searchFlightsByNumberUseCase.call(normalized);
       _logLookupResult(result: FlightNumberLookupResult.success);
-      final departure = await _flightSearchRepository.resolveAirport(
-        code: summary.origIcao,
-        fallbackName: 'Departure',
-      );
-      final arrival = await _flightSearchRepository.resolveAirport(
-        code: summary.destIcao,
-        fallbackName: 'Arrival',
-      );
-
-      final airlineName = await _flightSearchRepository
-          .resolveAirlineNameByCode(summary.airlineCode);
-
       emit(
-        FlightNumberSearchSummaryLoaded(
-          summary: summary.copyWith(
-            departure: departure,
-            arrival: arrival,
-            airlineName: airlineName ?? '',
-          ),
+        FlightNumberSearchResultsLoaded(
+          candidates: candidates,
+          selectedCandidate: candidates.length == 1 ? candidates.single : null,
         ),
       );
     } catch (error) {
@@ -67,11 +51,21 @@ class FlightNumberSearchCubit extends Cubit<FlightNumberSearchState> {
         ),
       );
       emit(
-        FlightNumberSearchError(
-          message: t.createFlight.flightNumberSearch.error,
-        ),
+        FlightNumberSearchError(message: _lookupFailureMessage(failureResult)),
       );
     }
+  }
+
+  void selectCandidate(FlightSummary candidate) {
+    final currentState = state;
+    if (currentState is! FlightNumberSearchResultsLoaded) return;
+
+    emit(
+      FlightNumberSearchResultsLoaded(
+        candidates: currentState.candidates,
+        selectedCandidate: candidate,
+      ),
+    );
   }
 
   Future<void> confirmSummaryAndLoadRoute({
@@ -79,35 +73,36 @@ class FlightNumberSearchCubit extends Cubit<FlightNumberSearchState> {
   }) async {
     final normalized = _normalize(flightNumber);
     final currentState = state;
-    if (normalized == null ||
-        currentState is! FlightNumberSearchSummaryLoaded) {
+    if (normalized == null || currentState is! FlightNumberSearchResultsLoaded) {
+      return;
+    }
+
+    final selectedCandidate = currentState.selectedCandidate;
+    if (selectedCandidate == null ||
+        selectedCandidate.departure == null ||
+        selectedCandidate.arrival == null) {
       return;
     }
 
     emit(const FlightNumberSearchLoading());
 
     try {
-      final departure = await _flightSearchRepository.resolveAirport(
-        code: currentState.summary.origIcao,
-        fallbackName: 'Departure',
-      );
-      final arrival = await _flightSearchRepository.resolveAirport(
-        code: currentState.summary.destIcao,
-        fallbackName: 'Arrival',
-      );
-
       emit(
         FlightNumberSearchSuccess(
-          departure: departure,
-          arrival: arrival,
-          flightNumber: normalized,
+          departure: selectedCandidate.departure!,
+          arrival: selectedCandidate.arrival!,
+          flightNumber:
+              _normalize(selectedCandidate.flightNumber ?? normalized) ??
+              normalized,
+          fr24Id: selectedCandidate.fr24Id,
         ),
       );
     } catch (_) {
       emit(
         FlightNumberSearchError(
-          message: t.createFlight.flightNumberSearch.error,
-          summary: currentState.summary,
+          message: t.createFlight.flightNumberSearch.unexpectedError,
+          candidates: currentState.candidates,
+          selectedCandidate: currentState.selectedCandidate,
         ),
       );
     }
@@ -119,7 +114,10 @@ class FlightNumberSearchCubit extends Cubit<FlightNumberSearchState> {
 
   String? _normalize(String raw) {
     final normalized = raw.replaceAll(RegExp(r'\s+'), '').trim().toUpperCase();
-    return normalized.isEmpty ? null : normalized;
+    if (normalized.isEmpty || !FlightNumberValidator.isValid(normalized)) {
+      return null;
+    }
+    return normalized;
   }
 
   void _logLookupResult({required FlightNumberLookupResult result}) {
@@ -128,12 +126,47 @@ class FlightNumberSearchCubit extends Cubit<FlightNumberSearchState> {
 
   FlightNumberLookupResult _lookupFailureResult(Object error) {
     if (error is FirebaseFunctionsException) {
+      final reason = _lookupFailureReason(error.details);
       return switch (error.code) {
         'not-found' => FlightNumberLookupResult.notFound,
-        'unavailable' => FlightNumberLookupResult.providerUnavailable,
+        'unavailable' => switch (reason) {
+          'provider_timeout' => FlightNumberLookupResult.providerTimeout,
+          'provider_invalid_response' =>
+            FlightNumberLookupResult.providerInvalidResponse,
+          _ => FlightNumberLookupResult.providerUnavailable,
+        },
+        'invalid-argument' => FlightNumberLookupResult.invalidArgument,
+        'permission-denied' => FlightNumberLookupResult.permissionDenied,
+        'resource-exhausted' => FlightNumberLookupResult.resourceExhausted,
+        'deadline-exceeded' => FlightNumberLookupResult.deadlineExceeded,
+        'internal' => FlightNumberLookupResult.internal,
         _ => FlightNumberLookupResult.failed,
       };
     }
     return FlightNumberLookupResult.failed;
+  }
+
+  String _lookupFailureMessage(FlightNumberLookupResult result) {
+    final lookupT = t.createFlight.flightNumberSearch;
+    return switch (result) {
+      FlightNumberLookupResult.notFound => lookupT.notFoundError,
+      FlightNumberLookupResult.invalidArgument => lookupT.invalidFormatError,
+      FlightNumberLookupResult.resourceExhausted => lookupT.rateLimitedError,
+      FlightNumberLookupResult.providerUnavailable ||
+      FlightNumberLookupResult.providerTimeout ||
+      FlightNumberLookupResult.providerInvalidResponse =>
+        lookupT.providerUnavailableError,
+      _ => lookupT.unexpectedError,
+    };
+  }
+
+  String? _lookupFailureReason(Object? details) {
+    if (details is Map) {
+      final dynamic reason = details['reason'];
+      if (reason is String && reason.isNotEmpty) {
+        return reason;
+      }
+    }
+    return null;
   }
 }

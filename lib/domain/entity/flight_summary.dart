@@ -5,6 +5,7 @@ import 'package:flymap/domain/entity/flight_route_metrics.dart';
 class FlightSummary extends Equatable {
   const FlightSummary({
     required this.flightNumber,
+    this.fr24Id,
     required this.origIcao,
     required this.destIcao,
     this.airlineCode,
@@ -17,6 +18,7 @@ class FlightSummary extends Equatable {
   });
 
   final String? flightNumber;
+  final String? fr24Id;
   final String? origIcao;
   final String? destIcao;
   final String? airlineCode;
@@ -52,6 +54,7 @@ class FlightSummary extends Equatable {
     return FlightSummary(
       flightNumber:
           _toNonEmptyString(map['flightNumber']) ?? fallbackFlightNumber,
+      fr24Id: _toNonEmptyString(map['fr24Id']),
       origIcao: _toNonEmptyString(map['origIcao']),
       destIcao: _toNonEmptyString(map['destIcao']),
       airlineCode: _toNonEmptyString(map['airlineCode']),
@@ -64,6 +67,7 @@ class FlightSummary extends Equatable {
 
   FlightSummary copyWith({
     String? flightNumber,
+    String? fr24Id,
     String? origIcao,
     String? destIcao,
     String? airlineCode,
@@ -76,6 +80,7 @@ class FlightSummary extends Equatable {
   }) {
     return FlightSummary(
       flightNumber: flightNumber ?? this.flightNumber,
+      fr24Id: fr24Id ?? this.fr24Id,
       origIcao: origIcao ?? this.origIcao,
       destIcao: destIcao ?? this.destIcao,
       airlineCode: airlineCode ?? this.airlineCode,
@@ -142,6 +147,7 @@ class FlightSummary extends Equatable {
   @override
   List<Object?> get props => [
     flightNumber,
+    fr24Id,
     origIcao,
     destIcao,
     airlineCode,

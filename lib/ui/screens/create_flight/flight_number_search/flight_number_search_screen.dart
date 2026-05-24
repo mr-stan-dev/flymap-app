@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flymap/domain/entity/flight_summary.dart';
+import 'package:flymap/domain/usecase/search_flights_by_number_use_case.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/router/app_router.dart';
+import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/theme/app_theme_ext.dart';
 import 'package:get_it/get_it.dart';
+
 import 'viewmodel/flight_number_search_cubit.dart';
 import 'viewmodel/flight_number_search_state.dart';
+import 'viewmodel/flight_number_validator.dart';
 import 'widgets/flight_summary_card.dart';
-import 'package:flymap/ui/design_system/design_system.dart';
+import 'widgets/search_fallback_action.dart';
 
 class FlightNumberSearchScreen extends StatefulWidget {
   const FlightNumberSearchScreen({
@@ -25,6 +30,13 @@ class FlightNumberSearchScreen extends StatefulWidget {
 class _FlightNumberSearchScreenState extends State<FlightNumberSearchScreen> {
   final TextEditingController _controller = TextEditingController();
 
+  void _goToAirportSearch() {
+    AppRouter.goToRealRouteAirportSearch(
+      context,
+      hasPendingFlightUnlock: widget.hasPendingFlightUnlock,
+    );
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -35,8 +47,7 @@ class _FlightNumberSearchScreenState extends State<FlightNumberSearchScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => FlightNumberSearchCubit(
-        lookupFlightByNumberUseCase: GetIt.I.get(),
-        flightSearchRepository: GetIt.I.get(),
+        searchFlightsByNumberUseCase: GetIt.I.get<SearchFlightsByNumberUseCase>(),
         analytics: GetIt.I.get(),
         crashlytics: GetIt.I.get(),
       ),
@@ -48,6 +59,7 @@ class _FlightNumberSearchScreenState extends State<FlightNumberSearchScreen> {
               departure: state.departure,
               arrival: state.arrival,
               flightNumber: state.flightNumber,
+              fr24Id: state.fr24Id,
               hasPendingFlightUnlock: widget.hasPendingFlightUnlock,
             );
           }
@@ -55,14 +67,30 @@ class _FlightNumberSearchScreenState extends State<FlightNumberSearchScreen> {
         builder: (context, state) {
           final cubit = context.read<FlightNumberSearchCubit>();
           final isLoading = state is FlightNumberSearchLoading;
+          final resultsState = state is FlightNumberSearchResultsLoaded
+              ? state
+              : null;
           final errorState = state is FlightNumberSearchError ? state : null;
           final isError = errorState != null;
-          final summary = state is FlightNumberSearchSummaryLoaded
-              ? state.summary
-              : errorState?.summary;
+          final candidates = resultsState?.candidates ??
+              errorState?.candidates ??
+              const <FlightSummary>[];
+          final selectedCandidate =
+              resultsState?.selectedCandidate ?? errorState?.selectedCandidate;
+          final singleCandidate =
+              candidates.length == 1 ? candidates.single : null;
+          final showInitialFindByAirports =
+              state is FlightNumberSearchInitial && !isLoading;
 
           final flightNumber = _controller.text.trim();
-          final canContinue = flightNumber.isNotEmpty && !isLoading;
+          final hasInput = flightNumber.isNotEmpty;
+          final isFlightNumberValid =
+              FlightNumberValidator.isValid(flightNumber);
+          final canSearch = isFlightNumberValid && !isLoading;
+          final canContinue =
+              candidates.isNotEmpty && selectedCandidate != null && !isLoading;
+          final showValidationError =
+              hasInput && !isFlightNumberValid && candidates.isEmpty && !isError;
 
           final t = context.t.createFlight.flightNumberSearch;
 
@@ -79,21 +107,13 @@ class _FlightNumberSearchScreenState extends State<FlightNumberSearchScreen> {
               ),
             );
           } else if (isError) {
-            feedback = Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  errorState.message,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 16),
-                TertiaryButton(
-                  label: t.findByAirports,
-                  onPressed: () => AppRouter.goToFlightSearch(context),
-                  expand: false,
-                ),
-              ],
+            feedback = Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: SearchFallbackAction(
+                message: errorState.message,
+                actionLabel: t.airportsFallbackButton,
+                onPressed: _goToAirportSearch,
+              ),
             );
           }
 
@@ -111,29 +131,44 @@ class _FlightNumberSearchScreenState extends State<FlightNumberSearchScreen> {
                 decoration: InputDecoration(
                   hintText: t.hint,
                   border: const OutlineInputBorder(),
+                  errorText: showValidationError ? t.invalidFormatError : null,
                 ),
                 onChanged: (_) {
-                  if (summary != null || isError) {
+                  if (candidates.isNotEmpty || isError) {
                     cubit.clearSummary();
                   } else {
                     setState(() {});
                   }
                 },
                 onSubmitted: (_) {
-                  if (canContinue) {
-                    if (summary == null) {
+                  if (candidates.isEmpty) {
+                    if (canSearch) {
                       cubit.loadFlightSummary(flightNumber);
-                    } else {
-                      cubit.confirmSummaryAndLoadRoute(
-                        flightNumber: flightNumber,
-                      );
                     }
+                    return;
+                  }
+                  if (canContinue) {
+                    cubit.confirmSummaryAndLoadRoute(
+                      flightNumber: flightNumber,
+                    );
                   }
                 },
               ),
-              const SizedBox(height: 32),
+              if (showInitialFindByAirports) ...[
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TertiaryButton(
+                    label: t.findByAirports,
+                    onPressed: _goToAirportSearch,
+                    expand: false,
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ] else
+                const SizedBox(height: 24),
               if (feedback != null) feedback,
-              if (summary != null) ...[
+              if (singleCandidate != null) ...[
                 Text(
                   t.foundTitle,
                   style: context.textTheme.title24Medium.copyWith(
@@ -141,7 +176,32 @@ class _FlightNumberSearchScreenState extends State<FlightNumberSearchScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                FlightSummaryCard(summary: summary),
+                FlightSummaryCard(summary: singleCandidate),
+              ] else if (candidates.isNotEmpty) ...[
+                Text(
+                  t.confirmTitle,
+                  style: context.textTheme.title24Medium.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: candidates.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final candidate = candidates[index];
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => cubit.selectCandidate(candidate),
+                      child: _SelectableFlightSummaryCard(
+                        summary: candidate,
+                        isSelected: selectedCandidate == candidate,
+                      ),
+                    );
+                  },
+                ),
               ],
             ],
           );
@@ -154,25 +214,28 @@ class _FlightNumberSearchScreenState extends State<FlightNumberSearchScreen> {
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   children: [
-                    Expanded(child: content),
-                    if (!isLoading && (!isError || summary != null))
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: content,
+                      ),
+                    ),
+                    if (!isLoading && !isError)
                       SizedBox(
                         width: double.infinity,
                         child: PrimaryButton(
-                          label: summary == null
+                          label: candidates.isEmpty
                               ? context.t.common.search
                               : context.t.common.kContinue,
-                          onPressed: canContinue
-                              ? () {
-                                  if (summary == null) {
-                                    cubit.loadFlightSummary(flightNumber);
-                                  } else {
-                                    cubit.confirmSummaryAndLoadRoute(
-                                      flightNumber: flightNumber,
-                                    );
-                                  }
-                                }
-                              : null,
+                          onPressed: candidates.isEmpty
+                              ? (canSearch
+                                    ? () =>
+                                          cubit.loadFlightSummary(flightNumber)
+                                    : null)
+                              : (canContinue
+                                    ? () => cubit.confirmSummaryAndLoadRoute(
+                                          flightNumber: flightNumber,
+                                        )
+                                    : null),
                         ),
                       ),
                   ],
@@ -181,6 +244,47 @@ class _FlightNumberSearchScreenState extends State<FlightNumberSearchScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _SelectableFlightSummaryCard extends StatelessWidget {
+  const _SelectableFlightSummaryCard({
+    required this.summary,
+    required this.isSelected,
+  });
+
+  final FlightSummary summary;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSelected
+              ? colorScheme.primary
+              : colorScheme.outline.withValues(alpha: 0.2),
+          width: 2,
+        ),
+        color: isSelected
+            ? colorScheme.primary.withValues(alpha: 0.05)
+            : Colors.transparent,
+      ),
+      child: FlightSummaryCard(
+        summary: summary,
+        showBorder: false,
+        trailing: Icon(
+          isSelected ? Icons.check_circle : Icons.radio_button_unchecked_rounded,
+          size: 20,
+          color: isSelected
+              ? colorScheme.primary
+              : colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }

@@ -25,6 +25,7 @@ class PreviewPreparationDelegate {
     final departure = _cubit.departure;
     final arrival = _cubit.arrival;
     final flightNumber = _cubit.flightNumber;
+    final fr24Id = _cubit.fr24Id;
 
     try {
       final hasInternet = await _connectivityChecker.hasInternetConnectivity();
@@ -48,6 +49,7 @@ class PreviewPreparationDelegate {
       if (flightNumber != null && flightNumber.trim().isNotEmpty) {
         final result = await _buildFlightRoutePreviewUseCase.call(
           flightNumber: flightNumber,
+          fr24Id: fr24Id,
           origCode: departure.icaoCode,
           destCode: arrival.icaoCode,
           lang: AppLocalization.currentLanguageCode,

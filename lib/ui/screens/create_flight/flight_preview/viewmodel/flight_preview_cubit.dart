@@ -47,6 +47,7 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
     required this.departure,
     required this.arrival,
     this.flightNumber,
+    this.fr24Id,
     bool hasPendingFlightUnlock = false,
     required ConnectivityChecker connectivityChecker,
     required GetRouteOverviewUseCase getRouteOverviewUseCase,
@@ -104,6 +105,7 @@ class FlightPreviewCubit extends Cubit<FlightPreviewState> {
   final Airport departure;
   final Airport arrival;
   final String? flightNumber;
+  final String? fr24Id;
   late final PreviewPreparationDelegate _previewPreparationDelegate;
   late final MapAndStepNavigationDelegate _navigationDelegate;
   late final WikiSelectionDelegate _wikiSelectionDelegate;

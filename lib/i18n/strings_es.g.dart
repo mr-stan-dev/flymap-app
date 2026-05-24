@@ -328,6 +328,7 @@ class _TranslationsCreateFlightEs extends TranslationsCreateFlightEn {
 	@override late final _TranslationsCreateFlightRouteTypeSelectorEs routeTypeSelector = _TranslationsCreateFlightRouteTypeSelectorEs._(_root);
 	@override late final _TranslationsCreateFlightProAccessEs proAccess = _TranslationsCreateFlightProAccessEs._(_root);
 	@override late final _TranslationsCreateFlightFlightNumberSearchEs flightNumberSearch = _TranslationsCreateFlightFlightNumberSearchEs._(_root);
+	@override late final _TranslationsCreateFlightRealRouteAirportSearchEs realRouteAirportSearch = _TranslationsCreateFlightRealRouteAirportSearchEs._(_root);
 	@override late final _TranslationsCreateFlightSearchEs search = _TranslationsCreateFlightSearchEs._(_root);
 	@override late final _TranslationsCreateFlightMapPreviewEs mapPreview = _TranslationsCreateFlightMapPreviewEs._(_root);
 	@override late final _TranslationsCreateFlightOverviewEs overview = _TranslationsCreateFlightOverviewEs._(_root);
@@ -757,11 +758,11 @@ class _TranslationsCreateFlightRouteTypeSelectorEs extends TranslationsCreateFli
 	// Translations
 	@override String get title => 'Nuevo vuelo';
 	@override String get basicTitle => 'Ruta aproximada';
-	@override String get basicSubtitle => 'Por aeropuertos';
-	@override String get basicDescription => 'Funciona bien para vuelos cortos y de media distancia.';
+	@override String get basicSubtitle => 'Desde aeropuertos';
+	@override String get basicDescription => 'Funciona bien para vuelos cortos y muchos de media distancia.';
 	@override String get proTitle => 'Ruta real';
-	@override String get proSubtitle => 'Por número de vuelo';
-	@override String get proDescription => 'Basada en datos históricos recientes de vuelos';
+	@override String get proSubtitle => 'Desde vuelos recientes';
+	@override String get proDescription => 'Construida a partir de la ruta registrada más reciente del mismo vuelo.';
 	@override String get mostAccurate => 'Más precisa';
 }
 
@@ -790,11 +791,40 @@ class _TranslationsCreateFlightFlightNumberSearchEs extends TranslationsCreateFl
 	@override String get subtitle => 'Introduce un número de vuelo (por ejemplo BA117).';
 	@override String get hint => 'p. ej. BA117';
 	@override String get loading => 'Buscando tu vuelo';
-	@override String get error => 'No pudimos encontrar tu vuelo. Edita el número o búscalo por aeropuertos';
+	@override String get invalidFormatError => 'Introduce un número de vuelo válido, como BA117.';
+	@override String get notFoundError => 'No pudimos encontrar ese número de vuelo. Revísalo e inténtalo de nuevo o búscalo por aeropuertos.';
+	@override String get rateLimitedError => 'Hay demasiadas búsquedas de vuelos en este momento. Inténtalo de nuevo en un momento o búscalo por aeropuertos.';
+	@override String get providerUnavailableError => 'Los datos del vuelo no están disponibles temporalmente. Inténtalo de nuevo en un momento o búscalo por aeropuertos.';
+	@override String get unexpectedError => 'Se produjo un error al buscar este vuelo. Inténtalo de nuevo o búscalo por aeropuertos.';
 	@override String get findByAirports => 'Buscar por aeropuertos';
+	@override String get airportsFallbackButton => 'Buscar por aeropuertos';
 	@override String get confirmTitle => 'Confirmar vuelo';
 	@override String get foundTitle => 'Hemos encontrado tu vuelo';
 	@override String get basedOnSameFlightOn => '* Basado en la ruta registrada más reciente para el mismo vuelo';
+}
+
+// Path: createFlight.realRouteAirportSearch
+class _TranslationsCreateFlightRealRouteAirportSearchEs extends TranslationsCreateFlightRealRouteAirportSearchEn {
+	_TranslationsCreateFlightRealRouteAirportSearchEs._(TranslationsEs root) : this._root = root, super.internal(root);
+
+	final TranslationsEs _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Buscar vuelos reales por aeropuertos';
+	@override String get subtitle => 'Elige los aeropuertos de salida y llegada para buscar vuelos reales recientes en esta ruta.';
+	@override String get searchAction => 'Buscar vuelos recientes';
+	@override String get loading => 'Buscando vuelos reales recientes';
+	@override String get loadingHint => 'Esto puede tardar unos segundos mientras revisamos el historial reciente de la ruta.';
+	@override String sorryNoFlightFromTo({required Object departure, required Object arrival}) => 'Lo sentimos, no pudimos encontrar vuelos de ${departure} a ${arrival}.';
+	@override String get emptyTitle => 'No pudimos encontrar vuelos recientes entre estos aeropuertos';
+	@override String get emptyResults => 'Asegúrate de haber seleccionado los mismos aeropuertos de salida y llegada que aparecen en tu billete de vuelo.';
+	@override String get rateLimitedError => 'Hay demasiadas búsquedas de vuelos en este momento. Inténtalo de nuevo en un momento.';
+	@override String get providerUnavailableError => 'Los datos de vuelos reales no están disponibles temporalmente. Inténtalo de nuevo en un momento.';
+	@override String get unexpectedError => 'Se produjo un error al buscar esta ruta. Inténtalo de nuevo.';
+	@override String get foundOneTitle => 'Se encontró 1 vuelo';
+	@override String foundManyTitle({required Object count}) => 'Se encontraron ${count} vuelos';
+	@override String get ticketMatchHint => 'Asegúrate de que coincidan con los aeropuertos de tu billete de vuelo.';
+	@override String get findByFlightNumber => 'Buscar por número de vuelo';
 }
 
 // Path: createFlight.search
@@ -1485,11 +1515,11 @@ extension on TranslationsEs {
 			'createFlight.steps.wikipediaTitle' => 'Artículos de Wikipedia',
 			'createFlight.routeTypeSelector.title' => 'Nuevo vuelo',
 			'createFlight.routeTypeSelector.basicTitle' => 'Ruta aproximada',
-			'createFlight.routeTypeSelector.basicSubtitle' => 'Por aeropuertos',
-			'createFlight.routeTypeSelector.basicDescription' => 'Funciona bien para vuelos cortos y de media distancia.',
+			'createFlight.routeTypeSelector.basicSubtitle' => 'Desde aeropuertos',
+			'createFlight.routeTypeSelector.basicDescription' => 'Funciona bien para vuelos cortos y muchos de media distancia.',
 			'createFlight.routeTypeSelector.proTitle' => 'Ruta real',
-			'createFlight.routeTypeSelector.proSubtitle' => 'Por número de vuelo',
-			'createFlight.routeTypeSelector.proDescription' => 'Basada en datos históricos recientes de vuelos',
+			'createFlight.routeTypeSelector.proSubtitle' => 'Desde vuelos recientes',
+			'createFlight.routeTypeSelector.proDescription' => 'Construida a partir de la ruta registrada más reciente del mismo vuelo.',
 			'createFlight.routeTypeSelector.mostAccurate' => 'Más precisa',
 			'createFlight.proAccess.subscriber' => 'Flymap Pro',
 			'createFlight.proAccess.subscriberBody' => 'Este vuelo tiene acceso Pro completo mediante tu suscripción de Flymap Pro.',
@@ -1500,11 +1530,31 @@ extension on TranslationsEs {
 			'createFlight.flightNumberSearch.subtitle' => 'Introduce un número de vuelo (por ejemplo BA117).',
 			'createFlight.flightNumberSearch.hint' => 'p. ej. BA117',
 			'createFlight.flightNumberSearch.loading' => 'Buscando tu vuelo',
-			'createFlight.flightNumberSearch.error' => 'No pudimos encontrar tu vuelo. Edita el número o búscalo por aeropuertos',
+			'createFlight.flightNumberSearch.invalidFormatError' => 'Introduce un número de vuelo válido, como BA117.',
+			'createFlight.flightNumberSearch.notFoundError' => 'No pudimos encontrar ese número de vuelo. Revísalo e inténtalo de nuevo o búscalo por aeropuertos.',
+			'createFlight.flightNumberSearch.rateLimitedError' => 'Hay demasiadas búsquedas de vuelos en este momento. Inténtalo de nuevo en un momento o búscalo por aeropuertos.',
+			'createFlight.flightNumberSearch.providerUnavailableError' => 'Los datos del vuelo no están disponibles temporalmente. Inténtalo de nuevo en un momento o búscalo por aeropuertos.',
+			'createFlight.flightNumberSearch.unexpectedError' => 'Se produjo un error al buscar este vuelo. Inténtalo de nuevo o búscalo por aeropuertos.',
 			'createFlight.flightNumberSearch.findByAirports' => 'Buscar por aeropuertos',
+			'createFlight.flightNumberSearch.airportsFallbackButton' => 'Buscar por aeropuertos',
 			'createFlight.flightNumberSearch.confirmTitle' => 'Confirmar vuelo',
 			'createFlight.flightNumberSearch.foundTitle' => 'Hemos encontrado tu vuelo',
 			'createFlight.flightNumberSearch.basedOnSameFlightOn' => '* Basado en la ruta registrada más reciente para el mismo vuelo',
+			'createFlight.realRouteAirportSearch.title' => 'Buscar vuelos reales por aeropuertos',
+			'createFlight.realRouteAirportSearch.subtitle' => 'Elige los aeropuertos de salida y llegada para buscar vuelos reales recientes en esta ruta.',
+			'createFlight.realRouteAirportSearch.searchAction' => 'Buscar vuelos recientes',
+			'createFlight.realRouteAirportSearch.loading' => 'Buscando vuelos reales recientes',
+			'createFlight.realRouteAirportSearch.loadingHint' => 'Esto puede tardar unos segundos mientras revisamos el historial reciente de la ruta.',
+			'createFlight.realRouteAirportSearch.sorryNoFlightFromTo' => ({required Object departure, required Object arrival}) => 'Lo sentimos, no pudimos encontrar vuelos de ${departure} a ${arrival}.',
+			'createFlight.realRouteAirportSearch.emptyTitle' => 'No pudimos encontrar vuelos recientes entre estos aeropuertos',
+			'createFlight.realRouteAirportSearch.emptyResults' => 'Asegúrate de haber seleccionado los mismos aeropuertos de salida y llegada que aparecen en tu billete de vuelo.',
+			'createFlight.realRouteAirportSearch.rateLimitedError' => 'Hay demasiadas búsquedas de vuelos en este momento. Inténtalo de nuevo en un momento.',
+			'createFlight.realRouteAirportSearch.providerUnavailableError' => 'Los datos de vuelos reales no están disponibles temporalmente. Inténtalo de nuevo en un momento.',
+			'createFlight.realRouteAirportSearch.unexpectedError' => 'Se produjo un error al buscar esta ruta. Inténtalo de nuevo.',
+			'createFlight.realRouteAirportSearch.foundOneTitle' => 'Se encontró 1 vuelo',
+			'createFlight.realRouteAirportSearch.foundManyTitle' => ({required Object count}) => 'Se encontraron ${count} vuelos',
+			'createFlight.realRouteAirportSearch.ticketMatchHint' => 'Asegúrate de que coincidan con los aeropuertos de tu billete de vuelo.',
+			'createFlight.realRouteAirportSearch.findByFlightNumber' => 'Buscar por número de vuelo',
 			'createFlight.search.departureHint' => 'Buscar aeropuerto de salida',
 			'createFlight.search.arrivalHint' => 'Buscar aeropuerto de llegada',
 			'createFlight.search.removeFavorite' => 'Eliminar favorito',
@@ -1749,6 +1799,8 @@ extension on TranslationsEs {
 			'flight.dashboard.ageMinutes' => ({required Object minutes}) => 'hace ${minutes} min',
 			'flight.dashboard.signalGood' => 'Buena',
 			'flight.dashboard.signalPoor' => 'Baja',
+			_ => null,
+		} ?? switch (path) {
 			'flight.dashboard.signalBad' => 'Mala',
 			'flight.dashboard.signalSearching' => 'Buscando',
 			'flight.dashboard.gpsQuality' => ({required Object quality}) => 'GPS ${quality}',
@@ -1769,8 +1821,6 @@ extension on TranslationsEs {
 			'flight.dashboard.flightPhaseTakeoffRoll' => 'Carrera de despegue',
 			'flight.dashboard.flightPhaseLandingRoll' => 'Carrera de aterrizaje',
 			'flight.dashboard.flightPhaseAscending' => 'Ascendiendo',
-			_ => null,
-		} ?? switch (path) {
 			'flight.dashboard.flightPhaseCruising' => 'Crucero',
 			'flight.dashboard.flightPhaseDescending' => 'Descendiendo',
 			'flight.dashboard.acquiringGpsSignal' => 'Adquiriendo señal GPS',

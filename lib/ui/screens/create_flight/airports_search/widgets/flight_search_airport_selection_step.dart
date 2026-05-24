@@ -22,6 +22,7 @@ class FlightSearchAirportSelectionStep extends StatelessWidget {
     required this.popular,
     required this.results,
     required this.homeAirportCode,
+    this.continueLabel,
     required this.onSearchChanged,
     required this.onClearSearch,
     required this.onToggleFavoriteForSelected,
@@ -45,6 +46,7 @@ class FlightSearchAirportSelectionStep extends StatelessWidget {
   final List<Airport> popular;
   final List<Airport> results;
   final String homeAirportCode;
+  final String? continueLabel;
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onClearSearch;
   final VoidCallback onToggleFavoriteForSelected;
@@ -121,7 +123,7 @@ class FlightSearchAirportSelectionStep extends StatelessWidget {
             height: 52,
             child: PrimaryButton(
               onPressed: selectedAirport == null ? null : onContinue,
-              label: context.t.common.kContinue,
+              label: continueLabel ?? context.t.common.kContinue,
             ),
           ),
         ),

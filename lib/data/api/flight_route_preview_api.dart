@@ -5,33 +5,50 @@ import 'package:flymap/logger.dart';
 
 class FlightRoutePreviewApi {
   FlightRoutePreviewApi({FirebaseFunctions? functions})
-    : _functions = functions ?? FirebaseFunctions.instance;
+    : _functions = functions;
 
   static const _function = 'build_flight_route_preview';
 
-  final FirebaseFunctions _functions;
+  final FirebaseFunctions? _functions;
   final _logger = const Logger('FlightRoutePreviewApi');
 
   Future<Map<String, dynamic>> buildFlightRoutePreview({
     required String flightNumber,
+    String? fr24Id,
+    String? origCode,
+    String? destCode,
     required int placesLimit,
     required int regionsLimit,
     String lang = 'en',
   }) async {
     final normalizedFlightNumber = _normalizeFlightNumber(flightNumber);
+    final normalizedFr24Id = _normalizeFr24Id(fr24Id);
+    final normalizedOrigCode = _normalizeAirportCode(origCode);
+    final normalizedDestCode = _normalizeAirportCode(destCode);
     if (normalizedFlightNumber == null) {
       throw ArgumentError('flightNumber must be non-empty');
     }
     _logger.log(
-      'callable=$_function flightNumber=$normalizedFlightNumber placesLimit=$placesLimit regionsLimit=$regionsLimit lang=$lang',
+      'callable=$_function flightNumber=$normalizedFlightNumber fr24Id=${normalizedFr24Id ?? "-"} origCode=${normalizedOrigCode ?? "-"} destCode=${normalizedDestCode ?? "-"} placesLimit=$placesLimit regionsLimit=$regionsLimit lang=$lang',
     );
     try {
-      final result = await _functions.httpsCallable(_function).call({
+      final functions = _functions ?? FirebaseFunctions.instance;
+      final requestPayload = <String, dynamic>{
         'flightNumber': normalizedFlightNumber,
         'placesLimit': placesLimit,
         'regionsLimit': regionsLimit,
         'lang': lang,
-      });
+      };
+      if (normalizedFr24Id != null) {
+        requestPayload['fr24Id'] = normalizedFr24Id;
+      }
+      if (normalizedOrigCode != null) {
+        requestPayload['origCode'] = normalizedOrigCode;
+      }
+      if (normalizedDestCode != null) {
+        requestPayload['destCode'] = normalizedDestCode;
+      }
+      final result = await functions.httpsCallable(_function).call(requestPayload);
       final decoded = _decodeFunctionData(result.data);
       if (decoded is! Map) {
         throw const FormatException(
@@ -76,7 +93,7 @@ class FlightRoutePreviewApi {
       return payload;
     } catch (e) {
       _logger.error(
-        'failed callable=$_function flightNumber=$normalizedFlightNumber error=$e',
+        'failed callable=$_function flightNumber=$normalizedFlightNumber fr24Id=${normalizedFr24Id ?? "-"} error=$e',
       );
       rethrow;
     }
@@ -96,6 +113,18 @@ class FlightRoutePreviewApi {
   String? _normalizeFlightNumber(String? raw) {
     if (raw == null) return null;
     final value = raw.replaceAll(RegExp(r'\s+'), '').trim().toUpperCase();
+    return value.isEmpty ? null : value;
+  }
+
+  String? _normalizeFr24Id(String? raw) {
+    if (raw == null) return null;
+    final value = raw.trim();
+    return value.isEmpty ? null : value;
+  }
+
+  String? _normalizeAirportCode(String? raw) {
+    if (raw == null) return null;
+    final value = raw.trim().toUpperCase();
     return value.isEmpty ? null : value;
   }
 }

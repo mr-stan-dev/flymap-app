@@ -1,54 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/flight_summary.dart';
-import 'package:flymap/ui/map/map_utils.dart';
-import 'package:flymap/i18n/strings.g.dart';
 
 class FlightSummaryCard extends StatelessWidget {
   final FlightSummary summary;
+  final bool showBorder;
+  final Widget? trailing;
 
-  const FlightSummaryCard({super.key, required this.summary});
+  const FlightSummaryCard({
+    super.key,
+    required this.summary,
+    this.showBorder = true,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
-    final tOverview = context.t.createFlight.overview;
 
     final departure = summary.departure;
     final arrival = summary.arrival;
-
-    final hasCoords =
-        departure != null &&
-        arrival != null &&
-        departure.latLon.latitude != 0 &&
-        arrival.latLon.latitude != 0;
-
-    final actualDistanceKm = summary.actualDistanceKm;
-    final actualDurationMinutes = summary.actualDurationMinutes;
-    final historicalFlightDate = summary.historicalFlightDate;
-    final estimatedDistanceKm = hasCoords
-        ? MapUtils.distance(departure: departure, arrival: arrival)
-        : 0.0;
-    final distanceKm = actualDistanceKm != null && actualDistanceKm > 0
-        ? summary.displayActualDistanceKm ?? actualDistanceKm.round()
-        : estimatedDistanceKm;
-
-    // For FR24 historical lookups, actual duration is authoritative.
-    // Otherwise fall back to a simple airport-to-airport estimate.
-    final durationMinutes =
-        actualDurationMinutes != null && actualDurationMinutes > 0
-        ? summary.displayActualDurationMinutes ?? actualDurationMinutes
-        : estimatedDistanceKm > 0
-        ? (estimatedDistanceKm / 850 * 60 + 30).round()
-        : 0;
+    final airlineLabel = (summary.airlineName?.isNotEmpty == true)
+        ? summary.airlineName!
+        : (summary.airlineCode?.isNotEmpty == true ? summary.airlineCode! : null);
 
     return Card(
       margin: EdgeInsets.zero,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: colorScheme.outlineVariant, width: 1),
+        side: showBorder
+            ? BorderSide(color: colorScheme.outlineVariant, width: 1)
+            : BorderSide.none,
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -57,34 +41,47 @@ class FlightSummaryCard extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (summary.airlineName?.isNotEmpty == true)
-                  Text(
-                    summary.airlineName!,
-                    maxLines: 1,
-                    style: textTheme.titleLarge?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
+                Expanded(
+                  child: airlineLabel != null
+                      ? Text(
+                          airlineLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.titleLarge?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+                const SizedBox(width: 12),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        summary.flightNumber ?? '',
+                        style: textTheme.labelLarge?.copyWith(
+                          color: colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  )
-                else
-                  const SizedBox.shrink(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    summary.flightNumber ?? '',
-                    style: textTheme.labelLarge?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                    if (trailing != null) ...[
+                      const SizedBox(width: 8),
+                      trailing!,
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -119,48 +116,10 @@ class FlightSummaryCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (distanceKm > 0) ...[
-              const SizedBox(height: 24),
-              const Divider(height: 1),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _StatItem(
-                    icon: Icons.straighten,
-                    label: tOverview.routeSummaryDistanceLabel,
-                    value: '${distanceKm.round()} km',
-                  ),
-                  _StatItem(
-                    icon: Icons.access_time,
-                    label: tOverview.routeSummaryDurationLabel,
-                    value: _formatDuration(durationMinutes),
-                  ),
-                ],
-              ),
-              if (historicalFlightDate != null) ...[
-                const SizedBox(height: 14),
-                Text(
-                  context.t.createFlight.flightNumberSearch.basedOnSameFlightOn,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ],
           ],
         ),
       ),
     );
-  }
-
-  String _formatDuration(int totalMinutes) {
-    final hours = totalMinutes ~/ 60;
-    final minutes = totalMinutes % 60;
-    if (hours > 0) {
-      return '${hours}h ${minutes}m';
-    }
-    return '${minutes}m';
   }
 }
 
@@ -220,50 +179,6 @@ class _AirportInfo extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-      ],
-    );
-  }
-}
-
-class _StatItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _StatItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Column(
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 14, color: colorScheme.onSurfaceVariant),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: colorScheme.onSurface,
-          ),
-        ),
       ],
     );
   }
