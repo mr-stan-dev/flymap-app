@@ -602,6 +602,7 @@
       "dashboardTitle": "Begin your flight journey",
       "dashboardSubtitle": "Start to see your live dashboard",
       "checkInButton": "Start",
+      "checkInSuccess": "Flight started",
       "checkInError": "Could not start now. Please try again"
     },
     "info": {

@@ -2707,6 +2707,9 @@ class TranslationsFlightUpcomingEn {
 	/// en: 'Start'
 	String get checkInButton => 'Start';
 
+	/// en: 'Flight started'
+	String get checkInSuccess => 'Flight started';
+
 	/// en: 'Could not start now. Please try again'
 	String get checkInError => 'Could not start now. Please try again';
 }
@@ -3620,6 +3623,7 @@ extension on Translations {
 			'flight.upcoming.dashboardTitle' => 'Begin your flight journey',
 			'flight.upcoming.dashboardSubtitle' => 'Start to see your live dashboard',
 			'flight.upcoming.checkInButton' => 'Start',
+			'flight.upcoming.checkInSuccess' => 'Flight started',
 			'flight.upcoming.checkInError' => 'Could not start now. Please try again',
 			'flight.info.overviewTitle' => 'Overview',
 			'flight.info.overviewLoading' => 'Building route overview...',

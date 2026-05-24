@@ -602,6 +602,7 @@
       "dashboardTitle": "Empieza tu viaje en vuelo",
       "dashboardSubtitle": "Empieza a ver tu panel en vivo",
       "checkInButton": "Iniciar",
+      "checkInSuccess": "Vuelo iniciado",
       "checkInError": "No se pudo iniciar ahora. Inténtalo de nuevo"
     },
     "info": {

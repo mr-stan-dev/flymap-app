@@ -602,6 +602,7 @@
       "dashboardTitle": "Commencez votre voyage",
       "dashboardSubtitle": "Commencez pour voir votre tableau de bord en direct",
       "checkInButton": "Démarrer",
+      "checkInSuccess": "Vol démarré",
       "checkInError": "Impossible de démarrer maintenant. Veuillez réessayer"
     },
     "info": {

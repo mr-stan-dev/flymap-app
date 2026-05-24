@@ -1123,6 +1123,7 @@ class _TranslationsFlightUpcomingFr extends TranslationsFlightUpcomingEn {
 	@override String get dashboardTitle => 'Commencez votre voyage';
 	@override String get dashboardSubtitle => 'Commencez pour voir votre tableau de bord en direct';
 	@override String get checkInButton => 'Démarrer';
+	@override String get checkInSuccess => 'Vol démarré';
 	@override String get checkInError => 'Impossible de démarrer maintenant. Veuillez réessayer';
 }
 
@@ -1838,6 +1839,7 @@ extension on TranslationsFr {
 			'flight.upcoming.dashboardTitle' => 'Commencez votre voyage',
 			'flight.upcoming.dashboardSubtitle' => 'Commencez pour voir votre tableau de bord en direct',
 			'flight.upcoming.checkInButton' => 'Démarrer',
+			'flight.upcoming.checkInSuccess' => 'Vol démarré',
 			'flight.upcoming.checkInError' => 'Impossible de démarrer maintenant. Veuillez réessayer',
 			'flight.info.overviewTitle' => 'Aperçu',
 			'flight.info.overviewLoading' => 'Création de l’aperçu de l’itinéraire...',

@@ -29,6 +29,7 @@ import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_style_loading_view
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/widgets/flight_map_bottom_status_overlay.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/widgets/flight_map_gps_badge_overlay.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/widgets/flight_map_sun_event_hint_overlay.dart';
+import 'package:flymap/ui/screens/home/tabs/home/home_tab.dart';
 import 'package:get_it/get_it.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
@@ -474,13 +475,23 @@ class _FlightMapState extends State<FlightMap> {
 
   Future<void> _checkInFlight(BuildContext context) async {
     final ok = await context.read<FlightScreenCubit>().checkInFlight();
-    if (ok || !context.mounted) {
+    if (ok) {
+      homeRefreshNotifier.value = true;
+    }
+    if (!context.mounted) {
       return;
     }
+
+    final message = ok
+        ? context.t.flight.upcoming.checkInSuccess
+        : context.t.flight.upcoming.checkInError;
     final messenger = ScaffoldMessenger.maybeOf(context);
     messenger?.hideCurrentSnackBar();
     messenger?.showSnackBar(
-      SnackBar(content: Text(context.t.flight.upcoming.checkInError)),
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 

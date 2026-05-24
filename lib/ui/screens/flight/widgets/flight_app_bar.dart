@@ -6,6 +6,7 @@ import 'package:flymap/router/app_router.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/widgets/complete_flight_confirmation_dialog.dart';
 import 'package:flymap/ui/screens/flight/widgets/delete_flight_confirmation_dialog.dart';
+import 'package:flymap/ui/screens/home/tabs/home/home_tab.dart';
 import 'package:flymap/ui/theme/app_theme_ext.dart';
 import 'package:flymap/ui/widgets/pro_widgets.dart';
 import 'package:flymap/utils/route_utils.dart';
@@ -155,6 +156,7 @@ class FlightAppBar extends StatelessWidget {
             .read<FlightScreenCubit>()
             .completeFlight(deleteOfflineData: result.deleteOfflineData);
         if (!completed || !context.mounted) return;
+        homeRefreshNotifier.value = true;
         AppRouter.goHome(context);
         break;
     }

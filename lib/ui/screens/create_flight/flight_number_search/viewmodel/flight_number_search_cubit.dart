@@ -7,7 +7,6 @@ import 'package:flymap/crashlytics/app_crashlytics.dart';
 import 'package:flymap/domain/entity/flight_summary.dart';
 import 'package:flymap/domain/usecase/search_flights_by_number_use_case.dart';
 import 'package:flymap/i18n/strings.g.dart';
-import 'package:flymap/repository/flight_search_repository.dart';
 
 import 'flight_number_search_state.dart';
 import 'flight_number_validator.dart';
