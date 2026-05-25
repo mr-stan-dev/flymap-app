@@ -17,6 +17,7 @@ A concise, repeatable blueprint for building maintainable Flutter applications w
 - Use `flutter_bloc` with `Cubit` for feature state management.
 - Use `get_it` for dependency injection.
 - Use `go_router` for app routing.
+- Use `go_router` when route complexity justifies it; do not introduce it by default for simple tab-only flows.
 - Use `equatable` for entities, state classes, and other value objects where value equality matters.
 
 ## Project Structure
@@ -31,7 +32,19 @@ A concise, repeatable blueprint for building maintainable Flutter applications w
   - `ui/screens/<feature>/viewmodel/` for the feature Cubit and its separate state file.
   - `ui/screens/<feature>/widgets/` for feature-specific widgets.
   - `ui/widgets/`, `ui/theme/`, and `ui/design_system/` for shared UI building blocks.
+- Prefer a hybrid feature-first structure under `lib/`:
+  - `app/` for app bootstrap, DI modules, routing, and app-wide theme/config.
+  - `core/` for cross-cutting technical primitives such as networking, errors, pagination, result types, and shared base widgets.
+  - `shared/` for truly shared domain concepts and reusable data-layer building blocks.
+  - `features/<feature>/` for feature-owned code, typically split into `data/`, `domain/`, and `presentation/`.
+- Inside each feature:
+  - `data/` contains datasources, DTOs, mappers, and repository implementations.
+  - `domain/` contains entities, repository contracts, and use cases.
+  - `presentation/` contains pages, widgets, cubits, and states.
 - Keep feature folder boundaries consistent once a structure is chosen.
+- Do not use top-level horizontal folders such as global `domain/`, `data/`, or `repository/` for feature-specific code.
+- Only place code in `shared/` when the same business meaning and invariants are reused unchanged across multiple features.
+- If a model or use case is only similar in shape but different in behavior or lifecycle, keep it feature-owned.
 
 ## State Management
 - Use `Cubit` from `flutter_bloc` for feature state management.
@@ -41,6 +54,7 @@ A concise, repeatable blueprint for building maintainable Flutter applications w
 - Keep each Cubit's states in a separate `*_state.dart` file.
 - Avoid overloading one state object with unrelated concerns.
 - Prefer one Cubit per screen, flow, or feature boundary unless a smaller split is clearly justified.
+- Do not emit raw transport models or JSON maps from Cubits; emit UI state backed by domain models or presentation models.
 
 ## Dependency Management
 - Use `GetIt` for dependency injection.
@@ -49,6 +63,7 @@ A concise, repeatable blueprint for building maintainable Flutter applications w
 - Keep object creation out of UI code unless the dependency is trivial and local.
 - Register long-lived services once and keep lightweight objects easy to replace in tests.
 - Do not add ad-hoc `GetIt` registrations inside feature code.
+- UI code must not fetch repositories, API clients, or services directly from `GetIt`; resolve dependencies before the widget boundary and inject them into Cubits or coordinators.
 
 ## Routing
 - Use `GoRouter` with a central router configuration.
@@ -61,12 +76,16 @@ A concise, repeatable blueprint for building maintainable Flutter applications w
 - Convert external payloads into app models through explicit mappers or adapters.
 - Do not pass raw JSON or loosely typed maps through the app.
 - Treat repositories as coordination boundaries, not dumping grounds for business logic.
+- Keep DTOs and transport models in the feature `data/` layer unless they are genuinely cross-feature.
+- Share infrastructure primitives such as `PageRequest`, `PageInfo`, `PaginatedResult`, and common failure types from `core/` or `shared/`, not from feature folders.
 
 ## Domain Logic
 - Keep business logic in dedicated use cases, controllers, or services.
 - Give each unit one clear responsibility.
 - Validate inputs and handle failure paths explicitly.
 - Return domain-friendly results instead of leaking transport or storage details upward.
+- Keep use cases feature-local by default.
+- Only move a use case into `shared/` when the same business action is reused unchanged across multiple features.
 
 ## Entities & Value Types
 - Entities must extend `Equatable`.
@@ -74,6 +93,8 @@ A concise, repeatable blueprint for building maintainable Flutter applications w
 - Include all meaningful fields in `props`.
 - Keep entities focused on domain data, not framework or transport concerns.
 - Keep entities free of UI, framework, and transport dependencies other than `Equatable`.
+- Share entities only when they represent the same domain concept with the same invariants across features.
+- Prefer sharing value objects such as identifiers, money, pagination, and result wrappers before sharing feature-level entities.
 
 ## UI Guidelines
 - Keep screens composed from small, focused widgets.
@@ -121,6 +142,8 @@ A concise, repeatable blueprint for building maintainable Flutter applications w
 - Separate `*_cubit.dart` and `*_state.dart` files per feature.
 - Centralized configuration for `GoRouter`, `GetIt`, and shared services.
 - Observable error handling and testable async flows.
+- Feature-owned vertical slices with `data/`, `domain/`, and `presentation/`.
+- Shared abstractions only for true cross-feature domain concepts or cross-cutting infrastructure.
 
 ## Patterns to Avoid
 - Business logic inside widgets.
@@ -128,6 +151,8 @@ A concise, repeatable blueprint for building maintainable Flutter applications w
 - Hidden global dependencies and ad-hoc service lookup in feature code.
 - Large files that mix UI, networking, persistence, and business rules.
 - Silent failures, background side effects, and untracked async work.
+- Extracting shared entities or use cases too early just because two payloads look similar.
+- Top-level “misc shared” folders with unclear ownership and mixed abstraction levels.
 
 ## Template Snippets
 
@@ -146,3 +171,4 @@ class DoThingUseCase {
   }
 }
 ```
+
