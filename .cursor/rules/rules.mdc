@@ -100,6 +100,12 @@ A concise, repeatable blueprint for building maintainable Flutter applications w
 - Prefer deterministic tests with mocked dependencies over networked or timing-sensitive tests.
 - Add regression coverage for bug fixes and risky logic changes.
 
+## Build & Tooling
+- Use `fvm` to pin and run the Flutter SDK for this project.
+- Prefer `fvm flutter ...` and `fvm dart ...` over global `flutter` and `dart` commands.
+- Prefer existing `make` targets for common project workflows when available.
+- Commit `.fvmrc` and do not commit `.fvm/`.
+
 ## Code Style
 - Use descriptive names for classes, methods, variables, and files.
 - Prefer strong typing and explicit models over `dynamic`.

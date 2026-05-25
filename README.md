@@ -2,6 +2,38 @@
 
 Offline maps for flights
 
+## Flutter SDK
+
+This project should be run with `fvm` so the Flutter SDK version stays pinned per repo.
+
+Install `fvm`:
+
+```bash
+brew install fvm
+```
+
+Initial project setup:
+
+```bash
+fvm use <flutter-version>
+fvm flutter pub get
+```
+
+After `.fvmrc` is committed, a fresh clone can be set up with:
+
+```bash
+fvm install
+fvm flutter pub get
+```
+
+Use `fvm`-prefixed commands for day-to-day work:
+
+```bash
+fvm flutter run
+fvm flutter analyze
+fvm flutter test
+```
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

@@ -14,14 +14,14 @@ endif
 # Generates iOS release config only.
 # Then you need to open Xcode and build/archive manually.
 prepare-ios-for-release:
-	flutter build ios --config-only --release --dart-define-from-file=env/app_config.prod.json
+	fvm flutter build ios --config-only --release --dart-define-from-file=env/app_config.prod.json
 
 ## Alias for prepare-ios-for-release.
 prep: prepare-ios-for-release
 
 ## Build Android App Bundle for release.
 build-android-release:
-	flutter build appbundle --release --dart-define-from-file=env/app_config.prod.json
+	fvm flutter build appbundle --release --dart-define-from-file=env/app_config.prod.json
 
 ## Alias for build-android-release.
 bar: build-android-release
