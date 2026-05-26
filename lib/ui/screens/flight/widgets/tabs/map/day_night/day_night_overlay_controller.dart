@@ -52,7 +52,7 @@ class DayNightOverlayController {
       twilightLayerId,
       FillLayerProperties(
         fillColor: '#22405F',
-        fillOpacity: 0.14,
+        fillOpacity: 0.12,
         fillAntialias: false,
       ),
       belowLayerId: belowLayerId,
@@ -63,7 +63,7 @@ class DayNightOverlayController {
       nightLayerId,
       FillLayerProperties(
         fillColor: '#08121C',
-        fillOpacity: 0.28,
+        fillOpacity: 0.2,
         fillAntialias: false,
       ),
       belowLayerId: belowLayerId,
