@@ -57,6 +57,7 @@ void main() {
     final forecast = service.compute(
       route: route,
       gpsData: const GpsData(latitude: 0, longitude: 30, accuracy: 8.0),
+      speedKmhOverride: 900,
       nowUtc: DateTime.utc(2026, 3, 20, 0),
     );
 
@@ -95,6 +96,23 @@ void main() {
     );
   });
 
+  test('route forecast returns null without reliable live speed', () {
+    final service = RouteSunEventForecastService();
+    final route = _buildEquatorialRoute(
+      startLongitude: 0,
+      endLongitude: 150,
+      speedKmh: 900,
+    );
+
+    final forecast = service.compute(
+      route: route,
+      gpsData: const GpsData(latitude: 0, longitude: 30, accuracy: 8.0),
+      nowUtc: DateTime.utc(2026, 3, 20, 0),
+    );
+
+    expect(forecast, isNull);
+  });
+
   test(
     'route forecast returns null when no sun event occurs before arrival',
     () {
@@ -108,6 +126,7 @@ void main() {
       final forecast = service.compute(
         route: route,
         gpsData: const GpsData(latitude: 0, longitude: 30, accuracy: 8.0),
+        speedKmhOverride: 900,
         nowUtc: DateTime.utc(2026, 3, 20, 0),
       );
 
