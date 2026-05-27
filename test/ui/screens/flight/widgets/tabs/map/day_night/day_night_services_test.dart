@@ -46,34 +46,44 @@ void main() {
     );
   });
 
-  test('route forecast finds sunrise ahead on a long eastbound route', () {
+  test('route forecast finds sunrise ahead when it is within 60 minutes', () {
     final service = RouteSunEventForecastService();
     final route = _buildEquatorialRoute(
-      startLongitude: 0,
-      endLongitude: 150,
+      startLongitude: 75,
+      endLongitude: 85,
       speedKmh: 900,
     );
 
     final forecast = service.compute(
       route: route,
-      gpsData: const GpsData(latitude: 0, longitude: 30, accuracy: 8.0),
+      gpsData: const GpsData(
+        latitude: 0,
+        longitude: 80,
+        course: 90,
+        accuracy: 8.0,
+      ),
       speedKmhOverride: 900,
       nowUtc: DateTime.utc(2026, 3, 20, 0),
     );
 
     expect(forecast, isNotNull);
     expect(forecast!.type, RouteSunEventType.sunrise);
-    expect(forecast.eta.inMinutes, greaterThan(60));
+    expect(forecast.eta.inMinutes, inInclusiveRange(1, 60));
   });
 
   test('route forecast uses GPS speed override when provided', () {
     final service = RouteSunEventForecastService();
     final route = _buildEquatorialRoute(
-      startLongitude: 0,
-      endLongitude: 150,
+      startLongitude: 75,
+      endLongitude: 85,
       speedKmh: 900,
     );
-    const gpsData = GpsData(latitude: 0, longitude: 30, accuracy: 8.0);
+    const gpsData = GpsData(
+      latitude: 0,
+      longitude: 80,
+      course: 90,
+      accuracy: 8.0,
+    );
 
     final slowerForecast = service.compute(
       route: route,
@@ -96,7 +106,30 @@ void main() {
     );
   });
 
-  test('route forecast returns null without reliable live speed', () {
+  test('route forecast returns null when event is more than 60 minutes away', () {
+    final service = RouteSunEventForecastService();
+    final route = _buildEquatorialRoute(
+      startLongitude: 0,
+      endLongitude: 150,
+      speedKmh: 900,
+    );
+
+    final forecast = service.compute(
+      route: route,
+      gpsData: const GpsData(
+        latitude: 0,
+        longitude: 30,
+        course: 90,
+        accuracy: 8.0,
+      ),
+      speedKmhOverride: 900,
+      nowUtc: DateTime.utc(2026, 3, 20, 0),
+    );
+
+    expect(forecast, isNull);
+  });
+
+  test('route forecast returns null without live course', () {
     final service = RouteSunEventForecastService();
     final route = _buildEquatorialRoute(
       startLongitude: 0,
@@ -107,6 +140,29 @@ void main() {
     final forecast = service.compute(
       route: route,
       gpsData: const GpsData(latitude: 0, longitude: 30, accuracy: 8.0),
+      speedKmhOverride: 900,
+      nowUtc: DateTime.utc(2026, 3, 20, 0),
+    );
+
+    expect(forecast, isNull);
+  });
+
+  test('route forecast returns null without reliable live speed', () {
+    final service = RouteSunEventForecastService();
+    final route = _buildEquatorialRoute(
+      startLongitude: 0,
+      endLongitude: 150,
+      speedKmh: 900,
+    );
+
+    final forecast = service.compute(
+      route: route,
+      gpsData: const GpsData(
+        latitude: 0,
+        longitude: 30,
+        course: 90,
+        accuracy: 8.0,
+      ),
       nowUtc: DateTime.utc(2026, 3, 20, 0),
     );
 
@@ -125,7 +181,12 @@ void main() {
 
       final forecast = service.compute(
         route: route,
-        gpsData: const GpsData(latitude: 0, longitude: 30, accuracy: 8.0),
+        gpsData: const GpsData(
+          latitude: 0,
+          longitude: 30,
+          course: 90,
+          accuracy: 8.0,
+        ),
         speedKmhOverride: 900,
         nowUtc: DateTime.utc(2026, 3, 20, 0),
       );
