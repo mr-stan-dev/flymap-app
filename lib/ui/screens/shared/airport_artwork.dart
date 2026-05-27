@@ -7,6 +7,7 @@ class AirportArtwork extends StatelessWidget {
     this.borderRadius = 12,
     this.isCircle = false,
     this.countryCode,
+    this.showCountryBadge = true,
     super.key,
   });
 
@@ -14,6 +15,7 @@ class AirportArtwork extends StatelessWidget {
   final double borderRadius;
   final bool isCircle;
   final String? countryCode;
+  final bool showCountryBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,7 @@ class AirportArtwork extends StatelessWidget {
           );
 
     final normalizedCountryCode = countryCode?.trim().toUpperCase() ?? '';
-    if (normalizedCountryCode.length != 2) {
+    if (!showCountryBadge || normalizedCountryCode.length != 2) {
       return clipped;
     }
 

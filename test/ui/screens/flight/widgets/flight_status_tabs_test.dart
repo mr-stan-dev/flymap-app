@@ -175,6 +175,67 @@ void main() {
     },
   );
 
+  testWidgets('geo-awareness card shows arrival airport as final next chip', (
+    tester,
+  ) async {
+    final gpsProvider = _FakeGpsDataProvider();
+    final subscriptionCubit = _buildSubscriptionCubit();
+    addTearDown(subscriptionCubit.close);
+    final route = _linearTestRoute();
+    final flight = _buildFlight(
+      status: FlightStatus.inProgress,
+      route: route,
+      routeInsights: FlightRouteInsights(
+        regions: [
+          _buildRegion(
+            pathFirstEncounterKm: 200,
+            name: 'English Channel',
+            geometry: _polygon(1.0, 2.0),
+          ),
+        ],
+      ),
+    );
+    final cubit = FlightScreenCubit(
+      flight: flight,
+      deleteFlightUseCase: _NoopDeleteFlightUseCase(),
+      completeFlightUseCase: _NoopCompleteFlightUseCase(),
+      startFlightUseCase: _FakeStartFlightUseCase(result: true),
+      gpsProvider: gpsProvider,
+      enableGpsCheckTimer: false,
+    );
+    addTearDown(cubit.close);
+
+    await tester.pumpWidget(
+      _testApp(
+        child: BlocProvider.value(
+          value: subscriptionCubit,
+          child: BlocProvider.value(
+            value: cubit,
+            child: MapBottomStatusCard(
+              status: FlightStatus.inProgress,
+              onSelectedRegionChanged: (_) {},
+              onCheckInPressed: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    gpsProvider.emit(
+      GpsStatus.gpsActive,
+      data: const GpsData(
+        latitude: 0,
+        longitude: 9.5,
+        speed: SpeedValue(600, 'km/h'),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('ARR'), findsOneWidget);
+    expect(find.textContaining('ARR (in '), findsNothing);
+  });
+
   testWidgets('dashboard tab shows bottom check-in card for upcoming', (
     tester,
   ) async {
@@ -582,6 +643,7 @@ double _coveredDistanceKmForTest(FlightRoute route, GpsData gpsData) {
 RouteRegion _buildRegion({
   required double pathFirstEncounterKm,
   required String name,
+  Map<String, dynamic>? geometry,
 }) {
   return RouteRegion(
     qid: 'region-1',
@@ -589,22 +651,26 @@ RouteRegion _buildRegion({
     regionType: RouteRegionType.channel,
     pathFirstEncounterKm: pathFirstEncounterKm,
     pathLengthInsideKm: 120,
-    geometry: const RouteRegionGeometry(
+    geometry: RouteRegionGeometry(
       type: 'Polygon',
-      geoJson: {
-        'type': 'Polygon',
-        'coordinates': [
-          [
-            [7.0, -1.0],
-            [8.0, -1.0],
-            [8.0, 1.0],
-            [7.0, 1.0],
-            [7.0, -1.0],
-          ],
-        ],
-      },
+      geoJson: geometry ?? _polygon(7.0, 8.0),
     ),
   );
+}
+
+Map<String, dynamic> _polygon(double lonStart, double lonEnd) {
+  return {
+    'type': 'Polygon',
+    'coordinates': [
+      [
+        [lonStart, -1.0],
+        [lonEnd, -1.0],
+        [lonEnd, 1.0],
+        [lonStart, 1.0],
+        [lonStart, -1.0],
+      ],
+    ],
+  };
 }
 
 SubscriptionCubit _buildSubscriptionCubit() {

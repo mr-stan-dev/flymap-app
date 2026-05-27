@@ -7,6 +7,7 @@ import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/subscription/paywall_source.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/widgets/airport_inline_chip.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/widgets/geo_awareness_blocking_overlay.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/widgets/geo_awareness_region_details_sheet.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/widgets/inline_label_chip.dart';
@@ -60,6 +61,8 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
           return previous.currentRegionIds != current.currentRegionIds ||
               previous.nextRegionId != current.nextRegionId ||
               previous.nextRegionEtaMinutes != current.nextRegionEtaMinutes ||
+              previous.routeCoveredDistanceKm !=
+                  current.routeCoveredDistanceKm ||
               previous.gps.status != current.gps.status ||
               previous.gps.lastFixAt != current.gps.lastFixAt ||
               previous.routeRegions != current.routeRegions;
@@ -93,8 +96,13 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
         final nextPrimary = state.nextRegionId == null
             ? null
             : _findRegion(allRegions, state.nextRegionId!);
+        final showArrivalAsNext =
+            nextPrimary == null &&
+            state.routeCoveredDistanceKm < state.flight.route.distanceInKm;
         final hasRegionContent =
-            currentRegions.isNotEmpty || nextPrimary != null;
+            currentRegions.isNotEmpty ||
+            nextPrimary != null ||
+            showArrivalAsNext;
         if (!hasRegionContent) {
           return const SizedBox.shrink();
         }
@@ -146,7 +154,7 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
                               isLocked: premiumRegionIds.contains(region.qid),
                             ),
                           ),
-                        if (nextPrimary != null)
+                        if (nextPrimary != null || showArrivalAsNext)
                           InlineLabelChip(
                             text: '${context.t.flight.route.nextRegionLabel}:',
                           ),
@@ -164,6 +172,11 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
                                 nextPrimary.qid,
                               ),
                             ),
+                          ),
+                        if (showArrivalAsNext)
+                          AirportInlineChip(
+                            airport: state.flight.route.arrival,
+                            isNext: true,
                           ),
                       ],
                     ),
