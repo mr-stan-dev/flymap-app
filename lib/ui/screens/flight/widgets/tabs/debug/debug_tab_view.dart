@@ -26,7 +26,7 @@ class _FlightDebugTabViewState extends State<FlightDebugTabView> {
   final MapDebugGpsProvider _simulator = MapDebugGpsProvider();
   FlightScreenCubit? _flightCubit;
   bool _playing = false;
-  int _speed = 1;
+  int _speed = 20;
   bool _resetGeoOnNextUpdate = false;
 
   @override

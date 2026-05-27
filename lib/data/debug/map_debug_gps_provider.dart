@@ -11,6 +11,8 @@ class MapDebugGpsProvider {
     this.baseSpeedKmh = 820,
   });
 
+  static const _routeDeviationKm = 50.0;
+
   final Duration tick;
   final double baseSpeedKmh;
   final ll.Distance _distance = const ll.Distance();
@@ -99,9 +101,21 @@ class MapDebugGpsProvider {
   void _emitCurrent() {
     final ratio = _progressRatio();
     final telemetry = _telemetryAtRatio(ratio);
-    final position = _samplePointAtDistanceKm(_progressKm);
+    final routePosition = _samplePointAtDistanceKm(_progressKm);
     final lookAhead = (_progressKm + 8).clamp(0.0, _totalDistanceKm);
-    final nextPosition = _samplePointAtDistanceKm(lookAhead);
+    final routeNextPosition = _samplePointAtDistanceKm(lookAhead);
+    final routeHeading = _bearingDegrees(routePosition, routeNextPosition);
+    final deviationKm = _routeDeviationForRatio(ratio);
+    final position = _offsetPoint(
+      routePosition,
+      bearingDegrees: routeHeading + 90.0,
+      distanceKm: deviationKm,
+    );
+    final nextPosition = _offsetPoint(
+      routeNextPosition,
+      bearingDegrees: routeHeading + 90.0,
+      distanceKm: deviationKm,
+    );
     final heading = _bearingDegrees(position, nextPosition);
 
     _onUpdate?.call(
@@ -228,6 +242,9 @@ class MapDebugGpsProvider {
   }
 
   double _bearingDegrees(ll.LatLng from, ll.LatLng to) {
+    if (from.latitude == to.latitude && from.longitude == to.longitude) {
+      return 0;
+    }
     final lat1 = _degToRad(from.latitude);
     final lat2 = _degToRad(to.latitude);
     final dLon = _degToRad(to.longitude - from.longitude);
@@ -237,6 +254,47 @@ class MapDebugGpsProvider {
         (math.sin(lat1) * math.cos(lat2) * math.cos(dLon));
     final raw = _radToDeg(math.atan2(y, x));
     return (raw + 360) % 360;
+  }
+
+  double _routeDeviationForRatio(double ratio) {
+    // Keep departure/arrival exact and only drift off-route during cruise.
+    if (ratio <= 0.06 || ratio >= 0.93) return 0.0;
+    if (ratio < 0.18) {
+      final t = ((ratio - 0.06) / 0.12).clamp(0.0, 1.0);
+      return _routeDeviationKm * _smoothstep(t);
+    }
+    if (ratio > 0.82) {
+      final t = ((0.93 - ratio) / 0.11).clamp(0.0, 1.0);
+      return _routeDeviationKm * _smoothstep(t);
+    }
+    return _routeDeviationKm;
+  }
+
+  ll.LatLng _offsetPoint(
+    ll.LatLng origin, {
+    required double bearingDegrees,
+    required double distanceKm,
+  }) {
+    if (!distanceKm.isFinite || distanceKm == 0) return origin;
+
+    const earthRadiusKm = 6371.0;
+    final angularDistance = distanceKm / earthRadiusKm;
+    final bearingRad = _degToRad(bearingDegrees);
+    final lat1 = _degToRad(origin.latitude);
+    final lon1 = _degToRad(origin.longitude);
+
+    final lat2 = math.asin(
+      (math.sin(lat1) * math.cos(angularDistance)) +
+          (math.cos(lat1) * math.sin(angularDistance) * math.cos(bearingRad)),
+    );
+    final lon2 =
+        lon1 +
+        math.atan2(
+          math.sin(bearingRad) * math.sin(angularDistance) * math.cos(lat1),
+          math.cos(angularDistance) - (math.sin(lat1) * math.sin(lat2)),
+        );
+
+    return ll.LatLng(_radToDeg(lat2), _normalizeLongitude(_radToDeg(lon2)));
   }
 
   double _degToRad(double value) => value * (math.pi / 180);

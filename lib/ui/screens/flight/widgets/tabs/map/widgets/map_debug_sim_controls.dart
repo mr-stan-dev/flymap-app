@@ -53,7 +53,7 @@ class MapDebugSimControls extends StatelessWidget {
             const SizedBox(height: 6),
             Wrap(
               spacing: 6,
-              children: const [1, 5, 10]
+              children: const [1, 5, 10, 20]
                   .map(
                     (speed) => _SpeedChipData(speed: speed, label: 'x$speed'),
                   )
