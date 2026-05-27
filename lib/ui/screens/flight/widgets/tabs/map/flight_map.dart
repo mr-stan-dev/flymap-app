@@ -344,7 +344,7 @@ class _FlightMapState extends State<FlightMap> {
       controller: _mapSession.controller,
       isReady: () => _mapSession.isReadyForUserLocation,
       shouldFollowUser: () => _cameraController.followUser,
-      shouldFollowHeadingUp: () => _cameraController.followUser,
+      shouldFollowHeadingUp: () => _cameraController.followHeadingUp,
       followZoomProvider: () => _cameraController.cameraZoom,
       followTiltProvider: () => _cameraController.cameraTilt,
     );
@@ -355,7 +355,7 @@ class _FlightMapState extends State<FlightMap> {
       controller: _mapSession.controller,
       isReady: () => _mapSession.isReadyForUserLocation,
       shouldFollowUser: () => _cameraController.followUser,
-      shouldFollowHeadingUp: () => _cameraController.followUser,
+      shouldFollowHeadingUp: () => _cameraController.followHeadingUp,
       followZoomProvider: () => _cameraController.cameraZoom,
       followTiltProvider: () => _cameraController.cameraTilt,
     );
@@ -488,10 +488,7 @@ class _FlightMapState extends State<FlightMap> {
     final messenger = ScaffoldMessenger.maybeOf(context);
     messenger?.hideCurrentSnackBar();
     messenger?.showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-      ),
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
     );
   }
 

@@ -11,6 +11,7 @@ class FlightMapCameraController extends ChangeNotifier {
 
   bool _is3D = false;
   bool _followUser = false;
+  bool _followHeadingUp = false;
   bool _showControls = true;
   bool _showResetNorth = false;
   double _mapBearingDegrees = 0;
@@ -22,6 +23,7 @@ class FlightMapCameraController extends ChangeNotifier {
 
   bool get is3D => _is3D;
   bool get followUser => _followUser;
+  bool get followHeadingUp => _followHeadingUp;
   bool get showControls => _showControls;
   bool get showResetNorth => _showResetNorth;
   double get mapBearingDegrees => _mapBearingDegrees;
@@ -51,6 +53,7 @@ class FlightMapCameraController extends ChangeNotifier {
 
     if (_followUser) {
       _followUser = false;
+      _followHeadingUp = false;
       notifyListeners();
       return;
     }
@@ -60,6 +63,7 @@ class FlightMapCameraController extends ChangeNotifier {
     }
 
     _followUser = true;
+    _followHeadingUp = true;
     notifyListeners();
     final update = CameraUpdate.newCameraPosition(
       CameraPosition(
@@ -74,10 +78,13 @@ class FlightMapCameraController extends ChangeNotifier {
 
   Future<void> resetNorth(MapLibreMapController? controller) async {
     showControlsTemporarily();
+    _followHeadingUp = false;
+    final update = CameraUpdate.bearingTo(0);
     if (_followUser) {
-      _followUser = false;
+      await controller?.moveCamera(update);
+    } else {
+      await controller?.animateCamera(update);
     }
-    await controller?.animateCamera(CameraUpdate.bearingTo(0));
     _mapBearingDegrees = 0;
     _showResetNorth = false;
     _lastBearingTenths = 0;
@@ -92,6 +99,7 @@ class FlightMapCameraController extends ChangeNotifier {
     }
     if (_followUser) {
       _followUser = false;
+      _followHeadingUp = false;
       changed = true;
     }
     _scheduleControlsAutoHide();
@@ -105,6 +113,7 @@ class FlightMapCameraController extends ChangeNotifier {
       return;
     }
     _followUser = false;
+    _followHeadingUp = false;
     notifyListeners();
   }
 
@@ -113,6 +122,7 @@ class FlightMapCameraController extends ChangeNotifier {
       return;
     }
     _followUser = false;
+    _followHeadingUp = false;
     notifyListeners();
   }
 
