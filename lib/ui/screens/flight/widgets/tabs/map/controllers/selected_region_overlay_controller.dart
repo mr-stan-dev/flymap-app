@@ -3,7 +3,7 @@ import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/ui/map/map_style_safety.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/map/day_night/route_path_sampler.dart';
+import 'package:flymap/utils/route_path_sampler.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 class SelectedRegionOverlayController {

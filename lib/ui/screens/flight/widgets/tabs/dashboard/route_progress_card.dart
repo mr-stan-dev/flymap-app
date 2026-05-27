@@ -1,29 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
-import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/i18n/strings.g.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/shared/route_progress_estimator.dart';
 
 class RouteProgressCard extends StatelessWidget {
   const RouteProgressCard({
     required this.route,
-    required this.gpsData,
+    required this.coveredDistanceKm,
     this.isStale = false,
     super.key,
   });
 
   final FlightRoute route;
-  final GpsData? gpsData;
+  final double coveredDistanceKm;
   final bool isStale;
 
   @override
   Widget build(BuildContext context) {
     final totalKm = route.distanceInKm;
-    final progress = RouteProgressEstimator.estimateProgress(
-      route: route,
-      gpsData: gpsData,
-    );
-    final coveredKm = progress * totalKm;
+    final coveredKm = coveredDistanceKm.clamp(0.0, totalKm);
+    final progress = totalKm > 0 ? (coveredKm / totalKm).clamp(0.0, 1.0) : 0.0;
     final remainingKm = (totalKm - coveredKm).clamp(0, totalKm);
     final colorScheme = Theme.of(context).colorScheme;
 

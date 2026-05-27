@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/domain/entity/flight_route_metrics.dart';
 import 'package:flymap/domain/entity/gps_data.dart';
-import 'package:flymap/ui/screens/flight/widgets/tabs/map/day_night/route_path_sampler.dart';
+import 'package:flymap/utils/route_path_sampler.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/day_night/route_sun_event_forecast.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/day_night/solar_position_calculator.dart';
 import 'package:latlong2/latlong.dart' as ll;

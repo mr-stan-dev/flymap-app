@@ -4,6 +4,7 @@ import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:latlong2/latlong.dart' as ll;
 
+/// Samples and projects positions against the planned route polyline.
 class RoutePathSampler {
   RoutePathSampler._(this.points, this._cumulativeDistancesKm);
 
@@ -31,6 +32,7 @@ class RoutePathSampler {
   double get totalDistanceKm =>
       _cumulativeDistancesKm.isEmpty ? 0 : _cumulativeDistancesKm.last;
 
+  /// Returns the interpolated route point at a given distance from departure.
   ll.LatLng? pointAtDistanceKm(double targetKm) {
     if (!isValid) return null;
     if (targetKm <= 0) return points.first;
@@ -70,6 +72,8 @@ class RoutePathSampler {
   }) {
     if (!isValid) return null;
 
+    // Snap to the closest route segment and report both along-route progress
+    // and lateral deviation from the planned path.
     RoutePathProjection? bestProjection;
     for (var i = 0; i < points.length - 1; i++) {
       final start = points[i];
@@ -107,6 +111,8 @@ class RoutePathSampler {
     required ll.LatLng start,
     required ll.LatLng end,
   }) {
+    // Use a local planar approximation per segment; this keeps projection
+    // math simple while remaining accurate enough for route-progress UI.
     final avgLatRadians =
         ((start.latitude + end.latitude) / 2) * 3.141592653589793 / 180;
     final xScale = cos(avgLatRadians);

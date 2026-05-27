@@ -10,17 +10,20 @@ class GeoAwarenessSnapshot extends Equatable {
     this.currentRegionIds = const [],
     this.nextRegionId,
     this.nextRegionEtaMinutes,
+    this.coveredDistanceKm = 0,
   });
 
   final List<String> currentRegionIds;
   final String? nextRegionId;
   final int? nextRegionEtaMinutes;
+  final double coveredDistanceKm;
 
   @override
   List<Object?> get props => [
     currentRegionIds,
     nextRegionId,
     nextRegionEtaMinutes,
+    coveredDistanceKm,
   ];
 }
 
@@ -39,6 +42,10 @@ class GeoAwarenessEngine {
     final lat = gpsData?.latitude;
     final lon = gpsData?.longitude;
     final hasLocation = lat != null && lon != null;
+    final progress = RouteProgressUtils.sample(route: route, gpsData: gpsData);
+    final coveredDistanceKm = hasLocation
+        ? _resolvedCoveredDistanceKm(progress, previous)
+        : (previous?.coveredDistanceKm ?? 0);
 
     final currentRegionIds = hasLocation
         ? _currentRegionIds(
@@ -52,25 +59,44 @@ class GeoAwarenessEngine {
         ? _nextRegionId(
             routeRegions: routeRegions,
             currentRegionIds: currentRegionIds,
+            coveredDistanceKm: coveredDistanceKm,
           )
         : (previous?.nextRegionId ??
               _nextRegionId(
                 routeRegions: routeRegions,
                 currentRegionIds: const [],
+                coveredDistanceKm: coveredDistanceKm,
               ));
 
     final nextRegionEtaMinutes = _estimateNextRegionEtaMinutes(
       nextRegionId: nextRegionId,
-      route: route,
       routeRegions: routeRegions,
       gpsData: gpsData,
+      coveredDistanceKm: coveredDistanceKm,
+      offRouteKm: progress.offRouteKm,
+      hasProjectedProgress: progress.isProjected,
     );
 
     return GeoAwarenessSnapshot(
       currentRegionIds: currentRegionIds,
       nextRegionId: nextRegionId,
       nextRegionEtaMinutes: nextRegionEtaMinutes,
+      coveredDistanceKm: coveredDistanceKm,
     );
+  }
+
+  double _resolvedCoveredDistanceKm(
+    RouteProgressSample progress,
+    GeoAwarenessSnapshot? previous,
+  ) {
+    final previousCoveredDistanceKm = previous?.coveredDistanceKm ?? 0;
+    final currentCoveredDistanceKm = progress.coveredDistanceKm;
+    if (!currentCoveredDistanceKm.isFinite) {
+      return previousCoveredDistanceKm;
+    }
+    return currentCoveredDistanceKm > previousCoveredDistanceKm
+        ? currentCoveredDistanceKm
+        : previousCoveredDistanceKm;
   }
 
   List<String> _currentRegionIds({
@@ -96,6 +122,7 @@ class GeoAwarenessEngine {
   String? _nextRegionId({
     required List<RouteRegion> routeRegions,
     required List<String> currentRegionIds,
+    required double coveredDistanceKm,
   }) {
     if (routeRegions.isEmpty) return null;
     final sorted = List<RouteRegion>.from(
@@ -103,24 +130,28 @@ class GeoAwarenessEngine {
     )..sort((a, b) => a.pathFirstEncounterKm.compareTo(b.pathFirstEncounterKm));
 
     if (currentRegionIds.isEmpty) {
-      return sorted.first.qid;
+      return _firstRegionAfterDistance(
+        sorted,
+        coveredDistanceKm: coveredDistanceKm,
+      );
     }
 
     final currentSet = currentRegionIds.toSet();
-    var maxEncounterKm = double.negativeInfinity;
-    for (final region in sorted) {
-      if (currentSet.contains(region.qid) &&
-          region.pathFirstEncounterKm > maxEncounterKm) {
-        maxEncounterKm = region.pathFirstEncounterKm;
-      }
-    }
-    if (!maxEncounterKm.isFinite) {
-      maxEncounterKm = 0;
-    }
+    return _firstRegionAfterDistance(
+      sorted,
+      coveredDistanceKm: coveredDistanceKm,
+      excludeIds: currentSet,
+    );
+  }
 
-    for (final region in sorted) {
-      if (!currentSet.contains(region.qid) &&
-          region.pathFirstEncounterKm > maxEncounterKm) {
+  String? _firstRegionAfterDistance(
+    List<RouteRegion> sortedRegions, {
+    required double coveredDistanceKm,
+    Set<String> excludeIds = const {},
+  }) {
+    for (final region in sortedRegions) {
+      if (excludeIds.contains(region.qid)) continue;
+      if (region.pathFirstEncounterKm > coveredDistanceKm) {
         return region.qid;
       }
     }
@@ -129,9 +160,11 @@ class GeoAwarenessEngine {
 
   int? _estimateNextRegionEtaMinutes({
     required String? nextRegionId,
-    required FlightRoute route,
     required List<RouteRegion> routeRegions,
     required GpsData? gpsData,
+    required double coveredDistanceKm,
+    required double offRouteKm,
+    required bool hasProjectedProgress,
   }) {
     if (nextRegionId == null || nextRegionId.isEmpty) return null;
     RouteRegion? nextRegion;
@@ -146,21 +179,19 @@ class GeoAwarenessEngine {
     final speedKmh = _speedKmhFromGps(gpsData);
     if (speedKmh == null ||
         !speedKmh.isFinite ||
-        speedKmh < _minNextRegionEtaSpeedKmh) {
+        speedKmh < _minNextRegionEtaSpeedKmh ||
+        !hasProjectedProgress) {
       return null;
     }
 
-    final currentDistanceKm = RouteProgressUtils.coveredDistanceKm(
-      route: route,
-      gpsData: gpsData,
-    );
     final remainingDistanceKm =
-        nextRegion.pathFirstEncounterKm - currentDistanceKm;
+        nextRegion.pathFirstEncounterKm - coveredDistanceKm;
     if (!remainingDistanceKm.isFinite || remainingDistanceKm <= 0) {
-      return 0;
+      return null;
     }
 
-    final rawMinutes = (remainingDistanceKm / speedKmh) * 60.0;
+    final adjustedDistanceKm = remainingDistanceKm + offRouteKm;
+    final rawMinutes = (adjustedDistanceKm / speedKmh) * 60.0;
     if (!rawMinutes.isFinite || rawMinutes > _maxNextRegionEtaMinutes) {
       return null;
     }

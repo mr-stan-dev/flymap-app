@@ -61,6 +61,7 @@ final class FlightScreenLoaded extends FlightScreenState {
   final Flight flight;
   final FlightGpsState gps;
   final List<RouteRegion> routeRegions;
+  final double routeCoveredDistanceKm;
   final String? lastVisitedRegionId;
   final List<String> currentRegionIds;
   final String? nextRegionId;
@@ -70,6 +71,7 @@ final class FlightScreenLoaded extends FlightScreenState {
     required this.flight,
     this.gps = const FlightGpsState(),
     required this.routeRegions,
+    this.routeCoveredDistanceKm = 0,
     this.lastVisitedRegionId,
     this.currentRegionIds = const [],
     this.nextRegionId,
@@ -80,6 +82,7 @@ final class FlightScreenLoaded extends FlightScreenState {
     Flight? flight,
     FlightGpsState? gps,
     List<RouteRegion>? routeRegions,
+    double? routeCoveredDistanceKm,
     String? lastVisitedRegionId,
     bool clearLastVisitedRegionId = false,
     List<String>? currentRegionIds,
@@ -92,6 +95,8 @@ final class FlightScreenLoaded extends FlightScreenState {
       flight: flight ?? this.flight,
       gps: gps ?? this.gps,
       routeRegions: routeRegions ?? this.routeRegions,
+      routeCoveredDistanceKm:
+          routeCoveredDistanceKm ?? this.routeCoveredDistanceKm,
       lastVisitedRegionId: clearLastVisitedRegionId
           ? null
           : lastVisitedRegionId ?? this.lastVisitedRegionId,
@@ -110,6 +115,7 @@ final class FlightScreenLoaded extends FlightScreenState {
     flight,
     gps,
     routeRegions,
+    routeCoveredDistanceKm,
     lastVisitedRegionId,
     currentRegionIds,
     nextRegionId,
@@ -123,6 +129,7 @@ final class FlightScreenLoaded extends FlightScreenState {
         'gpsStatus:${gps.status.name}, '
         'hasGpsData:${gps.data != null ? 1 : 0}, '
         'lastFix:${gps.lastFixAt?.toIso8601String() ?? '-'}, '
+        'coveredKm:${routeCoveredDistanceKm.toStringAsFixed(1)}, '
         'lastVisitedRegionId:${lastVisitedRegionId ?? '-'}, '
         'tick:${gps.updateTick}, '
         'currentRegionCount:${currentRegionIds.length}, '

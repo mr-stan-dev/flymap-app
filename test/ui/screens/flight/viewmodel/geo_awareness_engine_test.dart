@@ -78,6 +78,76 @@ void main() {
       expect(snapshot.nextRegionEtaMinutes, isNull);
     });
   });
+
+  group('GeoAwarenessEngine next-region selection', () {
+    const engine = GeoAwarenessEngine();
+    final route = _buildRoute();
+
+    test(
+      'uses route progress when outside all region polygons between regions',
+      () {
+        final snapshot = engine.compute(
+          route: route,
+          routeRegions: [
+            _buildRegion(qid: 'region-1', pathFirstEncounterKm: 200),
+            _buildRegion(qid: 'region-2', pathFirstEncounterKm: 800),
+          ],
+          gpsData: const GpsData(latitude: 0, longitude: 5),
+        );
+
+        expect(snapshot.currentRegionIds, isEmpty);
+        expect(snapshot.nextRegionId, 'region-2');
+      },
+    );
+
+    test('does not jump back to first region after passing all regions', () {
+      final snapshot = engine.compute(
+        route: route,
+        routeRegions: [
+          _buildRegion(qid: 'region-1', pathFirstEncounterKm: 200),
+          _buildRegion(qid: 'region-2', pathFirstEncounterKm: 800),
+        ],
+        gpsData: const GpsData(latitude: 0, longitude: 9.5),
+      );
+
+      expect(snapshot.currentRegionIds, isEmpty);
+      expect(snapshot.nextRegionId, isNull);
+    });
+
+    test(
+      'skips stale next region when covered distance already passed its start',
+      () {
+        final snapshot = engine.compute(
+          route: route,
+          routeRegions: [
+            _buildRegion(
+              qid: 'region-1',
+              pathFirstEncounterKm: 400,
+              geometry: _polygon(5.5, 6.5),
+            ),
+            _buildRegion(
+              qid: 'region-2',
+              pathFirstEncounterKm: 500,
+              geometry: _polygon(8.0, 8.5),
+            ),
+            _buildRegion(
+              qid: 'region-3',
+              pathFirstEncounterKm: 800,
+              geometry: _polygon(9.0, 9.5),
+            ),
+          ],
+          gpsData: const GpsData(
+            latitude: 0,
+            longitude: 6,
+            speed: SpeedValue(600, 'km/h'),
+          ),
+        );
+
+        expect(snapshot.currentRegionIds, ['region-1']);
+        expect(snapshot.nextRegionId, 'region-3');
+      },
+    );
+  });
 }
 
 FlightRoute _buildRoute() {
@@ -115,27 +185,35 @@ FlightRoute _buildRoute() {
   );
 }
 
-RouteRegion _buildRegion({required double pathFirstEncounterKm}) {
+RouteRegion _buildRegion({
+  String qid = 'region-1',
+  required double pathFirstEncounterKm,
+  Map<String, dynamic>? geometry,
+}) {
   return RouteRegion(
-    qid: 'region-1',
+    qid: qid,
     name: 'English Channel',
     regionType: RouteRegionType.channel,
     pathFirstEncounterKm: pathFirstEncounterKm,
     pathLengthInsideKm: 120,
-    geometry: const RouteRegionGeometry(
+    geometry: RouteRegionGeometry(
       type: 'Polygon',
-      geoJson: {
-        'type': 'Polygon',
-        'coordinates': [
-          [
-            [7.0, -1.0],
-            [8.0, -1.0],
-            [8.0, 1.0],
-            [7.0, 1.0],
-            [7.0, -1.0],
-          ],
-        ],
-      },
+      geoJson: geometry ?? _polygon(7.0, 8.0),
     ),
   );
+}
+
+Map<String, dynamic> _polygon(double lonStart, double lonEnd) {
+  return {
+    'type': 'Polygon',
+    'coordinates': [
+      [
+        [lonStart, -1.0],
+        [lonEnd, -1.0],
+        [lonEnd, 1.0],
+        [lonStart, 1.0],
+        [lonStart, -1.0],
+      ],
+    ],
+  };
 }

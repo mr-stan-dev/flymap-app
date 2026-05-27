@@ -269,6 +269,7 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
             currentRegionIds: current.currentRegionIds,
             nextRegionId: current.nextRegionId,
             nextRegionEtaMinutes: current.nextRegionEtaMinutes,
+            coveredDistanceKm: current.routeCoveredDistanceKm,
           );
     final geo = _geoAwarenessEngine.compute(
       route: _currentFlight.route,
@@ -309,6 +310,7 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
         ),
         flight: _currentFlight,
         routeRegions: _currentFlight.info.routeRegions,
+        routeCoveredDistanceKm: geo.coveredDistanceKm,
         lastVisitedRegionId: lastVisitedRegionId,
         currentRegionIds: geo.currentRegionIds,
         nextRegionId: geo.nextRegionId,

@@ -140,7 +140,7 @@ class _LoadedRouteTab extends StatelessWidget {
             if (!isUpcoming && hasGpsFix)
               RouteProgressCard(
                 route: route,
-                gpsData: state.gps.data,
+                coveredDistanceKm: state.routeCoveredDistanceKm,
                 isStale: isGpsStale,
               ),
             if (isUpcoming || (!isUpcoming && hasGpsFix))
