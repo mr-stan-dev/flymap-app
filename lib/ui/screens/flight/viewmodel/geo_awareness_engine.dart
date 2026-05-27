@@ -195,7 +195,7 @@ class GeoAwarenessEngine {
     if (!rawMinutes.isFinite || rawMinutes > _maxNextRegionEtaMinutes) {
       return null;
     }
-    return rawMinutes.round().clamp(0, _maxNextRegionEtaMinutes);
+    return rawMinutes.round().clamp(1, _maxNextRegionEtaMinutes);
   }
 
   double? _speedKmhFromGps(GpsData? gpsData) {

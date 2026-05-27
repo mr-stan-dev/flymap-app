@@ -92,6 +92,10 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
         if (state is! FlightScreenLoaded) {
           return const SizedBox.shrink();
         }
+        if (state.gps.status == GpsStatus.off ||
+            state.gps.status == GpsStatus.permissionsNotGranted) {
+          return const SizedBox.shrink();
+        }
         final isCurrentUserPro = context.select(
           (SubscriptionCubit cubit) => cubit.state.isPro,
         );
@@ -333,7 +337,7 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
   double? _speedKmhFromGps(GpsData? gpsData) {
     final speed = gpsData?.speed;
     final value = speed?.value;
-    if (value == null || !value.isFinite || value <= 0) {
+    if (value == null || !value.isFinite || value < 0) {
       return null;
     }
     final unit = (speed?.unit ?? '').toLowerCase().trim();

@@ -178,6 +178,82 @@ void main() {
   );
 
   testWidgets(
+    'geo-awareness card hides region content when GPS is off or unavailable by permission',
+    (tester) async {
+      final gpsProvider = _FakeGpsDataProvider();
+      final subscriptionCubit = _buildSubscriptionCubit();
+      addTearDown(subscriptionCubit.close);
+      final route = _linearTestRoute();
+      final flight = _buildFlight(
+        status: FlightStatus.inProgress,
+        route: route,
+        routeInsights: FlightRouteInsights(
+          regions: [
+            _buildRegion(
+              pathFirstEncounterKm: 200,
+              name: 'English Channel',
+              geometry: _polygon(1.0, 2.0),
+            ),
+          ],
+        ),
+      );
+      final cubit = FlightScreenCubit(
+        flight: flight,
+        deleteFlightUseCase: _NoopDeleteFlightUseCase(),
+        completeFlightUseCase: _NoopCompleteFlightUseCase(),
+        startFlightUseCase: _FakeStartFlightUseCase(result: true),
+        gpsProvider: gpsProvider,
+        enableGpsCheckTimer: false,
+      );
+      addTearDown(cubit.close);
+
+      await tester.pumpWidget(
+        _testApp(
+          child: BlocProvider.value(
+            value: subscriptionCubit,
+            child: BlocProvider.value(
+              value: cubit,
+              child: MapBottomStatusCard(
+                status: FlightStatus.inProgress,
+                onSelectedRegionChanged: (_) {},
+                onCheckInPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      gpsProvider.emit(
+        GpsStatus.gpsActive,
+        data: const GpsData(
+          latitude: 0,
+          longitude: 1.5,
+          speed: SpeedValue(600, 'km/h'),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('You are flying over:'), findsOneWidget);
+      expect(find.text('English Channel'), findsOneWidget);
+
+      gpsProvider.emit(GpsStatus.off);
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('You are flying over:'), findsNothing);
+      expect(find.text('English Channel'), findsNothing);
+
+      gpsProvider.emit(GpsStatus.permissionsNotGranted);
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('You are flying over:'), findsNothing);
+      expect(find.text('English Channel'), findsNothing);
+    },
+  );
+
+  testWidgets(
     'geo-awareness region sheet shows read more for offline article',
     (tester) async {
       final gpsProvider = _FakeGpsDataProvider();
@@ -248,7 +324,7 @@ void main() {
   );
 
   testWidgets(
-    'geo-awareness card updates arrival fallback label near landing',
+    'geo-awareness card updates arrival fallback label near landing at zero speed',
     (tester) async {
       final gpsProvider = _FakeGpsDataProvider();
       final subscriptionCubit = _buildSubscriptionCubit();
@@ -339,7 +415,7 @@ void main() {
         data: const GpsData(
           latitude: 0,
           longitude: 9.95,
-          speed: SpeedValue(150, 'km/h'),
+          speed: SpeedValue(0, 'km/h'),
         ),
       );
       await tester.pump();

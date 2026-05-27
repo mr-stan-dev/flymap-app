@@ -77,6 +77,19 @@ void main() {
       expect(snapshot.nextRegionId, 'region-1');
       expect(snapshot.nextRegionEtaMinutes, isNull);
     });
+
+    test('rounds small positive next-region ETA up to one minute', () {
+      final snapshot = engine.compute(
+        route: route,
+        routeRegions: [
+          _buildRegion(pathFirstEncounterKm: currentDistanceKm + 2),
+        ],
+        gpsData: gpsWithSpeed,
+      );
+
+      expect(snapshot.nextRegionId, 'region-1');
+      expect(snapshot.nextRegionEtaMinutes, 1);
+    });
   });
 
   group('GeoAwarenessEngine next-region selection', () {
