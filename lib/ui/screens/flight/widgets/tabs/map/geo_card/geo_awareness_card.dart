@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/domain/entity/gps_data.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/domain/policy/route_region_premium_gate_policy.dart';
@@ -15,6 +16,7 @@ import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/widgets/regio
 import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/ui/screens/shared/premium/route_premium_gate_interactions.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
+import 'package:flymap/utils/wikipedia_article_utils.dart';
 import 'package:latlong2/latlong.dart';
 
 class GeoAwarenessCard extends StatefulWidget {
@@ -54,10 +56,17 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
     return out;
   }
 
-  Future<void> _openRegionDetailsSheet(RouteRegion region) async {
+  Future<void> _openRegionDetailsSheet(
+    RouteRegion region, {
+    FlightArticle? offlineArticle,
+  }) async {
     widget.onSelectedRegionChanged(region);
 
-    await showGeoAwarenessRegionDetailsSheet(context, region: region);
+    await showGeoAwarenessRegionDetailsSheet(
+      context,
+      region: region,
+      offlineArticle: offlineArticle,
+    );
 
     if (!mounted) return;
     widget.onSelectedRegionChanged(null);
@@ -172,6 +181,11 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
                               isLocked: premiumRegionIds.contains(region.qid),
                               onTap: () => _onRegionChipTap(
                                 region,
+                                offlineArticle:
+                                    WikipediaArticleUtils.matchRegionArticle(
+                                      region,
+                                      state.flight.info.articles,
+                                    ),
                                 isLocked: premiumRegionIds.contains(region.qid),
                               ),
                             ),
@@ -240,6 +254,10 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
         isLocked: premiumRegionIds.contains(nextPrimary.qid),
         onTap: () => _onRegionChipTap(
           nextPrimary,
+          offlineArticle: WikipediaArticleUtils.matchRegionArticle(
+            nextPrimary,
+            state.flight.info.articles,
+          ),
           isLocked: premiumRegionIds.contains(nextPrimary.qid),
         ),
       );
@@ -330,10 +348,11 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
 
   Future<void> _onRegionChipTap(
     RouteRegion region, {
+    FlightArticle? offlineArticle,
     required bool isLocked,
   }) async {
     if (!isLocked) {
-      await _openRegionDetailsSheet(region);
+      await _openRegionDetailsSheet(region, offlineArticle: offlineArticle);
       return;
     }
     await RoutePremiumGateInteractions.onGateTap(

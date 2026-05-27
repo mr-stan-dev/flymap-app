@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/domain/entity/route_region.dart';
 import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/ui/design_system/design_system.dart';
+import 'package:flymap/ui/screens/flight/widgets/tabs/read/articles/article_details_page.dart';
 import 'package:flymap/ui/screens/shared/region_artwork.dart';
 import 'package:flymap/ui/screens/shared/route_timeline/route_timeline_region_type_mapper.dart';
 
@@ -9,6 +12,7 @@ const _typeMapper = RouteTimelineRegionTypeMapper();
 Future<void> showGeoAwarenessRegionDetailsSheet(
   BuildContext context, {
   required RouteRegion region,
+  FlightArticle? offlineArticle,
 }) async {
   final typeLabel = _typeMapper.mapLabel(context, region.regionType);
   final description = region.description?.trim().isNotEmpty == true
@@ -76,6 +80,25 @@ Future<void> showGeoAwarenessRegionDetailsSheet(
                     sheetContext,
                   ).textTheme.bodyMedium?.copyWith(height: 1.35),
                 ),
+                if (offlineArticle != null) ...[
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TertiaryButton(
+                      label: context.t.common.readMore,
+                      expand: false,
+                      onPressed: () async {
+                        Navigator.of(sheetContext).pop();
+                        await Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) =>
+                                ArticleDetailsPage(article: offlineArticle),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

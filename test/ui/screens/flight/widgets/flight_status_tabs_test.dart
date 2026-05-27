@@ -7,8 +7,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/data/gps_data_provider.dart';
 import 'package:flymap/domain/entity/airport.dart';
+import 'package:flymap/domain/entity/flight_article.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
+import 'package:flymap/domain/entity/flight_offline_content.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/domain/entity/flight_route_insights.dart';
 import 'package:flymap/domain/entity/flight_route_metrics.dart';
@@ -175,109 +177,180 @@ void main() {
     },
   );
 
-  testWidgets('geo-awareness card updates arrival fallback label near landing', (
-    tester,
-  ) async {
-    final gpsProvider = _FakeGpsDataProvider();
-    final subscriptionCubit = _buildSubscriptionCubit();
-    addTearDown(subscriptionCubit.close);
-    final route = _linearTestRoute();
-    final flight = _buildFlight(
-      status: FlightStatus.inProgress,
-      route: route,
-      routeInsights: FlightRouteInsights(
-        regions: [
-          _buildRegion(
-            qid: 'region-channel',
-            pathFirstEncounterKm: 200,
-            name: 'English Channel',
-            geometry: _polygon(1.0, 2.0),
-          ),
-          _buildRegion(
-            qid: 'region-arrival-area',
-            pathFirstEncounterKm: 900,
-            name: 'Arrival Area',
-            geometry: _polygon(9.6, 10.0),
-          ),
-        ],
-      ),
-    );
-    final cubit = FlightScreenCubit(
-      flight: flight,
-      deleteFlightUseCase: _NoopDeleteFlightUseCase(),
-      completeFlightUseCase: _NoopCompleteFlightUseCase(),
-      startFlightUseCase: _FakeStartFlightUseCase(result: true),
-      gpsProvider: gpsProvider,
-      enableGpsCheckTimer: false,
-    );
-    addTearDown(cubit.close);
+  testWidgets(
+    'geo-awareness region sheet shows read more for offline article',
+    (tester) async {
+      final gpsProvider = _FakeGpsDataProvider();
+      final subscriptionCubit = _buildSubscriptionCubit();
+      addTearDown(subscriptionCubit.close);
+      final route = _linearTestRoute();
+      final flight = _buildFlight(
+        status: FlightStatus.inProgress,
+        route: route,
+        routeInsights: FlightRouteInsights(
+          regions: [
+            _buildRegion(
+              qid: 'region-article',
+              pathFirstEncounterKm: 200,
+              name: 'English Channel',
+              geometry: _polygon(1.0, 2.0),
+            ),
+          ],
+        ),
+        offlineContent: FlightOfflineContent(
+          articles: [
+            _buildArticle(qid: 'region-article', title: 'English Channel'),
+          ],
+        ),
+      );
+      final cubit = FlightScreenCubit(
+        flight: flight,
+        deleteFlightUseCase: _NoopDeleteFlightUseCase(),
+        completeFlightUseCase: _NoopCompleteFlightUseCase(),
+        startFlightUseCase: _FakeStartFlightUseCase(result: true),
+        gpsProvider: gpsProvider,
+        enableGpsCheckTimer: false,
+      );
+      addTearDown(cubit.close);
 
-    await tester.pumpWidget(
-      _testApp(
-        child: BlocProvider.value(
-          value: subscriptionCubit,
+      await tester.pumpWidget(
+        _testApp(
           child: BlocProvider.value(
-            value: cubit,
-            child: MapBottomStatusCard(
-              status: FlightStatus.inProgress,
-              onSelectedRegionChanged: (_) {},
-              onCheckInPressed: () {},
+            value: subscriptionCubit,
+            child: BlocProvider.value(
+              value: cubit,
+              child: MapBottomStatusCard(
+                status: FlightStatus.inProgress,
+                onSelectedRegionChanged: (_) {},
+                onCheckInPressed: () {},
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    gpsProvider.emit(
-      GpsStatus.gpsActive,
-      data: const GpsData(
-        latitude: 0,
-        longitude: 9.5,
-        speed: SpeedValue(600, 'km/h'),
-      ),
-    );
-    await tester.pump();
-    await tester.pump();
+      gpsProvider.emit(
+        GpsStatus.gpsActive,
+        data: const GpsData(
+          latitude: 0,
+          longitude: 1.5,
+          speed: SpeedValue(600, 'km/h'),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
 
-    expect(find.text('Next:'), findsOneWidget);
-    expect(find.text('Arriving:'), findsNothing);
-    expect(find.text('Arrived:'), findsNothing);
-    expect(find.text('Arrival'), findsOneWidget);
-    expect(find.textContaining('Arrival (in '), findsNothing);
+      await tester.tap(find.text('English Channel').first);
+      await tester.pumpAndSettle();
 
-    gpsProvider.emit(
-      GpsStatus.gpsActive,
-      data: const GpsData(
-        latitude: 0,
-        longitude: 9.7,
-        speed: SpeedValue(600, 'km/h'),
-      ),
-    );
-    await tester.pump();
-    await tester.pumpAndSettle();
+      expect(find.text('Read more'), findsOneWidget);
+    },
+  );
 
-    expect(find.text('Next:'), findsNothing);
-    expect(find.text('Arriving:'), findsOneWidget);
-    expect(find.text('Arrived:'), findsNothing);
-    expect(find.text('Now:'), findsNothing);
-    expect(find.text('Arrival Area'), findsNothing);
+  testWidgets(
+    'geo-awareness card updates arrival fallback label near landing',
+    (tester) async {
+      final gpsProvider = _FakeGpsDataProvider();
+      final subscriptionCubit = _buildSubscriptionCubit();
+      addTearDown(subscriptionCubit.close);
+      final route = _linearTestRoute();
+      final flight = _buildFlight(
+        status: FlightStatus.inProgress,
+        route: route,
+        routeInsights: FlightRouteInsights(
+          regions: [
+            _buildRegion(
+              qid: 'region-channel',
+              pathFirstEncounterKm: 200,
+              name: 'English Channel',
+              geometry: _polygon(1.0, 2.0),
+            ),
+            _buildRegion(
+              qid: 'region-arrival-area',
+              pathFirstEncounterKm: 900,
+              name: 'Arrival Area',
+              geometry: _polygon(9.6, 10.0),
+            ),
+          ],
+        ),
+      );
+      final cubit = FlightScreenCubit(
+        flight: flight,
+        deleteFlightUseCase: _NoopDeleteFlightUseCase(),
+        completeFlightUseCase: _NoopCompleteFlightUseCase(),
+        startFlightUseCase: _FakeStartFlightUseCase(result: true),
+        gpsProvider: gpsProvider,
+        enableGpsCheckTimer: false,
+      );
+      addTearDown(cubit.close);
 
-    gpsProvider.emit(
-      GpsStatus.gpsActive,
-      data: const GpsData(
-        latitude: 0,
-        longitude: 9.95,
-        speed: SpeedValue(150, 'km/h'),
-      ),
-    );
-    await tester.pump();
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        _testApp(
+          child: BlocProvider.value(
+            value: subscriptionCubit,
+            child: BlocProvider.value(
+              value: cubit,
+              child: MapBottomStatusCard(
+                status: FlightStatus.inProgress,
+                onSelectedRegionChanged: (_) {},
+                onCheckInPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      );
 
-    expect(find.text('Arriving:'), findsNothing);
-    expect(find.text('Arrived:'), findsOneWidget);
-    expect(find.text('Now:'), findsNothing);
-    expect(find.text('Arrival Area'), findsNothing);
-  });
+      gpsProvider.emit(
+        GpsStatus.gpsActive,
+        data: const GpsData(
+          latitude: 0,
+          longitude: 9.5,
+          speed: SpeedValue(600, 'km/h'),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Next:'), findsOneWidget);
+      expect(find.text('Arriving:'), findsNothing);
+      expect(find.text('Arrived:'), findsNothing);
+      expect(find.text('Arrival'), findsOneWidget);
+      expect(find.textContaining('Arrival (in '), findsNothing);
+
+      gpsProvider.emit(
+        GpsStatus.gpsActive,
+        data: const GpsData(
+          latitude: 0,
+          longitude: 9.7,
+          speed: SpeedValue(600, 'km/h'),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Next:'), findsNothing);
+      expect(find.text('Arriving:'), findsOneWidget);
+      expect(find.text('Arrived:'), findsNothing);
+      expect(find.text('Now:'), findsNothing);
+      expect(find.text('Arrival Area'), findsNothing);
+
+      gpsProvider.emit(
+        GpsStatus.gpsActive,
+        data: const GpsData(
+          latitude: 0,
+          longitude: 9.95,
+          speed: SpeedValue(150, 'km/h'),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Arriving:'), findsNothing);
+      expect(find.text('Arrived:'), findsOneWidget);
+      expect(find.text('Now:'), findsNothing);
+      expect(find.text('Arrival Area'), findsNothing);
+    },
+  );
 
   testWidgets('dashboard tab shows bottom check-in card for upcoming', (
     tester,
@@ -577,6 +650,7 @@ Flight _buildFlight({
   required FlightStatus status,
   FlightRoute? route,
   FlightRouteInsights? routeInsights,
+  FlightOfflineContent? offlineContent,
 }) {
   final resolvedRoute = route ?? _testRoute();
 
@@ -584,7 +658,7 @@ Flight _buildFlight({
     id: 'flight-1',
     route: resolvedRoute,
     routeInsights: routeInsights ?? FlightInfo.empty.routeInsights,
-    offlineContent: FlightInfo.empty.offlineContent,
+    offlineContent: offlineContent ?? FlightInfo.empty.offlineContent,
     timestamp: FlightTimestamp(createdAt: DateTime(2026, 1, 1)),
     status: status,
   );
@@ -715,6 +789,24 @@ Map<String, dynamic> _polygon(double lonStart, double lonEnd) {
       ],
     ],
   };
+}
+
+FlightArticle _buildArticle({required String qid, required String title}) {
+  return FlightArticle(
+    qid: qid,
+    sourceUrl: 'https://en.wikipedia.org/wiki/${title.replaceAll(' ', '_')}',
+    title: title,
+    summary: 'Summary for $title',
+    contentPlainText: 'Plain text for $title',
+    contentHtml: '<p>HTML for $title</p>',
+    languageCode: 'en',
+    leadImageRelativePath: '',
+    inlineImageRelativePaths: const [],
+    attributionText: 'Source: Wikipedia contributors',
+    licenseText: 'CC BY-SA',
+    downloadedAt: DateTime(2026, 1, 1),
+    sizeBytes: 1024,
+  );
 }
 
 SubscriptionCubit _buildSubscriptionCubit() {
