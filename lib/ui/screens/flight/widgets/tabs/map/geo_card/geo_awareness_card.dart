@@ -12,8 +12,10 @@ import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/widgets/geo_a
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/widgets/geo_awareness_region_details_sheet.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/widgets/inline_label_chip.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/map/geo_card/widgets/region_inline_chip.dart';
+import 'package:flymap/ui/map/map_utils.dart';
 import 'package:flymap/ui/screens/shared/premium/route_premium_gate_interactions.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
+import 'package:latlong2/latlong.dart';
 
 class GeoAwarenessCard extends StatefulWidget {
   const GeoAwarenessCard({required this.onSelectedRegionChanged, super.key});
@@ -27,6 +29,11 @@ class GeoAwarenessCard extends StatefulWidget {
 class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
   static const _wrapAnimationDuration = Duration(milliseconds: 220);
   static const _chipSwapAnimationDuration = Duration(milliseconds: 180);
+  static const _arrivingRadiusKm = 40.0;
+  static const _arrivingProgressThreshold = 0.93;
+  static const _arrivedRadiusKm = 10.0;
+  static const _arrivedProgressThreshold = 0.97;
+  static const _arrivedMaxSpeedKmh = 180.0;
 
   RouteRegion? _findRegion(List<RouteRegion> allRegions, String qid) {
     for (final region in allRegions) {
@@ -99,11 +106,18 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
         final nextPrimary = state.nextRegionId == null
             ? null
             : _findRegion(allRegions, state.nextRegionId!);
-        final showArrivalAsNext =
-            nextPrimary == null &&
-            state.routeCoveredDistanceKm < state.flight.route.distanceInKm;
+        final arrivalLabelState = nextPrimary == null
+            ? _arrivalLabelState(state)
+            : null;
+        final hideCurrentRegions =
+            arrivalLabelState == _ArrivalLabelState.arriving ||
+            arrivalLabelState == _ArrivalLabelState.arrived;
+        final visibleCurrentRegions = hideCurrentRegions
+            ? const <RouteRegion>[]
+            : currentRegions;
+        final showArrivalAsNext = arrivalLabelState != null;
         final hasRegionContent =
-            currentRegions.isNotEmpty ||
+            visibleCurrentRegions.isNotEmpty ||
             nextPrimary != null ||
             showArrivalAsNext;
         if (!hasRegionContent) {
@@ -148,11 +162,11 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
                         runSpacing: 6,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          if (currentRegions.isNotEmpty)
+                          if (visibleCurrentRegions.isNotEmpty)
                             InlineLabelChip(
                               text: '${context.t.flight.route.nowLabel}:',
                             ),
-                          for (final region in currentRegions)
+                          for (final region in visibleCurrentRegions)
                             RegionInlineChip(
                               region: region,
                               isLocked: premiumRegionIds.contains(region.qid),
@@ -164,7 +178,7 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
                           if (nextPrimary != null || showArrivalAsNext)
                             InlineLabelChip(
                               text:
-                                  '${context.t.flight.route.nextRegionLabel}:',
+                                  '${_nextLabelText(context, arrivalLabelState)}:',
                             ),
                           if (nextPrimary != null || showArrivalAsNext)
                             AnimatedSwitcher(
@@ -238,6 +252,82 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
     );
   }
 
+  String _nextLabelText(
+    BuildContext context,
+    _ArrivalLabelState? arrivalLabelState,
+  ) {
+    return switch (arrivalLabelState) {
+      _ArrivalLabelState.arriving => context.t.flight.route.arrivingLabel,
+      _ArrivalLabelState.arrived => context.t.flight.route.arrivedLabel,
+      null || _ArrivalLabelState.next => context.t.flight.route.nextRegionLabel,
+    };
+  }
+
+  _ArrivalLabelState? _arrivalLabelState(FlightScreenLoaded state) {
+    final routeDistanceKm = state.flight.route.distanceInKm;
+    if (!routeDistanceKm.isFinite || routeDistanceKm <= 0) return null;
+
+    final progress = (state.routeCoveredDistanceKm / routeDistanceKm).clamp(
+      0.0,
+      1.5,
+    );
+    final gpsData = state.gps.data;
+    final lat = gpsData?.latitude;
+    final lon = gpsData?.longitude;
+    if (lat == null || lon == null) {
+      return state.routeCoveredDistanceKm < routeDistanceKm
+          ? _ArrivalLabelState.next
+          : null;
+    }
+
+    final distanceToArrivalKm = MapUtils.distanceKm(
+      departure: state.flight.route.arrival.latLon,
+      arrival: LatLng(lat, lon),
+    );
+    if (!distanceToArrivalKm.isFinite) {
+      return state.routeCoveredDistanceKm < routeDistanceKm
+          ? _ArrivalLabelState.next
+          : null;
+    }
+
+    final speedKmh = _speedKmhFromGps(gpsData);
+    final isArrived =
+        distanceToArrivalKm <= _arrivedRadiusKm &&
+        progress >= _arrivedProgressThreshold &&
+        speedKmh != null &&
+        speedKmh <= _arrivedMaxSpeedKmh;
+    if (isArrived) {
+      return _ArrivalLabelState.arrived;
+    }
+
+    final isArriving =
+        distanceToArrivalKm <= _arrivingRadiusKm &&
+        progress >= _arrivingProgressThreshold;
+    if (isArriving) {
+      return _ArrivalLabelState.arriving;
+    }
+
+    return state.routeCoveredDistanceKm < routeDistanceKm
+        ? _ArrivalLabelState.next
+        : null;
+  }
+
+  double? _speedKmhFromGps(GpsData? gpsData) {
+    final speed = gpsData?.speed;
+    final value = speed?.value;
+    if (value == null || !value.isFinite || value <= 0) {
+      return null;
+    }
+    final unit = (speed?.unit ?? '').toLowerCase().trim();
+    if (unit == 'km/h' || unit == 'kmh' || unit == 'kph') {
+      return value;
+    }
+    if (unit == 'mph') {
+      return value * 1.609344;
+    }
+    return null;
+  }
+
   Future<void> _onRegionChipTap(
     RouteRegion region, {
     required bool isLocked,
@@ -253,3 +343,5 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
     );
   }
 }
+
+enum _ArrivalLabelState { next, arriving, arrived }

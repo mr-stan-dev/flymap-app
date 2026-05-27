@@ -2863,6 +2863,12 @@ class TranslationsFlightRouteEn {
 	/// en: 'Next'
 	String get nextRegionLabel => 'Next';
 
+	/// en: 'Arriving'
+	String get arrivingLabel => 'Arriving';
+
+	/// en: 'Arrived'
+	String get arrivedLabel => 'Arrived';
+
 	/// en: 'ETA: $time'
 	String etaLabel({required Object time}) => 'ETA: ${time}';
 
@@ -3672,6 +3678,8 @@ extension on Translations {
 			'flight.route.nowLabel' => 'Now',
 			'flight.route.currentRegionLabel' => 'Current',
 			'flight.route.nextRegionLabel' => 'Next',
+			'flight.route.arrivingLabel' => 'Arriving',
+			'flight.route.arrivedLabel' => 'Arrived',
 			'flight.route.etaLabel' => ({required Object time}) => 'ETA: ${time}',
 			'flight.route.etaInLabel' => ({required Object time}) => 'in ${time}',
 			'flight.route.flyingOverLabel' => 'You are flying over:',

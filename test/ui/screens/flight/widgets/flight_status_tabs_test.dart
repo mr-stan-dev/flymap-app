@@ -175,7 +175,7 @@ void main() {
     },
   );
 
-  testWidgets('geo-awareness card shows arrival airport as final next chip', (
+  testWidgets('geo-awareness card updates arrival fallback label near landing', (
     tester,
   ) async {
     final gpsProvider = _FakeGpsDataProvider();
@@ -188,9 +188,16 @@ void main() {
       routeInsights: FlightRouteInsights(
         regions: [
           _buildRegion(
+            qid: 'region-channel',
             pathFirstEncounterKm: 200,
             name: 'English Channel',
             geometry: _polygon(1.0, 2.0),
+          ),
+          _buildRegion(
+            qid: 'region-arrival-area',
+            pathFirstEncounterKm: 900,
+            name: 'Arrival Area',
+            geometry: _polygon(9.6, 10.0),
           ),
         ],
       ),
@@ -232,8 +239,44 @@ void main() {
     await tester.pump();
     await tester.pump();
 
+    expect(find.text('Next:'), findsOneWidget);
+    expect(find.text('Arriving:'), findsNothing);
+    expect(find.text('Arrived:'), findsNothing);
     expect(find.text('Arrival'), findsOneWidget);
     expect(find.textContaining('Arrival (in '), findsNothing);
+
+    gpsProvider.emit(
+      GpsStatus.gpsActive,
+      data: const GpsData(
+        latitude: 0,
+        longitude: 9.7,
+        speed: SpeedValue(600, 'km/h'),
+      ),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Next:'), findsNothing);
+    expect(find.text('Arriving:'), findsOneWidget);
+    expect(find.text('Arrived:'), findsNothing);
+    expect(find.text('Now:'), findsNothing);
+    expect(find.text('Arrival Area'), findsNothing);
+
+    gpsProvider.emit(
+      GpsStatus.gpsActive,
+      data: const GpsData(
+        latitude: 0,
+        longitude: 9.95,
+        speed: SpeedValue(150, 'km/h'),
+      ),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Arriving:'), findsNothing);
+    expect(find.text('Arrived:'), findsOneWidget);
+    expect(find.text('Now:'), findsNothing);
+    expect(find.text('Arrival Area'), findsNothing);
   });
 
   testWidgets('dashboard tab shows bottom check-in card for upcoming', (
@@ -641,12 +684,13 @@ double _coveredDistanceKmForTest(FlightRoute route, GpsData gpsData) {
 }
 
 RouteRegion _buildRegion({
+  String qid = 'region-1',
   required double pathFirstEncounterKm,
   required String name,
   Map<String, dynamic>? geometry,
 }) {
   return RouteRegion(
-    qid: 'region-1',
+    qid: qid,
     name: name,
     regionType: RouteRegionType.channel,
     pathFirstEncounterKm: pathFirstEncounterKm,

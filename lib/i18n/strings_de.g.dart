@@ -1187,6 +1187,8 @@ class _TranslationsFlightRouteDe extends TranslationsFlightRouteEn {
 	@override String get nowLabel => 'Jetzt';
 	@override String get currentRegionLabel => 'Aktuell';
 	@override String get nextRegionLabel => 'Nächste';
+	@override String get arrivingLabel => 'Anflug';
+	@override String get arrivedLabel => 'Angekommen';
 	@override String etaLabel({required Object time}) => 'ETA: ${time}';
 	@override String etaInLabel({required Object time}) => 'in ${time}';
 	@override String get flyingOverLabel => 'Du fliegst über:';
@@ -1886,6 +1888,8 @@ extension on TranslationsDe {
 			'flight.route.nowLabel' => 'Jetzt',
 			'flight.route.currentRegionLabel' => 'Aktuell',
 			'flight.route.nextRegionLabel' => 'Nächste',
+			'flight.route.arrivingLabel' => 'Anflug',
+			'flight.route.arrivedLabel' => 'Angekommen',
 			'flight.route.etaLabel' => ({required Object time}) => 'ETA: ${time}',
 			'flight.route.etaInLabel' => ({required Object time}) => 'in ${time}',
 			'flight.route.flyingOverLabel' => 'Du fliegst über:',

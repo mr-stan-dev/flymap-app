@@ -652,6 +652,8 @@
       "nowLabel": "Maintenant",
       "currentRegionLabel": "Actuel",
       "nextRegionLabel": "Suivant",
+      "arrivingLabel": "Approche",
+      "arrivedLabel": "Arrivé",
       "etaLabel": "ETA : $time",
       "etaInLabel": "dans $time",
       "flyingOverLabel": "Vous survolez :",
