@@ -62,8 +62,8 @@ void main() {
 
         expect(chips.map((chip) => chip.label), [
           'United States',
-          'Atlantic Ocean',
           'Atlantic Coast',
+          'Atlantic Ocean',
           'Country',
           'United Kingdom',
         ]);
@@ -121,7 +121,7 @@ void main() {
       },
     );
 
-    test('includes all oceans first between departure and arrival', () {
+    test('keeps selected oceans in route order between edge countries', () {
       final chips = ShareFlightCardPolicy.routeChips(
         regions: [
           _region('coast', 'Atlantic Coast', RouteRegionType.coast, 80, 700),
@@ -138,13 +138,13 @@ void main() {
 
       expect(chips.map((chip) => chip.label), [
         'United States',
+        'France',
         'North Sea',
         'Atlantic Ocean',
-        'France',
         'United Kingdom',
       ]);
-      expect(chips[1].regionType, RouteRegionType.ocean);
       expect(chips[2].regionType, RouteRegionType.ocean);
+      expect(chips[3].regionType, RouteRegionType.ocean);
     });
 
     test(

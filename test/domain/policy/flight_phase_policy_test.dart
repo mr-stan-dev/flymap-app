@@ -116,7 +116,7 @@ void main() {
     test('does not classify runway phases when altitude is too high', () {
       final phase = FlightPhasePolicy.classify(
         speedKmh: 120,
-        altitudeMeters: 400,
+        altitudeMeters: 5000,
         speedDeltaKmh: 6,
         altitudeDeltaMeters: 0,
       );

@@ -27,6 +27,9 @@ import 'package:flymap/repository/learn_article_progress_repository.dart';
 import 'package:flymap/repository/learn_repository.dart';
 import 'package:flymap/repository/metric_units_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
+import 'package:flymap/rating/rate_prompt_policy_service.dart';
+import 'package:flymap/rating/rate_prompt_trigger.dart';
+import 'package:flymap/rating/rate_review_launcher.dart';
 import 'package:flymap/repository/settings_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_storage.dart';
@@ -64,6 +67,12 @@ void main() {
     GetIt.I.registerSingleton<DeleteFlightUseCase>(_FakeDeleteFlightUseCase());
     GetIt.I.registerSingleton<ConnectivityChecker>(
       const _FakeConnectivityChecker(),
+    );
+    GetIt.I.registerSingleton<RatePromptPolicyService>(
+      const _FakeRatePromptPolicyService(),
+    );
+    GetIt.I.registerSingleton<RateReviewLauncher>(
+      const _FakeRateReviewLauncher(),
     );
     GetIt.I.registerSingleton<OnboardingRepository>(
       OnboardingRepository(prefsStorage: UserFlightPrefsStorage()),
@@ -431,6 +440,32 @@ class _FakeAppAnalytics implements AppAnalytics {
 
   @override
   Future<void> setSubscriptionContext({required bool isPro}) async {}
+}
+
+class _FakeRatePromptPolicyService implements RatePromptPolicyService {
+  const _FakeRatePromptPolicyService();
+
+  @override
+  Future<void> recordAccepted() async {}
+
+  @override
+  Future<void> recordDeclined() async {}
+
+  @override
+  Future<void> recordDismissed() async {}
+
+  @override
+  Future<void> registerTrigger(RatePromptTrigger trigger) async {}
+
+  @override
+  Future<bool> shouldShowPromptNow() async => false;
+}
+
+class _FakeRateReviewLauncher implements RateReviewLauncher {
+  const _FakeRateReviewLauncher();
+
+  @override
+  Future<bool> requestReview() async => true;
 }
 
 class _FakeLearnRepository implements LearnRepository {
