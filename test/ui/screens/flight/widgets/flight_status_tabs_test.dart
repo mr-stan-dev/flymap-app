@@ -158,7 +158,7 @@ void main() {
         ),
       );
       await tester.pump();
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(find.textContaining('English Channel (in '), findsOneWidget);
 
@@ -167,7 +167,7 @@ void main() {
         data: const GpsData(latitude: 0, longitude: 3),
       );
       await tester.pump();
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect((cubit.state as FlightScreenLoaded).nextRegionEtaMinutes, isNull);
       expect(find.textContaining('English Channel'), findsOneWidget);
@@ -232,8 +232,8 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.text('ARR'), findsOneWidget);
-    expect(find.textContaining('ARR (in '), findsNothing);
+    expect(find.text('Arrival'), findsOneWidget);
+    expect(find.textContaining('Arrival (in '), findsNothing);
   });
 
   testWidgets('dashboard tab shows bottom check-in card for upcoming', (

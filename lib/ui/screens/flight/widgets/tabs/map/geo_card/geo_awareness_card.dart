@@ -25,6 +25,9 @@ class GeoAwarenessCard extends StatefulWidget {
 }
 
 class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
+  static const _wrapAnimationDuration = Duration(milliseconds: 220);
+  static const _chipSwapAnimationDuration = Duration(milliseconds: 180);
+
   RouteRegion? _findRegion(List<RouteRegion> allRegions, String qid) {
     for (final region in allRegions) {
       if (region.qid == qid) return region;
@@ -136,49 +139,68 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
                     message: isGpsSearching
                         ? context.t.flight.dashboard.gpsSearching
                         : context.t.common.loading,
-                    child: Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        if (currentRegions.isNotEmpty)
-                          InlineLabelChip(
-                            text: '${context.t.flight.route.nowLabel}:',
-                          ),
-                        for (final region in currentRegions)
-                          RegionInlineChip(
-                            region: region,
-                            isLocked: premiumRegionIds.contains(region.qid),
-                            onTap: () => _onRegionChipTap(
-                              region,
+                    child: AnimatedSize(
+                      duration: _wrapAnimationDuration,
+                      curve: Curves.easeOutCubic,
+                      alignment: Alignment.topLeft,
+                      child: Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          if (currentRegions.isNotEmpty)
+                            InlineLabelChip(
+                              text: '${context.t.flight.route.nowLabel}:',
+                            ),
+                          for (final region in currentRegions)
+                            RegionInlineChip(
+                              region: region,
                               isLocked: premiumRegionIds.contains(region.qid),
-                            ),
-                          ),
-                        if (nextPrimary != null || showArrivalAsNext)
-                          InlineLabelChip(
-                            text: '${context.t.flight.route.nextRegionLabel}:',
-                          ),
-                        if (nextPrimary != null)
-                          RegionInlineChip(
-                            region: nextPrimary,
-                            isNext: true,
-                            nextRegionEtaMinutes: state.nextRegionEtaMinutes,
-                            isLocked: premiumRegionIds.contains(
-                              nextPrimary.qid,
-                            ),
-                            onTap: () => _onRegionChipTap(
-                              nextPrimary,
-                              isLocked: premiumRegionIds.contains(
-                                nextPrimary.qid,
+                              onTap: () => _onRegionChipTap(
+                                region,
+                                isLocked: premiumRegionIds.contains(region.qid),
                               ),
                             ),
-                          ),
-                        if (showArrivalAsNext)
-                          AirportInlineChip(
-                            airport: state.flight.route.arrival,
-                            isNext: true,
-                          ),
-                      ],
+                          if (nextPrimary != null || showArrivalAsNext)
+                            InlineLabelChip(
+                              text:
+                                  '${context.t.flight.route.nextRegionLabel}:',
+                            ),
+                          if (nextPrimary != null || showArrivalAsNext)
+                            AnimatedSwitcher(
+                              duration: _chipSwapAnimationDuration,
+                              switchInCurve: Curves.easeOutCubic,
+                              switchOutCurve: Curves.easeInCubic,
+                              transitionBuilder: (child, animation) {
+                                final offsetAnimation = Tween<Offset>(
+                                  begin: const Offset(0.08, 0),
+                                  end: Offset.zero,
+                                ).animate(animation);
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: SlideTransition(
+                                    position: offsetAnimation,
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              layoutBuilder: (currentChild, previousChildren) {
+                                return Stack(
+                                  alignment: Alignment.centerLeft,
+                                  children: [
+                                    ...previousChildren,
+                                    if (currentChild != null) currentChild,
+                                  ],
+                                );
+                              },
+                              child: _buildNextChip(
+                                state: state,
+                                nextPrimary: nextPrimary,
+                                premiumRegionIds: premiumRegionIds,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -187,6 +209,32 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildNextChip({
+    required FlightScreenLoaded state,
+    required RouteRegion? nextPrimary,
+    required Set<String> premiumRegionIds,
+  }) {
+    if (nextPrimary != null) {
+      return RegionInlineChip(
+        key: ValueKey('next-region:${nextPrimary.qid}'),
+        region: nextPrimary,
+        isNext: true,
+        nextRegionEtaMinutes: state.nextRegionEtaMinutes,
+        isLocked: premiumRegionIds.contains(nextPrimary.qid),
+        onTap: () => _onRegionChipTap(
+          nextPrimary,
+          isLocked: premiumRegionIds.contains(nextPrimary.qid),
+        ),
+      );
+    }
+
+    return AirportInlineChip(
+      key: ValueKey('next-arrival:${state.flight.route.arrival.displayCode}'),
+      airport: state.flight.route.arrival,
+      isNext: true,
     );
   }
 
