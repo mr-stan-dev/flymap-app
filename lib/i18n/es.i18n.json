@@ -653,6 +653,7 @@
       "currentRegionLabel": "Actual",
       "nextRegionLabel": "Siguiente",
       "etaLabel": "ETA: $time",
+      "etaInLabel": "en $time",
       "flyingOverLabel": "Estás volando sobre:",
       "premiumLockedChipLabel": "Desbloquear",
       "premiumGateTitle": "Desbloquear cronología completa de la ruta",

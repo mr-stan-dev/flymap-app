@@ -2866,6 +2866,9 @@ class TranslationsFlightRouteEn {
 	/// en: 'ETA: $time'
 	String etaLabel({required Object time}) => 'ETA: ${time}';
 
+	/// en: 'in $time'
+	String etaInLabel({required Object time}) => 'in ${time}';
+
 	/// en: 'You are flying over:'
 	String get flyingOverLabel => 'You are flying over:';
 
@@ -3670,6 +3673,7 @@ extension on Translations {
 			'flight.route.currentRegionLabel' => 'Current',
 			'flight.route.nextRegionLabel' => 'Next',
 			'flight.route.etaLabel' => ({required Object time}) => 'ETA: ${time}',
+			'flight.route.etaInLabel' => ({required Object time}) => 'in ${time}',
 			'flight.route.flyingOverLabel' => 'You are flying over:',
 			'flight.route.premiumLockedChipLabel' => 'Unlock',
 			'flight.route.premiumGateTitle' => 'Unlock full route timeline',

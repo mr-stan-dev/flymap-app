@@ -101,8 +101,7 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
         final isGpsSearching = state.gps.status == GpsStatus.searching;
         final showBlockingOverlay =
             isGpsSearching && state.gps.lastFixAt == null;
-        final showStaleHint =
-            isGpsSearching && state.gps.lastFixAt != null;
+        final showStaleHint = isGpsSearching && state.gps.lastFixAt != null;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -166,6 +165,7 @@ class _GeoAwarenessCardState extends State<GeoAwarenessCard> {
                           RegionInlineChip(
                             region: nextPrimary,
                             isNext: true,
+                            nextRegionEtaMinutes: state.nextRegionEtaMinutes,
                             isLocked: premiumRegionIds.contains(
                               nextPrimary.qid,
                             ),

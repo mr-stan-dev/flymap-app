@@ -27,10 +27,12 @@ class GeoAwarenessSnapshot extends Equatable {
 class GeoAwarenessEngine {
   const GeoAwarenessEngine();
 
+  static const _maxNextRegionEtaMinutes = 180;
+  static const _minNextRegionEtaSpeedKmh = 200.0;
+
   GeoAwarenessSnapshot compute({
     required FlightRoute route,
     required List<RouteRegion> routeRegions,
-    required int cruiseSpeedKmh,
     required GpsData? gpsData,
     GeoAwarenessSnapshot? previous,
   }) {
@@ -61,7 +63,6 @@ class GeoAwarenessEngine {
       nextRegionId: nextRegionId,
       route: route,
       routeRegions: routeRegions,
-      cruiseSpeedKmh: cruiseSpeedKmh,
       gpsData: gpsData,
     );
 
@@ -130,7 +131,6 @@ class GeoAwarenessEngine {
     required String? nextRegionId,
     required FlightRoute route,
     required List<RouteRegion> routeRegions,
-    required int cruiseSpeedKmh,
     required GpsData? gpsData,
   }) {
     if (nextRegionId == null || nextRegionId.isEmpty) return null;
@@ -143,6 +143,13 @@ class GeoAwarenessEngine {
     }
     if (nextRegion == null) return null;
 
+    final speedKmh = _speedKmhFromGps(gpsData);
+    if (speedKmh == null ||
+        !speedKmh.isFinite ||
+        speedKmh < _minNextRegionEtaSpeedKmh) {
+      return null;
+    }
+
     final currentDistanceKm = RouteProgressUtils.coveredDistanceKm(
       route: route,
       gpsData: gpsData,
@@ -153,11 +160,11 @@ class GeoAwarenessEngine {
       return 0;
     }
 
-    final speedKmh = _speedKmhFromGps(gpsData) ?? cruiseSpeedKmh.toDouble();
-    if (!speedKmh.isFinite || speedKmh <= 0) return null;
-
     final rawMinutes = (remainingDistanceKm / speedKmh) * 60.0;
-    return rawMinutes.isFinite ? rawMinutes.round().clamp(0, 99999) : null;
+    if (!rawMinutes.isFinite || rawMinutes > _maxNextRegionEtaMinutes) {
+      return null;
+    }
+    return rawMinutes.round().clamp(0, _maxNextRegionEtaMinutes);
   }
 
   double? _speedKmhFromGps(GpsData? gpsData) {

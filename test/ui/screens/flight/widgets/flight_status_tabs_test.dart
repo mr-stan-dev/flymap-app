@@ -10,12 +10,15 @@ import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/domain/entity/flight_info.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
+import 'package:flymap/domain/entity/flight_route_insights.dart';
 import 'package:flymap/domain/entity/flight_route_metrics.dart';
 import 'package:flymap/domain/entity/flight_route_source.dart';
 import 'package:flymap/domain/entity/flight_status.dart';
 import 'package:flymap/domain/entity/flight_timestamp.dart';
 import 'package:flymap/domain/entity/flight_waypoint.dart';
 import 'package:flymap/domain/entity/gps_data.dart';
+import 'package:flymap/domain/entity/route_region.dart';
+import 'package:flymap/domain/entity/route_region_type.dart';
 import 'package:flymap/domain/usecase/complete_flight_use_case.dart';
 import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
 import 'package:flymap/domain/usecase/start_flight_use_case.dart';
@@ -92,6 +95,85 @@ void main() {
     await cubit.close();
     await tester.pump();
   });
+
+  testWidgets(
+    'geo-awareness card shows ETA on next region chip only with speed',
+    (tester) async {
+      final gpsProvider = _FakeGpsDataProvider();
+      final subscriptionCubit = _buildSubscriptionCubit();
+      addTearDown(subscriptionCubit.close);
+      final route = _linearTestRoute();
+      final currentDistanceKm = _coveredDistanceKmForTest(
+        route,
+        const GpsData(
+          latitude: 0,
+          longitude: 3,
+          speed: SpeedValue(600, 'km/h'),
+        ),
+      );
+      final flight = _buildFlight(
+        status: FlightStatus.inProgress,
+        route: route,
+        routeInsights: FlightRouteInsights(
+          regions: [
+            _buildRegion(
+              pathFirstEncounterKm: currentDistanceKm + 200,
+              name: 'English Channel',
+            ),
+          ],
+        ),
+      );
+      final cubit = FlightScreenCubit(
+        flight: flight,
+        deleteFlightUseCase: _NoopDeleteFlightUseCase(),
+        completeFlightUseCase: _NoopCompleteFlightUseCase(),
+        startFlightUseCase: _FakeStartFlightUseCase(result: true),
+        gpsProvider: gpsProvider,
+        enableGpsCheckTimer: false,
+      );
+      addTearDown(cubit.close);
+
+      await tester.pumpWidget(
+        _testApp(
+          child: BlocProvider.value(
+            value: subscriptionCubit,
+            child: BlocProvider.value(
+              value: cubit,
+              child: MapBottomStatusCard(
+                status: FlightStatus.inProgress,
+                onSelectedRegionChanged: (_) {},
+                onCheckInPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      gpsProvider.emit(
+        GpsStatus.gpsActive,
+        data: const GpsData(
+          latitude: 0,
+          longitude: 3,
+          speed: SpeedValue(600, 'km/h'),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.textContaining('English Channel (in '), findsOneWidget);
+
+      gpsProvider.emit(
+        GpsStatus.gpsActive,
+        data: const GpsData(latitude: 0, longitude: 3),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect((cubit.state as FlightScreenLoaded).nextRegionEtaMinutes, isNull);
+      expect(find.textContaining('English Channel'), findsOneWidget);
+      expect(find.textContaining('English Channel (in '), findsNothing);
+    },
+  );
 
   testWidgets('dashboard tab shows bottom check-in card for upcoming', (
     tester,
@@ -387,7 +469,24 @@ FlightScreenLoaded _loadedState({
   );
 }
 
-Flight _buildFlight({required FlightStatus status, FlightRoute? route}) {
+Flight _buildFlight({
+  required FlightStatus status,
+  FlightRoute? route,
+  FlightRouteInsights? routeInsights,
+}) {
+  final resolvedRoute = route ?? _testRoute();
+
+  return Flight(
+    id: 'flight-1',
+    route: resolvedRoute,
+    routeInsights: routeInsights ?? FlightInfo.empty.routeInsights,
+    offlineContent: FlightInfo.empty.offlineContent,
+    timestamp: FlightTimestamp(createdAt: DateTime(2026, 1, 1)),
+    status: status,
+  );
+}
+
+FlightRoute _testRoute() {
   const departure = Airport(
     name: 'London Heathrow',
     city: 'London',
@@ -424,13 +523,87 @@ Flight _buildFlight({required FlightStatus status, FlightRoute? route}) {
     ),
   );
 
-  return Flight(
-    id: 'flight-1',
-    route: route ?? defaultRoute,
-    routeInsights: FlightInfo.empty.routeInsights,
-    offlineContent: FlightInfo.empty.offlineContent,
-    timestamp: FlightTimestamp(createdAt: DateTime(2026, 1, 1)),
-    status: status,
+  return defaultRoute;
+}
+
+FlightRoute _linearTestRoute() {
+  const departure = Airport(
+    name: 'Origin Airport',
+    city: 'Origin',
+    countryCode: 'GB',
+    latLon: LatLng(0, 0),
+    iataCode: 'ORG',
+    icaoCode: 'ORIG',
+    wikipediaUrl: '',
+  );
+  const arrival = Airport(
+    name: 'Arrival Airport',
+    city: 'Arrival',
+    countryCode: 'FR',
+    latLon: LatLng(0, 10),
+    iataCode: 'ARR',
+    icaoCode: 'ARRI',
+    wikipediaUrl: '',
+  );
+
+  return const FlightRoute(
+    departure: departure,
+    arrival: arrival,
+    waypoints: [
+      FlightWaypoint(latLon: LatLng(0, 0)),
+      FlightWaypoint(latLon: LatLng(0, 10)),
+    ],
+    corridor: [LatLng(0, 0), LatLng(0, 10)],
+    metrics: FlightRouteMetrics(
+      greatCircleDistanceKm: 1111.95,
+      approxDurationMinutes: 111,
+    ),
+  );
+}
+
+double _coveredDistanceKmForTest(FlightRoute route, GpsData gpsData) {
+  final airportToAirportDistanceKm = route.distanceInKm;
+  final current = LatLng(gpsData.latitude!, gpsData.longitude!);
+  final distance = const Distance();
+  final distanceToDepartureKm = distance.as(
+    LengthUnit.Kilometer,
+    route.departure.latLon,
+    current,
+  );
+  final distanceToArrivalKm = distance.as(
+    LengthUnit.Kilometer,
+    current,
+    route.arrival.latLon,
+  );
+  final span = distanceToDepartureKm + distanceToArrivalKm;
+  return (distanceToDepartureKm / span) * airportToAirportDistanceKm;
+}
+
+RouteRegion _buildRegion({
+  required double pathFirstEncounterKm,
+  required String name,
+}) {
+  return RouteRegion(
+    qid: 'region-1',
+    name: name,
+    regionType: RouteRegionType.channel,
+    pathFirstEncounterKm: pathFirstEncounterKm,
+    pathLengthInsideKm: 120,
+    geometry: const RouteRegionGeometry(
+      type: 'Polygon',
+      geoJson: {
+        'type': 'Polygon',
+        'coordinates': [
+          [
+            [7.0, -1.0],
+            [8.0, -1.0],
+            [8.0, 1.0],
+            [7.0, 1.0],
+            [7.0, -1.0],
+          ],
+        ],
+      },
+    ),
   );
 }
 
@@ -443,13 +616,21 @@ SubscriptionCubit _buildSubscriptionCubit() {
 }
 
 class _FakeGpsDataProvider extends GpsDataProvider {
+  void Function(GpsStatus status, {GpsData? data})? _onUpdate;
+
   @override
   Future<void> start({
     required void Function(GpsStatus status, {GpsData? data}) onUpdate,
-  }) async {}
+  }) async {
+    _onUpdate = onUpdate;
+  }
 
   @override
   Future<void> stop() async {}
+
+  void emit(GpsStatus status, {GpsData? data}) {
+    _onUpdate?.call(status, data: data);
+  }
 }
 
 class _FakeStartFlightUseCase implements StartFlightUseCase {

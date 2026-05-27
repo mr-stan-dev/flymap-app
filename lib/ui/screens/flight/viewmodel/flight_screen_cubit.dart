@@ -273,8 +273,6 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
     final geo = _geoAwarenessEngine.compute(
       route: _currentFlight.route,
       routeRegions: _currentFlight.info.routeRegions,
-      cruiseSpeedKmh:
-          _currentFlight.route.metrics.effectiveAverageSpeedKmh?.round() ?? 850,
       gpsData: data,
       previous: previousGeo,
     );
@@ -295,7 +293,8 @@ class FlightScreenCubit extends Cubit<FlightScreenState> {
       GpsStatus.off || GpsStatus.permissionsNotGranted => null,
     };
     final resolvedGpsLastFixAt = switch (status) {
-      GpsStatus.gpsActive || GpsStatus.weakSignal => data != null ? now : currentGpsLastFixAt,
+      GpsStatus.gpsActive ||
+      GpsStatus.weakSignal => data != null ? now : currentGpsLastFixAt,
       GpsStatus.searching => currentGpsLastFixAt,
       GpsStatus.off || GpsStatus.permissionsNotGranted => null,
     };

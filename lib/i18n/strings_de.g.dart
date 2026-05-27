@@ -1188,6 +1188,7 @@ class _TranslationsFlightRouteDe extends TranslationsFlightRouteEn {
 	@override String get currentRegionLabel => 'Aktuell';
 	@override String get nextRegionLabel => 'Nächste';
 	@override String etaLabel({required Object time}) => 'ETA: ${time}';
+	@override String etaInLabel({required Object time}) => 'in ${time}';
 	@override String get flyingOverLabel => 'Du fliegst über:';
 	@override String get premiumLockedChipLabel => 'Freischalten';
 	@override String get premiumGateTitle => 'Vollständige Routen-Zeitachse freischalten';
@@ -1886,6 +1887,7 @@ extension on TranslationsDe {
 			'flight.route.currentRegionLabel' => 'Aktuell',
 			'flight.route.nextRegionLabel' => 'Nächste',
 			'flight.route.etaLabel' => ({required Object time}) => 'ETA: ${time}',
+			'flight.route.etaInLabel' => ({required Object time}) => 'in ${time}',
 			'flight.route.flyingOverLabel' => 'Du fliegst über:',
 			'flight.route.premiumLockedChipLabel' => 'Freischalten',
 			'flight.route.premiumGateTitle' => 'Vollständige Routen-Zeitachse freischalten',

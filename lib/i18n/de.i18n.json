@@ -653,6 +653,7 @@
       "currentRegionLabel": "Aktuell",
       "nextRegionLabel": "Nächste",
       "etaLabel": "ETA: $time",
+      "etaInLabel": "in $time",
       "flyingOverLabel": "Du fliegst über:",
       "premiumLockedChipLabel": "Freischalten",
       "premiumGateTitle": "Vollständige Routen-Zeitachse freischalten",
