@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/analytics/app_analytics_initializer.dart';
 import 'package:flymap/app/flymap_app.dart';
+import 'package:flymap/auth/app_auth_repository.dart';
 import 'package:flymap/crashlytics/app_crashlytics_initializer.dart';
 import 'package:flymap/cubit_state_observer.dart';
 import 'package:flymap/data/map_asset_cache_service.dart';
@@ -38,6 +39,7 @@ void main() async {
       await GetIt.I<AppCrashlyticsInitializer>().initialize(
         enableCollection: kReleaseMode,
       );
+      await GetIt.I<AppAuthRepository>().initialize();
       await GetIt.I<AppDatabase>().initialize();
       await GetIt.I<FlightsDbMigrationRunner>().migrateIfNeeded();
       await GetIt.I<AutoCompleteStaleInProgressFlightsUseCase>().call();

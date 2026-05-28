@@ -1,5 +1,6 @@
 import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/analytics/app_analytics_initializer.dart';
+import 'package:flymap/auth/app_auth_repository.dart';
 import 'package:flymap/crashlytics/app_crashlytics.dart';
 import 'package:flymap/crashlytics/app_crashlytics_initializer.dart';
 import 'package:flymap/data/api/feedback_api.dart';
@@ -100,6 +101,9 @@ class DiModule {
     i.registerLazySingleton<AppCrashlyticsInitializer>(
       () => AppCrashlyticsInitializer(crashlytics: i.get<AppCrashlytics>()),
     );
+    i.registerLazySingleton<AppAuthRepository>(
+      () => FirebaseAppAuthRepository(),
+    );
 
     i.registerLazySingleton<AirportsDatabase>(() => AirportsDatabase.instance);
     i.registerLazySingleton<AirlinesDatabase>(() => AirlinesDatabase.instance);
@@ -135,7 +139,9 @@ class DiModule {
       () => RouteOverviewApi(httpClient: i.get()),
     );
     i.registerLazySingleton<FlightLookupApi>(() => FlightLookupApi());
-    i.registerLazySingleton<FlightNumberSearchApi>(() => FlightNumberSearchApi());
+    i.registerLazySingleton<FlightNumberSearchApi>(
+      () => FlightNumberSearchApi(),
+    );
     i.registerLazySingleton<FlightRouteSearchApi>(() => FlightRouteSearchApi());
     i.registerLazySingleton<FlightRoutePreviewApi>(
       () => FlightRoutePreviewApi(),
