@@ -1,4 +1,8 @@
-.PHONY: run-debug rd prepare prep build-android-release bar build-ios-release bir test t analyze a bump release rel
+.PHONY: help prepare-ios-for-release run-debug rd prepare prep build-android-release bar build-ios-release bir test t analyze a bump release rel
+
+.DEFAULT_GOAL := help
+
+ANDROID_RELEASE_BUNDLE := build/app/outputs/bundle/release/app-release.aab
 
 # Allows: make bump 1.5.1 [BUILD=20]
 # It maps the positional argument to VERSION and ignores it as a make target.
@@ -11,23 +15,28 @@ $(VERSION):
 endif
 endif
 
+help: ## Show available Make commands.
+	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_.-]+:.*## / { printf "  %-24s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+
 # Generates iOS release config only.
 # Then you need to open Xcode and build/archive manually.
-prepare-ios-for-release:
+prepare-ios-for-release: ## Generate iOS release config for a manual Xcode archive.
 	fvm flutter build ios --config-only --release --dart-define-from-file=env/app_config.prod.json
 
-## Alias for prepare-ios-for-release.
-prep: prepare-ios-for-release
+prep: prepare-ios-for-release ## Alias for prepare-ios-for-release.
 
-## Build Android App Bundle for release.
-build-android-release:
+build-android-release: ## Build the Android release App Bundle (.aab).
 	fvm flutter build appbundle --release --dart-define-from-file=env/app_config.prod.json
 
-## Alias for build-android-release.
-bar: build-android-release
+bar: build-android-release ## Build the Android release bundle and reveal it in Finder.
+	@if [ -f "$(ANDROID_RELEASE_BUNDLE)" ]; then \
+		open -R "$(ANDROID_RELEASE_BUNDLE)"; \
+	else \
+		echo "Expected bundle not found: $(ANDROID_RELEASE_BUNDLE)" >&2; \
+		exit 1; \
+	fi
 
-## Bump version, commit, and create a local tag (no push).
-bump:
+bump: ## Bump version, commit it, and create a local tag. Usage: make bump 1.2.0 [BUILD=7]
 ifndef VERSION
 	$(error Usage: make bump 1.2.0 [BUILD=7])
 endif
