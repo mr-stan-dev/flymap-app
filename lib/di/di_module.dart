@@ -12,8 +12,6 @@ import 'package:flymap/data/api/flight_route_preview_api.dart';
 import 'package:flymap/data/api/flight_route_search_api.dart';
 import 'package:flymap/data/api/mapbox_static_image_api.dart';
 import 'package:flymap/data/api/route_overview_api.dart';
-import 'package:flymap/data/api/route_places_api.dart';
-import 'package:flymap/data/api/route_regions_api.dart';
 import 'package:flymap/data/api/flight_info_api_mapper.dart';
 import 'package:flymap/data/map_asset_cache_service.dart';
 import 'package:flymap/data/local/airports_database.dart';
@@ -26,8 +24,6 @@ import 'package:flymap/data/local/migrations/flights_db_migration.dart';
 import 'package:flymap/data/local/migrations/flights_db_migration_runner.dart';
 import 'package:flymap/data/local/migrations/flights_db_migration_v1_to_v2.dart';
 import 'package:flymap/data/local/mappers/flight_db_mapper.dart';
-import 'package:flymap/data/mappers/route_places_api_mapper.dart';
-import 'package:flymap/data/mappers/route_regions_api_mapper.dart';
 import 'package:flymap/data/mappers/route_overview_api_mapper.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flymap/data/wiki/wikipedia_article_client.dart';
@@ -46,9 +42,7 @@ import 'package:flymap/repository/metric_units_repository.dart';
 import 'package:flymap/repository/onboarding_repository.dart';
 import 'package:flymap/repository/poi_wiki_preview_repository.dart';
 import 'package:flymap/repository/recent_airports_repository.dart';
-import 'package:flymap/repository/route_preview_repository.dart';
 import 'package:flymap/repository/route_overview_repository.dart';
-import 'package:flymap/repository/route_timeline_repository.dart';
 import 'package:flymap/repository/settings_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_repository.dart';
@@ -73,9 +67,7 @@ import 'package:flymap/domain/usecase/generate_share_image_use_case.dart';
 import 'package:flymap/domain/usecase/search_flights_by_route_use_case.dart';
 
 import 'package:flymap/domain/usecase/get_place_info_use_case.dart';
-import 'package:flymap/domain/usecase/get_route_preview_use_case.dart';
 import 'package:flymap/domain/usecase/get_route_overview_use_case.dart';
-import 'package:flymap/domain/usecase/get_route_regions_use_case.dart';
 import 'package:flymap/domain/usecase/get_wiki_articles_use_case.dart';
 import 'package:flymap/domain/usecase/get_learn_article_progress_use_case.dart';
 import 'package:flymap/domain/usecase/get_learn_article_content_use_case.dart';
@@ -132,8 +124,6 @@ class DiModule {
       () => FlightsDBService(database: i.get(), flightMapper: i.get()),
     );
 
-    i.registerFactory<RoutePlacesApiMapper>(() => RoutePlacesApiMapper());
-    i.registerFactory<RouteRegionsApiMapper>(() => RouteRegionsApiMapper());
     i.registerFactory<RouteOverviewApiMapper>(() => RouteOverviewApiMapper());
     i.registerLazySingleton<RouteOverviewApi>(() => RouteOverviewApi());
     i.registerLazySingleton<FlightLookupApi>(() => FlightLookupApi());
@@ -144,29 +134,11 @@ class DiModule {
     i.registerLazySingleton<FlightRoutePreviewApi>(
       () => FlightRoutePreviewApi(),
     );
-    i.registerLazySingleton<RoutePlacesApi>(
-      () => RoutePlacesApi(httpClient: i.get()),
-    );
-    i.registerLazySingleton<RouteRegionsApi>(
-      () => RouteRegionsApi(httpClient: i.get()),
-    );
-    i.registerLazySingleton<RoutePreviewRepository>(
-      () => HybridRoutePreviewRepository(api: i.get(), mapper: i.get()),
-    );
     i.registerLazySingleton<RouteOverviewRepository>(
       () => ApiRouteOverviewRepository(api: i.get(), mapper: i.get()),
     );
-    i.registerLazySingleton<RouteTimelineRepository>(
-      () => ApiRouteTimelineRepository(api: i.get(), mapper: i.get()),
-    );
     i.registerLazySingleton<GetRouteOverviewUseCase>(
       () => GetRouteOverviewUseCase(repository: i.get()),
-    );
-    i.registerLazySingleton<GetRoutePreviewUseCase>(
-      () => GetRoutePreviewUseCase(repository: i.get()),
-    );
-    i.registerLazySingleton<GetRouteRegionsUseCase>(
-      () => GetRouteRegionsUseCase(repository: i.get()),
     );
     i.registerLazySingleton<FlightSearchRepository>(
       () => ApiFlightSearchRepository(
