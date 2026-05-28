@@ -135,9 +135,7 @@ class DiModule {
     i.registerFactory<RoutePlacesApiMapper>(() => RoutePlacesApiMapper());
     i.registerFactory<RouteRegionsApiMapper>(() => RouteRegionsApiMapper());
     i.registerFactory<RouteOverviewApiMapper>(() => RouteOverviewApiMapper());
-    i.registerLazySingleton<RouteOverviewApi>(
-      () => RouteOverviewApi(httpClient: i.get()),
-    );
+    i.registerLazySingleton<RouteOverviewApi>(() => RouteOverviewApi());
     i.registerLazySingleton<FlightLookupApi>(() => FlightLookupApi());
     i.registerLazySingleton<FlightNumberSearchApi>(
       () => FlightNumberSearchApi(),
