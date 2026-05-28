@@ -344,6 +344,7 @@ class DiModule {
     );
     i.registerLazySingleton<SubscriptionRepository>(
       () => RevenueCatSubscriptionRepository(
+        authRepository: i.get(),
         client: i.get(),
         config: i.get(),
         statusCache: i.get(),

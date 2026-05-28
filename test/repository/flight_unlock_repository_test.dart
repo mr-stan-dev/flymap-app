@@ -136,6 +136,9 @@ class _FakeRevenueCatClient implements RevenueCatClient {
   Future<void> configure({required String apiKey}) async {}
 
   @override
+  Future<String> getAppUserId() async => r'$RCAnonymousID:test';
+
+  @override
   Future<RevenueCatCustomerSnapshot> getCustomerInfo() async =>
       const RevenueCatCustomerSnapshot(entitlements: {});
 
@@ -149,6 +152,9 @@ class _FakeRevenueCatClient implements RevenueCatClient {
   }) async {
     return product;
   }
+
+  @override
+  Future<void> logIn({required String appUserId}) async {}
 
   @override
   Future<void> presentCustomerCenter() async {}

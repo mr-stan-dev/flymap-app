@@ -76,6 +76,10 @@ abstract class RevenueCatClient {
 
   Future<void> configure({required String apiKey});
 
+  Future<String> getAppUserId();
+
+  Future<void> logIn({required String appUserId});
+
   Future<RevenueCatCustomerSnapshot> getCustomerInfo();
 
   Future<RevenueCatCustomerSnapshot> restorePurchases();
@@ -129,6 +133,18 @@ class PurchasesRevenueCatClient implements RevenueCatClient {
 
     // Keep behavior deterministic when initialize is called repeatedly.
     _ensureListener();
+  }
+
+  @override
+  Future<String> getAppUserId() async {
+    return Purchases.appUserID;
+  }
+
+  @override
+  Future<void> logIn({required String appUserId}) async {
+    final result = await Purchases.logIn(appUserId);
+    if (_controller.isClosed) return;
+    _controller.add(_mapCustomerInfo(result.customerInfo));
   }
 
   @override
