@@ -901,6 +901,7 @@ class _TranslationsCreateFlightOverviewFr extends TranslationsCreateFlightOvervi
 	@override String get routeSummaryDistanceLabel => 'Distance';
 	@override String get routeSummaryDurationLabel => 'Durée';
 	@override String get routeSummaryRegionsLabel => 'Régions';
+	@override String get routeSummaryRegionsTitle => 'Vous survolerez';
 	@override String get routeSummaryPlacesLabel => 'Lieux';
 	@override String get routeSummaryTimelineTitle => 'Chronologie';
 	@override String get routeSummaryPlacesTitle => 'Lieux le long de l’itinéraire';
@@ -1608,6 +1609,7 @@ extension on TranslationsFr {
 			'createFlight.overview.routeSummaryDistanceLabel' => 'Distance',
 			'createFlight.overview.routeSummaryDurationLabel' => 'Durée',
 			'createFlight.overview.routeSummaryRegionsLabel' => 'Régions',
+			'createFlight.overview.routeSummaryRegionsTitle' => 'Vous survolerez',
 			'createFlight.overview.routeSummaryPlacesLabel' => 'Lieux',
 			'createFlight.overview.routeSummaryTimelineTitle' => 'Chronologie',
 			'createFlight.overview.routeSummaryPlacesTitle' => 'Lieux le long de l’itinéraire',
@@ -1802,9 +1804,9 @@ extension on TranslationsFr {
 			'flight.dashboard.ageSeconds' => ({required Object seconds}) => 'il y a ${seconds} s',
 			'flight.dashboard.ageMinutes' => ({required Object minutes}) => 'il y a ${minutes} min',
 			'flight.dashboard.signalGood' => 'Bon',
-			'flight.dashboard.signalPoor' => 'Faible',
 			_ => null,
 		} ?? switch (path) {
+			'flight.dashboard.signalPoor' => 'Faible',
 			'flight.dashboard.signalBad' => 'Mauvais',
 			'flight.dashboard.signalSearching' => 'Recherche',
 			'flight.dashboard.gpsQuality' => ({required Object quality}) => 'GPS ${quality}',

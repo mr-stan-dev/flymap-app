@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flymap/domain/entity/poi_wiki_preview.dart';
 import 'package:flymap/domain/entity/flight_poi_type.dart';
 import 'package:flymap/domain/entity/route_poi_summary.dart';
 import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/ui/screens/create_flight/flight_preview/widgets/poi_preview_bottom_sheet.dart';
 import 'package:flymap/ui/design_system/widgets/ds_chips.dart';
 import 'package:flymap/ui/design_system/widgets/ds_containers.dart';
 import 'package:flymap/ui/screens/shared/poi_type_marker_asset.dart';
@@ -51,7 +53,8 @@ class RoutePlacesByTypeSection extends StatelessWidget {
                                 .map(
                                   (item) => SelectionChip(
                                     label: item.name,
-                                    onPressed: () {},
+                                    onPressed: () =>
+                                        _openPoiPreview(context, item),
                                     leading: CircleAvatar(
                                       radius: 9,
                                       backgroundColor: Colors.transparent,
@@ -116,5 +119,27 @@ class RoutePlacesByTypeSection extends StatelessWidget {
               '${part[0].toUpperCase()}${part.length > 1 ? part.substring(1) : ''}',
         )
         .join(' ');
+  }
+
+  Future<void> _openPoiPreview(
+    BuildContext context,
+    RoutePoiSummary item,
+  ) async {
+    final preloadedPreview = PoiWikiPreview(
+      qid: item.qid,
+      title: item.name,
+      summary: item.description,
+      htmlContent: item.descriptionHtml,
+      sourceUrl: item.wiki,
+      languageCode: '',
+    );
+    await showPoiPreviewDialog(
+      context: context,
+      name: item.name,
+      typeRaw: item.type.rawValue,
+      qid: item.qid,
+      actionMode: PoiPreviewActionMode.openOnly,
+      preloadedPreview: preloadedPreview,
+    );
   }
 }

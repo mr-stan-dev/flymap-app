@@ -344,6 +344,7 @@
       "routeSummaryDistanceLabel": "Distance",
       "routeSummaryDurationLabel": "Duration",
       "routeSummaryRegionsLabel": "Regions",
+      "routeSummaryRegionsTitle": "You'll fly over",
       "routeSummaryPlacesLabel": "Places",
       "routeSummaryTimelineTitle": "Timeline",
       "routeSummaryPlacesTitle": "Places along the route",

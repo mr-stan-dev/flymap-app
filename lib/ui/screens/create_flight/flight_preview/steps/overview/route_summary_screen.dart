@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flymap/domain/entity/flight_route.dart';
 import 'package:flymap/domain/entity/route_region.dart';
+import 'package:flymap/domain/policy/route_region_premium_gate_policy.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/subscription/paywall_source.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/common/route/route_places_by_type.dart';
+import 'package:flymap/ui/screens/common/route/route_regions_by_type.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/flight_unlock_gate_sheet.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/steps/overview/region_info_screen.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/viewmodel/flight_preview_cubit.dart';
@@ -40,6 +42,13 @@ class RouteSummaryScreen extends StatelessWidget {
       (SubscriptionCubit cubit) => cubit.state.isPro,
     );
     final isProUser = isProSubscriber || previewState.hasPendingFlightUnlock;
+    final orderedRegions = RouteRegionPremiumGatePolicy.orderByDistance(
+      liveRegions,
+    );
+    final gateDecision = RouteRegionPremiumGatePolicy.evaluate(
+      orderedRegions: orderedRegions,
+      isProUser: isProUser,
+    );
     final flightPreviewCubit = context.read<FlightPreviewCubit>();
     final subscriptionCubit = context.read<SubscriptionCubit>();
     final distance = _formatDistanceKm(route);
@@ -48,6 +57,8 @@ class RouteSummaryScreen extends StatelessWidget {
         '${route.departure.displayCode} → ${route.arrival.displayCode}';
     final routeSubtitle =
         '${RouteUtils.cityLabel(route.departure.city)} → ${RouteUtils.cityLabel(route.arrival.city)}';
+    final routePreview =
+        '${route.departure.nameShort} → ${route.arrival.nameShort}';
 
     return Scaffold(
       appBar: AppBar(
@@ -101,22 +112,34 @@ class RouteSummaryScreen extends StatelessWidget {
                         label:
                             '${t.createFlight.overview.routeSummaryDurationLabel}: $duration',
                       ),
-                      _MetaChip(
-                        icon: Icons.public_rounded,
-                        label:
-                            '${t.createFlight.overview.routeSummaryRegionsLabel}: ${liveRegions.length}',
-                      ),
-                      _MetaChip(
-                        icon: Icons.place_rounded,
-                        label:
-                            '${t.createFlight.overview.routeSummaryPlacesLabel}: ${livePois.length}',
-                      ),
                     ],
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 12),
+            if (gateDecision.freeRegions.isNotEmpty ||
+                gateDecision.premiumRegions.isNotEmpty) ...[
+              RouteRegionsByTypeSection(
+                regions: gateDecision.freeRegions,
+                hiddenRegionsCount: gateDecision.premiumRegions.length,
+                onOpenRegion: (region) => _openRegionInfo(context, region),
+                onPremiumGateTap: gateDecision.isGated
+                    ? () => showFlightUnlockGateSheet(
+                        context: context,
+                        subscriptionCubit: subscriptionCubit,
+                        source: PaywallSource.routeTimelineGate,
+                        onUnlockActivated:
+                            flightPreviewCubit.enablePendingFlightUnlock,
+                        onProActivated: flightPreviewCubit.refreshPoisForPro,
+                        routePreview: routePreview,
+                        presentProPaywall: subscriptionCubit
+                            .presentPaywallFromRouteTimelineGate,
+                      )
+                    : null,
+              ),
+              const SizedBox(height: 12),
+            ],
             Text(
               t.createFlight.overview.routeSummaryTimelineTitle,
               style: Theme.of(
@@ -136,8 +159,7 @@ class RouteSummaryScreen extends StatelessWidget {
                 source: PaywallSource.routeTimelineGate,
                 onUnlockActivated: flightPreviewCubit.enablePendingFlightUnlock,
                 onProActivated: flightPreviewCubit.refreshPoisForPro,
-                routePreview:
-                    '${route.departure.nameShort} → ${route.arrival.nameShort}',
+                routePreview: routePreview,
                 presentProPaywall:
                     subscriptionCubit.presentPaywallFromRouteTimelineGate,
               ),

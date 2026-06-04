@@ -2172,6 +2172,9 @@ class TranslationsCreateFlightOverviewEn {
 	/// en: 'Regions'
 	String get routeSummaryRegionsLabel => 'Regions';
 
+	/// en: 'You'll fly over'
+	String get routeSummaryRegionsTitle => 'You\'ll fly over';
+
 	/// en: 'Places'
 	String get routeSummaryPlacesLabel => 'Places';
 
@@ -3398,6 +3401,7 @@ extension on Translations {
 			'createFlight.overview.routeSummaryDistanceLabel' => 'Distance',
 			'createFlight.overview.routeSummaryDurationLabel' => 'Duration',
 			'createFlight.overview.routeSummaryRegionsLabel' => 'Regions',
+			'createFlight.overview.routeSummaryRegionsTitle' => 'You\'ll fly over',
 			'createFlight.overview.routeSummaryPlacesLabel' => 'Places',
 			'createFlight.overview.routeSummaryTimelineTitle' => 'Timeline',
 			'createFlight.overview.routeSummaryPlacesTitle' => 'Places along the route',
@@ -3592,9 +3596,9 @@ extension on Translations {
 			'flight.dashboard.ageSeconds' => ({required Object seconds}) => '${seconds} s ago',
 			'flight.dashboard.ageMinutes' => ({required Object minutes}) => '${minutes} m ago',
 			'flight.dashboard.signalGood' => 'Good',
-			'flight.dashboard.signalPoor' => 'Poor',
 			_ => null,
 		} ?? switch (path) {
+			'flight.dashboard.signalPoor' => 'Poor',
 			'flight.dashboard.signalBad' => 'Bad',
 			'flight.dashboard.signalSearching' => 'Searching',
 			'flight.dashboard.gpsQuality' => ({required Object quality}) => 'GPS ${quality}',

@@ -73,6 +73,18 @@ class RouteTimelineRegionTypeMapper {
     }
   }
 
+  String mapCountLabel(BuildContext context, RouteRegionType type, int count) {
+    final singular = mapLabel(context, type);
+    if (count == 1) return '$singular $count';
+
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final plural = switch (languageCode) {
+      'en' => _pluralizeEnglish(singular),
+      _ => singular,
+    };
+    return '$plural $count';
+  }
+
   IconData mapIcon(RouteRegionType type) {
     switch (type) {
       case RouteRegionType.country:
@@ -111,6 +123,41 @@ class RouteTimelineRegionTypeMapper {
       case RouteRegionType.geoarea:
       case RouteRegionType.unknown:
         return Icons.place_outlined;
+    }
+  }
+
+  String _pluralizeEnglish(String label) {
+    switch (label) {
+      case 'Country':
+        return 'Countries';
+      case 'Mountain range':
+        return 'Mountain ranges';
+      case 'Geographic area':
+        return 'Geographic areas';
+      case 'Alkaline lake':
+        return 'Alkaline lakes';
+      case 'Wetlands':
+        return 'Wetlands';
+    }
+
+    if (label.endsWith('y') &&
+        label.length > 1 &&
+        !_isEnglishVowel(label[label.length - 2])) {
+      return '${label.substring(0, label.length - 1)}ies';
+    }
+    return '${label}s';
+  }
+
+  bool _isEnglishVowel(String char) {
+    switch (char.toLowerCase()) {
+      case 'a':
+      case 'e':
+      case 'i':
+      case 'o':
+      case 'u':
+        return true;
+      default:
+        return false;
     }
   }
 }
