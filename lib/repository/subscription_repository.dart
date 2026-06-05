@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flymap/auth/app_auth_repository.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/subscription/revenuecat_client.dart';
 import 'package:flymap/subscription/revenuecat_env_config.dart';
@@ -34,13 +33,11 @@ abstract class SubscriptionRepository {
 
 class RevenueCatSubscriptionRepository implements SubscriptionRepository {
   RevenueCatSubscriptionRepository({
-    required AppAuthRepository authRepository,
     required RevenueCatClient client,
     required RevenueCatEnvConfig config,
     SubscriptionStatusCache? statusCache,
     TargetPlatform? platformOverride,
   }) : _client = client,
-       _authRepository = authRepository,
        _config = config,
        _statusCache = statusCache ?? _NoopSubscriptionStatusCache(),
        _platformOverride = platformOverride,
@@ -51,7 +48,6 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
        );
 
   final RevenueCatClient _client;
-  final AppAuthRepository _authRepository;
   final RevenueCatEnvConfig _config;
   final SubscriptionStatusCache _statusCache;
   final TargetPlatform? _platformOverride;
@@ -104,9 +100,7 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
     }
 
     try {
-      final appUserId = await _authRepository.ensureSignedIn();
       await _client.configure(apiKey: apiKey);
-      await _identifyRevenueCatUser(appUserId);
       _isConfigured = true;
       _ensureCustomerInfoSubscription();
       return refresh();
@@ -288,17 +282,6 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
         _publishError('Subscription updates are temporarily unavailable.');
       },
     );
-  }
-
-  Future<void> _identifyRevenueCatUser(String appUserId) async {
-    try {
-      final currentAppUserId = await _client.getAppUserId();
-      if (currentAppUserId == appUserId) return;
-    } catch (_) {
-      // Explicit login below will recover the identity if the SDK has no
-      // readable cached user yet.
-    }
-    await _client.logIn(appUserId: appUserId);
   }
 
   SubscriptionStatus _toStatus(RevenueCatCustomerSnapshot snapshot) {

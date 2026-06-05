@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flymap/auth/app_auth_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/subscription/revenuecat_client.dart';
 import 'package:flymap/subscription/revenuecat_env_config.dart';
@@ -13,16 +12,13 @@ import 'package:flymap/subscription/subscription_status_cache.dart';
 void main() {
   group('RevenueCatSubscriptionRepository', () {
     late _FakeRevenueCatClient client;
-    late _FakeAppAuthRepository authRepository;
     late _FakeSubscriptionStatusCache cache;
     late RevenueCatSubscriptionRepository repository;
 
     setUp(() {
       client = _FakeRevenueCatClient();
-      authRepository = _FakeAppAuthRepository();
       cache = _FakeSubscriptionStatusCache();
       repository = RevenueCatSubscriptionRepository(
-        authRepository: authRepository,
         client: client,
         config: const RevenueCatEnvConfig(
           androidApiKey: 'android_key',
@@ -66,21 +62,10 @@ void main() {
       expect(status.error, isNull);
     });
 
-    test('logs RevenueCat into the Firebase auth user', () async {
-      client.currentAppUserId = r'$RCAnonymousID:test';
-
+    test('configures RevenueCat without logging in a Firebase user', () async {
       await repository.initialize();
 
-      expect(authRepository.ensureSignedInCalls, 1);
-      expect(client.loggedInAppUserIds, ['user-1']);
-    });
-
-    test('skips RevenueCat logIn when already identified', () async {
-      client.currentAppUserId = 'user-1';
-
-      await repository.initialize();
-
-      expect(authRepository.ensureSignedInCalls, 1);
+      expect(client.configureCalls, 1);
       expect(client.loggedInAppUserIds, isEmpty);
     });
 
@@ -91,7 +76,6 @@ void main() {
         lastUpdatedAt: DateTime.parse('2026-01-01T00:00:00Z'),
       );
       final noKeyRepository = RevenueCatSubscriptionRepository(
-        authRepository: authRepository,
         client: client,
         config: const RevenueCatEnvConfig(
           iosApiKey: '',
@@ -115,7 +99,6 @@ void main() {
       () async {
         final emptyCache = _FakeSubscriptionStatusCache();
         final noKeyRepository = RevenueCatSubscriptionRepository(
-          authRepository: authRepository,
           client: client,
           config: const RevenueCatEnvConfig(
             iosApiKey: '',
@@ -395,22 +378,6 @@ class _FakeRevenueCatClient implements RevenueCatClient {
   void emitSnapshot(RevenueCatCustomerSnapshot snapshot) {
     _controller.add(snapshot);
   }
-}
-
-class _FakeAppAuthRepository implements AppAuthRepository {
-  int ensureSignedInCalls = 0;
-
-  @override
-  String? get currentUserId => 'user-1';
-
-  @override
-  Future<String> ensureSignedIn() async {
-    ensureSignedInCalls++;
-    return 'user-1';
-  }
-
-  @override
-  Future<String?> initialize() async => 'user-1';
 }
 
 class _FakeSubscriptionStatusCache implements SubscriptionStatusCache {
