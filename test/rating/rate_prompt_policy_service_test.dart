@@ -6,7 +6,7 @@ import 'package:flymap/rating/rate_prompt_trigger.dart';
 void main() {
   group('DefaultRatePromptPolicyService', () {
     test(
-      'does not show until min counts and first-seen age are satisfied',
+      'does not show until download count and first-seen age are satisfied',
       () async {
         final repository = _InMemoryRatePromptRepository();
         final service = DefaultRatePromptPolicyService(
@@ -14,16 +14,14 @@ void main() {
           nowProvider: () => DateTime.utc(2026, 4, 9),
         );
 
-        await service.registerTrigger(RatePromptTrigger.flightMapDownloadSuccess);
+        await service.registerTrigger(
+          RatePromptTrigger.flightMapDownloadSuccess,
+        );
         expect(await service.shouldShowPromptNow(), isFalse);
 
-        await service.registerTrigger(RatePromptTrigger.flightMapDownloadSuccess);
-        expect(await service.shouldShowPromptNow(), isFalse);
-
-        await service.registerTrigger(RatePromptTrigger.flightMapDownloadSuccess);
-        expect(await service.shouldShowPromptNow(), isFalse);
-
-        await service.registerTrigger(RatePromptTrigger.shareCardShared);
+        await service.registerTrigger(
+          RatePromptTrigger.flightMapDownloadSuccess,
+        );
         expect(await service.shouldShowPromptNow(), isFalse);
 
         repository.firstSeenAt = DateTime.utc(2026, 4, 1);
@@ -41,10 +39,11 @@ void main() {
       );
 
       expect(await service.shouldShowPromptNow(), isFalse);
-      for (var i = 0; i < 3; i++) {
-        await service.registerTrigger(RatePromptTrigger.flightMapDownloadSuccess);
+      for (var i = 0; i < 2; i++) {
+        await service.registerTrigger(
+          RatePromptTrigger.flightMapDownloadSuccess,
+        );
       }
-      await service.registerTrigger(RatePromptTrigger.shareCardShared);
       expect(await service.shouldShowPromptNow(), isTrue);
       await service.recordDeclined();
 
@@ -56,29 +55,48 @@ void main() {
       expect(afterSnooze, isTrue);
     });
 
-    test('accepted users are never prompted again', () async {
+    test('accepted users are snoozed for 180 days', () async {
+      var now = DateTime.utc(2026, 4, 9);
       final repository = _InMemoryRatePromptRepository();
       final service = DefaultRatePromptPolicyService(
         repository: repository,
-        nowProvider: () => DateTime.utc(2026, 4, 9),
+        nowProvider: () => now,
         firstSeenMinAge: Duration.zero,
       );
 
       expect(await service.shouldShowPromptNow(), isFalse);
-      for (var i = 0; i < 3; i++) {
-        await service.registerTrigger(RatePromptTrigger.flightMapDownloadSuccess);
+      for (var i = 0; i < 2; i++) {
+        await service.registerTrigger(
+          RatePromptTrigger.flightMapDownloadSuccess,
+        );
       }
-      await service.registerTrigger(RatePromptTrigger.shareCardShared);
       expect(await service.shouldShowPromptNow(), isTrue);
       await service.recordAccepted();
 
       await service.registerTrigger(RatePromptTrigger.flightMapDownloadSuccess);
-      await service.registerTrigger(RatePromptTrigger.shareCardShared);
-      final third = await service.shouldShowPromptNow();
-      final fourth = await service.shouldShowPromptNow();
+      expect(await service.shouldShowPromptNow(), isFalse);
 
-      expect(third, isFalse);
-      expect(fourth, isFalse);
+      now = now.add(const Duration(days: 181));
+      expect(await service.shouldShowPromptNow(), isTrue);
+    });
+
+    test('legacy completed users are migrated to a 180-day snooze', () async {
+      var now = DateTime.utc(2026, 4, 9);
+      final repository = _InMemoryRatePromptRepository()
+        .._completed = true
+        ..firstSeenAt = DateTime.utc(2026, 4, 1);
+      repository._counts[RatePromptTrigger.flightMapDownloadSuccess] = 2;
+      final service = DefaultRatePromptPolicyService(
+        repository: repository,
+        nowProvider: () => now,
+      );
+
+      expect(await service.shouldShowPromptNow(), isFalse);
+      expect(repository._completed, isFalse);
+      expect(await service.shouldShowPromptNow(), isFalse);
+
+      now = now.add(const Duration(days: 181));
+      expect(await service.shouldShowPromptNow(), isTrue);
     });
   });
 }

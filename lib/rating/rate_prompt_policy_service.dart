@@ -18,20 +18,22 @@ class DefaultRatePromptPolicyService implements RatePromptPolicyService {
     required RatePromptRepository repository,
     DateTime Function()? nowProvider,
     Duration firstSeenMinAge = const Duration(days: 7),
+    Duration acceptedSnooze = const Duration(days: 180),
     Duration dismissSnooze = const Duration(days: 14),
     Duration declineSnooze = const Duration(days: 30),
   }) : _repository = repository,
        _nowProvider = nowProvider ?? DateTime.now,
        _firstSeenMinAge = firstSeenMinAge,
+       _acceptedSnooze = acceptedSnooze,
        _dismissSnooze = dismissSnooze,
        _declineSnooze = declineSnooze;
 
-  static const _minDownloadSuccessCountToPrompt = 3;
-  static const _minShareCountToPrompt = 1;
+  static const _minDownloadSuccessCountToPrompt = 2;
 
   final RatePromptRepository _repository;
   final DateTime Function() _nowProvider;
   final Duration _firstSeenMinAge;
+  final Duration _acceptedSnooze;
   final Duration _dismissSnooze;
   final Duration _declineSnooze;
 
@@ -42,11 +44,15 @@ class DefaultRatePromptPolicyService implements RatePromptPolicyService {
 
   @override
   Future<bool> shouldShowPromptNow() async {
+    final now = _nowProvider().toUtc();
+
     if (await _repository.isCompleted()) {
+      // Migrate legacy "never ask again" users to the new long-snooze model.
+      await _repository.setCompleted(false);
+      await _repository.setSnoozedUntil(now.add(_acceptedSnooze));
       return false;
     }
 
-    final now = _nowProvider().toUtc();
     var firstSeenAt = await _repository.getFirstSeenAt();
     if (firstSeenAt == null) {
       firstSeenAt = now;
@@ -64,13 +70,6 @@ class DefaultRatePromptPolicyService implements RatePromptPolicyService {
       return false;
     }
 
-    final shareCount = await _repository.getTriggerCount(
-      RatePromptTrigger.shareCardShared,
-    );
-    if (shareCount < _minShareCountToPrompt) {
-      return false;
-    }
-
     final snoozedUntil = await _repository.getSnoozedUntil();
     if (snoozedUntil == null) {
       return true;
@@ -81,8 +80,9 @@ class DefaultRatePromptPolicyService implements RatePromptPolicyService {
 
   @override
   Future<void> recordAccepted() async {
-    await _repository.setCompleted(true);
-    await _repository.setSnoozedUntil(null);
+    final now = _nowProvider().toUtc();
+    await _repository.setCompleted(false);
+    await _repository.setSnoozedUntil(now.add(_acceptedSnooze));
   }
 
   @override
