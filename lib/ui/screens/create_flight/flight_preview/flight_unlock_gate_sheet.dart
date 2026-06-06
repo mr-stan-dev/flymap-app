@@ -24,7 +24,9 @@ Future<void> showFlightUnlockGateSheet({
   if (subscriptionCubit.state.unusedFlightUnlockCount <= 0 &&
       subscriptionCubit.state.flightUnlockProduct == null &&
       !subscriptionCubit.state.isFlightUnlockLoading) {
-    unawaited(subscriptionCubit.loadFlightUnlockProduct());
+    unawaited(
+      subscriptionCubit.loadFlightUnlockProduct(showUnavailableError: false),
+    );
   }
   unawaited(
     analytics.log(
@@ -54,12 +56,14 @@ Future<void> showFlightUnlockGateSheet({
                 action: hasExistingUnlock
                     ? FlightUnlockActionType.useExisting
                     : FlightUnlockActionType.buyUnlock,
-                unusedUnlockCount: subscriptionCubit.state.unusedFlightUnlockCount,
+                unusedUnlockCount:
+                    subscriptionCubit.state.unusedFlightUnlockCount,
               ),
             ),
           );
           if (!hasExistingUnlock) {
-            final purchaseResult = await subscriptionCubit.purchaseFlightUnlock();
+            final purchaseResult = await subscriptionCubit
+                .purchaseFlightUnlock();
             unawaited(
               analytics.log(
                 FlightUnlockPurchaseResultEvent(
@@ -72,8 +76,7 @@ Future<void> showFlightUnlockGateSheet({
             );
             if (!innerContext.mounted ||
                 !purchaseResult.isPurchased ||
-                purchaseResult.status !=
-                    FlightUnlockPurchaseStatus.purchased) {
+                purchaseResult.status != FlightUnlockPurchaseStatus.purchased) {
               return;
             }
           }
@@ -90,7 +93,8 @@ Future<void> showFlightUnlockGateSheet({
               FlightUnlockActionEvent(
                 source: source,
                 action: FlightUnlockActionType.viewProPlans,
-                unusedUnlockCount: subscriptionCubit.state.unusedFlightUnlockCount,
+                unusedUnlockCount:
+                    subscriptionCubit.state.unusedFlightUnlockCount,
               ),
             ),
           );
@@ -120,7 +124,9 @@ Future<void> showFlightUnlockGateSheet({
               return;
             case SubscriptionPaywallResult.notPresented:
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(context.t.createFlight.paywall.noPaywall)),
+                SnackBar(
+                  content: Text(context.t.createFlight.paywall.noPaywall),
+                ),
               );
               return;
             case SubscriptionPaywallResult.error:

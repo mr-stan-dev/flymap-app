@@ -24,10 +24,11 @@ class FlightUnlockBottomSheet extends StatelessWidget {
         final unlockCount = state.unusedFlightUnlockCount;
         final canUseExistingUnlock = unlockCount > 0;
         final product = state.flightUnlockProduct;
-        final isLoadingPrice =
+        final isLoadingUnlockOption =
             !canUseExistingUnlock &&
             state.isFlightUnlockLoading &&
             product == null;
+        final showUnlockOption = canUseExistingUnlock || product != null;
         final optionAPrice = canUseExistingUnlock
             ? context.t.subscription.flightUnlockAvailableCount(
                 count: unlockCount,
@@ -36,8 +37,7 @@ class FlightUnlockBottomSheet extends StatelessWidget {
         final optionAButtonLabel = canUseExistingUnlock
             ? context.t.subscription.flightUnlockUseAction
             : context.t.subscription.flightUnlockAction;
-        final optionAButtonEnabled =
-            canUseExistingUnlock || product != null || isLoadingPrice;
+        final optionAButtonEnabled = canUseExistingUnlock || product != null;
 
         return SafeArea(
           child: Padding(
@@ -53,40 +53,79 @@ class FlightUnlockBottomSheet extends StatelessWidget {
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 16),
-                _UnlockOptionCard(
-                  title: context.t.subscription.flightUnlockOptionTitle,
-                  subtitle: context.t.subscription.flightUnlockOptionBody,
-                  supportingText: isLoadingPrice
-                      ? context.t.subscription.flightUnlockPriceLoading
-                      : optionAPrice,
-                  buttonLabel: optionAButtonLabel,
-                  isPrimary: true,
-                  isLoading: state.isFlightUnlockPurchaseLoading,
-                  isEnabled:
-                      optionAButtonEnabled && !state.isFlightUnlockLoading,
-                  onPressed: () => onUnlockFlight(context),
-                ),
-                const SizedBox(height: 12),
-                _UnlockOptionCard(
-                  title: context.t.subscription.flightUnlockProOptionTitle,
-                  subtitle: context.t.subscription.flightUnlockProOptionBody,
-                  buttonLabel: context.t.subscription.flightUnlockProAction,
-                  isPrimary: false,
-                  onPressed: () => onViewProPlans(context),
-                ),
-                if (state.flightUnlockErrorMessage?.trim().isNotEmpty == true)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: InlineMessage(
-                      message: state.flightUnlockErrorMessage!,
-                      tone: DsMessageTone.warning,
+                if (isLoadingUnlockOption)
+                  const _UnlockOptionsLoadingState()
+                else ...[
+                  if (showUnlockOption) ...[
+                    _UnlockOptionCard(
+                      title: context.t.subscription.flightUnlockOptionTitle,
+                      subtitle: context.t.subscription.flightUnlockOptionBody,
+                      supportingText: optionAPrice,
+                      buttonLabel: optionAButtonLabel,
+                      isPrimary: true,
+                      isLoading: state.isFlightUnlockPurchaseLoading,
+                      isEnabled:
+                          optionAButtonEnabled && !state.isFlightUnlockLoading,
+                      onPressed: () => onUnlockFlight(context),
                     ),
+                    const SizedBox(height: 12),
+                  ],
+                  _UnlockOptionCard(
+                    title: context.t.subscription.flightUnlockProOptionTitle,
+                    subtitle: context.t.subscription.flightUnlockProOptionBody,
+                    buttonLabel: context.t.subscription.flightUnlockProAction,
+                    isPrimary: false,
+                    onPressed: () => onViewProPlans(context),
                   ),
+                  if (showUnlockOption &&
+                      state.flightUnlockErrorMessage?.trim().isNotEmpty ==
+                          true)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: InlineMessage(
+                        message: state.flightUnlockErrorMessage!,
+                        tone: DsMessageTone.warning,
+                      ),
+                    ),
+                ],
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class _UnlockOptionsLoadingState extends StatelessWidget {
+  const _UnlockOptionsLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        color: Theme.of(context).colorScheme.surface,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox.square(
+            dimension: 20,
+            child: CircularProgressIndicator(strokeWidth: 2.4),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            context.t.common.loading,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
     );
   }
 }
