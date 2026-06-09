@@ -133,7 +133,7 @@ class SettingsContent extends StatelessWidget {
                       onTap: () async {
                         await _openExternalUrl(
                           context,
-                          'https://www.apptractor.dev/projects/flymap/privacy',
+                          'https://flymap.app/privacy',
                         );
                       },
                     ),
@@ -143,7 +143,7 @@ class SettingsContent extends StatelessWidget {
                       onTap: () async {
                         await _openExternalUrl(
                           context,
-                          'https://www.apptractor.dev/projects/flymap/terms',
+                          'https://flymap.app/terms',
                         );
                       },
                     ),
