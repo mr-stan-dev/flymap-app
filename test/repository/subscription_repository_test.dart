@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flymap/analytics/app_analytics_context.dart';
+import 'package:flymap/auth/app_auth_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/subscription/revenuecat_client.dart';
 import 'package:flymap/subscription/revenuecat_env_config.dart';
@@ -68,6 +70,103 @@ void main() {
       expect(client.configureCalls, 1);
       expect(client.loggedInAppUserIds, isEmpty);
     });
+
+    test('does not use Firebase uid when auth identity is disabled', () async {
+      final identityClient = _FakeRevenueCatClient();
+      final identityRepository = RevenueCatSubscriptionRepository(
+        client: identityClient,
+        config: const RevenueCatEnvConfig(
+          androidApiKey: 'android_key',
+          entitlementPro: 'pro',
+        ),
+        statusCache: _FakeSubscriptionStatusCache(),
+        authRepository: _FakeAppAuthRepository(userId: 'firebase-uid'),
+        analyticsContextStore: AppAnalyticsContextStore(),
+        platformOverride: TargetPlatform.android,
+      );
+      addTearDown(identityRepository.close);
+
+      await identityRepository.initialize();
+
+      expect(identityClient.configuredAppUserIds, <String?>[null]);
+      expect(identityClient.loggedInAppUserIds, isEmpty);
+      expect(identityClient.attributes, isEmpty);
+    });
+
+    test(
+      'configures RevenueCat anonymously before logging in Firebase uid',
+      () async {
+        final identityClient = _FakeRevenueCatClient();
+        final identityCache = _FakeSubscriptionStatusCache();
+        final contextStore = AppAnalyticsContextStore()
+          ..setGlobal(
+            const AppAnalyticsGlobalContext(
+              appVersion: '1.2.3',
+              buildNumber: '45',
+              platform: 'android',
+              appEnv: 'debug',
+            ),
+          );
+        final identifiedRepository = RevenueCatSubscriptionRepository(
+          client: identityClient,
+          config: const RevenueCatEnvConfig(
+            androidApiKey: 'android_key',
+            entitlementPro: 'pro',
+          ),
+          statusCache: identityCache,
+          authRepository: _FakeAppAuthRepository(userId: 'firebase-uid'),
+          analyticsContextStore: contextStore,
+          authIdentityEnabled: true,
+          platformOverride: TargetPlatform.android,
+        );
+        addTearDown(identifiedRepository.close);
+
+        await identifiedRepository.initialize();
+
+        expect(identityClient.configuredAppUserIds, <String?>[null]);
+        expect(identityClient.loggedInAppUserIds, ['firebase-uid']);
+        expect(
+          identityClient.attributes,
+          containsPair('firebase_uid', 'firebase-uid'),
+        );
+        expect(
+          identityClient.attributes,
+          containsPair('posthog_distinct_id', 'firebase-uid'),
+        );
+        expect(identityClient.attributes, containsPair('app_version', '1.2.3'));
+        expect(identityClient.attributes, containsPair('platform', 'android'));
+      },
+    );
+
+    test(
+      'does not log in again when RevenueCat already has Firebase uid',
+      () async {
+        final identityClient = _FakeRevenueCatClient()
+          ..currentAppUserId = 'firebase-uid';
+        final identityRepository = RevenueCatSubscriptionRepository(
+          client: identityClient,
+          config: const RevenueCatEnvConfig(
+            androidApiKey: 'android_key',
+            entitlementPro: 'pro',
+          ),
+          statusCache: _FakeSubscriptionStatusCache(),
+          authRepository: _FakeAppAuthRepository(userId: 'firebase-uid'),
+          analyticsContextStore: AppAnalyticsContextStore(),
+          authIdentityEnabled: true,
+          platformOverride: TargetPlatform.android,
+        );
+        addTearDown(identityRepository.close);
+
+        await identityRepository.initialize();
+
+        expect(identityClient.configuredAppUserIds, <String?>[null]);
+        expect(identityClient.loggedInAppUserIds, isEmpty);
+        expect(
+          identityClient.attributes,
+          containsPair('firebase_uid', 'firebase-uid'),
+        );
+      },
+    );
 
     test('returns cached status with error when API key is missing', () async {
       cache.loaded = SubscriptionStatus(
@@ -291,7 +390,10 @@ class _FakeRevenueCatClient implements RevenueCatClient {
   List<RevenueCatProductSnapshot> products = const [];
   RevenueCatStoreProductSnapshot? nonSubscriptionProduct;
   String currentAppUserId = r'$RCAnonymousID:test';
+  bool adoptConfiguredAppUserId = true;
+  final List<String?> configuredAppUserIds = <String?>[];
   final List<String> loggedInAppUserIds = <String>[];
+  final Map<String, String> attributes = <String, String>{};
 
   @override
   Stream<RevenueCatCustomerSnapshot> get customerInfoStream =>
@@ -303,11 +405,15 @@ class _FakeRevenueCatClient implements RevenueCatClient {
   }
 
   @override
-  Future<void> configure({required String apiKey}) async {
+  Future<void> configure({required String apiKey, String? appUserId}) async {
     if (throwOnConfigure) {
       throw StateError('configure failed');
     }
     configureCalls++;
+    configuredAppUserIds.add(appUserId);
+    if (appUserId != null && adoptConfiguredAppUserId) {
+      currentAppUserId = appUserId;
+    }
   }
 
   @override
@@ -325,6 +431,11 @@ class _FakeRevenueCatClient implements RevenueCatClient {
   Future<void> logIn({required String appUserId}) async {
     currentAppUserId = appUserId;
     loggedInAppUserIds.add(appUserId);
+  }
+
+  @override
+  Future<void> setAttributes(Map<String, String> attributes) async {
+    this.attributes.addAll(attributes);
   }
 
   @override
@@ -378,6 +489,21 @@ class _FakeRevenueCatClient implements RevenueCatClient {
   void emitSnapshot(RevenueCatCustomerSnapshot snapshot) {
     _controller.add(snapshot);
   }
+}
+
+class _FakeAppAuthRepository implements AppAuthRepository {
+  _FakeAppAuthRepository({required this.userId});
+
+  final String userId;
+
+  @override
+  String? get currentUserId => userId;
+
+  @override
+  Future<String> ensureSignedIn() async => userId;
+
+  @override
+  Future<String?> initialize() async => userId;
 }
 
 class _FakeSubscriptionStatusCache implements SubscriptionStatusCache {

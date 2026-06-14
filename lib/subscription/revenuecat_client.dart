@@ -74,11 +74,13 @@ class RevenueCatStoreProductSnapshot extends Equatable {
 abstract class RevenueCatClient {
   Stream<RevenueCatCustomerSnapshot> get customerInfoStream;
 
-  Future<void> configure({required String apiKey});
+  Future<void> configure({required String apiKey, String? appUserId});
 
   Future<String> getAppUserId();
 
   Future<void> logIn({required String appUserId});
+
+  Future<void> setAttributes(Map<String, String> attributes);
 
   Future<RevenueCatCustomerSnapshot> getCustomerInfo();
 
@@ -121,9 +123,10 @@ class PurchasesRevenueCatClient implements RevenueCatClient {
       _controller.stream;
 
   @override
-  Future<void> configure({required String apiKey}) async {
+  Future<void> configure({required String apiKey, String? appUserId}) async {
     if (!_isConfigured) {
-      final config = PurchasesConfiguration(apiKey);
+      final config = PurchasesConfiguration(apiKey)
+        ..appUserID = _normalizeAppUserId(appUserId);
       await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.info);
       await Purchases.configure(config);
       _ensureListener();
@@ -133,6 +136,11 @@ class PurchasesRevenueCatClient implements RevenueCatClient {
 
     // Keep behavior deterministic when initialize is called repeatedly.
     _ensureListener();
+  }
+
+  String? _normalizeAppUserId(String? appUserId) {
+    final trimmed = appUserId?.trim();
+    return trimmed == null || trimmed.isEmpty ? null : trimmed;
   }
 
   @override
@@ -145,6 +153,12 @@ class PurchasesRevenueCatClient implements RevenueCatClient {
     final result = await Purchases.logIn(appUserId);
     if (_controller.isClosed) return;
     _controller.add(_mapCustomerInfo(result.customerInfo));
+  }
+
+  @override
+  Future<void> setAttributes(Map<String, String> attributes) async {
+    if (attributes.isEmpty) return;
+    await Purchases.setAttributes(attributes);
   }
 
   @override

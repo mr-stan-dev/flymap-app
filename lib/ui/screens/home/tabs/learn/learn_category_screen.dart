@@ -5,8 +5,8 @@ import 'package:flymap/domain/entity/learn_article_progress.dart';
 import 'package:flymap/domain/entity/learn_category.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/subscription/subscription_paywall_result.dart';
+import 'package:flymap/router/app_router.dart';
 import 'package:flymap/ui/design_system/design_system.dart';
-import 'package:flymap/ui/screens/home/tabs/learn/learn_article_screen.dart';
 import 'package:flymap/ui/screens/home/tabs/learn/learn_article_tile.dart';
 import 'package:flymap/ui/screens/home/tabs/learn/viewmodel/learn_cubit.dart';
 import 'package:flymap/ui/screens/home/tabs/learn/viewmodel/learn_state.dart';
@@ -201,11 +201,7 @@ class _LearnCategoryScreenState extends State<LearnCategoryScreen> {
             };
           });
         }
-        await Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => LearnArticleScreen(article: article),
-          ),
-        );
+        await AppRouter.goToLearnArticle(context, article: article);
         return;
       case LearnOfflineUpgradeBlocked(:final message):
       case LearnOpenArticleFailed(:final message):

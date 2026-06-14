@@ -3,5 +3,8 @@
   "RC_API_KEY_ANDROID": "test_xoDWuBlcmaxIARJzQkcHLnwgTDL",
   "RC_UNLOCK_FLIGHT_PRODUCT_ID_IOS": "test_flight_pro_unlock_1",
   "RC_UNLOCK_FLIGHT_PRODUCT_ID_ANDROID": "test_flight_pro_unlock_1",
-  "MAPBOX_ACCESS_TOKEN": "pk.eyJ1IjoiYXBwdHJhY3RvciIsImEiOiJjbW9hN2VnbXkwM2NtMnByMGI2cGo1enVsIn0.mEqDtVKF1gb1dBimBCFt-g"
+  "MAPBOX_ACCESS_TOKEN": "pk.eyJ1IjoiYXBwdHJhY3RvciIsImEiOiJjbW9hN2VnbXkwM2NtMnByMGI2cGo1enVsIn0.mEqDtVKF1gb1dBimBCFt-g",
+  "POSTHOG_ENABLED": false,
+  "POSTHOG_PROJECT_TOKEN": "",
+  "POSTHOG_HOST": "https://eu.i.posthog.com"
 }

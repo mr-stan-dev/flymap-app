@@ -57,29 +57,35 @@ void main() {
       expect(cubit.state.unusedFlightUnlockCount, 2);
     });
 
-    test('startup silently preloads unlock product when balance is empty', () async {
-      flightUnlockRepository.product = const FlightUnlockProduct(
-        productId: 'unlock.flight',
-        title: 'Unlock Flight',
-        priceText: r'$4.99',
-      );
+    test(
+      'startup silently preloads unlock product when balance is empty',
+      () async {
+        flightUnlockRepository.product = const FlightUnlockProduct(
+          productId: 'unlock.flight',
+          title: 'Unlock Flight',
+          priceText: r'$4.99',
+        );
 
-      await cubit.initialize();
-      await Future<void>.delayed(Duration.zero);
+        await cubit.initialize();
+        await Future<void>.delayed(Duration.zero);
 
-      expect(flightUnlockRepository.getUnlockProductCallCount, 1);
-      expect(cubit.state.flightUnlockProduct?.priceText, r'$4.99');
-      expect(cubit.state.flightUnlockErrorMessage, isNull);
-    });
+        expect(flightUnlockRepository.getUnlockProductCallCount, 1);
+        expect(cubit.state.flightUnlockProduct?.priceText, r'$4.99');
+        expect(cubit.state.flightUnlockErrorMessage, isNull);
+      },
+    );
 
-    test('startup silent preload does not expose error when product is unavailable', () async {
-      await cubit.initialize();
-      await Future<void>.delayed(Duration.zero);
+    test(
+      'startup silent preload does not expose error when product is unavailable',
+      () async {
+        await cubit.initialize();
+        await Future<void>.delayed(Duration.zero);
 
-      expect(flightUnlockRepository.getUnlockProductCallCount, 1);
-      expect(cubit.state.flightUnlockProduct, isNull);
-      expect(cubit.state.flightUnlockErrorMessage, isNull);
-    });
+        expect(flightUnlockRepository.getUnlockProductCallCount, 1);
+        expect(cubit.state.flightUnlockProduct, isNull);
+        expect(cubit.state.flightUnlockErrorMessage, isNull);
+      },
+    );
 
     test('startup failure path is non-blocking and free', () async {
       repository.initializeResult = _status(
@@ -155,7 +161,9 @@ void main() {
 
     test('purchaseFlightUnlock increments local balance', () async {
       flightUnlockRepository.purchaseResult =
-          const FlightUnlockPurchaseResult.purchased(productId: 'unlock.flight');
+          const FlightUnlockPurchaseResult.purchased(
+            productId: 'unlock.flight',
+          );
 
       final result = await cubit.purchaseFlightUnlock();
 
@@ -196,7 +204,13 @@ void main() {
 
       await cubit.presentPaywallForCreateFlight();
 
-      final event = analytics.events.single as PaywallResultEvent;
+      final presented = analytics.events
+          .whereType<PaywallPresentedEvent>()
+          .single;
+      expect(presented.source, PaywallSource.wikiLimit);
+      expect(presented.isProUser, isFalse);
+      expect(presented.hasProducts, isFalse);
+      final event = analytics.events.whereType<PaywallResultEvent>().single;
       expect(event.source, PaywallSource.wikiLimit);
       expect(event.result, SubscriptionPaywallResult.cancelled);
     });
@@ -208,7 +222,7 @@ void main() {
 
       expect(result, SubscriptionPaywallResult.purchased);
       expect(repository.refreshCallCount, 1);
-      final event = analytics.events.single as PaywallResultEvent;
+      final event = analytics.events.whereType<PaywallResultEvent>().single;
       expect(event.source, PaywallSource.settingsBanner);
       expect(event.result, SubscriptionPaywallResult.purchased);
     });
@@ -222,7 +236,7 @@ void main() {
 
         expect(result, SubscriptionPaywallResult.cancelled);
         expect(repository.refreshCallCount, 0);
-        final event = analytics.events.single as PaywallResultEvent;
+        final event = analytics.events.whereType<PaywallResultEvent>().single;
         expect(event.source, PaywallSource.subscriptionManagement);
         expect(event.result, SubscriptionPaywallResult.cancelled);
       },
@@ -234,7 +248,7 @@ void main() {
       final result = await cubit.presentPaywallFromOverviewPoi();
 
       expect(result, SubscriptionPaywallResult.cancelled);
-      final event = analytics.events.single as PaywallResultEvent;
+      final event = analytics.events.whereType<PaywallResultEvent>().single;
       expect(event.source, PaywallSource.poiSection);
       expect(event.result, SubscriptionPaywallResult.cancelled);
     });
@@ -245,7 +259,7 @@ void main() {
       final result = await cubit.presentPaywallFromRealRouteGate();
 
       expect(result, SubscriptionPaywallResult.cancelled);
-      final event = analytics.events.single as PaywallResultEvent;
+      final event = analytics.events.whereType<PaywallResultEvent>().single;
       expect(event.source, PaywallSource.realRouteGate);
       expect(event.result, SubscriptionPaywallResult.cancelled);
     });

@@ -44,6 +44,7 @@ dependencies:
   html: ^0.15.6
   webview_flutter: ^4.13.0
   flutter_svg: ^2.0.10+1
+  posthog_flutter: ^5.26.0
   purchases_flutter: ^9.15.1
   purchases_ui_flutter: ^9.15.1
   package_info_plus: ^8.3.0

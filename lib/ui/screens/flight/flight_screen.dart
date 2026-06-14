@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/domain/entity/flight.dart';
 import 'package:flymap/i18n/strings.g.dart';
+import 'package:flymap/map_download_config.dart';
 import 'package:flymap/router/app_router.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_cubit.dart';
 import 'package:flymap/ui/screens/flight/viewmodel/flight_screen_state.dart';
@@ -14,6 +18,8 @@ import 'package:flymap/ui/screens/flight/widgets/tabs/map/map_tab.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/read/read_tab_view.dart';
 import 'package:flymap/ui/screens/flight/widgets/tabs/route/flight_route_tab_view.dart';
 import 'package:flymap/ui/screens/home/tabs/home/home_tab.dart';
+import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
+import 'package:get_it/get_it.dart';
 
 class FlightScreen extends StatelessWidget {
   final Flight flight;
@@ -46,6 +52,12 @@ class _FlightScreenView extends StatefulWidget {
 class _FlightScreenViewState extends State<_FlightScreenView> {
   int _tabIndex = 0;
   bool _isGpsHelpSheetOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _logFlightOpened();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -180,6 +192,33 @@ class _FlightScreenViewState extends State<_FlightScreenView> {
       await showGpsSignalHelpSheet(context);
     } finally {
       _isGpsHelpSheetOpen = false;
+    }
+  }
+
+  void _logFlightOpened() {
+    if (!GetIt.I.isRegistered<AppAnalytics>()) return;
+    final flight = context.read<FlightScreenCubit>().flight;
+    unawaited(
+      GetIt.I.get<AppAnalytics>().log(
+        FlightOpenedEvent(
+          routeSource: flight.route.source,
+          routeLength: MapDownloadConfig.resolveRouteLength(
+            flight.route.distanceInKm,
+          ),
+          accessTier: _resolveAccessTier(flight),
+        ),
+      ),
+    );
+  }
+
+  FlightOpenedAccessTier _resolveAccessTier(Flight flight) {
+    if (!flight.hasProAccess) return FlightOpenedAccessTier.free;
+    try {
+      return context.read<SubscriptionCubit>().state.isPro
+          ? FlightOpenedAccessTier.pro
+          : FlightOpenedAccessTier.flightUnlock;
+    } catch (_) {
+      return FlightOpenedAccessTier.pro;
     }
   }
 }

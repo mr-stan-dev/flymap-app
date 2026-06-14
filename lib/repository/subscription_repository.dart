@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flymap/analytics/app_analytics_context.dart';
+import 'package:flymap/auth/app_auth_repository.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/subscription/revenuecat_client.dart';
 import 'package:flymap/subscription/revenuecat_env_config.dart';
@@ -36,10 +38,16 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
     required RevenueCatClient client,
     required RevenueCatEnvConfig config,
     SubscriptionStatusCache? statusCache,
+    AppAuthRepository? authRepository,
+    AppAnalyticsContextStore? analyticsContextStore,
+    bool authIdentityEnabled = kReleaseMode,
     TargetPlatform? platformOverride,
   }) : _client = client,
        _config = config,
        _statusCache = statusCache ?? _NoopSubscriptionStatusCache(),
+       _authRepository = authRepository,
+       _analyticsContextStore = analyticsContextStore,
+       _authIdentityEnabled = authIdentityEnabled,
        _platformOverride = platformOverride,
        _currentStatus = SubscriptionStatus(
          isPro: false,
@@ -50,6 +58,9 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
   final RevenueCatClient _client;
   final RevenueCatEnvConfig _config;
   final SubscriptionStatusCache _statusCache;
+  final AppAuthRepository? _authRepository;
+  final AppAnalyticsContextStore? _analyticsContextStore;
+  final bool _authIdentityEnabled;
   final TargetPlatform? _platformOverride;
   final _logger = const Logger('SubscriptionRepository');
 
@@ -100,7 +111,11 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
     }
 
     try {
+      final appUserId = await _resolveRevenueCatAppUserId();
+      // Configure without forcing the Firebase UID so upgraded installs can
+      // load RevenueCat's cached anonymous ID before logIn aliases it.
       await _client.configure(apiKey: apiKey);
+      await _alignRevenueCatIdentity(appUserId);
       _isConfigured = true;
       _ensureCustomerInfoSubscription();
       return refresh();
@@ -108,6 +123,46 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
       _logger.error('RevenueCat configure failed: $e');
       _isConfigured = false;
       return _publishError('Subscription service is temporarily unavailable.');
+    }
+  }
+
+  Future<String?> _resolveRevenueCatAppUserId() async {
+    if (!_authIdentityEnabled) return null;
+
+    final authRepository = _authRepository;
+    if (authRepository == null) return null;
+
+    try {
+      final userId =
+          authRepository.currentUserId ?? await authRepository.initialize();
+      final normalized = userId?.trim();
+      return normalized == null || normalized.isEmpty ? null : normalized;
+    } catch (e) {
+      _logger.error('RevenueCat app user id resolution skipped: $e');
+      return null;
+    }
+  }
+
+  Future<void> _alignRevenueCatIdentity(String? appUserId) async {
+    final userId = appUserId?.trim();
+    if (userId == null || userId.isEmpty) return;
+
+    try {
+      final currentAppUserId = await _client.getAppUserId();
+      if (currentAppUserId != userId) {
+        await _client.logIn(appUserId: userId);
+      }
+
+      final context =
+          _analyticsContextStore?.global ?? AppAnalyticsGlobalContext.unknown;
+      await _client.setAttributes(
+        context.toRevenueCatAttributes(
+          firebaseUid: userId,
+          posthogDistinctId: userId,
+        ),
+      );
+    } catch (e) {
+      _logger.error('RevenueCat identity alignment skipped: $e');
     }
   }
 

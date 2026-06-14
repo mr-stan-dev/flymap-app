@@ -52,7 +52,7 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
       final unusedUnlockCount = await _flightUnlockRepository.initialize();
       _emitUnlockBalance(unusedUnlockCount);
       final status = await _repository.initialize();
-      _emitStatus(status);
+      _emitStatus(status, source: 'refresh');
       await loadProducts();
       _preloadFlightUnlockProductIfNeeded(unusedUnlockCount);
     } catch (e) {
@@ -67,16 +67,24 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
     }
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh({String source = 'refresh'}) async {
     emit(state.copyWith(phase: SubscriptionPhase.loading, clearError: true));
     final status = await _repository.refresh();
-    _emitStatus(status);
+    _emitStatus(status, source: source);
   }
 
   Future<void> restorePurchases() async {
     emit(state.copyWith(phase: SubscriptionPhase.loading, clearError: true));
     final status = await _repository.restorePurchases();
-    _emitStatus(status);
+    _emitStatus(status, source: 'restore');
+    final restoreResult = status.error != null
+        ? RestorePurchasesAnalyticsResult.error
+        : status.isPro
+        ? RestorePurchasesAnalyticsResult.proRestored
+        : RestorePurchasesAnalyticsResult.noSubscription;
+    unawaited(
+      _analytics.log(RestorePurchasesResultEvent(result: restoreResult)),
+    );
   }
 
   Future<void> loadProducts() async {
@@ -152,7 +160,7 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
   Future<void> purchasePackage(String packageId) async {
     emit(state.copyWith(phase: SubscriptionPhase.loading, clearError: true));
     final status = await _repository.purchasePackage(packageId: packageId);
-    _emitStatus(status);
+    _emitStatus(status, source: 'purchase');
   }
 
   Future<SubscriptionPaywallResult> presentPaywallForCreateFlight() async {
@@ -210,13 +218,26 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
   Future<SubscriptionPaywallResult> _presentPaywallIfNeeded({
     required PaywallSource source,
   }) async {
+    unawaited(
+      _analytics.log(
+        PaywallPresentedEvent(
+          source: source,
+          isProUser: state.isPro,
+          hasProducts: state.products.isNotEmpty,
+        ),
+      ),
+    );
     final result = await _repository.presentPaywallIfNeeded();
     unawaited(
       _analytics.log(PaywallResultEvent(source: source, result: result)),
     );
     if (result == SubscriptionPaywallResult.purchased ||
         result == SubscriptionPaywallResult.restored) {
-      await refresh();
+      await refresh(
+        source: result == SubscriptionPaywallResult.purchased
+            ? 'purchase'
+            : 'restore',
+      );
     }
     return result;
   }
@@ -227,15 +248,27 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
   }
 
   void _onStatusUpdate(SubscriptionStatus status) {
-    _emitStatus(status);
+    _emitStatus(status, source: 'customer_info_stream');
   }
 
   void _onUnlockBalanceUpdate(int unusedUnlockCount) {
     _emitUnlockBalance(unusedUnlockCount);
   }
 
-  void _emitStatus(SubscriptionStatus status) {
+  void _emitStatus(SubscriptionStatus status, {required String source}) {
+    final previousStatus = state.status;
     unawaited(_analytics.setSubscriptionContext(isPro: status.isPro));
+    if (previousStatus != null && previousStatus.isPro != status.isPro) {
+      unawaited(
+        _analytics.log(
+          SubscriptionStatusChangedEvent(
+            fromStatus: _subscriptionStatusName(previousStatus),
+            toStatus: _subscriptionStatusName(status),
+            source: source,
+          ),
+        ),
+      );
+    }
     emit(
       state.copyWith(
         phase: status.isPro ? SubscriptionPhase.pro : SubscriptionPhase.free,
@@ -243,6 +276,10 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
         errorMessage: status.error,
       ),
     );
+  }
+
+  String _subscriptionStatusName(SubscriptionStatus status) {
+    return status.isPro ? 'pro' : 'free';
   }
 
   void _emitUnlockBalance(int unusedUnlockCount) {

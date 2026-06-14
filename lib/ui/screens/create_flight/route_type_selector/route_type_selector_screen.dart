@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/router/app_router.dart';
 import 'package:flymap/subscription/paywall_source.dart';
@@ -7,6 +10,7 @@ import 'package:flymap/ui/design_system/design_system.dart';
 import 'package:flymap/ui/screens/create_flight/flight_preview/flight_unlock_gate_sheet.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_state.dart';
+import 'package:get_it/get_it.dart';
 import 'widgets/route_type_card.dart';
 
 enum RouteType { basic, pro }
@@ -22,6 +26,7 @@ class FlightRouteTypeSelector extends StatefulWidget {
 class _FlightRouteTypeSelectorState extends State<FlightRouteTypeSelector> {
   RouteType _selectedType = RouteType.basic;
   bool _hasPendingFlightUnlock = false;
+  final AppAnalytics _analytics = GetIt.I.get<AppAnalytics>();
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +74,8 @@ class _FlightRouteTypeSelectorState extends State<FlightRouteTypeSelector> {
                       description: t.proDescription,
                       isSelected: _selectedType == RouteType.pro,
                       isProOnly: true,
-                      onTap: () => setState(() => _selectedType = RouteType.pro),
+                      onTap: () =>
+                          setState(() => _selectedType = RouteType.pro),
                     ),
                     const Spacer(),
                     if (_selectedType == RouteType.pro && !hasUnlockedProRoute)
@@ -84,6 +90,10 @@ class _FlightRouteTypeSelectorState extends State<FlightRouteTypeSelector> {
                       PrimaryButton(
                         label: context.t.common.kContinue,
                         onPressed: () {
+                          _logRouteTypeSelected(
+                            isProUser: isPro,
+                            hasPendingFlightUnlock: _hasPendingFlightUnlock,
+                          );
                           if (_selectedType == RouteType.basic) {
                             AppRouter.goToFlightSearch(context);
                           } else {
@@ -101,6 +111,23 @@ class _FlightRouteTypeSelectorState extends State<FlightRouteTypeSelector> {
           ),
         );
       },
+    );
+  }
+
+  void _logRouteTypeSelected({
+    required bool isProUser,
+    required bool hasPendingFlightUnlock,
+  }) {
+    unawaited(
+      _analytics.log(
+        RouteTypeSelectedEvent(
+          routeType: _selectedType == RouteType.basic
+              ? SelectedRouteType.airports
+              : SelectedRouteType.realRoute,
+          isProUser: isProUser,
+          hasPendingFlightUnlock: hasPendingFlightUnlock,
+        ),
+      ),
     );
   }
 

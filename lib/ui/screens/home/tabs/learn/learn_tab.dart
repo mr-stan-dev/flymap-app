@@ -53,6 +53,7 @@ class _LearnCategoriesView extends StatelessWidget {
                 return LearnCategoryCard(
                   category: category,
                   onTap: () {
+                    context.read<LearnCubit>().trackCategoryOpened(category);
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => BlocProvider.value(

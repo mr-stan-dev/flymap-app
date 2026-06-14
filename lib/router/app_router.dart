@@ -2,6 +2,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flymap/domain/entity/airport.dart';
 import 'package:flymap/domain/entity/flight.dart';
+import 'package:flymap/domain/entity/learn_article_content.dart';
 import 'package:flymap/ui/screens/create_flight/download_completed/download_completed_args.dart';
 import 'package:flymap/ui/screens/create_flight/download_completed/download_completed_screen.dart';
 import 'package:flymap/ui/screens/about/about_screen.dart';
@@ -15,6 +16,7 @@ import 'package:flymap/ui/screens/feedback/feedback_screen.dart';
 import 'package:flymap/ui/screens/feedback/feedback_screen_args.dart';
 import 'package:flymap/ui/screens/flight/flight_screen.dart';
 import 'package:flymap/ui/screens/home/home_screen.dart';
+import 'package:flymap/ui/screens/home/tabs/learn/learn_article_screen.dart';
 import 'package:flymap/ui/screens/onboarding/onboarding_screen.dart';
 import 'package:flymap/ui/screens/share_flight/share_flight_image_screen.dart';
 import 'package:flymap/ui/screens/settings/profile/settings_profile_screen.dart';
@@ -45,6 +47,7 @@ class AppRouter {
   static const String settingsProfileRoute = '/settings/profile';
   static const String settingsStorageRoute = '/settings/storage';
   static const String settingsHistoryRoute = '/settings/history';
+  static const String learnArticleRoute = '/learn/article';
 
   /// Create the router configuration
   static GoRouter createRouter({required bool showOnboarding}) {
@@ -210,6 +213,18 @@ class AppRouter {
           },
         ),
 
+        GoRoute(
+          path: learnArticleRoute,
+          name: 'learn-article',
+          builder: (context, state) {
+            final article = state.extra as LearnArticleContent?;
+            if (article == null) {
+              return const HomeScreen(initialTab: HomeRootTab.learn);
+            }
+            return LearnArticleScreen(article: article);
+          },
+        ),
+
         // Subscription management route
         GoRoute(
           path: subscriptionRoute,
@@ -356,6 +371,13 @@ class AppRouter {
   /// Navigate to subscription management
   static void goToSubscriptionManagement(BuildContext context) {
     context.push(subscriptionRoute);
+  }
+
+  static Future<void> goToLearnArticle(
+    BuildContext context, {
+    required LearnArticleContent article,
+  }) {
+    return context.push(learnArticleRoute, extra: article);
   }
 
   /// Navigate to about

@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flymap/analytics/app_analytics.dart';
 import 'package:flymap/data/network/connectivity_checker.dart';
 import 'package:flymap/domain/entity/learn_article_meta.dart';
 import 'package:flymap/domain/entity/learn_article_progress.dart';
+import 'package:flymap/domain/entity/learn_category.dart';
 import 'package:flymap/i18n/strings.g.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/domain/usecase/can_open_learn_article_use_case.dart';
@@ -25,6 +29,7 @@ class LearnCubit extends Cubit<LearnState> {
     MarkLearnArticleSeenUseCase? markLearnArticleSeenUseCase,
     CanOpenLearnArticleUseCase? canOpenLearnArticleUseCase,
     ConnectivityChecker? connectivityChecker,
+    AppAnalytics? analytics,
   }) : _getLearnCategoriesUseCase =
            getLearnCategoriesUseCase ?? GetIt.I<GetLearnCategoriesUseCase>(),
        _getLearnCategoryArticlesUseCase =
@@ -46,6 +51,11 @@ class LearnCubit extends Cubit<LearnState> {
            canOpenLearnArticleUseCase ?? GetIt.I<CanOpenLearnArticleUseCase>(),
        _connectivityChecker =
            connectivityChecker ?? const ConnectivityChecker(),
+       _analytics =
+           analytics ??
+           (GetIt.I.isRegistered<AppAnalytics>()
+               ? GetIt.I<AppAnalytics>()
+               : null),
        super(const LearnLoading());
 
   final GetLearnCategoriesUseCase _getLearnCategoriesUseCase;
@@ -56,6 +66,7 @@ class LearnCubit extends Cubit<LearnState> {
   final MarkLearnArticleSeenUseCase _markLearnArticleSeenUseCase;
   final CanOpenLearnArticleUseCase _canOpenLearnArticleUseCase;
   final ConnectivityChecker _connectivityChecker;
+  final AppAnalytics? _analytics;
   final Logger _logger = const Logger('LearnCubit');
 
   Future<void> load() async {
@@ -82,6 +93,19 @@ class LearnCubit extends Cubit<LearnState> {
       _logger.error('Failed to load learn articles for "$categoryId": $e');
       rethrow;
     }
+  }
+
+  void trackCategoryOpened(LearnCategory category) {
+    final analytics = _analytics;
+    if (analytics == null) return;
+    unawaited(
+      analytics.log(
+        LearnCategoryOpenedEvent(
+          categoryId: category.id,
+          articleCount: category.articleCount,
+        ),
+      ),
+    );
   }
 
   Future<Map<String, LearnArticleProgress>> loadArticleProgress({
@@ -139,6 +163,19 @@ class LearnCubit extends Cubit<LearnState> {
       final content = await _getLearnArticleContentUseCase(
         articleId: article.id,
       );
+      final analytics = _analytics;
+      if (analytics != null) {
+        unawaited(
+          analytics.log(
+            LearnArticleOpenedEvent(
+              articleId: article.id,
+              categoryId: article.categoryId,
+              access: article.access,
+              isProUser: isProUser,
+            ),
+          ),
+        );
+      }
       return LearnOpenArticle(content);
     } catch (e) {
       _logger.error('Failed to open learn article "${article.id}": $e');

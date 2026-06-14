@@ -133,7 +133,7 @@ class _FakeRevenueCatClient implements RevenueCatClient {
   Future<void> close() async {}
 
   @override
-  Future<void> configure({required String apiKey}) async {}
+  Future<void> configure({required String apiKey, String? appUserId}) async {}
 
   @override
   Future<String> getAppUserId() async => r'$RCAnonymousID:test';
@@ -155,6 +155,9 @@ class _FakeRevenueCatClient implements RevenueCatClient {
 
   @override
   Future<void> logIn({required String appUserId}) async {}
+
+  @override
+  Future<void> setAttributes(Map<String, String> attributes) async {}
 
   @override
   Future<void> presentCustomerCenter() async {}

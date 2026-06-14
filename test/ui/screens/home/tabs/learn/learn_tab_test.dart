@@ -20,6 +20,8 @@ import 'package:flymap/subscription/flight_unlock_purchase_result.dart';
 import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/subscription/subscription_product.dart';
 import 'package:flymap/subscription/subscription_status.dart';
+import 'package:flymap/router/app_router.dart';
+import 'package:flymap/ui/screens/home/tabs/learn/learn_article_screen.dart';
 import 'package:flymap/ui/screens/home/tabs/learn/learn_tab.dart';
 import 'package:flymap/ui/screens/home/tabs/learn/viewmodel/learn_cubit.dart';
 import 'package:flymap/ui/screens/subscription/viewmodel/subscription_cubit.dart';
@@ -31,6 +33,7 @@ import 'package:flymap/domain/usecase/get_learn_categories_use_case.dart';
 import 'package:flymap/domain/usecase/get_learn_category_articles_use_case.dart';
 import 'package:flymap/domain/usecase/mark_learn_article_seen_use_case.dart';
 import 'package:flymap/domain/usecase/toggle_learn_article_favorite_use_case.dart';
+import 'package:go_router/go_router.dart';
 
 void main() {
   setUpAll(() {
@@ -132,9 +135,54 @@ void main() {
 
     expect(find.byIcon(Icons.star_rounded), findsOneWidget);
   });
+
+  testWidgets('logs learn category and article opens', (tester) async {
+    final analytics = _FakeAppAnalytics();
+    final learnRepository = _FakeLearnRepository();
+    final learnCubit = _buildLearnCubit(learnRepository, analytics: analytics);
+
+    await tester.pumpWidget(
+      _testApp(
+        isProUser: false,
+        analytics: analytics,
+        child: LearnTab(cubit: learnCubit),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Free Cat'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Free One'));
+    await tester.pumpAndSettle();
+
+    expect(
+      analytics.logged.map((event) => event.name),
+      containsAll(<String>['learn_category_opened', 'learn_article_opened']),
+    );
+    expect(
+      analytics.logged
+          .firstWhere((event) => event.name == 'learn_category_opened')
+          .parameters,
+      <String, Object>{'category_id': 'free_cat', 'article_count': 1},
+    );
+    expect(
+      analytics.logged
+          .firstWhere((event) => event.name == 'learn_article_opened')
+          .parameters,
+      <String, Object>{
+        'article_id': 'f1',
+        'category_id': 'free_cat',
+        'access': 'free',
+        'is_pro_user': false,
+      },
+    );
+  });
 }
 
-LearnCubit _buildLearnCubit(_FakeLearnRepository repository) {
+LearnCubit _buildLearnCubit(
+  _FakeLearnRepository repository, {
+  AppAnalytics? analytics,
+}) {
   final progressRepository = _InMemoryLearnArticleProgressRepository();
   return LearnCubit(
     getLearnCategoriesUseCase: GetLearnCategoriesUseCase(
@@ -158,10 +206,32 @@ LearnCubit _buildLearnCubit(_FakeLearnRepository repository) {
     canOpenLearnArticleUseCase: CanOpenLearnArticleUseCase(
       repository: repository,
     ),
+    analytics: analytics,
   );
 }
 
-Widget _testApp({required bool isProUser, required Widget child}) {
+Widget _testApp({
+  required bool isProUser,
+  required Widget child,
+  _FakeAppAnalytics? analytics,
+}) {
+  final appAnalytics = analytics ?? _FakeAppAnalytics();
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => Scaffold(body: child),
+      ),
+      GoRoute(
+        path: AppRouter.learnArticleRoute,
+        builder: (context, state) {
+          return LearnArticleScreen(
+            article: state.extra as LearnArticleContent,
+          );
+        },
+      ),
+    ],
+  );
   return TranslationProvider(
     child: MultiBlocProvider(
       providers: [
@@ -169,17 +239,17 @@ Widget _testApp({required bool isProUser, required Widget child}) {
           create: (_) => SubscriptionCubit(
             repository: _FakeSubscriptionRepository(isProUser: isProUser),
             flightUnlockRepository: _FakeFlightUnlockRepository(),
-            analytics: const _FakeAppAnalytics(),
+            analytics: appAnalytics,
           )..initialize(),
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         locale: AppLocale.en.flutterLocale,
         supportedLocales: AppLocaleUtils.supportedLocales,
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        home: Scaffold(body: child),
+        routerConfig: router,
       ),
     ),
   );
@@ -365,10 +435,12 @@ class _FakeFlightUnlockRepository implements FlightUnlockRepository {
 }
 
 class _FakeAppAnalytics implements AppAnalytics {
-  const _FakeAppAnalytics();
+  final List<AnalyticsEvent> logged = <AnalyticsEvent>[];
 
   @override
-  Future<void> log(AnalyticsEvent event) async {}
+  Future<void> log(AnalyticsEvent event) async {
+    logged.add(event);
+  }
 
   @override
   Future<void> setGlobalContext({

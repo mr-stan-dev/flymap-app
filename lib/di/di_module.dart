@@ -1,5 +1,12 @@
 import 'package:flymap/analytics/app_analytics.dart';
+import 'package:flymap/analytics/app_analytics_context.dart';
 import 'package:flymap/analytics/app_analytics_initializer.dart';
+import 'package:flymap/analytics/composite_app_analytics.dart';
+import 'package:flymap/analytics/filtering_app_analytics.dart';
+import 'package:flymap/analytics/posthog_app_analytics.dart';
+import 'package:flymap/analytics/posthog_client.dart';
+import 'package:flymap/analytics/posthog_env_config.dart';
+import 'package:flymap/analytics/posthog_event_filter.dart';
 import 'package:flymap/auth/app_auth_repository.dart';
 import 'package:flymap/crashlytics/app_crashlytics.dart';
 import 'package:flymap/crashlytics/app_crashlytics_initializer.dart';
@@ -85,9 +92,33 @@ class DiModule {
   final i = GetIt.I;
 
   void register() {
-    i.registerLazySingleton<AppAnalytics>(() => FirebaseAppAnalytics());
+    i.registerLazySingleton<AppAnalyticsContextStore>(
+      () => AppAnalyticsContextStore(),
+    );
+    i.registerLazySingleton<PostHogEnvConfig>(PostHogEnvConfig.fromEnvironment);
+    i.registerLazySingleton<PostHogAnalyticsClient>(
+      () => PackagePostHogAnalyticsClient(),
+    );
+    i.registerLazySingleton<AppAnalytics>(
+      () => CompositeAppAnalytics(
+        sinks: <AppAnalytics>[
+          FirebaseAppAnalytics(),
+          FilteringAppAnalytics(
+            delegate: PostHogAppAnalytics(
+              config: i.get<PostHogEnvConfig>(),
+              client: i.get<PostHogAnalyticsClient>(),
+            ),
+            eventFilter: const PostHogFunnelEventFilter(),
+          ),
+        ],
+      ),
+    );
     i.registerLazySingleton<AppAnalyticsInitializer>(
-      () => AppAnalyticsInitializer(analytics: i.get<AppAnalytics>()),
+      () => AppAnalyticsInitializer(
+        analytics: i.get<AppAnalytics>(),
+        authRepository: i.get<AppAuthRepository>(),
+        contextStore: i.get<AppAnalyticsContextStore>(),
+      ),
     );
     i.registerLazySingleton<AppCrashlytics>(() => FirebaseAppCrashlytics());
     i.registerLazySingleton<AppCrashlyticsInitializer>(
@@ -317,6 +348,8 @@ class DiModule {
         client: i.get(),
         config: i.get(),
         statusCache: i.get(),
+        authRepository: i.get(),
+        analyticsContextStore: i.get(),
       ),
     );
   }

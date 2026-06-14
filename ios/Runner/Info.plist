@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>com.posthog.posthog.AUTO_INIT</key>
+	<false/>
 	<key>CFBundleDisplayName</key>
 	<string>Flymap</string>
 	<key>CFBundleExecutable</key>
