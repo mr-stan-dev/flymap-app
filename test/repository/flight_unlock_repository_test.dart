@@ -193,4 +193,7 @@ class _FakeRevenueCatClient implements RevenueCatClient {
   @override
   Future<RevenueCatCustomerSnapshot> restorePurchases() async =>
       const RevenueCatCustomerSnapshot(entitlements: {});
+
+  @override
+  Future<void> syncPurchases() async {}
 }

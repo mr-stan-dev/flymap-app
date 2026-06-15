@@ -7,6 +7,7 @@ import 'package:flymap/auth/app_auth_repository.dart';
 import 'package:flymap/repository/subscription_repository.dart';
 import 'package:flymap/subscription/revenuecat_client.dart';
 import 'package:flymap/subscription/revenuecat_env_config.dart';
+import 'package:flymap/subscription/revenuecat_identity_migration_store.dart';
 import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/subscription/subscription_status.dart';
 import 'package:flymap/subscription/subscription_status_cache.dart';
@@ -114,6 +115,8 @@ void main() {
             entitlementPro: 'pro',
           ),
           statusCache: identityCache,
+          identityMigrationStore: _FakeRevenueCatIdentityMigrationStore()
+            ..alreadySynced = true,
           authRepository: _FakeAppAuthRepository(userId: 'firebase-uid'),
           analyticsContextStore: contextStore,
           authIdentityEnabled: true,
@@ -135,6 +138,100 @@ void main() {
         );
         expect(identityClient.attributes, containsPair('app_version', '1.2.3'));
         expect(identityClient.attributes, containsPair('platform', 'android'));
+      },
+    );
+
+    test(
+      'syncs purchases once after Firebase uid migration when first refresh is free',
+      () async {
+        final identityClient = _FakeRevenueCatClient();
+        final migrationStore = _FakeRevenueCatIdentityMigrationStore();
+        identityClient.getCustomerInfoResult = _snapshot({
+          'pro': const RevenueCatEntitlementSnapshot(isActive: false),
+        });
+        identityClient.afterSyncCustomerInfoResult = _snapshot({
+          'pro': const RevenueCatEntitlementSnapshot(isActive: true),
+        });
+        final identityRepository = RevenueCatSubscriptionRepository(
+          client: identityClient,
+          config: const RevenueCatEnvConfig(
+            androidApiKey: 'android_key',
+            entitlementPro: 'pro',
+          ),
+          statusCache: _FakeSubscriptionStatusCache(),
+          identityMigrationStore: migrationStore,
+          authRepository: _FakeAppAuthRepository(userId: 'firebase-uid'),
+          authIdentityEnabled: true,
+          platformOverride: TargetPlatform.android,
+        );
+        addTearDown(identityRepository.close);
+
+        final status = await identityRepository.initialize();
+
+        expect(identityClient.syncPurchasesCalls, 1);
+        expect(migrationStore.checkedUserIds, ['firebase-uid']);
+        expect(migrationStore.markedUserIds, ['firebase-uid']);
+        expect(status.isPro, isTrue);
+      },
+    );
+
+    test(
+      'does not sync purchases when migrated Firebase uid is already pro',
+      () async {
+        final identityClient = _FakeRevenueCatClient();
+        identityClient.getCustomerInfoResult = _snapshot({
+          'pro': const RevenueCatEntitlementSnapshot(isActive: true),
+        });
+        final identityRepository = RevenueCatSubscriptionRepository(
+          client: identityClient,
+          config: const RevenueCatEnvConfig(
+            androidApiKey: 'android_key',
+            entitlementPro: 'pro',
+          ),
+          statusCache: _FakeSubscriptionStatusCache(),
+          identityMigrationStore: _FakeRevenueCatIdentityMigrationStore(),
+          authRepository: _FakeAppAuthRepository(userId: 'firebase-uid'),
+          authIdentityEnabled: true,
+          platformOverride: TargetPlatform.android,
+        );
+        addTearDown(identityRepository.close);
+
+        final status = await identityRepository.initialize();
+
+        expect(status.isPro, isTrue);
+        expect(identityClient.syncPurchasesCalls, 0);
+      },
+    );
+
+    test(
+      'does not sync purchases again after migration marker is set',
+      () async {
+        final identityClient = _FakeRevenueCatClient();
+        identityClient.getCustomerInfoResult = _snapshot({
+          'pro': const RevenueCatEntitlementSnapshot(isActive: false),
+        });
+        final migrationStore = _FakeRevenueCatIdentityMigrationStore()
+          ..alreadySynced = true;
+        final identityRepository = RevenueCatSubscriptionRepository(
+          client: identityClient,
+          config: const RevenueCatEnvConfig(
+            androidApiKey: 'android_key',
+            entitlementPro: 'pro',
+          ),
+          statusCache: _FakeSubscriptionStatusCache(),
+          identityMigrationStore: migrationStore,
+          authRepository: _FakeAppAuthRepository(userId: 'firebase-uid'),
+          authIdentityEnabled: true,
+          platformOverride: TargetPlatform.android,
+        );
+        addTearDown(identityRepository.close);
+
+        final status = await identityRepository.initialize();
+
+        expect(status.isPro, isFalse);
+        expect(identityClient.syncPurchasesCalls, 0);
+        expect(migrationStore.checkedUserIds, ['firebase-uid']);
+        expect(migrationStore.markedUserIds, isEmpty);
       },
     );
 
@@ -377,11 +474,14 @@ class _FakeRevenueCatClient implements RevenueCatClient {
   int configureCalls = 0;
   int presentPaywallCalls = 0;
   int purchaseCalls = 0;
+  int syncPurchasesCalls = 0;
   bool throwOnConfigure = false;
   bool throwOnGetCustomerInfo = false;
+  bool throwOnSyncPurchases = false;
   bool canMakePaymentsValue = true;
   RevenueCatCustomerSnapshot getCustomerInfoResult =
       const RevenueCatCustomerSnapshot(entitlements: {});
+  RevenueCatCustomerSnapshot? afterSyncCustomerInfoResult;
   RevenueCatCustomerSnapshot restoreResult = const RevenueCatCustomerSnapshot(
     entitlements: {},
   );
@@ -486,6 +586,18 @@ class _FakeRevenueCatClient implements RevenueCatClient {
     return restoreResult;
   }
 
+  @override
+  Future<void> syncPurchases() async {
+    if (throwOnSyncPurchases) {
+      throw StateError('syncPurchases failed');
+    }
+    syncPurchasesCalls++;
+    final afterSync = afterSyncCustomerInfoResult;
+    if (afterSync != null) {
+      getCustomerInfoResult = afterSync;
+    }
+  }
+
   void emitSnapshot(RevenueCatCustomerSnapshot snapshot) {
     _controller.add(snapshot);
   }
@@ -518,5 +630,24 @@ class _FakeSubscriptionStatusCache implements SubscriptionStatusCache {
   @override
   Future<void> save(SubscriptionStatus status) async {
     saved = status;
+  }
+}
+
+class _FakeRevenueCatIdentityMigrationStore
+    implements RevenueCatIdentityMigrationStore {
+  bool alreadySynced = false;
+  final checkedUserIds = <String>[];
+  final markedUserIds = <String>[];
+
+  @override
+  Future<bool> hasSyncedPurchasesForUser(String appUserId) async {
+    checkedUserIds.add(appUserId);
+    return alreadySynced;
+  }
+
+  @override
+  Future<void> markSyncedPurchasesForUser(String appUserId) async {
+    markedUserIds.add(appUserId);
+    alreadySynced = true;
   }
 }

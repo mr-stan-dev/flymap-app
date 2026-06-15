@@ -6,6 +6,7 @@ import 'package:flymap/auth/app_auth_repository.dart';
 import 'package:flymap/logger.dart';
 import 'package:flymap/subscription/revenuecat_client.dart';
 import 'package:flymap/subscription/revenuecat_env_config.dart';
+import 'package:flymap/subscription/revenuecat_identity_migration_store.dart';
 import 'package:flymap/subscription/subscription_paywall_result.dart';
 import 'package:flymap/subscription/subscription_product.dart';
 import 'package:flymap/subscription/subscription_status_cache.dart';
@@ -38,6 +39,7 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
     required RevenueCatClient client,
     required RevenueCatEnvConfig config,
     SubscriptionStatusCache? statusCache,
+    RevenueCatIdentityMigrationStore? identityMigrationStore,
     AppAuthRepository? authRepository,
     AppAnalyticsContextStore? analyticsContextStore,
     bool authIdentityEnabled = kReleaseMode,
@@ -45,6 +47,8 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
   }) : _client = client,
        _config = config,
        _statusCache = statusCache ?? _NoopSubscriptionStatusCache(),
+       _identityMigrationStore =
+           identityMigrationStore ?? _NoopRevenueCatIdentityMigrationStore(),
        _authRepository = authRepository,
        _analyticsContextStore = analyticsContextStore,
        _authIdentityEnabled = authIdentityEnabled,
@@ -58,6 +62,7 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
   final RevenueCatClient _client;
   final RevenueCatEnvConfig _config;
   final SubscriptionStatusCache _statusCache;
+  final RevenueCatIdentityMigrationStore _identityMigrationStore;
   final AppAuthRepository? _authRepository;
   final AppAnalyticsContextStore? _analyticsContextStore;
   final bool _authIdentityEnabled;
@@ -118,7 +123,11 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
       await _alignRevenueCatIdentity(appUserId);
       _isConfigured = true;
       _ensureCustomerInfoSubscription();
-      return refresh();
+      final status = await refresh();
+      return _syncPurchasesForIdentityMigrationIfNeeded(
+        status: status,
+        appUserId: appUserId,
+      );
     } catch (e) {
       _logger.error('RevenueCat configure failed: $e');
       _isConfigured = false;
@@ -163,6 +172,30 @@ class RevenueCatSubscriptionRepository implements SubscriptionRepository {
       );
     } catch (e) {
       _logger.error('RevenueCat identity alignment skipped: $e');
+    }
+  }
+
+  Future<SubscriptionStatus> _syncPurchasesForIdentityMigrationIfNeeded({
+    required SubscriptionStatus status,
+    required String? appUserId,
+  }) async {
+    if (status.isPro) return status;
+
+    final userId = appUserId?.trim();
+    if (userId == null || userId.isEmpty) return status;
+
+    try {
+      final alreadySynced = await _identityMigrationStore
+          .hasSyncedPurchasesForUser(userId);
+      if (alreadySynced) return status;
+
+      await _client.syncPurchases();
+      await _identityMigrationStore.markSyncedPurchasesForUser(userId);
+      final snapshot = await _client.getCustomerInfo();
+      return _publish(_toStatus(snapshot));
+    } catch (e) {
+      _logger.error('RevenueCat identity purchase sync skipped: $e');
+      return status;
     }
   }
 
@@ -403,4 +436,17 @@ class _NoopSubscriptionStatusCache implements SubscriptionStatusCache {
 
   @override
   Future<void> save(SubscriptionStatus status) async {}
+}
+
+class _NoopRevenueCatIdentityMigrationStore
+    implements RevenueCatIdentityMigrationStore {
+  const _NoopRevenueCatIdentityMigrationStore();
+
+  @override
+  Future<bool> hasSyncedPurchasesForUser(String appUserId) async {
+    return true;
+  }
+
+  @override
+  Future<void> markSyncedPurchasesForUser(String appUserId) async {}
 }

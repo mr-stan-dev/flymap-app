@@ -58,6 +58,7 @@ import 'package:flymap/repository/flight_search_repository.dart';
 import 'package:flymap/repository/user_flight_prefs_storage.dart';
 import 'package:flymap/subscription/revenuecat_client.dart';
 import 'package:flymap/subscription/revenuecat_env_config.dart';
+import 'package:flymap/subscription/revenuecat_identity_migration_store.dart';
 import 'package:flymap/subscription/subscription_status_cache.dart';
 import 'package:flymap/domain/usecase/delete_flight_use_case.dart';
 import 'package:flymap/domain/usecase/complete_flight_use_case.dart';
@@ -340,6 +341,9 @@ class DiModule {
     i.registerLazySingleton<SubscriptionStatusCache>(
       () => SharedPrefsSubscriptionStatusCache(),
     );
+    i.registerLazySingleton<RevenueCatIdentityMigrationStore>(
+      () => SharedPrefsRevenueCatIdentityMigrationStore(),
+    );
     i.registerLazySingleton<FlightUnlockRepository>(
       () => RevenueCatFlightUnlockRepository(client: i.get(), config: i.get()),
     );
@@ -348,6 +352,7 @@ class DiModule {
         client: i.get(),
         config: i.get(),
         statusCache: i.get(),
+        identityMigrationStore: i.get(),
         authRepository: i.get(),
         analyticsContextStore: i.get(),
       ),

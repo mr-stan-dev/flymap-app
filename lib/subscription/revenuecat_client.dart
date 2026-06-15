@@ -86,6 +86,8 @@ abstract class RevenueCatClient {
 
   Future<RevenueCatCustomerSnapshot> restorePurchases();
 
+  Future<void> syncPurchases();
+
   Future<List<RevenueCatProductSnapshot>> getCurrentOfferingProducts();
 
   Future<RevenueCatStoreProductSnapshot?> getNonSubscriptionProduct({
@@ -171,6 +173,11 @@ class PurchasesRevenueCatClient implements RevenueCatClient {
   Future<RevenueCatCustomerSnapshot> restorePurchases() async {
     final info = await Purchases.restorePurchases();
     return _mapCustomerInfo(info);
+  }
+
+  @override
+  Future<void> syncPurchases() async {
+    await Purchases.syncPurchases();
   }
 
   @override
