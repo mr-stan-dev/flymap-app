@@ -920,7 +920,7 @@ class _TranslationsCreateFlightWikipediaDe extends TranslationsCreateFlightWikip
 	@override String get unselectAll => 'Auswahl aufheben';
 	@override String get selectAll => 'Alle auswählen';
 	@override String basicHint({required Object count}) => 'Ausgewählte Offline-Artikel: ${count}';
-	@override String get proHint => 'Vollständiges Offline-Artikelpaket';
+	@override String get proHint => 'Karte und Offline-Datenpaket';
 	@override String get proGateHint => 'Upgrade für das vollständige Offline-Artikelpaket';
 	@override String get proActiveTitle => 'Pro aktiv';
 	@override String get proActiveMessage => 'Vollständiges Artikelpaket freigeschaltet.';
@@ -1652,7 +1652,7 @@ extension on TranslationsDe {
 			'createFlight.wikipedia.unselectAll' => 'Auswahl aufheben',
 			'createFlight.wikipedia.selectAll' => 'Alle auswählen',
 			'createFlight.wikipedia.basicHint' => ({required Object count}) => 'Ausgewählte Offline-Artikel: ${count}',
-			'createFlight.wikipedia.proHint' => 'Vollständiges Offline-Artikelpaket',
+			'createFlight.wikipedia.proHint' => 'Karte und Offline-Datenpaket',
 			'createFlight.wikipedia.proGateHint' => 'Upgrade für das vollständige Offline-Artikelpaket',
 			'createFlight.wikipedia.proActiveTitle' => 'Pro aktiv',
 			'createFlight.wikipedia.proActiveMessage' => 'Vollständiges Artikelpaket freigeschaltet.',

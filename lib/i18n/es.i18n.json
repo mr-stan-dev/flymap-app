@@ -404,7 +404,7 @@
       "unselectAll": "Deseleccionar todo",
       "selectAll": "Seleccionar todo",
       "basicHint": "Artículos offline seleccionados: $count",
-      "proHint": "Paquete completo de artículos offline",
+      "proHint": "Mapa y paquete de datos offline",
       "proGateHint": "Mejora para obtener el paquete completo de artículos offline",
       "proActiveTitle": "Pro activo",
       "proActiveMessage": "Paquete completo de artículos desbloqueado.",

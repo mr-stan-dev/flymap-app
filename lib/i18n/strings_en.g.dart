@@ -2206,8 +2206,8 @@ class TranslationsCreateFlightWikipediaEn {
 	/// en: 'Offline articles selected: $count'
 	String basicHint({required Object count}) => 'Offline articles selected: ${count}';
 
-	/// en: 'Full offline article pack'
-	String get proHint => 'Full offline article pack';
+	/// en: 'Map and offline data pack'
+	String get proHint => 'Map and offline data pack';
 
 	/// en: 'Upgrade for the full offline article pack'
 	String get proGateHint => 'Upgrade for the full offline article pack';
@@ -3430,7 +3430,7 @@ extension on Translations {
 			'createFlight.wikipedia.unselectAll' => 'Unselect all',
 			'createFlight.wikipedia.selectAll' => 'Select all',
 			'createFlight.wikipedia.basicHint' => ({required Object count}) => 'Offline articles selected: ${count}',
-			'createFlight.wikipedia.proHint' => 'Full offline article pack',
+			'createFlight.wikipedia.proHint' => 'Map and offline data pack',
 			'createFlight.wikipedia.proGateHint' => 'Upgrade for the full offline article pack',
 			'createFlight.wikipedia.proActiveTitle' => 'Pro active',
 			'createFlight.wikipedia.proActiveMessage' => 'Full articles pack unlocked.',

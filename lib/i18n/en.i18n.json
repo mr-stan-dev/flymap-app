@@ -404,7 +404,7 @@
       "unselectAll": "Unselect all",
       "selectAll": "Select all",
       "basicHint": "Offline articles selected: $count",
-      "proHint": "Full offline article pack",
+      "proHint": "Map and offline data pack",
       "proGateHint": "Upgrade for the full offline article pack",
       "proActiveTitle": "Pro active",
       "proActiveMessage": "Full articles pack unlocked.",

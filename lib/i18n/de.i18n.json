@@ -404,7 +404,7 @@
       "unselectAll": "Auswahl aufheben",
       "selectAll": "Alle auswählen",
       "basicHint": "Ausgewählte Offline-Artikel: $count",
-      "proHint": "Vollständiges Offline-Artikelpaket",
+      "proHint": "Karte und Offline-Datenpaket",
       "proGateHint": "Upgrade für das vollständige Offline-Artikelpaket",
       "proActiveTitle": "Pro aktiv",
       "proActiveMessage": "Vollständiges Artikelpaket freigeschaltet.",

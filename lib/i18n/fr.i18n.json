@@ -404,7 +404,7 @@
       "unselectAll": "Tout désélectionner",
       "selectAll": "Tout sélectionner",
       "basicHint": "Articles hors ligne sélectionnés : $count",
-      "proHint": "Pack complet d’articles hors ligne",
+      "proHint": "Carte et pack de données hors ligne",
       "proGateHint": "Passez à Pro pour le pack complet d’articles hors ligne",
       "proActiveTitle": "Pro actif",
       "proActiveMessage": "Pack complet d’articles débloqué.",

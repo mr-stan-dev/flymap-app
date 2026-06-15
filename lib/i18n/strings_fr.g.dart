@@ -920,7 +920,7 @@ class _TranslationsCreateFlightWikipediaFr extends TranslationsCreateFlightWikip
 	@override String get unselectAll => 'Tout désélectionner';
 	@override String get selectAll => 'Tout sélectionner';
 	@override String basicHint({required Object count}) => 'Articles hors ligne sélectionnés : ${count}';
-	@override String get proHint => 'Pack complet d’articles hors ligne';
+	@override String get proHint => 'Carte et pack de données hors ligne';
 	@override String get proGateHint => 'Passez à Pro pour le pack complet d’articles hors ligne';
 	@override String get proActiveTitle => 'Pro actif';
 	@override String get proActiveMessage => 'Pack complet d’articles débloqué.';
@@ -1652,7 +1652,7 @@ extension on TranslationsFr {
 			'createFlight.wikipedia.unselectAll' => 'Tout désélectionner',
 			'createFlight.wikipedia.selectAll' => 'Tout sélectionner',
 			'createFlight.wikipedia.basicHint' => ({required Object count}) => 'Articles hors ligne sélectionnés : ${count}',
-			'createFlight.wikipedia.proHint' => 'Pack complet d’articles hors ligne',
+			'createFlight.wikipedia.proHint' => 'Carte et pack de données hors ligne',
 			'createFlight.wikipedia.proGateHint' => 'Passez à Pro pour le pack complet d’articles hors ligne',
 			'createFlight.wikipedia.proActiveTitle' => 'Pro actif',
 			'createFlight.wikipedia.proActiveMessage' => 'Pack complet d’articles débloqué.',
