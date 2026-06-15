@@ -116,6 +116,44 @@ void main() {
     );
     expect(find.text('Download'), findsOneWidget);
   });
+
+  testWidgets('compact action buttons keep content visible', (tester) async {
+    await pumpWithTheme(
+      tester,
+      theme: AppTheme.darkTheme,
+      child: SizedBox(
+        width: 220,
+        child: const SecondaryButton(
+          label: 'Manage subscription',
+          trailingIcon: Icons.open_in_new_rounded,
+          compact: true,
+          onPressed: _noop,
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(OutlinedButton)).height, 44);
+    expect(find.text('Manage subscription'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await pumpWithTheme(
+      tester,
+      theme: AppTheme.darkTheme,
+      child: SizedBox(
+        width: 220,
+        child: const TertiaryButton(
+          label: 'Restore purchases',
+          leadingIcon: Icons.restore_rounded,
+          compact: true,
+          onPressed: _noop,
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(TextButton)).height, 44);
+    expect(find.text('Restore purchases'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 void _noop() {}

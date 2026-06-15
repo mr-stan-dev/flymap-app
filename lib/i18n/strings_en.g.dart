@@ -612,17 +612,23 @@ class TranslationsSubscriptionEn {
 	/// en: 'Subscription'
 	String get screenTitle => 'Subscription';
 
-	/// en: 'Pull down to refresh your subscription status.'
-	String get pullToRefresh => 'Pull down to refresh your subscription status.';
-
-	/// en: 'Need help?'
-	String get needHelp => 'Need help?';
-
 	/// en: 'Contact support'
 	String get contactSupport => 'Contact support';
 
 	/// en: 'Flymap Pro'
 	String get cardTitle => 'Flymap Pro';
+
+	/// en: 'Subscription period'
+	String get periodTitle => 'Subscription period';
+
+	/// en: 'Renews or expires'
+	String get renewsOrExpires => 'Renews or expires';
+
+	/// en: 'No expiration'
+	String get noExpiration => 'No expiration';
+
+	/// en: 'Last checked'
+	String get lastChecked => 'Last checked';
 
 	/// en: 'Unlock Pro features'
 	String get flightUnlockSheetTitle => 'Unlock Pro features';
@@ -654,12 +660,6 @@ class TranslationsSubscriptionEn {
 	/// en: 'View Pro Plans'
 	String get flightUnlockProAction => 'View Pro Plans';
 
-	/// en: 'Unused flight unlocks'
-	String get flightUnlockBalanceLabel => 'Unused flight unlocks';
-
-	/// en: 'Single-flight unlocks are stored on this device.'
-	String get flightUnlockLocalNote => 'Single-flight unlocks are stored on this device.';
-
 	/// en: 'Flight unlock is not available right now.'
 	String get flightUnlockUnavailable => 'Flight unlock is not available right now.';
 
@@ -672,35 +672,26 @@ class TranslationsSubscriptionEn {
 	/// en: 'What Flymap Pro unlocks'
 	String get proFeaturesTitle => 'What Flymap Pro unlocks';
 
-	/// en: 'Detailed offline maps'
-	String get proFeatureMapsTitle => 'Detailed offline maps';
+	/// en: 'Accurate route previews'
+	String get proFeatureRoutesTitle => 'Accurate route previews';
 
-	/// en: 'Get higher-detail offline maps for your saved routes.'
-	String get proFeatureMapsText => 'Get higher-detail offline maps for your saved routes.';
+	/// en: 'Higher-detail offline maps'
+	String get proFeatureMapsTitle => 'Higher-detail offline maps';
 
-	/// en: 'More route discoveries'
-	String get proFeaturePoiTitle => 'More route discoveries';
+	/// en: 'Full route timeline'
+	String get proFeatureTimelineTitle => 'Full route timeline';
 
-	/// en: 'See more interesting places along your route.'
-	String get proFeaturePoiText => 'See more interesting places along your route.';
+	/// en: '10x more places on route'
+	String get proFeaturePoiTitle => '10x more places on route';
 
-	/// en: 'Unlimited offline articles'
-	String get proFeatureArticlesTitle => 'Unlimited offline articles';
-
-	/// en: 'Read offline articles without the Free plan limit.'
-	String get proFeatureArticlesText => 'Read offline articles without the Free plan limit.';
+	/// en: 'Complete offline article packs'
+	String get proFeatureArticlesTitle => 'Complete offline article packs';
 
 	/// en: 'Checking your subscription status...'
 	String get checkingStatus => 'Checking your subscription status...';
 
-	/// en: 'Flymap Pro is active.'
-	String get proActive => 'Flymap Pro is active.';
-
 	/// en: 'You are on Free plan.'
 	String get freePlan => 'You are on Free plan.';
-
-	/// en: 'Status'
-	String get status => 'Status';
 
 	/// en: 'Active'
 	String get active => 'Active';
@@ -708,32 +699,20 @@ class TranslationsSubscriptionEn {
 	/// en: 'Not active'
 	String get notActive => 'Not active';
 
-	/// en: 'Entitlement'
-	String get entitlement => 'Entitlement';
-
-	/// en: 'Expires'
-	String get expires => 'Expires';
-
-	/// en: 'No expiration'
-	String get noExpiration => 'No expiration';
-
-	/// en: 'Last update'
-	String get lastUpdate => 'Last update';
-
 	/// en: 'Unknown'
 	String get unknown => 'Unknown';
 
 	/// en: 'Manage subscription'
 	String get manageSubscription => 'Manage subscription';
 
+	/// en: 'Restore purchases'
+	String get restorePurchases => 'Restore purchases';
+
 	/// en: 'Upgrade to Pro'
 	String get upgradeToPro => 'Upgrade to Pro';
 
-	/// en: 'You can cancel or change billing in your App Store or Google Play subscription settings.'
-	String get proManageHint => 'You can cancel or change billing in your App Store or Google Play subscription settings.';
-
-	/// en: 'Upgrade to Pro for detailed offline maps, more route discoveries, and unlimited offline articles.'
-	String get freeUpgradeHint => 'Upgrade to Pro for detailed offline maps, more route discoveries, and unlimited offline articles.';
+	/// en: 'No active subscription found.'
+	String get restoreNoSubscription => 'No active subscription found.';
 
 	/// en: 'Flymap subscription support'
 	String get supportEmailSubject => 'Flymap subscription support';
@@ -3257,10 +3236,12 @@ extension on Translations {
 			'settings.proBannerSubtitleFree' => 'Unlock detailed maps and full offline article bundles',
 			'settings.proBannerBadgeActive' => 'PRO ACTIVE',
 			'subscription.screenTitle' => 'Subscription',
-			'subscription.pullToRefresh' => 'Pull down to refresh your subscription status.',
-			'subscription.needHelp' => 'Need help?',
 			'subscription.contactSupport' => 'Contact support',
 			'subscription.cardTitle' => 'Flymap Pro',
+			'subscription.periodTitle' => 'Subscription period',
+			'subscription.renewsOrExpires' => 'Renews or expires',
+			'subscription.noExpiration' => 'No expiration',
+			'subscription.lastChecked' => 'Last checked',
 			'subscription.flightUnlockSheetTitle' => 'Unlock Pro features',
 			'subscription.flightUnlockOptionTitle' => 'One-time purchase',
 			'subscription.flightUnlockOptionBody' => 'Unlock Pro for a single flight',
@@ -3271,33 +3252,24 @@ extension on Translations {
 			'subscription.flightUnlockAvailableCount' => ({required Object count}) => '${count} flight unlocks available',
 			'subscription.flightUnlockProOptionBody' => 'Unlock Pro for unlimited flights',
 			'subscription.flightUnlockProAction' => 'View Pro Plans',
-			'subscription.flightUnlockBalanceLabel' => 'Unused flight unlocks',
-			'subscription.flightUnlockLocalNote' => 'Single-flight unlocks are stored on this device.',
 			'subscription.flightUnlockUnavailable' => 'Flight unlock is not available right now.',
 			'subscription.flightUnlockPurchaseCancelled' => 'Flight unlock purchase cancelled.',
 			'subscription.flightUnlockPurchaseFailed' => 'Flight unlock purchase failed. Please try again.',
 			'subscription.proFeaturesTitle' => 'What Flymap Pro unlocks',
-			'subscription.proFeatureMapsTitle' => 'Detailed offline maps',
-			'subscription.proFeatureMapsText' => 'Get higher-detail offline maps for your saved routes.',
-			'subscription.proFeaturePoiTitle' => 'More route discoveries',
-			'subscription.proFeaturePoiText' => 'See more interesting places along your route.',
-			'subscription.proFeatureArticlesTitle' => 'Unlimited offline articles',
-			'subscription.proFeatureArticlesText' => 'Read offline articles without the Free plan limit.',
+			'subscription.proFeatureRoutesTitle' => 'Accurate route previews',
+			'subscription.proFeatureMapsTitle' => 'Higher-detail offline maps',
+			'subscription.proFeatureTimelineTitle' => 'Full route timeline',
+			'subscription.proFeaturePoiTitle' => '10x more places on route',
+			'subscription.proFeatureArticlesTitle' => 'Complete offline article packs',
 			'subscription.checkingStatus' => 'Checking your subscription status...',
-			'subscription.proActive' => 'Flymap Pro is active.',
 			'subscription.freePlan' => 'You are on Free plan.',
-			'subscription.status' => 'Status',
 			'subscription.active' => 'Active',
 			'subscription.notActive' => 'Not active',
-			'subscription.entitlement' => 'Entitlement',
-			'subscription.expires' => 'Expires',
-			'subscription.noExpiration' => 'No expiration',
-			'subscription.lastUpdate' => 'Last update',
 			'subscription.unknown' => 'Unknown',
 			'subscription.manageSubscription' => 'Manage subscription',
+			'subscription.restorePurchases' => 'Restore purchases',
 			'subscription.upgradeToPro' => 'Upgrade to Pro',
-			'subscription.proManageHint' => 'You can cancel or change billing in your App Store or Google Play subscription settings.',
-			'subscription.freeUpgradeHint' => 'Upgrade to Pro for detailed offline maps, more route discoveries, and unlimited offline articles.',
+			'subscription.restoreNoSubscription' => 'No active subscription found.',
 			'subscription.supportEmailSubject' => 'Flymap subscription support',
 			'subscription.couldNotOpenEmailApp' => 'Could not open email app',
 			'subscription.couldNotOpenSubscriptionSettings' => 'Could not open subscription settings',
@@ -3596,8 +3568,6 @@ extension on Translations {
 			'flight.dashboard.ageSeconds' => ({required Object seconds}) => '${seconds} s ago',
 			'flight.dashboard.ageMinutes' => ({required Object minutes}) => '${minutes} m ago',
 			'flight.dashboard.signalGood' => 'Good',
-			_ => null,
-		} ?? switch (path) {
 			'flight.dashboard.signalPoor' => 'Poor',
 			'flight.dashboard.signalBad' => 'Bad',
 			'flight.dashboard.signalSearching' => 'Searching',
@@ -3605,6 +3575,8 @@ extension on Translations {
 			'flight.dashboard.gpsSearchingLabel' => 'GPS searching',
 			'flight.dashboard.gpsPermissionNeededLabel' => 'GPS permission needed',
 			'flight.dashboard.gpsOffLabel' => 'GPS off',
+			_ => null,
+		} ?? switch (path) {
 			'flight.dashboard.aircraftHeading' => 'Aircraft heading',
 			'flight.dashboard.headingShort' => ({required Object heading}) => 'HDG ${heading}°',
 			'flight.dashboard.liveInstruments' => 'Live instruments',

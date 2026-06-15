@@ -27,6 +27,7 @@ class _SubscriptionManagementScreenState
     'https://play.google.com/store/account/subscriptions',
   );
   bool _isPaywallLoading = false;
+  bool _isRestoreLoading = false;
 
   @override
   void initState() {
@@ -45,8 +46,11 @@ class _SubscriptionManagementScreenState
       body: SafeArea(
         child: BlocBuilder<SubscriptionCubit, SubscriptionState>(
           builder: (context, state) {
-            if (state.phase == SubscriptionPhase.unknown ||
-                state.phase == SubscriptionPhase.loading) {
+            final isInitialLoading =
+                (state.phase == SubscriptionPhase.unknown ||
+                    state.phase == SubscriptionPhase.loading) &&
+                state.status == null;
+            if (isInitialLoading) {
               return const Center(child: CircularProgressIndicator());
             }
 
@@ -61,21 +65,25 @@ class _SubscriptionManagementScreenState
                   _buildStatusCard(context, state),
                   const SizedBox(height: 12),
                   _buildProFeaturesCard(context),
+                  if (_isProActive(state)) ...[
+                    const SizedBox(height: 12),
+                    _buildSubscriptionPeriodCard(context, state),
+                  ],
                   const SizedBox(height: 8),
-                  Text(
-                    context.t.subscription.pullToRefresh,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  TertiaryButton(
+                    label: context.t.subscription.restorePurchases,
+                    leadingIcon: Icons.restore_rounded,
+                    compact: true,
+                    isLoading: _isRestoreLoading,
+                    onPressed: _isRestoreLoading || _isPaywallLoading
+                        ? null
+                        : () => _restorePurchases(context),
                   ),
-                  const SizedBox(height: 12),
-                  SectionCard(
-                    title: context.t.subscription.needHelp,
-                    child: SecondaryButton(
-                      label: context.t.subscription.contactSupport,
-                      leadingIcon: Icons.support_agent_rounded,
-                      onPressed: () => _contactSupport(context),
-                    ),
+                  TertiaryButton(
+                    label: context.t.subscription.contactSupport,
+                    leadingIcon: Icons.support_agent_rounded,
+                    compact: true,
+                    onPressed: () => _contactSupport(context),
                   ),
                 ],
               ),
@@ -86,63 +94,52 @@ class _SubscriptionManagementScreenState
     );
   }
 
+  bool _isProActive(SubscriptionState state) {
+    return state.isPro || state.status?.isPro == true;
+  }
+
   Widget _buildStatusCard(BuildContext context, SubscriptionState state) {
-    final statusText = switch (state.phase) {
-      SubscriptionPhase.unknown ||
-      SubscriptionPhase.loading => context.t.subscription.checkingStatus,
-      SubscriptionPhase.pro => context.t.subscription.proActive,
-      SubscriptionPhase.free => context.t.subscription.freePlan,
-    };
+    final isPro = _isProActive(state);
+    final unlockBalanceText = state.unusedFlightUnlockCount > 0
+        ? context.t.subscription.flightUnlockAvailableCount(
+            count: state.unusedFlightUnlockCount,
+          )
+        : null;
+    final errorMessage = state.errorMessage?.trim();
 
     return SectionCard(
       title: context.t.subscription.cardTitle,
+      trailing: StatusChip(
+        label: isPro
+            ? context.t.subscription.active
+            : context.t.subscription.notActive,
+        tone: isPro ? StatusChipTone.success : StatusChipTone.neutral,
+        icon: isPro ? Icons.workspace_premium_rounded : Icons.lock_open_rounded,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          state.isPro
-              ? _buildProStatusBanner(context, statusText)
-              : InfoBanner(
-                  message: statusText,
-                  tone: state.phase == SubscriptionPhase.free
-                      ? DsMessageTone.neutral
-                      : DsMessageTone.info,
-                ),
-          const SizedBox(height: 12),
-          _MetaRow(
-            label: context.t.subscription.status,
-            value: state.isPro
-                ? context.t.subscription.active
-                : context.t.subscription.notActive,
-          ),
-          _MetaRow(
-            label: context.t.subscription.entitlement,
-            value:
-                state.status?.entitlementId ?? context.t.subscription.cardTitle,
-          ),
-          _MetaRow(
-            label: context.t.subscription.flightUnlockBalanceLabel,
-            value: context.t.subscription.flightUnlockAvailableCount(
-              count: state.unusedFlightUnlockCount,
+          if (!isPro)
+            Text(
+              context.t.subscription.freePlan,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
-          ),
-          _MetaRow(
-            label: context.t.subscription.expires,
-            value:
-                _formatDateTime(state.status?.expiresAt) ??
-                context.t.subscription.noExpiration,
-          ),
-          _MetaRow(
-            label: context.t.subscription.lastUpdate,
-            value:
-                _formatDateTime(state.lastUpdatedAt) ??
-                context.t.subscription.unknown,
-          ),
-          const SizedBox(height: 8),
-          if (state.isPro)
-            TertiaryButton(
+          if (unlockBalanceText != null) ...[
+            if (!isPro) const SizedBox(height: DsSpacing.sm),
+            MetaPill(
+              icon: Icons.confirmation_number_rounded,
+              text: unlockBalanceText,
+            ),
+          ],
+          if (!isPro || unlockBalanceText != null)
+            const SizedBox(height: DsSpacing.md),
+          if (isPro)
+            SecondaryButton(
               label: context.t.subscription.manageSubscription,
-              leadingIcon: Icons.storefront_rounded,
               trailingIcon: Icons.open_in_new_rounded,
+              compact: true,
               onPressed: () => _openStoreSubscriptions(
                 context: context,
                 messenger: ScaffoldMessenger.of(context),
@@ -150,34 +147,41 @@ class _SubscriptionManagementScreenState
               ),
             )
           else
-            PremiumButton(
+            PrimaryButton(
               label: context.t.subscription.upgradeToPro,
               onPressed: _isPaywallLoading ? null : () => _openPaywall(context),
               isLoading: _isPaywallLoading,
+              trailingIcon: Icons.arrow_forward_rounded,
             ),
-          const SizedBox(height: 8),
-          Text(
-            state.isPro
-                ? context.t.subscription.proManageHint
-                : context.t.subscription.freeUpgradeHint,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            context.t.subscription.flightUnlockLocalNote,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          if (state.errorMessage?.trim().isNotEmpty == true) ...[
-            const SizedBox(height: 8),
-            InlineMessage(
-              message: state.errorMessage!,
-              tone: DsMessageTone.warning,
-            ),
+          if (errorMessage != null && errorMessage.isNotEmpty) ...[
+            const SizedBox(height: DsSpacing.xs),
+            InlineMessage(message: errorMessage, tone: DsMessageTone.warning),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionPeriodCard(
+    BuildContext context,
+    SubscriptionState state,
+  ) {
+    return SectionCard(
+      title: context.t.subscription.periodTitle,
+      child: Column(
+        children: [
+          _MetaRow(
+            label: context.t.subscription.renewsOrExpires,
+            value:
+                _formatDateTime(state.status?.expiresAt) ??
+                context.t.subscription.noExpiration,
+          ),
+          _MetaRow(
+            label: context.t.subscription.lastChecked,
+            value:
+                _formatDateTime(state.lastUpdatedAt) ??
+                context.t.subscription.unknown,
+          ),
         ],
       ),
     );
@@ -189,55 +193,28 @@ class _SubscriptionManagementScreenState
       child: Column(
         children: [
           _ProFeatureRow(
+            icon: Icons.route_rounded,
+            title: context.t.subscription.proFeatureRoutesTitle,
+          ),
+          const Divider(height: 14),
+          _ProFeatureRow(
             icon: Icons.map_rounded,
             title: context.t.subscription.proFeatureMapsTitle,
-            text: context.t.subscription.proFeatureMapsText,
           ),
-          const Divider(height: 24),
+          const Divider(height: 14),
+          _ProFeatureRow(
+            icon: Icons.timeline_rounded,
+            title: context.t.subscription.proFeatureTimelineTitle,
+          ),
+          const Divider(height: 14),
           _ProFeatureRow(
             icon: Icons.travel_explore_rounded,
             title: context.t.subscription.proFeaturePoiTitle,
-            text: context.t.subscription.proFeaturePoiText,
           ),
-          const Divider(height: 24),
+          const Divider(height: 14),
           _ProFeatureRow(
             icon: Icons.menu_book_rounded,
             title: context.t.subscription.proFeatureArticlesTitle,
-            text: context.t.subscription.proFeatureArticlesText,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProStatusBanner(BuildContext context, String text) {
-    final theme = Theme.of(context);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: DsBrandColors.proAmber.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: DsBrandColors.proAmber.withValues(alpha: 0.7),
-        ),
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.workspace_premium_rounded,
-            size: 18,
-            color: DsBrandColors.proAmber,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: DsBrandColors.proAmber,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
           ),
         ],
       ),
@@ -315,6 +292,29 @@ class _SubscriptionManagementScreenState
       }
     }
   }
+
+  Future<void> _restorePurchases(BuildContext context) async {
+    if (_isRestoreLoading) return;
+    setState(() => _isRestoreLoading = true);
+    final cubit = context.read<SubscriptionCubit>();
+    final messenger = ScaffoldMessenger.of(context);
+    final strings = context.t;
+    try {
+      await cubit.restorePurchases();
+      if (!mounted) return;
+      final errorMessage = cubit.state.errorMessage?.trim();
+      final message = errorMessage != null && errorMessage.isNotEmpty
+          ? errorMessage
+          : cubit.state.isPro
+          ? strings.subscription.proRestored
+          : strings.subscription.restoreNoSubscription;
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) {
+        setState(() => _isRestoreLoading = false);
+      }
+    }
+  }
 }
 
 class _MetaRow extends StatelessWidget {
@@ -328,18 +328,26 @@ class _MetaRow extends StatelessWidget {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurface.withValues(alpha: 0.65);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: DsSpacing.xs),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 90,
+          Expanded(
             child: Text(
               label,
               style: theme.textTheme.bodyMedium?.copyWith(color: muted),
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(child: Text(value, style: theme.textTheme.bodyMedium)),
+          const SizedBox(width: DsSpacing.md),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -347,63 +355,33 @@ class _MetaRow extends StatelessWidget {
 }
 
 class _ProFeatureRow extends StatelessWidget {
-  const _ProFeatureRow({
-    required this.icon,
-    required this.title,
-    required this.text,
-  });
+  const _ProFeatureRow({required this.icon, required this.title});
 
   final IconData icon;
   final String title;
-  final String text;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          width: 36,
-          height: 36,
+          width: 30,
+          height: 30,
           decoration: BoxDecoration(
             color: DsBrandColors.proAmber.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(DsRadii.md),
+            borderRadius: BorderRadius.circular(DsRadii.sm),
           ),
-          child: const Icon(
-            Icons.workspace_premium_rounded,
-            color: DsBrandColors.proAmber,
-            size: 18,
-          ),
+          child: Icon(icon, color: DsBrandColors.proAmber, size: 17),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: DsSpacing.sm),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(icon, size: 16, color: DsBrandColors.proAmber),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                text,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+          child: Text(
+            title,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],

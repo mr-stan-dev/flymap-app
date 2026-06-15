@@ -268,10 +268,12 @@ class _TranslationsSubscriptionEs extends TranslationsSubscriptionEn {
 
 	// Translations
 	@override String get screenTitle => 'Suscripción';
-	@override String get pullToRefresh => 'Desliza hacia abajo para actualizar el estado de tu suscripción.';
-	@override String get needHelp => '¿Necesitas ayuda?';
 	@override String get contactSupport => 'Contactar con soporte';
 	@override String get cardTitle => 'Flymap Pro';
+	@override String get periodTitle => 'Periodo de suscripción';
+	@override String get renewsOrExpires => 'Renueva o caduca';
+	@override String get noExpiration => 'Sin caducidad';
+	@override String get lastChecked => 'Última comprobación';
 	@override String get flightUnlockSheetTitle => 'Desbloquear funciones Pro';
 	@override String get flightUnlockOptionTitle => 'Compra única';
 	@override String get flightUnlockOptionBody => 'Desbloquea Pro para un solo vuelo';
@@ -282,33 +284,24 @@ class _TranslationsSubscriptionEs extends TranslationsSubscriptionEn {
 	@override String flightUnlockAvailableCount({required Object count}) => '${count} desbloqueos de vuelo disponibles';
 	@override String get flightUnlockProOptionBody => 'Desbloquea Pro para vuelos ilimitados';
 	@override String get flightUnlockProAction => 'Ver planes Pro';
-	@override String get flightUnlockBalanceLabel => 'Desbloqueos de vuelo sin usar';
-	@override String get flightUnlockLocalNote => 'Los desbloqueos de un solo vuelo se almacenan en este dispositivo.';
 	@override String get flightUnlockUnavailable => 'El desbloqueo de vuelo no está disponible ahora mismo.';
 	@override String get flightUnlockPurchaseCancelled => 'Compra del desbloqueo de vuelo cancelada.';
 	@override String get flightUnlockPurchaseFailed => 'La compra del desbloqueo de vuelo falló. Inténtalo de nuevo.';
 	@override String get proFeaturesTitle => 'Lo que desbloquea Flymap Pro';
-	@override String get proFeatureMapsTitle => 'Mapas offline detallados';
-	@override String get proFeatureMapsText => 'Obtén mapas offline con mayor detalle para tus rutas guardadas.';
-	@override String get proFeaturePoiTitle => 'Más descubrimientos en ruta';
-	@override String get proFeaturePoiText => 'Ve más lugares interesantes a lo largo de tu ruta.';
-	@override String get proFeatureArticlesTitle => 'Artículos offline ilimitados';
-	@override String get proFeatureArticlesText => 'Lee artículos offline sin el límite del plan Free.';
+	@override String get proFeatureRoutesTitle => 'Vistas previas de ruta precisas';
+	@override String get proFeatureMapsTitle => 'Mapas offline con más detalle';
+	@override String get proFeatureTimelineTitle => 'Línea de tiempo completa';
+	@override String get proFeaturePoiTitle => '10 veces más lugares en la ruta';
+	@override String get proFeatureArticlesTitle => 'Paquetes completos de artículos offline';
 	@override String get checkingStatus => 'Comprobando el estado de tu suscripción...';
-	@override String get proActive => 'Flymap Pro está activo.';
 	@override String get freePlan => 'Estás en el plan Free.';
-	@override String get status => 'Estado';
 	@override String get active => 'Activo';
 	@override String get notActive => 'No activo';
-	@override String get entitlement => 'Acceso';
-	@override String get expires => 'Caduca';
-	@override String get noExpiration => 'Sin caducidad';
-	@override String get lastUpdate => 'Última actualización';
 	@override String get unknown => 'Desconocido';
 	@override String get manageSubscription => 'Gestionar suscripción';
+	@override String get restorePurchases => 'Restaurar compras';
 	@override String get upgradeToPro => 'Pasar a Pro';
-	@override String get proManageHint => 'Puedes cancelar o cambiar la facturación en los ajustes de suscripción de App Store o Google Play.';
-	@override String get freeUpgradeHint => 'Pásate a Pro para obtener mapas offline detallados, más descubrimientos en ruta y artículos offline ilimitados.';
+	@override String get restoreNoSubscription => 'No se encontró ninguna suscripción activa.';
 	@override String get supportEmailSubject => 'Soporte de suscripción de Flymap';
 	@override String get couldNotOpenEmailApp => 'No se pudo abrir la app de correo';
 	@override String get couldNotOpenSubscriptionSettings => 'No se pudieron abrir los ajustes de suscripción';
@@ -1465,10 +1458,12 @@ extension on TranslationsEs {
 			'settings.proBannerSubtitleFree' => 'Desbloquea mapas detallados y paquetes completos de artículos offline',
 			'settings.proBannerBadgeActive' => 'PRO ACTIVO',
 			'subscription.screenTitle' => 'Suscripción',
-			'subscription.pullToRefresh' => 'Desliza hacia abajo para actualizar el estado de tu suscripción.',
-			'subscription.needHelp' => '¿Necesitas ayuda?',
 			'subscription.contactSupport' => 'Contactar con soporte',
 			'subscription.cardTitle' => 'Flymap Pro',
+			'subscription.periodTitle' => 'Periodo de suscripción',
+			'subscription.renewsOrExpires' => 'Renueva o caduca',
+			'subscription.noExpiration' => 'Sin caducidad',
+			'subscription.lastChecked' => 'Última comprobación',
 			'subscription.flightUnlockSheetTitle' => 'Desbloquear funciones Pro',
 			'subscription.flightUnlockOptionTitle' => 'Compra única',
 			'subscription.flightUnlockOptionBody' => 'Desbloquea Pro para un solo vuelo',
@@ -1479,33 +1474,24 @@ extension on TranslationsEs {
 			'subscription.flightUnlockAvailableCount' => ({required Object count}) => '${count} desbloqueos de vuelo disponibles',
 			'subscription.flightUnlockProOptionBody' => 'Desbloquea Pro para vuelos ilimitados',
 			'subscription.flightUnlockProAction' => 'Ver planes Pro',
-			'subscription.flightUnlockBalanceLabel' => 'Desbloqueos de vuelo sin usar',
-			'subscription.flightUnlockLocalNote' => 'Los desbloqueos de un solo vuelo se almacenan en este dispositivo.',
 			'subscription.flightUnlockUnavailable' => 'El desbloqueo de vuelo no está disponible ahora mismo.',
 			'subscription.flightUnlockPurchaseCancelled' => 'Compra del desbloqueo de vuelo cancelada.',
 			'subscription.flightUnlockPurchaseFailed' => 'La compra del desbloqueo de vuelo falló. Inténtalo de nuevo.',
 			'subscription.proFeaturesTitle' => 'Lo que desbloquea Flymap Pro',
-			'subscription.proFeatureMapsTitle' => 'Mapas offline detallados',
-			'subscription.proFeatureMapsText' => 'Obtén mapas offline con mayor detalle para tus rutas guardadas.',
-			'subscription.proFeaturePoiTitle' => 'Más descubrimientos en ruta',
-			'subscription.proFeaturePoiText' => 'Ve más lugares interesantes a lo largo de tu ruta.',
-			'subscription.proFeatureArticlesTitle' => 'Artículos offline ilimitados',
-			'subscription.proFeatureArticlesText' => 'Lee artículos offline sin el límite del plan Free.',
+			'subscription.proFeatureRoutesTitle' => 'Vistas previas de ruta precisas',
+			'subscription.proFeatureMapsTitle' => 'Mapas offline con más detalle',
+			'subscription.proFeatureTimelineTitle' => 'Línea de tiempo completa',
+			'subscription.proFeaturePoiTitle' => '10 veces más lugares en la ruta',
+			'subscription.proFeatureArticlesTitle' => 'Paquetes completos de artículos offline',
 			'subscription.checkingStatus' => 'Comprobando el estado de tu suscripción...',
-			'subscription.proActive' => 'Flymap Pro está activo.',
 			'subscription.freePlan' => 'Estás en el plan Free.',
-			'subscription.status' => 'Estado',
 			'subscription.active' => 'Activo',
 			'subscription.notActive' => 'No activo',
-			'subscription.entitlement' => 'Acceso',
-			'subscription.expires' => 'Caduca',
-			'subscription.noExpiration' => 'Sin caducidad',
-			'subscription.lastUpdate' => 'Última actualización',
 			'subscription.unknown' => 'Desconocido',
 			'subscription.manageSubscription' => 'Gestionar suscripción',
+			'subscription.restorePurchases' => 'Restaurar compras',
 			'subscription.upgradeToPro' => 'Pasar a Pro',
-			'subscription.proManageHint' => 'Puedes cancelar o cambiar la facturación en los ajustes de suscripción de App Store o Google Play.',
-			'subscription.freeUpgradeHint' => 'Pásate a Pro para obtener mapas offline detallados, más descubrimientos en ruta y artículos offline ilimitados.',
+			'subscription.restoreNoSubscription' => 'No se encontró ninguna suscripción activa.',
 			'subscription.supportEmailSubject' => 'Soporte de suscripción de Flymap',
 			'subscription.couldNotOpenEmailApp' => 'No se pudo abrir la app de correo',
 			'subscription.couldNotOpenSubscriptionSettings' => 'No se pudieron abrir los ajustes de suscripción',
@@ -1804,8 +1790,6 @@ extension on TranslationsEs {
 			'flight.dashboard.ageSeconds' => ({required Object seconds}) => 'hace ${seconds} s',
 			'flight.dashboard.ageMinutes' => ({required Object minutes}) => 'hace ${minutes} min',
 			'flight.dashboard.signalGood' => 'Buena',
-			_ => null,
-		} ?? switch (path) {
 			'flight.dashboard.signalPoor' => 'Baja',
 			'flight.dashboard.signalBad' => 'Mala',
 			'flight.dashboard.signalSearching' => 'Buscando',
@@ -1813,6 +1797,8 @@ extension on TranslationsEs {
 			'flight.dashboard.gpsSearchingLabel' => 'Buscando GPS',
 			'flight.dashboard.gpsPermissionNeededLabel' => 'Permiso de GPS necesario',
 			'flight.dashboard.gpsOffLabel' => 'GPS apagado',
+			_ => null,
+		} ?? switch (path) {
 			'flight.dashboard.aircraftHeading' => 'Rumbo de la aeronave',
 			'flight.dashboard.headingShort' => ({required Object heading}) => 'HDG ${heading}°',
 			'flight.dashboard.liveInstruments' => 'Instrumentos en vivo',

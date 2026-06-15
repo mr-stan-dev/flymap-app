@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flymap/ui/design_system/tokens/ds_brand_colors.dart';
 
+const double _buttonHeight = 52;
+const double _compactButtonHeight = 44;
+
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
     required this.label,
@@ -29,7 +32,7 @@ class PrimaryButton extends StatelessWidget {
     );
     return SizedBox(
       width: expand ? double.infinity : null,
-      height: 52,
+      height: _buttonHeight,
       child: FilledButton(
         onPressed: isLoading ? null : onPressed,
         child: child,
@@ -60,10 +63,18 @@ class SecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = compact ? _compactButtonHeight : _buttonHeight;
     return SizedBox(
       width: expand ? double.infinity : null,
-      height: compact ? 40 : 52,
+      height: height,
       child: OutlinedButton(
+        style: compact
+            ? OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                minimumSize: Size(0, height),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              )
+            : null,
         onPressed: isLoading ? null : onPressed,
         child: _ButtonContent(
           label: label,
@@ -98,11 +109,15 @@ class TertiaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = compact ? _compactButtonHeight : _buttonHeight;
     return SizedBox(
       width: expand ? double.infinity : null,
-      height: compact ? 40 : 52,
+      height: height,
       child: TextButton(
         style: TextButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: compact ? 12 : 16),
+          minimumSize: Size(0, height),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -210,7 +225,7 @@ class PremiumButton extends StatelessWidget {
 
     return SizedBox(
       width: expand ? double.infinity : null,
-      height: 52,
+      height: _buttonHeight,
       child: Stack(
         fit: StackFit.expand,
         alignment: Alignment.center,
@@ -335,19 +350,22 @@ class _ButtonContent extends StatelessWidget {
       );
     }
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (leadingIcon != null) ...[
-          Icon(leadingIcon, size: 18),
-          const SizedBox(width: 8),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (leadingIcon != null) ...[
+            Icon(leadingIcon, size: 18),
+            const SizedBox(width: 8),
+          ],
+          Text(label),
+          if (trailingIcon != null) ...[
+            const SizedBox(width: 8),
+            Icon(trailingIcon, size: 18),
+          ],
         ],
-        Text(label),
-        if (trailingIcon != null) ...[
-          const SizedBox(width: 8),
-          Icon(trailingIcon, size: 18),
-        ],
-      ],
+      ),
     );
   }
 }
