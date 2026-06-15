@@ -46,45 +46,48 @@ class LearnArticleScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(article.title)),
       body: SafeArea(
-        child: Markdown(
-          data: article.markdown,
-          styleSheet: markdownStyle,
-          sizedImageBuilder: (config) {
-            final src = config.uri.toString().trim();
-            final assetPath = _assetPathForMarkdownImage(src);
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  assetPath,
-                  width: config.width,
-                  height: config.height,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ),
-            );
-          },
-          onTapLink: (text, href, title) async {
-            final link = href?.trim();
-            if (link == null || link.isEmpty) return;
-            final uri = Uri.tryParse(link);
-            if (uri == null) return;
-            final launched = await launchUrl(
-              uri,
-              mode: LaunchMode.externalApplication,
-            );
-            if (!launched && context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(context.t.settings.couldNotOpenUrl(url: link)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Markdown(
+            data: article.markdown,
+            styleSheet: markdownStyle,
+            sizedImageBuilder: (config) {
+              final src = config.uri.toString().trim();
+              final assetPath = _assetPathForMarkdownImage(src);
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    assetPath,
+                    width: config.width,
+                    height: config.height,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const SizedBox.shrink();
+                    },
+                  ),
                 ),
               );
-            }
-          },
+            },
+            onTapLink: (text, href, title) async {
+              final link = href?.trim();
+              if (link == null || link.isEmpty) return;
+              final uri = Uri.tryParse(link);
+              if (uri == null) return;
+              final launched = await launchUrl(
+                uri,
+                mode: LaunchMode.externalApplication,
+              );
+              if (!launched && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(context.t.settings.couldNotOpenUrl(url: link)),
+                  ),
+                );
+              }
+            },
+          ),
         ),
       ),
     );
